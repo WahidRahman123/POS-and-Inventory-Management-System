@@ -10,6 +10,7 @@ function App() {
     <>
       <h1 className="text-red-500">Hello World {value}</h1>
       <button onClick={() => dispatch(increment())}>Click Me</button>
+      
     </>
   )
 }
