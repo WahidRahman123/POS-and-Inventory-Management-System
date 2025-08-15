@@ -47,7 +47,7 @@ module.exports.searchByDates = async (req, res) => {
 
     if (!date) return res.status(400).json({ message: "Invalid Dates!" });
 
-    // Today's sales: 
+    // Today's sales:
     if (date && date == "t") {
       const now = new Date();
       const sales = await Sales.find({ createdAt: { $eq: now } });
@@ -59,18 +59,20 @@ module.exports.searchByDates = async (req, res) => {
       }
     }
 
-    // Weekly sales: 
+    // Weekly sales:
     if (date && date == "w") {
       const now = new Date();
+      
       const startOfWeek = new Date(now);
-      startOfWeek.setDate(now.getDate() - now.getDay());
       startOfWeek.setHours(0, 0, 0, 0);
+      const day = startOfWeek.getDay();
+      const diff = day >= 6 ? day - 6 : day + 1;
 
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6);
-      endOfWeek.setHours(23, 59, 59, 999);
+      startOfWeek.setDate(startOfWeek.getDate() - diff);
 
-      const sales = await Sales.find({ createdAt: { $gte: startOfWeek, $lte: endOfWeek } });
+      const sales = await Sales.find({
+        createdAt: { $gte: startOfWeek, $lte: now },
+      });
 
       if (sales) {
         return res.status(200).json(sales);
@@ -79,13 +81,15 @@ module.exports.searchByDates = async (req, res) => {
       }
     }
 
-    // Monthly sales: 
+    // Monthly sales:
     if (date && date == "m") {
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-      const sales = await Sales.find({ createdAt: { $gte: startOfMonth, $lt: endOfMonth } });
+      const sales = await Sales.find({
+        createdAt: { $gte: startOfMonth, $lt: endOfMonth },
+      });
 
       if (sales) {
         return res.status(200).json(sales);
@@ -94,13 +98,15 @@ module.exports.searchByDates = async (req, res) => {
       }
     }
 
-    // Yearly sales: 
+    // Yearly sales:
     if (date && date == "y") {
       const now = new Date();
       const startOfYear = new Date(now.getFullYear(), 0, 1);
       const endOfYear = new Date(now.getFullYear() + 1, 0, 1);
 
-      const sales = await Sales.find({ createdAt: { $gte: startOfYear, $lt: endOfYear } });
+      const sales = await Sales.find({
+        createdAt: { $gte: startOfYear, $lt: endOfYear },
+      });
 
       if (sales) {
         return res.status(200).json(sales);
@@ -108,8 +114,6 @@ module.exports.searchByDates = async (req, res) => {
         return res.status(404).json({ message: "Sales not found" });
       }
     }
-
-
   } catch (error) {
     console.error(error);
     res.status(500).send("Server Error");
