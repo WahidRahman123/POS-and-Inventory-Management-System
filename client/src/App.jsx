@@ -147,6 +147,7 @@ import SalesReport from "./pages/SalesReport";
 import UserManagement from "./pages/UserManagement";
 import EditProductPage from "./pages/EditProductPage";
 import EditCategoryPage from "./pages/EditCategoryPage";
+import PointOfSale from "./pages/PointOfSale";
 
 function App() {
   const { value } = useSelector((state) => state.counter);
@@ -204,6 +205,14 @@ function App() {
           element={
             <Layout>
               <Product />
+            </Layout>
+          }
+        />
+        <Route
+          path="/point-of-sale"
+          element={
+            <Layout>
+              <PointOfSale />
             </Layout>
           }
         />
