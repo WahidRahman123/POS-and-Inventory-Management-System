@@ -114,3 +114,18 @@ module.exports.searchProduct = async (req, res) => {
         res.status(500).send('Server Error');
     }
 }
+module.exports.quantityOfProduct = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const product = await Product.findById(id);
+
+        if(product) {
+            res.status(200).json({ quantity: product.quantity });
+        } else {
+            res.status(404).json({message: "Product not found"});
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server Error');
+    }
+}

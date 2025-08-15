@@ -1,4 +1,5 @@
 const Sales = require("../models/Sales");
+const Product = require("../models/Product");
 
 module.exports.index = async (req, res) => {
   try {
@@ -13,28 +14,41 @@ module.exports.index = async (req, res) => {
 
 module.exports.createSales = async (req, res) => {
   try {
-    const {
-      customerName,
-      address,
-      productName,
-      sellPrice,
-      costPrice,
-      quantity,
-      subtotal,
-    } = req.body;
+    const arrayOfResResults = [];
+    const arrayOfSales = req.body;
+    for (let i = 0; i < arrayOfSales.length; i++) {
+      const {
+        customerName,
+        address,
+        productName,
+        sellPrice,
+        costPrice,
+        quantity,
+        subtotal,
+      } = arrayOfSales[i];
 
-    const sales = new Sales({
-      customerName,
-      address,
-      productName,
-      sellPrice,
-      costPrice,
-      quantity,
-      subtotal,
-    });
 
-    const createdSales = await sales.save();
-    res.status(201).json(createdSales);
+      const sales = new Sales({
+        customerName,
+        address,
+        productName,
+        sellPrice,
+        costPrice,
+        quantity,
+        subtotal,
+      });
+
+      const createdSales = await sales.save();
+
+      const product = await Product.findOne({ name: productName });
+      product.quantity = product.quantity - quantity;
+      await product.save();
+
+      //* response result is push into an array so that it can be sent.
+      arrayOfResResults.push(createdSales);
+    }
+
+    res.status(201).json(arrayOfResResults);
   } catch (error) {
     console.error(error);
     res.status(500).send("Server Error");
@@ -62,7 +76,7 @@ module.exports.searchByDates = async (req, res) => {
     // Weekly sales:
     if (date && date == "w") {
       const now = new Date();
-      
+
       const startOfWeek = new Date(now);
       startOfWeek.setHours(0, 0, 0, 0);
       const day = startOfWeek.getDay();

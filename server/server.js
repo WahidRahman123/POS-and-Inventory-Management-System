@@ -9,6 +9,7 @@ const productRoutes = require('./routes/productRoutes');
 const categoryRoutes = require('./routes/categoriesRoutes');
 const userRoutes = require('./routes/userRoutes');
 const salesRoutes = require('./routes/salesRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 const app = express();
 app.use(express.json());
@@ -25,6 +26,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/sales', salesRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.listen(port, () => {
     console.log(`LISTENING TO THE PORT ${port}`);
