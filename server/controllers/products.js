@@ -114,12 +114,29 @@ module.exports.searchProduct = async (req, res) => {
         res.status(500).send('Server Error');
     }
 }
+
 module.exports.quantityOfProduct = async (req, res) => {
     try {
         const { id } = req.params;
         const { quantity } = await Product.findById(id, { quantity: 1, _id: 0 });
 
         res.status(200).json({ quantity });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server Error');
+    }
+}
+
+module.exports.addStock = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { quantity } = req.body;
+        const product = await Product.findById(id);
+
+        product.quantity = product.quantity + quantity;
+        product.save();
+        res.status(200).json({ message: "Stock Add Successfully" });
 
     } catch (error) {
         console.error(error);

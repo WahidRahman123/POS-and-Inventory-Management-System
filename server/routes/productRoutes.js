@@ -22,6 +22,11 @@ router.post('/', products.createProduct);
 // @access private
 router.get('/search', products.searchProduct);
 
+//* @route GET /api/products/addstock/:id
+// @desc search products
+// @access private
+router.post('/addstock/:id', products.addStock);
+
 //* @route GET /api/products/quantity/:id
 // @desc fetch only product's quantity
 // @access private
