@@ -4,7 +4,7 @@ const Product = require('../models/Product');
 module.exports.index = async (req, res) => {
     try {
         const limitValue = parseInt(req.query.l);
-        const product = await Product.find({}).limit(limitValue);
+        const product = await Product.find({}).limit(limitValue).populate('category');
 
         res.status(201).json(product);
     } catch (error) {
@@ -29,7 +29,7 @@ module.exports.createProduct =  async (req, res) => {
         });
 
         const createdProduct = await product.save();
-        res.status(201).json(createdProduct);
+        res.status(201).json({message: 'Item Added Successfully!'});
 
     } catch (error) {
         console.error(error);
@@ -40,7 +40,7 @@ module.exports.createProduct =  async (req, res) => {
 module.exports.showProduct = async (req, res) => {
     try {
         const { id } = req.params;
-        const product = await Product.findById(id);
+        const product = await Product.findById(id).populate('category');
 
         res.status(201).json(product);
 
@@ -87,7 +87,7 @@ module.exports.deleteProduct = async (req, res) => {
         if (product) {
 
             await product.deleteOne();
-            res.json({message: "Product removed"});
+            res.status(201).json({message: "Product removed"});
 
         } else {
             res.status(404).json({message: "Product not found"});

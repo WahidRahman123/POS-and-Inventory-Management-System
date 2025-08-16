@@ -1,60 +1,124 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import { deleteProduct, fetchAllProducts, searchProducts } from "../features/product/productSlice";
 
 const Product = () => {
+  const { products, loading, error, deleteToggle } = useSelector((state) => state.product);
+  const dispatch = useDispatch();
+  const [limit, setLimit] = useState(10);
+  const [searchProduct, setSearchProduct] = useState("");
+  // console.log(products)
+
+  const handleSearchProduct = (e) => {
+    const searchValue = e.target.value;
+    setSearchProduct(searchValue);
+    
+    if(!searchValue) {
+      dispatch(fetchAllProducts(limit));
+    } else {
+      dispatch(searchProducts(searchValue));
+    }
+  }
+
+  const handleDelete = (pid) => {
+    if(window.confirm("Are you sure you want to delete the Product?")){
+
+      dispatch(deleteProduct(pid));
+    }
+  }
+
+  useEffect(() => {
+    dispatch(fetchAllProducts(limit));
+  }, [dispatch, limit, deleteToggle]);
   return (
     <div className="bg-slate-50 min-h-screen p-6 font-sans">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Inventory List</h1>
+        <Link
+          to="/product/add"
+          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+        >
+          Add Item
+        </Link>
+      </div>
 
-  
-  <div className="flex justify-between items-center mb-4">
-    <h1 className="text-2xl font-bold">Inventory List</h1>
-    <Link to="/product/add" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-      Add Item
-    </Link>
-  </div>
+      <div className="flex justify-between items-center mb-4">
+        <div className="text-sm text-gray-600">
+          Show{" "}
+          <span>
+            <input
+              type="number"
+              min={0}
+              value={limit}
+              onChange={(e) => setLimit(e.target.value)}
+              className="w-[60px] outline-1 px-1 rounded"
+            />
+          </span>{" "}
+          entries
+        </div>
+        <input
+          type="search"
+          placeholder="Search..."
+          value={searchProduct}
+          onChange={handleSearchProduct}
+          className="border border-gray-300 rounded-md px-3 py-1"
+        />
+      </div>
 
+      <div className="overflow-x-auto">
+        <table className="w-full bg-white shadow-md rounded-lg text-sm">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-2 text-left">#</th>
+              <th className="p-2 text-left">Name</th>
+              <th className="p-2 text-left">Category</th>
+              <th className="p-2 text-center">Quantity</th>
+              <th className="p-2 text-right">Cost Price</th>
+              <th className="p-2 text-right">Sale Price</th>
+              <th className="p-2 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {products.length > 0 ? (
+              products.map((product, index) => (
+                <tr key={index} className="hover:bg-gray-50">
+                  <td className="p-2">{index + 1}</td>
+                  <td className="p-2">{product.name}</td>
+                  <td className="p-2">{product.category.name}</td>
 
-  <div className="flex justify-between items-center mb-4">
-    <div className="text-sm text-gray-600">Show <span><input type='number' min={0} className='w-[60px] outline-1 px-1 rounded'/></span> entries</div>
-    <input type="search" placeholder="Search..." className="border border-gray-300 rounded-md px-3 py-1" />
-  </div>
+                  <td className="p-2 text-center">{product.quantity}</td>
+                  <td className="p-2 text-right">৳ {product.costPrice}</td>
+                  <td className="p-2 text-right">৳ {product.sellPrice}</td>
+                  <td className="p-2 flex gap-2 justify-center">
+                    <Link
+                      to={`/product/${product._id}/add-stock`}
+                      className="text-xs bg-green-500 text-white px-2 py-1 rounded"
+                    >
+                      Stock Entry
+                    </Link>
+                    <Link
+                      to={`/product/${product._id}/edit`}
+                      className="text-xs bg-blue-500 text-white px-2 py-1 rounded"
+                    >
+                      Update
+                    </Link>
+                    <button onClick={() => handleDelete(product._id)} className="cursor-pointer hover:bg-red-600 text-xs bg-red-500 text-white px-2 py-1 rounded">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr className="text-center select-none text-gray-600 text-3xl">
+                <td colSpan={7}>No Products Available.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
 
-  <div className="overflow-x-auto">
-    <table className="w-full bg-white shadow-md rounded-lg text-sm">
-      <thead className="bg-gray-100">
-        <tr>
-          <th className="p-2 text-left">#</th>
-          <th className="p-2 text-left">Name</th>
-          <th className="p-2 text-left">Category</th>
-          <th className="p-2 text-center">Quantity</th>
-          <th className="p-2 text-right">Cost Price</th>
-          <th className="p-2 text-right">Sale Price</th>
-          <th className="p-2 text-center">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-       
-        <tr className="hover:bg-gray-50">
-          <td className="p-2">1</td>
-          <td className="p-2">Test Item</td>
-          <td className="p-2">CategoryTest</td>
-          
-          <td className="p-2 text-center">84</td>
-          <td className="p-2 text-right">$23.00</td>
-          <td className="p-2 text-right">$38.00</td>
-          <td className="p-2 flex gap-2 justify-center">
-            <Link to="/product/id/add-stock" className="text-xs bg-green-500 text-white px-2 py-1 rounded">Stock Entry</Link>
-            <Link to="/product/id/edit" className="text-xs bg-blue-500 text-white px-2 py-1 rounded">Update</Link>
-            <button className="cursor-pointer hover:bg-red-600 text-xs bg-red-500 text-white px-2 py-1 rounded">Delete</button>
-          </td>
-        </tr>
-        
-      </tbody>
-    </table>
-  </div>
-</div>
-
-  )
-}
-
-export default Product
+export default Product;
