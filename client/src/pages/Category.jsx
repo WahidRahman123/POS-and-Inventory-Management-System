@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 const Category = () => {
   return (
@@ -31,7 +32,6 @@ const Category = () => {
         <tr>
           <th className="p-2 text-left">Date/Time</th>
           <th className="p-2 text-left">Name</th>
-          <th className="p-2 text-left">Created By</th>
           <th className="p-2 text-center">Actions</th>
         </tr>
       </thead>
@@ -39,23 +39,14 @@ const Category = () => {
         <tr className="hover:bg-gray-50">
           <td className="p-2">2023-12-07 11:27:28</td>
           <td className="p-2">Category QQ</td>
-          <td className="p-2">admin</td>
-          <td className="p-2 text-center">
-            <button className="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
+          <td className="p-2 flex gap-2 justify-center">
+            <Link to="/category/id/edit" className="text-xs bg-blue-500 text-white px-2 py-1 rounded">Update</Link>
+            <button className="cursor-pointer text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
               Delete
             </button>
           </td>
         </tr>
-        <tr className="hover:bg-gray-50">
-          <td className="p-2">2023-12-07 11:27:22</td>
-          <td className="p-2">Category Three</td>
-          <td className="p-2">admin</td>
-          <td className="p-2 text-center">
-            <button className="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
-              Delete
-            </button>
-          </td>
-        </tr>
+        
         {/* Repeat rows as needed */}
       </tbody>
     </table>

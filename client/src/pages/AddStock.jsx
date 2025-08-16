@@ -38,10 +38,6 @@ const AddStock = () => {
             <span>: Category QQ</span>
           </div>
           <div className="flex">
-            <span className="w-28 font-medium">Description</span>
-            <span>: This is just a demo test. This is just a demo test.</span>
-          </div>
-          <div className="flex">
             <span className="w-28 font-medium">Quantity</span>
             <span>: 0</span>
           </div>

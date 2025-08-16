@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 
 module.exports.index = async (req, res) => {
   try {
-    const user = await User.find({});
+    const user = await User.find({}).select('-password');
 
     res.status(201).json(user);
   } catch (error) {

@@ -37,10 +37,10 @@ const AddItem = () => {
         className="w-full border border-gray-300 rounded-md px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
 
-      <label className="block text-sm font-medium mb-1">Description</label>
-      <textarea
-        rows="4"
-        defaultValue="This is just a demo test. This is just a demo test. This is just a demo test. This is just a demo test. This is just a demo test."
+      <label className="block text-sm font-medium mb-1">Quantity</label>
+      <input
+        type="number"
+        defaultValue="38"
         className="w-full border border-gray-300 rounded-md px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
 

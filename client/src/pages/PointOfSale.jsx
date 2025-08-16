@@ -2,7 +2,7 @@ import React from 'react'
 
 const PointOfSale = () => {
   return (
-   <div className="max-w-3xl mx-auto bg-white shadow-md rounded-md p-6">
+   <div className="max-w-5xl mx-auto bg-white shadow-md rounded-md p-6">
   <h1 className="text-2xl font-bold text-gray-800 mb-4">Sale Order</h1>
 
   {/* Customer */}

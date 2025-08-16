@@ -24,42 +24,7 @@ const EditCategoryPage = () => {
     </div>
   </div>
 
-  {/* Table */}
-  <div className="overflow-x-auto">
-    <table className="w-full bg-white shadow-md rounded-lg text-sm">
-      <thead className="bg-gray-100">
-        <tr>
-          <th className="p-2 text-left">Date/Time</th>
-          <th className="p-2 text-left">Name</th>
-          <th className="p-2 text-left">Created By</th>
-          <th className="p-2 text-center">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr className="hover:bg-gray-50">
-          <td className="p-2">2023-12-07 11:27:28</td>
-          <td className="p-2">Category QQ</td>
-          <td className="p-2">admin</td>
-          <td className="p-2 text-center">
-            <button className="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
-              Delete
-            </button>
-          </td>
-        </tr>
-        <tr className="hover:bg-gray-50">
-          <td className="p-2">2023-12-07 11:27:22</td>
-          <td className="p-2">Category Three</td>
-          <td className="p-2">admin</td>
-          <td className="p-2 text-center">
-            <button className="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
-              Delete
-            </button>
-          </td>
-        </tr>
-        {/* Repeat rows as needed */}
-      </tbody>
-    </table>
-  </div>
+  
 </div>
   )
 }

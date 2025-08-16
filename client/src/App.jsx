@@ -1,8 +1,6 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { increment } from "./features/counter/counter";
 
-import Layout from "./components/Layout";
 import Product from "./pages/Product";
 import AddItem from "./pages/AddItem";
 import Login from "./pages/Login";
@@ -21,76 +19,27 @@ function App() {
   const dispatch = useDispatch();
 
   return (
-    <Router>
       <Routes>
         {/* Login page without layout */}
         <Route path="/login" element={<Login />} />
 
         {/* All other pages with Layout */}
         <Route path="/" element={<Home />}>
-          <Route
-            path="/dashboard"
-            element={
-                <Dashboard />
-            }
-          />
-          <Route
-            path="/category"
-            element={
-                <Category />
-            }
-          />
-          <Route
-            path="/add-item"
-            element={
-                <AddItem />
-            }
-          />
-          <Route
-            path="/add-stock"
-            element={
-                <AddStock />
-            }
-          />
-          <Route
-            path="/product"
-            element={
-                <Product />
-            }
-          />
-          <Route
-            path="/pointOfSale"
-            element={
-                <PointOfSale />
-            }
-          />
-          <Route
-            path="/salesReport"
-            element={
-                <SalesReport />
-            }
-          />
-          <Route
-            path="/users"
-            element={
-                <UserManagement />
-            }
-          />
-          <Route
-            path="/edit-Product-Page/:id"
-            element={
-                <EditProductPage />
-            }
-          />
-          <Route
-            path="/editPategoryPage/:id"
-            element={
-                <EditCategoryPage />
-            }
-          />
+          <Route path="/" element={<Dashboard />} />
+
+          <Route path="/category" element={<Category />} />
+          <Route path="/category/:id/edit" element={<EditCategoryPage />} />
+
+          <Route path="/product" element={<Product />} />
+          <Route path="/product/add" element={<AddItem />} />
+          <Route path="/product/:id/edit" element={<EditProductPage />} />
+          <Route path="/product/:id/add-stock" element={<AddStock />} />
+
+          <Route path="/point-of-sale" element={<PointOfSale />} />
+          <Route path="/sales-report" element={<SalesReport />} />
+          <Route path="/users" element={<UserManagement />} />
         </Route>
       </Routes>
-    </Router>
   );
 }
 

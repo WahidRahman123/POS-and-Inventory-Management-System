@@ -2,6 +2,7 @@ import React from 'react'
 import SideBar from '../components/SideBar'
 import Topbar from '../components/Topbar'
 import Footer from '../components/Footer'
+import { Outlet } from 'react-router-dom'
 
 const Home = () => {
   return (
@@ -15,7 +16,9 @@ const Home = () => {
         <Topbar />
 
         {/* Page Content */}
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex-1 p-6">
+          <Outlet />
+        </main>
 
         {/* Footer */}
         <Footer />

@@ -10,7 +10,7 @@ const UserManagement = () => {
   </div>
 
  {/* Add New User */}
-<div className="flex items-center justify-center  bg-gray-50">
+<div className="flex items-center justify-center  bg-gray-50 mb-5">
   <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
     <label className="block text-sm font-medium mb-1">Username</label>
     <input
@@ -24,17 +24,11 @@ const UserManagement = () => {
       placeholder="Password"
       className="w-full border border-gray-300 rounded-md px-3 py-2 mb-2"
     />
-    <label className="block text-sm font-medium mb-1">Repeat Password</label>
-    <input
-      type="password"
-      placeholder="Repeat Password"
-      className="w-full border border-gray-300 rounded-md px-3 py-2 mb-2"
-    />
+    
     <label className="block text-sm font-medium mb-1">Account Type</label>
     <select className="w-full border border-gray-300 rounded-md px-3 py-2 mb-4">
       <option>Admin</option>
       <option>Cashier</option>
-      <option>Clerk</option>
     </select>
     <button className="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-700">
       Add New User
@@ -61,7 +55,7 @@ const UserManagement = () => {
           <td className="p-2">2023-12-07 11:38:12</td>
           <td className="p-2 text-center">
             <button className="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
-              Change Password
+              Delete User
             </button>
           </td>
         </tr>
@@ -71,7 +65,7 @@ const UserManagement = () => {
           <td className="p-2">2023-12-07 08:46:00</td>
           <td className="p-2 text-center">
             <button className="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
-              Change Password
+              Delete User
             </button>
           </td>
         </tr>
@@ -81,7 +75,7 @@ const UserManagement = () => {
           <td className="p-2">2023-12-07 08:45:50</td>
           <td className="p-2 text-center">
             <button className="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
-              Change Password
+              Delete User
             </button>
           </td>
         </tr>
