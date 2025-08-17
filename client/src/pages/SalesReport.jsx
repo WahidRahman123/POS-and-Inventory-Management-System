@@ -1,7 +1,20 @@
-import React from 'react'
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchSalesByDate } from "../features/sales/salesSlice";
 
 const SalesReport = () => {
-  
+  const { sales, loading, error, totalSales } = useSelector((state) => state.sales);
+  const dispatch = useDispatch();
+  const [day, setDay] = useState('Today');
+
+  const handleOnClick = (query, d) => {
+    setDay(d);
+    dispatch(fetchSalesByDate(query));
+  };
+
+  useEffect(() => {
+    dispatch(fetchSalesByDate("t"));
+  }, [dispatch]);
   return (
     <div className="p-6 bg-white min-h-screen">
       {/* Title */}
@@ -10,16 +23,28 @@ const SalesReport = () => {
 
       {/* Buttons */}
       <div className="flex flex-wrap gap-2 mb-6">
-        <button className="flex items-center border px-4 py-2 bg-white hover:bg-gray-50">
+        <button
+          onClick={() => handleOnClick("t", "Today")}
+          className="cursor-pointer flex items-center border px-4 py-2 bg-white hover:bg-gray-50"
+        >
           <span className="mr-2">📅</span> Today's Sales
         </button>
-        <button className="flex items-center border px-4 py-2 bg-white hover:bg-gray-50">
+        <button
+          onClick={() => handleOnClick("w", "This Week")}
+          className="cursor-pointer flex items-center border px-4 py-2 bg-white hover:bg-gray-50"
+        >
           <span className="mr-2">📅</span> This Week
         </button>
-        <button className="flex items-center border px-4 py-2 bg-white hover:bg-gray-50">
+        <button
+          onClick={() => handleOnClick("m", "This Month")}
+          className="cursor-pointer flex items-center border px-4 py-2 bg-white hover:bg-gray-50"
+        >
           <span className="mr-2">📅</span> Monthly Sales
         </button>
-        <button className="flex items-center border px-4 py-2 bg-white hover:bg-gray-50">
+        <button
+          onClick={() => handleOnClick("y", "This Year")}
+          className="cursor-pointer flex items-center border px-4 py-2 bg-white hover:bg-gray-50"
+        >
           <span className="mr-2">📅</span> Annual Sales
         </button>
       </div>
@@ -41,25 +66,40 @@ const SalesReport = () => {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td className="border px-4 py-2">2023-12-08</td>
-              <td className="border px-4 py-2">Test Item</td>
-              <td className="border px-4 py-2">$23.00</td>
-              <td className="border px-4 py-2">5</td>
-              <td className="border px-4 py-2">$115.00</td>
-            </tr>
+            {sales.length > 0 ? (
+              sales.map((sale, index) => (
+                <tr key={index}>
+                  <td className="border px-4 py-2">
+                    {new Date(sale.createdAt)
+                      .toLocaleDateString("en-GB")
+                      .replaceAll("/", "-")}
+                  </td>
+                  <td className="border px-4 py-2">{sale.productName}</td>
+                  <td className="border px-4 py-2">৳ {sale.sellPrice}</td>
+                  <td className="border px-4 py-2">{sale.quantity}</td>
+                  <td className="border px-4 py-2">৳ {sale.subtotal}</td>
+                </tr>
+              ))
+            ) : (
+              <tr className="text-center select-none text-gray-500 text-3xl">
+                <td colSpan={5} className="px-4 py-2">
+                  No Sales Available.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
       {/* Total Sales */}
       <div className="mt-4 font-semibold">
-        Total Sales Today: <span className="text-green-600">$115</span>
+        Total Sales {day}: 
+        <span className="text-green-600">
+          {totalSales ? "৳" : ""} {totalSales}
+        </span>
       </div>
     </div>
-  
+  );
+};
 
-  )
-}
-
-export default SalesReport
+export default SalesReport;

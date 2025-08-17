@@ -3,7 +3,7 @@ const Product = require("../models/Product");
 
 module.exports.index = async (req, res) => {
   try {
-    const sales = await Sales.find({});
+    const sales = await Sales.find({}).sort({createdAt: -1});
 
     res.status(201).json(sales);
   } catch (error) {
@@ -64,7 +64,7 @@ module.exports.searchByDates = async (req, res) => {
     // Today's sales:
     if (date && date == "t") {
       const now = new Date();
-      const sales = await Sales.find({ createdAt: { $eq: now } });
+      const sales = await Sales.find({ createdAt: { $eq: now } }).sort({createdAt: -1});
 
       if (sales) {
         return res.status(200).json(sales);
@@ -86,7 +86,7 @@ module.exports.searchByDates = async (req, res) => {
 
       const sales = await Sales.find({
         createdAt: { $gte: startOfWeek, $lte: now },
-      });
+      }).sort({createdAt: -1});
 
       if (sales) {
         return res.status(200).json(sales);
@@ -103,7 +103,7 @@ module.exports.searchByDates = async (req, res) => {
 
       const sales = await Sales.find({
         createdAt: { $gte: startOfMonth, $lt: endOfMonth },
-      });
+      }).sort({createdAt: -1});
 
       if (sales) {
         return res.status(200).json(sales);
@@ -120,7 +120,7 @@ module.exports.searchByDates = async (req, res) => {
 
       const sales = await Sales.find({
         createdAt: { $gte: startOfYear, $lt: endOfYear },
-      });
+      }).sort({createdAt: -1});
 
       if (sales) {
         return res.status(200).json(sales);

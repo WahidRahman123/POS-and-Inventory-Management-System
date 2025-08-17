@@ -67,7 +67,7 @@ export const addProduct = createAsyncThunk(
         product
       );
 
-      return data;
+      return {message: 'Item Added Successfully!'};
     } catch (error) {
       const message = "Item Adding Failed!";
       return ThunkAPI.rejectWithValue(message);
@@ -341,5 +341,5 @@ const productSlice = createSlice({
   },
 });
 
-export const { setProductSearchedById } = productSlice.actions; //! Baki ase
+// export const { setProductSearchedById } = productSlice.actions; //! Baki ase
 export default productSlice.reducer;

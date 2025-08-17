@@ -86,7 +86,7 @@ module.exports.deleteCategory = async (req, res) => {
         if (category) {
 
             await category.deleteOne();
-            res.json({message: "Category removed"});
+            res.status(201).json({message: "Category removed"});
 
         } else {
             res.status(404).json({message: "Category not found"});

@@ -55,5 +55,5 @@ const dashboardSlice = createSlice({
   },
 });
 
-export const { one } = dashboardSlice.actions; //! Baki ase
+// export const { one } = dashboardSlice.actions; //! Baki ase
 export default dashboardSlice.reducer;

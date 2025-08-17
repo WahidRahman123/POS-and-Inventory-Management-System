@@ -20,17 +20,18 @@ const AddItem = () => {
     setProduct({ ...product, [name]: value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const newProduct = {
-      ...product,
-      sellPrice: Number(product.sellPrice),
-      costPrice: Number(product.costPrice),
-      quantity: Number(product.quantity),
-    };
-    // console.log(newProduct)
-    dispatch(addProduct(newProduct));
-    if (!error) {
+  const handleSubmit = async (e) => {
+    try {
+      e.preventDefault();
+      const newProduct = {
+        ...product,
+        sellPrice: Number(product.sellPrice),
+        costPrice: Number(product.costPrice),
+        quantity: Number(product.quantity),
+      };
+      // console.log(newProduct)
+      await dispatch(addProduct(newProduct)).unwrap();
+
       setProduct({
         name: "",
         sellPrice: 0,
@@ -38,6 +39,8 @@ const AddItem = () => {
         quantity: 1,
         categoryName: "",
       });
+    } catch (error) {
+      console.log("Added Failed!");
     }
   };
 
