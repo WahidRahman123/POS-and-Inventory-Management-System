@@ -23,6 +23,11 @@ router.post('/', users.createUser);
 // @access Private
 router.post('/login', users.login);
 
+// @route POST /api/users/:id/changepassword/
+// @desc login
+// @access Private
+router.post('/:id/changepassword', users.changeUserPassword);
+
 //* @route DELETE /api/users
 // @desc Delete Users 
 // @access Private

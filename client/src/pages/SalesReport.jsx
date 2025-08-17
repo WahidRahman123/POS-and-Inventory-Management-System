@@ -50,7 +50,7 @@ const SalesReport = () => {
       </div>
 
       {/* Today's Report Title */}
-      <h2 className="text-xl font-semibold mb-2">Today's Report</h2>
+      <h2 className="text-xl font-semibold mb-2">{day}'s Report</h2>
       <hr className="mb-4" />
 
       {/* Table */}

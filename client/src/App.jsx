@@ -13,6 +13,7 @@ import EditProductPage from "./pages/EditProductPage";
 import EditCategoryPage from "./pages/EditCategoryPage";
 import PointOfSale from "./pages/PointOfSale";
 import Home from "./pages/Home";
+import ChangePassword from "./pages/ChangePassword";
 
 function App() {
   const { value } = useSelector((state) => state.counter);
@@ -38,6 +39,7 @@ function App() {
           <Route path="/point-of-sale" element={<PointOfSale />} />
           <Route path="/sales-report" element={<SalesReport />} />
           <Route path="/users" element={<UserManagement />} />
+          <Route path="/changepassword/:id" element={<ChangePassword />} />
         </Route>
       </Routes>
   );

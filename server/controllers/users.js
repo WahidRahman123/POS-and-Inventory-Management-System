@@ -84,3 +84,26 @@ module.exports.login = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+module.exports.changeUserPassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const user = await User.findById(req.params.id);
+    if (user) {
+      const match = await user.matchPassword(oldPassword);
+      if(match) {
+        user.password = newPassword;
+        await user.save();
+
+        res.status(201).json({ message: "Password Updated Successfully!" });
+      } else {
+        res.status(404).json({ message: "Old Password is incorrect!" });
+      }
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error"});
+  }
+};

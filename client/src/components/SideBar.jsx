@@ -1,7 +1,13 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 const SideBar = () => {
+  const navigate = useNavigate();
+  
+  const handleOnClick = () => {
+    navigate('/changepassword/id');
+  }
+
   return (
     <div className="w-64 bg-gray-200 flex flex-col min-h-screen">
       <div className="p-6 text-lg font-bold border-b border-gray-300">
@@ -51,6 +57,10 @@ const SideBar = () => {
           <span className="mr-3">📠</span> POS
         </Link>
       </nav>
+
+      <div className="flex justify-center mt-2">
+        <button onClick={handleOnClick} className="w-[60%] px-2 py-1 bg-blue-700 text-white rounded-lg cursor-pointer hover:bg-blue-800">Change Password</button>
+      </div>
     </div>
   );
 };
