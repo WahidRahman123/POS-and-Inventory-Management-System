@@ -11,6 +11,7 @@ const initialState = {
     quantity: 1,
     category: "",
   },
+  productsBySearch: [],
   deleteToggle: true,
   loading: false,
   error: null,
@@ -144,7 +145,11 @@ export const addStock = createAsyncThunk(
 const productSlice = createSlice({
   name: "product",
   initialState,
-  reducers: {},
+  reducers: {
+    setProductsBySearchToEmpty: (state) => {
+      state.productsBySearch = [];
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchAllProducts.pending, (state, action) => {
@@ -176,6 +181,7 @@ const productSlice = createSlice({
       .addCase(searchProducts.fulfilled, (state, action) => {
         state.loading = false;
         state.products = action.payload;
+        state.productsBySearch = action.payload;
       })
       .addCase(searchProducts.rejected, (state, action) => {
         state.loading = false;
@@ -341,5 +347,5 @@ const productSlice = createSlice({
   },
 });
 
-// export const { setProductSearchedById } = productSlice.actions; //! Baki ase
+export const { setProductsBySearchToEmpty } = productSlice.actions; 
 export default productSlice.reducer;

@@ -156,9 +156,11 @@ const UserManagement = () => {
                   <td className="p-2 text-center">
                     <button
                       onClick={() => handleDelete(user._id)}
-                      disabled={user.role === "admin" ? true : false}
+                      disabled={
+                        user._id === "689e359f51378e685a5e5ad5" ? true : false
+                      }
                       className={`text-xs  text-white px-2 py-1 rounded  ${
-                        user.role === "admin"
+                        user._id === "689e359f51378e685a5e5ad5"
                           ? "bg-red-400"
                           : "hover:bg-red-600 bg-red-500 cursor-pointer"
                       }`}
