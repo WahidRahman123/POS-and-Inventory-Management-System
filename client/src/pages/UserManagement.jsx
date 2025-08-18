@@ -145,10 +145,10 @@ const UserManagement = () => {
                   <td className="p-2">
                     {user.createdAt ? (
                       `${new Date(user.createdAt)
-                        .toLocaleDateString("en-GB")
+                        .toLocaleDateString("en-GB", { timeZone: 'Asia/Dhaka' })
                         .replaceAll("/", "-")} / ${new Date(
                         user.createdAt
-                      ).toLocaleTimeString()}`
+                      ).toLocaleTimeString("en-US", { timeZone: 'Asia/Dhaka' })}`
                     ) : (
                       <span className="font-bold">-</span>
                     )}

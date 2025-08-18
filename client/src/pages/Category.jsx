@@ -82,10 +82,10 @@ const Category = () => {
                   <td className="p-2">
                     {category.createdAt ? (
                       `${new Date(category.createdAt)
-                        .toLocaleDateString("en-GB")
+                        .toLocaleDateString("en-GB", { timeZone: 'Asia/Dhaka' })
                         .replaceAll("/", "-")} / ${new Date(
                         category.createdAt
-                      ).toLocaleTimeString()}`
+                      ).toLocaleTimeString("en-US", { timeZone: 'Asia/Dhaka' })}`
                     ) : (
                       <span className="font-bold">-</span>
                     )}

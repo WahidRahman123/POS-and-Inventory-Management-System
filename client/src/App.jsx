@@ -14,6 +14,7 @@ import EditCategoryPage from "./pages/EditCategoryPage";
 import PointOfSale from "./pages/PointOfSale";
 import Home from "./pages/Home";
 import ChangePassword from "./pages/ChangePassword";
+import InvoicePage from "./pages/InvoicePage";
 
 function App() {
   const { value } = useSelector((state) => state.counter);
@@ -23,6 +24,8 @@ function App() {
       <Routes>
         {/* Login page without layout */}
         <Route path="/login" element={<Login />} />
+        <Route path="/invoice" element={<InvoicePage />} />
+
 
         {/* All other pages with Layout */}
         <Route path="/" element={<Home />}>

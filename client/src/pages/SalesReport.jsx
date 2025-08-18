@@ -71,7 +71,7 @@ const SalesReport = () => {
                 <tr key={index}>
                   <td className="border px-4 py-2">
                     {new Date(sale.createdAt)
-                      .toLocaleDateString("en-GB")
+                      .toLocaleDateString("en-GB", { timeZone: 'Asia/Dhaka' })
                       .replaceAll("/", "-")}
                   </td>
                   <td className="border px-4 py-2">{sale.productName}</td>
