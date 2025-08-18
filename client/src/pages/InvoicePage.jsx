@@ -6,6 +6,8 @@ import { useRef } from "react";
 const InvoicePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  // const title = `invoice-${new Date().toISOString().split('.')[0].replaceAll(':', '_')}`;
+  // console.log(title)
 
   const contentRef = useRef(null);
   const reactToPrintFn = useReactToPrint({ contentRef });

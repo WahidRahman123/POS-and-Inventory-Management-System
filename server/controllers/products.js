@@ -115,6 +115,23 @@ module.exports.searchProduct = async (req, res) => {
     }
 }
 
+module.exports.searchProductForPOS = async (req, res) => {
+    try {
+        const query = req.query.q;
+
+        const product = await Product.find({ name: {$regex: query, $options: 'i'}, quantity: {$gt: 0} });
+
+        if(product) {
+            res.status(200).json(product);
+        } else {
+            res.status(404).json({message: "Product not found"});
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server Error');
+    }
+}
+
 module.exports.quantityOfProduct = async (req, res) => {
     try {
         const { id } = req.params;
@@ -137,6 +154,44 @@ module.exports.addStock = async (req, res) => {
         product.quantity = product.quantity + quantity;
         product.save();
         res.status(200).json({ message: "Stock Add Successfully" });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server Error');
+    }
+}
+
+module.exports.productLowQuantityCheck = async (req, res) => {
+    try {
+        const countRes = await Product.aggregate([
+            {
+                $match: { quantity: {$lt: 10} }
+            },
+            {
+                $group: {
+                    _id: null,
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        const result = {
+            count: countRes.length > 0 ? countRes[0].count : 0,
+        }
+        // console.log(result);
+        res.status(200).json(result);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server Error');
+    }
+}
+
+module.exports.lowQuantityProductList = async (req, res) => {
+    try {
+        const product = await Product.find({ quantity: {$lt: 10} }).populate('category');
+
+        res.status(200).json(product);
 
     } catch (error) {
         console.error(error);

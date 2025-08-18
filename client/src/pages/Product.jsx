@@ -87,7 +87,7 @@ const Product = () => {
                   <td className="p-2">{product.name}</td>
                   <td className="p-2">{product.category.name}</td>
 
-                  <td className="p-2 text-center">{product.quantity}</td>
+                  <td className={`p-2 text-center ${product.quantity < 10 ? 'font-bold text-red-500': ''}`}>{product.quantity}</td>
                   <td className="p-2 text-right">৳ {product.costPrice}</td>
                   <td className="p-2 text-right">৳ {product.sellPrice}</td>
                   <td className="p-2 flex gap-2 justify-center">

@@ -12,6 +12,8 @@ const initialState = {
     category: "",
   },
   productsBySearch: [],
+  lowQuantityProducts: [],
+  count: 0,
   deleteToggle: true,
   loading: false,
   error: null,
@@ -59,6 +61,27 @@ export const searchProducts = createAsyncThunk(
   }
 );
 
+export const searchProductsforPOS = createAsyncThunk(
+  "product/searchProductsforPOS",
+  async (query, ThunkAPI) => {
+    try {
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URI}/api/products/searchforpos`,
+        {
+          params: {
+            q: query,
+          },
+        }
+      );
+
+      return data;
+    } catch (error) {
+      const message = "Product Fetching Failed!";
+      return ThunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 export const addProduct = createAsyncThunk(
   "product/addProduct",
   async (product, ThunkAPI) => {
@@ -68,7 +91,7 @@ export const addProduct = createAsyncThunk(
         product
       );
 
-      return {message: 'Item Added Successfully!'};
+      return { message: "Item Added Successfully!" };
     } catch (error) {
       const message = "Item Adding Failed!";
       return ThunkAPI.rejectWithValue(message);
@@ -130,7 +153,9 @@ export const addStock = createAsyncThunk(
   async (product, ThunkAPI) => {
     try {
       const { data } = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URI}/api/products/addstock/${product.id}`,
+        `${import.meta.env.VITE_BACKEND_URI}/api/products/addstock/${
+          product.id
+        }`,
         product.info
       );
 
@@ -142,13 +167,49 @@ export const addStock = createAsyncThunk(
   }
 );
 
+export const countLowQuantityProduct = createAsyncThunk(
+  "product/countLowQuantityProduct",
+  async (_, ThunkAPI) => {
+    try {
+      const { data } = await axios.get(
+        `${
+          import.meta.env.VITE_BACKEND_URI
+        }/api/products/product-low-quantity-check`
+      );
+
+      return data;
+    } catch (error) {
+      const message = "Count Fetching Failed!";
+      return ThunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+export const lowQuantityProductList = createAsyncThunk(
+  "product/lowQuantityProductList",
+  async (_, ThunkAPI) => {
+    try {
+      const { data } = await axios.get(
+        `${
+          import.meta.env.VITE_BACKEND_URI
+        }/api/products/low-quantity-product-list`
+      );
+
+      return data;
+    } catch (error) {
+      const message = "Fetching Failed!";
+      return ThunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 const productSlice = createSlice({
   name: "product",
   initialState,
   reducers: {
     setProductsBySearchToEmpty: (state) => {
       state.productsBySearch = [];
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -184,6 +245,29 @@ const productSlice = createSlice({
         state.productsBySearch = action.payload;
       })
       .addCase(searchProducts.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+        toast.error(action.payload, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
+      .addCase(searchProductsforPOS.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(searchProductsforPOS.fulfilled, (state, action) => {
+        state.loading = false;
+        state.products = action.payload;
+        state.productsBySearch = action.payload;
+      })
+      .addCase(searchProductsforPOS.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error;
         toast.error(action.payload, {
@@ -343,9 +427,53 @@ const productSlice = createSlice({
           progress: undefined,
           theme: "colored",
         });
+      })
+      .addCase(countLowQuantityProduct.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(countLowQuantityProduct.fulfilled, (state, action) => {
+        state.loading = false;
+        state.count = action.payload.count;
+      })
+      .addCase(countLowQuantityProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+        // toast.error(action.payload, {
+        //   position: "bottom-right",
+        //   autoClose: 3000,
+        //   hideProgressBar: false,
+        //   closeOnClick: false,
+        //   pauseOnHover: true,
+        //   draggable: true,
+        //   progress: undefined,
+        //   theme: "colored",
+        // });
+      })
+      .addCase(lowQuantityProductList.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(lowQuantityProductList.fulfilled, (state, action) => {
+        state.loading = false;
+        state.lowQuantityProducts = action.payload;
+      })
+      .addCase(lowQuantityProductList.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+        toast.error(action.payload, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
       });
   },
 });
 
-export const { setProductsBySearchToEmpty } = productSlice.actions; 
+export const { setProductsBySearchToEmpty } = productSlice.actions;
 export default productSlice.reducer;

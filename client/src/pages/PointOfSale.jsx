@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   searchProducts,
+  searchProductsforPOS,
   setProductsBySearchToEmpty,
 } from "../features/product/productSlice";
 import { addSales, setCreatedSalesToEmpty } from "../features/sales/salesSlice";
@@ -38,7 +39,7 @@ const PointOfSale = () => {
     setSearchValue(e.target.value);
 
     if (e.target.value) {
-      dispatch(searchProducts(e.target.value));
+      dispatch(searchProductsforPOS(e.target.value));
     } else {
       dispatch(setProductsBySearchToEmpty());
     }
@@ -67,7 +68,7 @@ const PointOfSale = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (selectedProducts.length > 0) {
-      console.log(selectedProducts);
+      // console.log(selectedProducts);
       const finalProducts = selectedProducts.map((p, i) => {
         return {
           customerName: customer.customerName,
@@ -79,7 +80,7 @@ const PointOfSale = () => {
           subtotal: Number(p.sellPrice) * Number(p.qty),
         };
       });
-      console.log(finalProducts);
+      // console.log(finalProducts);
       dispatch(addSales(finalProducts));
     } else {
       alert("Please select at least one product!");
@@ -181,6 +182,9 @@ const PointOfSale = () => {
                 Sale Price
               </th>
               <th className="px-3 py-1.5 text-xs font-semibold text-gray-700 border-b">
+                Available (Quantity)
+              </th>
+              <th className="px-3 py-1.5 text-xs font-semibold text-gray-700 border-b">
                 Quantity
               </th>
 
@@ -206,9 +210,13 @@ const PointOfSale = () => {
                     ৳ {product.sellPrice}
                   </td>
                   <td className="px-3 py-1.5 text-sm text-gray-800 border-b text-center">
+                    {product.quantity}
+                  </td>
+                  <td className="px-3 py-1.5 text-sm text-gray-800 border-b text-center">
                     <input
                       type="number"
                       min={1}
+                      max={product.quantity}
                       value={product.qty}
                       onChange={(e) => {
                         const newQty = Number(e.target.value);
@@ -238,7 +246,7 @@ const PointOfSale = () => {
             ) : (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="text-center select-none text-gray-400 font-bold"
                 >
                   No Orders Yet
