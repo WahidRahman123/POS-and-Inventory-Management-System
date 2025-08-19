@@ -1,36 +1,52 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
-import { deleteProduct, fetchAllProducts, searchProducts } from "../features/product/productSlice";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  deleteProduct,
+  fetchAllProducts,
+  searchProducts,
+} from "../features/product/productSlice";
 
 const Product = () => {
-  const { products, loading, error, deleteToggle } = useSelector((state) => state.product);
+  const { user } = useSelector((state) => state.auth);
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, []);
+
+  const { products, loading, error, deleteToggle } = useSelector(
+    (state) => state.product
+  );
+
   const dispatch = useDispatch();
   const [limit, setLimit] = useState(10);
   const [searchProduct, setSearchProduct] = useState("");
   // console.log(products)
+  const navigate = useNavigate();
 
   const handleSearchProduct = (e) => {
     const searchValue = e.target.value;
     setSearchProduct(searchValue);
-    
-    if(!searchValue) {
+
+    if (!searchValue) {
       dispatch(fetchAllProducts(limit));
     } else {
       dispatch(searchProducts(searchValue));
     }
-  }
+  };
 
   const handleDelete = (pid) => {
-    if(window.confirm("Are you sure you want to delete the Product?")){
-
+    if (window.confirm("Are you sure you want to delete the Product?")) {
       dispatch(deleteProduct(pid));
     }
-  }
+  };
 
   useEffect(() => {
     dispatch(fetchAllProducts(limit));
   }, [dispatch, limit, deleteToggle]);
+
+  
   return (
     <div className="bg-slate-50 min-h-screen p-6 font-sans">
       <div className="flex justify-between items-center mb-4">
@@ -87,7 +103,13 @@ const Product = () => {
                   <td className="p-2">{product.name}</td>
                   <td className="p-2">{product.category.name}</td>
 
-                  <td className={`p-2 text-center ${product.quantity < 10 ? 'font-bold text-red-500': ''}`}>{product.quantity}</td>
+                  <td
+                    className={`p-2 text-center ${
+                      product.quantity < 10 ? "font-bold text-red-500" : ""
+                    }`}
+                  >
+                    {product.quantity}
+                  </td>
                   <td className="p-2 text-right">৳ {product.costPrice}</td>
                   <td className="p-2 text-right">৳ {product.sellPrice}</td>
                   <td className="p-2 flex gap-2 justify-center">
@@ -103,7 +125,10 @@ const Product = () => {
                     >
                       Update
                     </Link>
-                    <button onClick={() => handleDelete(product._id)} className="cursor-pointer hover:bg-red-600 text-xs bg-red-500 text-white px-2 py-1 rounded">
+                    <button
+                      onClick={() => handleDelete(product._id)}
+                      className="cursor-pointer hover:bg-red-600 text-xs bg-red-500 text-white px-2 py-1 rounded"
+                    >
                       Delete
                     </button>
                   </td>

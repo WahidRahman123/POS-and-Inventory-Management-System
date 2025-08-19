@@ -1,9 +1,9 @@
 const User = require("../models/user");
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 module.exports.index = async (req, res) => {
   try {
-    const user = await User.find({}).select('-password');
+    const user = await User.find({}).select("-password");
 
     res.status(201).json(user);
   } catch (error) {
@@ -81,7 +81,7 @@ module.exports.login = async (req, res) => {
     );
   } catch (error) {
     console.error(error);
-    res.status(500).send("Server Error");
+    res.status(500).json({ message: "Login Failed!" });
   }
 };
 
@@ -91,7 +91,7 @@ module.exports.changeUserPassword = async (req, res) => {
     const user = await User.findById(req.params.id);
     if (user) {
       const match = await user.matchPassword(oldPassword);
-      if(match) {
+      if (match) {
         user.password = newPassword;
         await user.save();
 
@@ -104,6 +104,6 @@ module.exports.changeUserPassword = async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server Error"});
+    res.status(500).json({ message: "Server Error" });
   }
 };

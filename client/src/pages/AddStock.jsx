@@ -4,9 +4,17 @@ import { useNavigate, useParams } from "react-router-dom";
 import { addStock, fetchProductById } from "../features/product/productSlice";
 
 const AddStock = () => {
+  const { user } = useSelector((state) => state.auth);
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, []);
+  
   const { id } = useParams();
   const [stockValue, setStockValue] = useState(0);
   const { productSearchedById } = useSelector((state) => state.product);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -16,16 +24,18 @@ const AddStock = () => {
       const info = {
         quantity: Number(stockValue),
       };
-      await dispatch(addStock({id, info})).unwrap();
-      navigate('/product');
+      await dispatch(addStock({ id, info })).unwrap();
+      navigate("/product");
     } catch (error) {
-      console.log('Add Stock Failed!');
+      console.log("Add Stock Failed!");
     }
   };
 
   useEffect(() => {
     dispatch(fetchProductById(id));
   }, [dispatch]);
+
+  
   return (
     <div className="flex flex-col md:flex-row bg-white shadow-md rounded-lg p-6 gap-8">
       {/* Left: Stock Form */}

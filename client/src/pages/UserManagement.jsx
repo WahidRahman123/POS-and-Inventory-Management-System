@@ -1,9 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addUser, deleteUser, fetchUsers } from "../features/user/userSlice";
+import { useNavigate } from "react-router-dom";
 
 const UserManagement = () => {
+  const { user } = useSelector((state) => state.auth);
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+    if (user && user.role !== 'admin') {
+        navigate("/");
+      }
+  }, []);
+
   const { users, loading, error, toggle } = useSelector((state) => state.user);
+
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const [passerror, setPasserror] = useState(null);
   const [userInput, setUserInput] = useState({
@@ -48,8 +61,15 @@ const UserManagement = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchUsers());
+    if(user && user.role === 'admin') {
+      // console.log('fetching...');
+      dispatch(fetchUsers());
+    }
   }, [dispatch, toggle]);
+
+  //? Glimpse Stopper
+  if(user && user.role !== 'admin') return;
+
   return (
     <div className="bg-slate-50 min-h-screen p-6 font-sans">
       {/* Header */}
@@ -145,10 +165,12 @@ const UserManagement = () => {
                   <td className="p-2">
                     {user.createdAt ? (
                       `${new Date(user.createdAt)
-                        .toLocaleDateString("en-GB", { timeZone: 'Asia/Dhaka' })
+                        .toLocaleDateString("en-GB", { timeZone: "Asia/Dhaka" })
                         .replaceAll("/", "-")} / ${new Date(
                         user.createdAt
-                      ).toLocaleTimeString("en-US", { timeZone: 'Asia/Dhaka' })}`
+                      ).toLocaleTimeString("en-US", {
+                        timeZone: "Asia/Dhaka",
+                      })}`
                     ) : (
                       <span className="font-bold">-</span>
                     )}

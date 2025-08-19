@@ -2,8 +2,16 @@ import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
 import { useRef } from "react";
+import { useSelector } from "react-redux";
 
 const InvoicePage = () => {
+  const { user } = useSelector((state) => state.auth);
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, []);
+
   const navigate = useNavigate();
   const location = useLocation();
   // const title = `invoice-${new Date().toISOString().split('.')[0].replaceAll(':', '_')}`;
@@ -13,10 +21,14 @@ const InvoicePage = () => {
   const reactToPrintFn = useReactToPrint({ contentRef });
 
   useEffect(() => {
-    if (!location.state) {
+    if (user && !location.state) {
       navigate("/point-of-sale");
     }
   }, []);
+
+  //? Glimpse Stopper
+  if (!user) return;
+  if (!location.state) return;
 
   return (
     <>
@@ -53,7 +65,7 @@ const InvoicePage = () => {
             <div className="flex justify-between mt-4 border-b border-gray-300 pb-2">
               <p>
                 <span className="font-semibold">M/s:</span>{" "}
-                {location.state.customerName}
+                {location.state ? location.state.customerName : ""}
               </p>
               <div className="text-right">
                 {/* <p>
@@ -66,7 +78,10 @@ const InvoicePage = () => {
                     day: "2-digit",
                     month: "short",
                     year: "numeric",
-                  })} {new Date().toLocaleTimeString("en-US",{timeZone: 'Asia/Dhaka'})}
+                  })}{" "}
+                  {new Date().toLocaleTimeString("en-US", {
+                    timeZone: "Asia/Dhaka",
+                  })}
                 </p>
               </div>
             </div>
@@ -83,42 +98,51 @@ const InvoicePage = () => {
                 </tr>
               </thead>
               <tbody>
-                {location.state
-                  ? location.state.sales.map((sale, index) => (
-                      <tr key={index}>
-                        <td className="border border-gray-300 px-2 py-1 text-center">
-                          {index + 1}
-                        </td>
-                        <td className="border border-gray-300 px-2 py-1">
-                          {sale.productName}
-                        </td>
-                        <td className="border border-gray-300 px-2 py-1 text-center">
-                          {sale.quantity}
-                        </td>
+                {location.state ? (
+                  location.state.sales.map((sale, index) => (
+                    <tr key={index}>
+                      <td className="border border-gray-300 px-2 py-1 text-center">
+                        {index + 1}
+                      </td>
+                      <td className="border border-gray-300 px-2 py-1">
+                        {sale.productName}
+                      </td>
+                      <td className="border border-gray-300 px-2 py-1 text-center">
+                        {sale.quantity}
+                      </td>
 
-                        <td className="border border-gray-300 px-2 py-1 text-right">
-                          {sale.sellPrice}
-                        </td>
-                        <td className="border border-gray-300 px-2 py-1 text-right">
-                          {sale.subtotal}
-                        </td>
-                      </tr>
-                    ))
-                  : ""}
+                      <td className="border border-gray-300 px-2 py-1 text-right">
+                        {sale.sellPrice}
+                      </td>
+                      <td className="border border-gray-300 px-2 py-1 text-right">
+                        {sale.subtotal}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr></tr>
+                )}
               </tbody>
             </table>
 
             <div className="mt-4 text-sm">
               <p className="font-semibold text-red-600">
-                Total Orders {location.state.sales.length}{" "}
-                <span className="float-right">{location.state.total}</span>
+                Total Orders {location.state ? location.state.sales.length : ""}{" "}
+                <span className="float-right">
+                  {location.state ? location.state.total : ""}
+                </span>
               </p>
               <p>
                 Bill Paid{" "}
-                <span className="float-right">{location.state.billPaid}</span>
+                <span className="float-right">
+                  {location.state ? location.state.billPaid : ""}
+                </span>
               </p>
               <p>
-                Due <span className="float-right">{location.state.due}</span>
+                Due{" "}
+                <span className="float-right">
+                  {location.state ? location.state.due : ""}
+                </span>
               </p>
             </div>
 

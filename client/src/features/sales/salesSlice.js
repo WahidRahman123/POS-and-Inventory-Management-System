@@ -17,9 +17,12 @@ export const fetchSalesByDate = createAsyncThunk(
       const { data } = await axios.get(
         `${import.meta.env.VITE_BACKEND_URI}/api/sales/search`,
         {
-            params: {
-                d: query,
-            }
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+          params: {
+            d: query,
+          },
         }
       );
 
@@ -37,7 +40,12 @@ export const addSales = createAsyncThunk(
     try {
       const { data } = await axios.post(
         `${import.meta.env.VITE_BACKEND_URI}/api/sales`,
-        sales
+        sales,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
       );
 
       return data;
@@ -54,7 +62,7 @@ const salesSlice = createSlice({
   reducers: {
     setCreatedSalesToEmpty: (state) => {
       state.createdSales = [];
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -65,11 +73,14 @@ const salesSlice = createSlice({
       .addCase(fetchSalesByDate.fulfilled, (state, action) => {
         state.loading = false;
         state.sales = action.payload;
-        if(state.sales.length > 0) {
-            const total = state.sales.reduce((acc, sale) => acc + sale.subtotal, 0);
-            state.totalSales = total;
+        if (state.sales.length > 0) {
+          const total = state.sales.reduce(
+            (acc, sale) => acc + sale.subtotal,
+            0
+          );
+          state.totalSales = total;
         } else {
-            state.totalSales = null;
+          state.totalSales = null;
         }
       })
       .addCase(fetchSalesByDate.rejected, (state, action) => {

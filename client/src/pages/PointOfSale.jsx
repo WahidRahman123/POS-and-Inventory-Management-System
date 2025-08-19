@@ -11,7 +11,15 @@ import { useReactToPrint } from "react-to-print";
 import { useNavigate } from "react-router-dom";
 
 const PointOfSale = () => {
+  const { user } = useSelector((state) => state.auth);
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, []);
+  
   const [selectedProducts, setSelectedProducts] = useState([]);
+
   const [searchValue, setSearchValue] = useState("");
   const subTotal = selectedProducts.reduce(
     (acc, product) => acc + product.qty * product.sellPrice,
@@ -64,7 +72,6 @@ const PointOfSale = () => {
     setSearchValue("");
   };
 
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (selectedProducts.length > 0) {
@@ -90,12 +97,20 @@ const PointOfSale = () => {
 
   useEffect(() => {
     if (createdSales.length > 0) {
-      const data = {sales: createdSales, customerName: customer.customerName, total: subTotal, due: Number(subTotal) - Number(cashInput), billPaid: Number(cashInput)};
+      const data = {
+        sales: createdSales,
+        customerName: customer.customerName,
+        total: subTotal,
+        due: Number(subTotal) - Number(cashInput),
+        billPaid: Number(cashInput),
+      };
       dispatch(setCreatedSalesToEmpty());
       // Navigate to the page and print it
-      navigate('/invoice', { state: data });
+      navigate("/invoice", { state: data });
     }
   }, [createdSales]);
+
+  
 
   return (
     <>

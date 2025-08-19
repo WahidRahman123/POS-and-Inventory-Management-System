@@ -27,8 +27,7 @@ export const login = createAsyncThunk(
 
       return data;
     } catch (error) {
-      const message = "Login Failed!";
-      return ThunkAPI.rejectWithValue(message);
+      return ThunkAPI.rejectWithValue(error.response.data);
     }
   }
 );
@@ -59,7 +58,7 @@ const authSlice = createSlice({
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error;
-        toast.error(action.payload, {
+        toast.error(action.payload.message, {
           position: "bottom-right",
           autoClose: 3000,
           hideProgressBar: false,

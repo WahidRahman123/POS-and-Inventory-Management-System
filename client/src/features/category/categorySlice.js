@@ -15,7 +15,12 @@ export const fetchAllCategories = createAsyncThunk(
   async (_, ThunkAPI) => {
     try {
       const { data } = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URI}/api/categories`
+        `${import.meta.env.VITE_BACKEND_URI}/api/categories`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
       );
 
       return data;
@@ -33,6 +38,9 @@ export const fetchCategoriesWithLimit = createAsyncThunk(
       const { data } = await axios.get(
         `${import.meta.env.VITE_BACKEND_URI}/api/categories/limit`,
         {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
           params: {
             l: limit,
           },
@@ -53,7 +61,12 @@ export const addCategory = createAsyncThunk(
     try {
       const { data } = await axios.post(
         `${import.meta.env.VITE_BACKEND_URI}/api/categories`,
-        category
+        category,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
       );
 
       return { message: "Category Added Successfully!" };
@@ -70,7 +83,12 @@ export const updateCategory = createAsyncThunk(
     try {
       const { data } = await axios.put(
         `${import.meta.env.VITE_BACKEND_URI}/api/categories/${category.id}`,
-        category.info
+        category.info,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
       );
 
       return { message: "Category Updated Successfully!" };
@@ -86,7 +104,12 @@ export const deleteCategory = createAsyncThunk(
   async (categoryId, ThunkAPI) => {
     try {
       const { data } = await axios.delete(
-        `${import.meta.env.VITE_BACKEND_URI}/api/categories/${categoryId}`
+        `${import.meta.env.VITE_BACKEND_URI}/api/categories/${categoryId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
       );
 
       return { message: "Category deleted Successfully!" };
@@ -102,7 +125,12 @@ export const fetchSpecificCategory = createAsyncThunk(
   async (categoryId, ThunkAPI) => {
     try {
       const { data } = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URI}/api/categories/${categoryId}`
+        `${import.meta.env.VITE_BACKEND_URI}/api/categories/${categoryId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
       );
 
       return data;

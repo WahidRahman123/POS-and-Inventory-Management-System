@@ -42,9 +42,11 @@ function App() {
           <Route path="/product/low-stock" element={<LowQuantityProductsPage />} />
 
           <Route path="/point-of-sale" element={<PointOfSale />} />
+          {/* for admin */}
           <Route path="/sales-report" element={<SalesReport />} />
+          {/* for admin */}
           <Route path="/users" element={<UserManagement />} />
-          <Route path="/changepassword/:id" element={<ChangePassword />} />
+          <Route path="/changepassword" element={<ChangePassword />} />
         </Route>
       </Routes>
   );

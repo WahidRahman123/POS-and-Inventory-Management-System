@@ -8,6 +8,13 @@ import {
 import { fetchAllCategories } from "../features/category/categorySlice";
 
 const EditProductPage = () => {
+  const { user } = useSelector((state) => state.auth);
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, []);
+
   //* Date:
   const now = new Date();
 
@@ -22,6 +29,7 @@ const EditProductPage = () => {
   const { productSearchedById, error, loading } = useSelector(
     (state) => state.product
   );
+  
   const { categories } = useSelector((state) => state.category);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -74,6 +82,8 @@ const EditProductPage = () => {
       });
     }
   }, [productSearchedById]);
+
+  
 
   return (
     <div className="bg-slate-50 min-h-screen p-6 font-sans">

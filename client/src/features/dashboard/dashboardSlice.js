@@ -13,7 +13,12 @@ export const fetchDashboardResult = createAsyncThunk(
   async (_, ThunkAPI) => {
     try {
       const { data } = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URI}/api/dashboard`
+        `${import.meta.env.VITE_BACKEND_URI}/api/dashboard`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
       );
 
       return data;

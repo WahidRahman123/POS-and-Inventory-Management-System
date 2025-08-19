@@ -5,8 +5,17 @@ import { addProduct } from "../features/product/productSlice";
 import { useNavigate } from "react-router-dom";
 
 const AddItem = () => {
+  const { user } = useSelector((state) => state.auth);
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, []);
+  
   const { categories, loading, error } = useSelector((state) => state.category);
+
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [product, setProduct] = useState({
     name: "",
     sellPrice: 0,
@@ -47,6 +56,8 @@ const AddItem = () => {
   useEffect(() => {
     dispatch(fetchAllCategories());
   }, [dispatch]);
+
+  
   return (
     <div className="bg-slate-50 min-h-screen p-6 font-sans">
       {/* Header */}

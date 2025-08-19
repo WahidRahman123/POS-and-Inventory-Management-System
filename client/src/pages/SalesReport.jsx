@@ -1,11 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchSalesByDate } from "../features/sales/salesSlice";
+import { useNavigate } from "react-router-dom";
 
 const SalesReport = () => {
-  const { sales, loading, error, totalSales } = useSelector((state) => state.sales);
+  const { user } = useSelector((state) => state.auth);
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+    if (user && user.role !== 'admin') {
+      navigate("/");
+    }
+  }, []);
+  
+  const { sales, loading, error, totalSales } = useSelector(
+    (state) => state.sales
+  );
+  
   const dispatch = useDispatch();
-  const [day, setDay] = useState('Today');
+  const navigate = useNavigate();
+  const [day, setDay] = useState("Today");
 
   const handleOnClick = (query, d) => {
     setDay(d);
@@ -13,8 +28,15 @@ const SalesReport = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchSalesByDate("t"));
+    if(user && user.role === 'admin'){
+      // console.log('fetching...')
+      dispatch(fetchSalesByDate("t"));
+    }
   }, [dispatch]);
+
+  //? Glimpse Stopper
+  if(user && user.role !== 'admin') return;
+ 
   return (
     <div className="p-6 bg-white min-h-screen">
       {/* Title */}
@@ -71,7 +93,7 @@ const SalesReport = () => {
                 <tr key={index}>
                   <td className="border px-4 py-2">
                     {new Date(sale.createdAt)
-                      .toLocaleDateString("en-GB", { timeZone: 'Asia/Dhaka' })
+                      .toLocaleDateString("en-GB", { timeZone: "Asia/Dhaka" })
                       .replaceAll("/", "-")}
                   </td>
                   <td className="border px-4 py-2">{sale.productName}</td>
@@ -93,7 +115,7 @@ const SalesReport = () => {
 
       {/* Total Sales */}
       <div className="mt-4 font-semibold">
-        Total Sales {day}: 
+        Total Sales {day}:
         <span className="text-green-600">
           {totalSales ? "৳" : ""} {totalSales}
         </span>

@@ -26,6 +26,9 @@ export const fetchAllProducts = createAsyncThunk(
       const { data } = await axios.get(
         `${import.meta.env.VITE_BACKEND_URI}/api/products`,
         {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
           params: {
             l: limit,
           },
@@ -47,6 +50,9 @@ export const searchProducts = createAsyncThunk(
       const { data } = await axios.get(
         `${import.meta.env.VITE_BACKEND_URI}/api/products/search`,
         {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
           params: {
             q: query,
           },
@@ -68,6 +74,9 @@ export const searchProductsforPOS = createAsyncThunk(
       const { data } = await axios.get(
         `${import.meta.env.VITE_BACKEND_URI}/api/products/searchforpos`,
         {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
           params: {
             q: query,
           },
@@ -88,7 +97,12 @@ export const addProduct = createAsyncThunk(
     try {
       const { data } = await axios.post(
         `${import.meta.env.VITE_BACKEND_URI}/api/products`,
-        product
+        product,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
       );
 
       return { message: "Item Added Successfully!" };
@@ -104,7 +118,12 @@ export const fetchProductById = createAsyncThunk(
   async (productId, ThunkAPI) => {
     try {
       const { data } = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URI}/api/products/${productId}`
+        `${import.meta.env.VITE_BACKEND_URI}/api/products/${productId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
       );
 
       return data;
@@ -121,7 +140,12 @@ export const updateProduct = createAsyncThunk(
     try {
       const { data } = await axios.put(
         `${import.meta.env.VITE_BACKEND_URI}/api/products/${product.id}`,
-        product.item
+        product.item,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
       );
 
       return { message: "Item Updated Successfully!" };
@@ -137,7 +161,12 @@ export const deleteProduct = createAsyncThunk(
   async (productId, ThunkAPI) => {
     try {
       const { data } = await axios.delete(
-        `${import.meta.env.VITE_BACKEND_URI}/api/products/${productId}`
+        `${import.meta.env.VITE_BACKEND_URI}/api/products/${productId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
       );
 
       return { message: "Item deleted Successfully!" };
@@ -156,7 +185,12 @@ export const addStock = createAsyncThunk(
         `${import.meta.env.VITE_BACKEND_URI}/api/products/addstock/${
           product.id
         }`,
-        product.info
+        product.info,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
       );
 
       return { message: "Add Stock Successful!" };
@@ -174,7 +208,12 @@ export const countLowQuantityProduct = createAsyncThunk(
       const { data } = await axios.get(
         `${
           import.meta.env.VITE_BACKEND_URI
-        }/api/products/product-low-quantity-check`
+        }/api/products/product-low-quantity-check`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
       );
 
       return data;
@@ -192,7 +231,12 @@ export const lowQuantityProductList = createAsyncThunk(
       const { data } = await axios.get(
         `${
           import.meta.env.VITE_BACKEND_URI
-        }/api/products/low-quantity-product-list`
+        }/api/products/low-quantity-product-list`, 
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
       );
 
       return data;

@@ -14,7 +14,12 @@ export const fetchUsers = createAsyncThunk(
   async (_, ThunkAPI) => {
     try {
       const { data } = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URI}/api/users`
+        `${import.meta.env.VITE_BACKEND_URI}/api/users`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
       );
 
       return data;
@@ -31,7 +36,12 @@ export const addUser = createAsyncThunk(
     try {
       const { data } = await axios.post(
         `${import.meta.env.VITE_BACKEND_URI}/api/users`,
-        userInfo
+        userInfo,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
       );
 
       return { message: "User Added Successfully!" };
@@ -47,7 +57,12 @@ export const deleteUser = createAsyncThunk(
   async (userId, ThunkAPI) => {
     try {
       const { data } = await axios.delete(
-        `${import.meta.env.VITE_BACKEND_URI}/api/users/${userId}`
+        `${import.meta.env.VITE_BACKEND_URI}/api/users/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
       );
 
       return { message: "User Deleted Successfully!" };
@@ -66,7 +81,12 @@ export const changeUserPassword = createAsyncThunk(
         `${import.meta.env.VITE_BACKEND_URI}/api/users/${
           user.id
         }/changepassword`,
-        user.info
+        user.info,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
       );
 
       return data;

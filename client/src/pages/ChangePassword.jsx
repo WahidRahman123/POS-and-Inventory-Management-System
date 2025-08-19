@@ -1,9 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { changeUserPassword } from "../features/user/userSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 const ChangePassword = () => {
+  const { user } = useSelector((state) => state.auth);
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, []);
+
   const [inputUser, setInputUser] = useState({
     oldPassword: "",
     newPassword: "",
@@ -11,7 +18,7 @@ const ChangePassword = () => {
   });
   const [passerror, setPasserror] = useState(null);
   const [passSameErr, setpassSameErr] = useState(null);
-  const id = '689e35b551378e685a5e5ad7'; //! Change it
+  // const id = "689e35b551378e685a5e5ad7"; //! Change it
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -29,19 +36,21 @@ const ChangePassword = () => {
         setpassSameErr(null);
         await dispatch(
           changeUserPassword({
-            id,
+            id: user._id,
             info: {
-                oldPassword: inputUser.oldPassword,
-                newPassword: inputUser.newPassword
-            }
+              oldPassword: inputUser.oldPassword,
+              newPassword: inputUser.newPassword,
+            },
           })
         ).unwrap();
-        navigate('/');
+        navigate("/");
       }
     } catch (error) {
       console.log("Something Went Wrong!");
     }
   };
+
+  
   return (
     <div className="bg-slate-50 min-h-screen p-6 font-sans">
       {/* Header */}

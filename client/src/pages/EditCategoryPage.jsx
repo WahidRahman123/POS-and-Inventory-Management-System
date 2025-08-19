@@ -1,10 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchSpecificCategory, updateCategory } from "../features/category/categorySlice";
+import {
+  fetchSpecificCategory,
+  updateCategory,
+} from "../features/category/categorySlice";
 import { useNavigate, useParams } from "react-router-dom";
 
 const EditCategoryPage = () => {
+  //For Autherization
+  const { user } = useSelector((state) => state.auth);
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, []);
+
+  
   const { categoryById } = useSelector((state) => state.category);
+
   const dispatch = useDispatch();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -18,13 +31,14 @@ const EditCategoryPage = () => {
       await dispatch(updateCategory({ id, info: category })).unwrap();
       navigate("/category");
     } catch (error) {
-      console.log('Update Failed!')
+      console.log("Update Failed!");
     }
-  }
+  };
 
   useEffect(() => {
     dispatch(fetchSpecificCategory(id));
   }, [dispatch]);
+
 
   useEffect(() => {
     if (categoryById && categoryById.name) {
@@ -57,7 +71,10 @@ const EditCategoryPage = () => {
             className="flex-1 border border-gray-300 rounded-md px-3 py-2"
             required
           />
-          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+          >
             Update Category
           </button>
         </div>

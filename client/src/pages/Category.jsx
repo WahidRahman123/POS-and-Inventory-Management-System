@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   addCategory,
   deleteCategory,
@@ -8,12 +8,21 @@ import {
 } from "../features/category/categorySlice";
 
 const Category = () => {
+  const { user } = useSelector((state) => state.auth);
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, []);
+
   const { categories, loading, error, toggle } = useSelector(
     (state) => state.category
   );
+
   const dispatch = useDispatch();
   const [limit, setLimit] = useState(10);
   const [categoryName, setCategoryName] = useState("");
+  const navigate = useNavigate();
 
   const handleDelete = (cid) => {
     if (window.confirm("Are you sure you want to delete the Category?")) {
@@ -27,7 +36,7 @@ const Category = () => {
       await dispatch(addCategory({ name: categoryName })).unwrap();
       setCategoryName("");
     } catch (error) {
-      console.log('Category Add Failed!');
+      console.log("Category Add Failed!");
     }
   };
 
@@ -82,10 +91,12 @@ const Category = () => {
                   <td className="p-2">
                     {category.createdAt ? (
                       `${new Date(category.createdAt)
-                        .toLocaleDateString("en-GB", { timeZone: 'Asia/Dhaka' })
+                        .toLocaleDateString("en-GB", { timeZone: "Asia/Dhaka" })
                         .replaceAll("/", "-")} / ${new Date(
                         category.createdAt
-                      ).toLocaleTimeString("en-US", { timeZone: 'Asia/Dhaka' })}`
+                      ).toLocaleTimeString("en-US", {
+                        timeZone: "Asia/Dhaka",
+                      })}`
                     ) : (
                       <span className="font-bold">-</span>
                     )}
@@ -109,7 +120,9 @@ const Category = () => {
               ))
             ) : (
               <tr className="text-center select-none text-gray-500 text-3xl">
-                <td colSpan={3} className="px-2 py-1">No Category Available.</td>
+                <td colSpan={3} className="px-2 py-1">
+                  No Category Available.
+                </td>
               </tr>
             )}
 
