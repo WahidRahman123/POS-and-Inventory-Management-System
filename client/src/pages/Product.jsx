@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
+import { BeatLoader } from "react-spinners";
 import {
+  countLowQuantityProduct,
   deleteProduct,
   fetchAllProducts,
   searchProducts,
@@ -18,6 +20,7 @@ const Product = () => {
   const { products, loading, error, deleteToggle } = useSelector(
     (state) => state.product
   );
+  const [did, setDid] = useState(null);
 
   const dispatch = useDispatch();
   const [limit, setLimit] = useState(10);
@@ -36,9 +39,16 @@ const Product = () => {
     }
   };
 
-  const handleDelete = (pid) => {
-    if (window.confirm("Are you sure you want to delete the Product?")) {
-      dispatch(deleteProduct(pid));
+  const handleDelete = async (pid) => {
+    try {
+      if (window.confirm("Are you sure you want to delete the Product?")) {
+        setDid(pid);
+        await dispatch(deleteProduct(pid)).unwrap();
+        setDid(null);
+      }
+    } catch (error) {
+      console.log("Delete Failed!");
+      setDid(null);
     }
   };
 
@@ -46,7 +56,10 @@ const Product = () => {
     dispatch(fetchAllProducts(limit));
   }, [dispatch, limit, deleteToggle]);
 
-  
+  useEffect(() => {
+    dispatch(countLowQuantityProduct());
+  }, [deleteToggle]);
+
   return (
     <div className="bg-slate-50 min-h-screen p-6 font-sans">
       <div className="flex justify-between items-center mb-4">
@@ -127,9 +140,20 @@ const Product = () => {
                     </Link>
                     <button
                       onClick={() => handleDelete(product._id)}
-                      className="cursor-pointer hover:bg-red-600 text-xs bg-red-500 text-white px-2 py-1 rounded"
+                      disabled={
+                        loading && did && did === product._id ? true : false
+                      }
+                      className={`text-white  py-1 rounded ${
+                        loading && did && did === product._id
+                          ? "bg-red-400 cursor-not-allowed px-[12px]"
+                          : "cursor-pointer hover:bg-red-600 text-xs bg-red-500 px-2"
+                      }`}
                     >
-                      Delete
+                      {loading && did && did === product._id ? (
+                        <BeatLoader color="#FFFFFF" size={3} />
+                      ) : (
+                        "Delete"
+                      )}
                     </button>
                   </td>
                 </tr>

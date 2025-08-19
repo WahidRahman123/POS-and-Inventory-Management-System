@@ -15,8 +15,19 @@ const EditCategoryPage = () => {
     }
   }, []);
 
+  //* Date:
+  const now = new Date();
+
+  const tdate = now
+    .toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      year: "numeric",
+    })
+    .split(" ");
+
   
-  const { categoryById } = useSelector((state) => state.category);
+  const { categoryById, loading } = useSelector((state) => state.category);
 
   const dispatch = useDispatch();
   const { id } = useParams();
@@ -24,14 +35,18 @@ const EditCategoryPage = () => {
   const [category, setCategory] = useState({
     name: "",
   });
+  const [uid, setUid] = useState(null);
 
   const handleSubmit = async (e) => {
     try {
       e.preventDefault();
+      setUid('Running');
       await dispatch(updateCategory({ id, info: category })).unwrap();
+      setUid(null);
       navigate("/category");
     } catch (error) {
       console.log("Update Failed!");
+      setUid(null);
     }
   };
 
@@ -55,7 +70,7 @@ const EditCategoryPage = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Categories</h1>
         <span className="text-sm text-gray-500">
-          Friday, December 2023 | admin
+          {tdate[2]}, {tdate[0]} {tdate[1]} | {user ? user.role : ""}
         </span>
       </div>
 
@@ -73,9 +88,10 @@ const EditCategoryPage = () => {
           />
           <button
             type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            disabled={loading && uid ? true : false}
+            className={` text-white px-4 py-2 rounded-md  ${loading && uid ? "cursor-not-allowed bg-blue-500" : "bg-blue-600 hover:bg-blue-700 cursor-pointer"}`}
           >
-            Update Category
+            {loading && uid ? "Updating..." : "Update Category"}
           </button>
         </div>
       </form>

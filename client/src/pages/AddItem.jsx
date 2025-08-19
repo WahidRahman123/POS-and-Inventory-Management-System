@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllCategories } from "../features/category/categorySlice";
-import { addProduct } from "../features/product/productSlice";
+import { addProduct, countLowQuantityProduct } from "../features/product/productSlice";
 import { useNavigate } from "react-router-dom";
 
 const AddItem = () => {
@@ -11,8 +11,9 @@ const AddItem = () => {
       navigate("/login");
     }
   }, []);
-  
-  const { categories, loading, error } = useSelector((state) => state.category);
+
+  const { categories } = useSelector((state) => state.category);
+  const { loading, toggle } = useSelector((state) => state.product);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ const AddItem = () => {
     quantity: 1,
     categoryName: "",
   });
+  const [aid, setAid] = useState(null);
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
@@ -32,6 +34,7 @@ const AddItem = () => {
   const handleSubmit = async (e) => {
     try {
       e.preventDefault();
+      setAid("Running");
       const newProduct = {
         ...product,
         sellPrice: Number(product.sellPrice),
@@ -48,8 +51,10 @@ const AddItem = () => {
         quantity: 1,
         categoryName: "",
       });
+      setAid(null);
     } catch (error) {
       console.log("Added Failed!");
+      setAid(null);
     }
   };
 
@@ -57,7 +62,10 @@ const AddItem = () => {
     dispatch(fetchAllCategories());
   }, [dispatch]);
 
-  
+  useEffect(() => {
+    dispatch(countLowQuantityProduct());
+  }, [toggle]);
+
   return (
     <div className="bg-slate-50 min-h-screen p-6 font-sans">
       {/* Header */}
@@ -131,9 +139,14 @@ const AddItem = () => {
 
           <button
             type="submit"
-            className="cursor-pointer w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-700"
+            disabled={loading && aid ? true : false}
+            className={`w-full text-white font-semibold py-2 rounded-md  ${
+              loading && aid
+                ? "cursor-not-allowed bg-blue-500"
+                : "cursor-pointer bg-blue-600 hover:bg-blue-700"
+            }`}
           >
-            Add Item
+            {loading && aid ? "Adding..." : "Add Item"}
           </button>
         </form>
       </div>

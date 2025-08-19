@@ -17,8 +17,9 @@ const PointOfSale = () => {
       navigate("/login");
     }
   }, []);
-  
+
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const [cid, setCid] = useState(null);
 
   const [searchValue, setSearchValue] = useState("");
   const subTotal = selectedProducts.reduce(
@@ -35,7 +36,7 @@ const PointOfSale = () => {
   });
 
   const { productsBySearch } = useSelector((state) => state.product);
-  const { createdSales } = useSelector((state) => state.sales);
+  const { createdSales, loading } = useSelector((state) => state.sales);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -72,26 +73,33 @@ const PointOfSale = () => {
     setSearchValue("");
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (selectedProducts.length > 0) {
-      // console.log(selectedProducts);
-      const finalProducts = selectedProducts.map((p, i) => {
-        return {
-          customerName: customer.customerName,
-          address: customer.address,
-          productName: p.name,
-          sellPrice: p.sellPrice,
-          costPrice: p.costPrice,
-          quantity: p.qty,
-          subtotal: Number(p.sellPrice) * Number(p.qty),
-        };
-      });
-      // console.log(finalProducts);
-      dispatch(addSales(finalProducts));
-    } else {
-      alert("Please select at least one product!");
-      return;
+  const handleSubmit = async (e) => {
+    try {
+      e.preventDefault();
+      if (selectedProducts.length > 0) {
+        setCid('Running');
+        // console.log(selectedProducts);
+        const finalProducts = selectedProducts.map((p, i) => {
+          return {
+            customerName: customer.customerName,
+            address: customer.address,
+            productName: p.name,
+            sellPrice: p.sellPrice,
+            costPrice: p.costPrice,
+            quantity: p.qty,
+            subtotal: Number(p.sellPrice) * Number(p.qty),
+          };
+        });
+        // console.log(finalProducts);
+        await dispatch(addSales(finalProducts)).unwrap();
+        setCid(null);
+      } else {
+        alert("Please select at least one product!");
+        return;
+      }
+    } catch (error) {
+      console.log('Creating Failed!');
+      setCid(null);
     }
   };
 
@@ -109,8 +117,6 @@ const PointOfSale = () => {
       navigate("/invoice", { state: data });
     }
   }, [createdSales]);
-
-  
 
   return (
     <>
@@ -330,9 +336,10 @@ const PointOfSale = () => {
 
         <button
           type="submit"
-          className="hover:bg-blue-700 cursor-pointer mt-4 w-full bg-blue-600 text-white font-bold py-2 rounded-sm"
+          disabled={loading && cid ? true : false}
+          className={`mt-4 w-full text-white font-bold py-2 rounded-sm ${loading && cid ? 'cursor-not-allowed bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'}`}
         >
-          Pay&nbsp;{subTotal}
+          {loading && cid ? 'Paying...' : `Pay ${subTotal}`}
         </button>
       </form>
     </>

@@ -15,6 +15,7 @@ const initialState = {
   lowQuantityProducts: [],
   count: 0,
   deleteToggle: true,
+  toggle: true,
   loading: false,
   error: null,
 };
@@ -331,6 +332,7 @@ const productSlice = createSlice({
       })
       .addCase(addProduct.fulfilled, (state, action) => {
         state.loading = false;
+        state.toggle = !state.toggle;
         toast.success(action.payload.message, {
           position: "bottom-right",
           autoClose: 3000,

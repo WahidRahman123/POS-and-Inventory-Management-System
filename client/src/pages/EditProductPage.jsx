@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { FaArrowLeft } from "react-icons/fa";
 import {
   fetchProductById,
   updateProduct,
@@ -29,7 +30,8 @@ const EditProductPage = () => {
   const { productSearchedById, error, loading } = useSelector(
     (state) => state.product
   );
-  
+  const [eid, setEid] = useState(null);
+
   const { categories } = useSelector((state) => state.category);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -50,6 +52,7 @@ const EditProductPage = () => {
   const handleSubmit = async (e) => {
     try {
       e.preventDefault();
+      setEid('Running');
       const newProduct = {
         ...product,
         sellPrice: Number(product.sellPrice),
@@ -58,10 +61,11 @@ const EditProductPage = () => {
       };
 
       await dispatch(updateProduct({ id, item: newProduct })).unwrap();
-
+      setEid(null);
       navigate("/product");
     } catch (error) {
       console.log("Submission Failed!");
+      setEid(null);
     }
   };
 
@@ -83,15 +87,13 @@ const EditProductPage = () => {
     }
   }, [productSearchedById]);
 
-  
-
   return (
     <div className="bg-slate-50 min-h-screen p-6 font-sans">
       {/* Header */}
       <header className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Update Item</h1>
         <span className="text-sm text-gray-500">
-          {tdate[2]}, {tdate[0]} {tdate[1]} | admin
+          {tdate[2]}, {tdate[0]} {tdate[1]} | {user ? user.role : ""}
         </span>
       </header>
 
@@ -158,11 +160,18 @@ const EditProductPage = () => {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-700"
+            disabled={loading && eid ? true : false}
+            className={`w-full  text-white font-semibold py-2 rounded-md  ${loading && eid ? "cursor-not-allowed bg-blue-500" : "cursor-pointer bg-blue-600 hover:bg-blue-700"}`}
           >
-            Update Item
+            {loading && eid ? "Updating..." : "Update Item"}
           </button>
         </form>
+
+        <div className="flex justify-end">
+          <div onClick={() => navigate(-1)} className="flex mt-4 items-center text-lg font-medium text-green-600 hover:text-blue-800 cursor-pointer">
+            <FaArrowLeft className="mr-2" /> Back
+          </div>
+        </div>
       </div>
     </div>
   );

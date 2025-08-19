@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
+import { BeatLoader } from "react-spinners"
 import {
   addCategory,
   deleteCategory,
@@ -22,21 +23,33 @@ const Category = () => {
   const dispatch = useDispatch();
   const [limit, setLimit] = useState(10);
   const [categoryName, setCategoryName] = useState("");
+  const [aid, setAid] = useState(null);
+  const [did, setDid] = useState(null);
   const navigate = useNavigate();
 
-  const handleDelete = (cid) => {
-    if (window.confirm("Are you sure you want to delete the Category?")) {
-      dispatch(deleteCategory(cid));
+  const handleDelete = async (cid) => {
+    try {
+      if (window.confirm("Are you sure you want to delete the Category?")) {
+        setDid(cid);
+        await dispatch(deleteCategory(cid)).unwrap();
+        setDid(null);
+      }
+    } catch (error) {
+      console.log("Delete Failed!");
+      setDid(null);
     }
   };
 
   const handleSubmit = async (e) => {
     try {
       e.preventDefault();
+      setAid("Running");
       await dispatch(addCategory({ name: categoryName })).unwrap();
       setCategoryName("");
+      setAid(null);
     } catch (error) {
       console.log("Category Add Failed!");
+      setAid(null);
     }
   };
 
@@ -65,9 +78,14 @@ const Category = () => {
           />
           <button
             type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            disabled={loading && aid ? true : false}
+            className={` text-white px-4 py-2 rounded-md  ${
+              loading && aid
+                ? "cursor-not-allowed bg-blue-500"
+                : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
+            }`}
           >
-            Add Category
+            {loading && aid ? "Adding..." : "Add Category"}
           </button>
         </div>
       </form>
@@ -110,10 +128,11 @@ const Category = () => {
                       Update
                     </Link>
                     <button
+                      disabled={loading && did && did === category._id ? true : false}
                       onClick={() => handleDelete(category._id)}
-                      className="cursor-pointer text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                      className={`text-xs text-white px-2 py-1 rounded ${loading && did && did === category._id ? "cursor-not-allowed bg-red-400" : "cursor-pointer bg-red-500 hover:bg-red-600"}`}
                     >
-                      Delete
+                      {loading && did && did === category._id ?<BeatLoader color="#FFFFFF" size={3} /> :"Delete"}
                     </button>
                   </td>
                 </tr>

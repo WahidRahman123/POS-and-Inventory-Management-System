@@ -9,15 +9,17 @@ const UserManagement = () => {
     if (!user) {
       navigate("/login");
     }
-    if (user && user.role !== 'admin') {
-        navigate("/");
-      }
+    if (user && user.role !== "admin") {
+      navigate("/");
+    }
   }, []);
 
   const { users, loading, error, toggle } = useSelector((state) => state.user);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [aid, setAid] = useState(null);
+  const [did, setDid] = useState(null);
   const [passerror, setPasserror] = useState(null);
   const [userInput, setUserInput] = useState({
     name: "",
@@ -26,15 +28,23 @@ const UserManagement = () => {
     role: "cashier",
   });
 
-  const handleDelete = (uid) => {
-    if (window.confirm("Are you sure you want to delete the User?")) {
-      dispatch(deleteUser(uid));
+  const handleDelete = async (uid) => {
+    try {
+      if (window.confirm("Are you sure you want to delete the User?")) {
+        setDid(uid);
+        await dispatch(deleteUser(uid)).unwrap();
+        setDid(null);
+      }
+    } catch (error) {
+      console.log("Delete Failed!");
+      setDid(null);
     }
   };
 
   const handleSubmit = async (e) => {
     try {
       e.preventDefault();
+      setAid("Running");
       if (userInput.password !== userInput.confirmPassword) {
         setPasserror("*Password does not match!");
         return;
@@ -54,21 +64,23 @@ const UserManagement = () => {
           confirmPassword: "",
           role: "cashier",
         });
+        setAid(null);
       }
     } catch (error) {
       console.log("User Addition Failed!");
+      setAid(null);
     }
   };
 
   useEffect(() => {
-    if(user && user.role === 'admin') {
+    if (user && user.role === "admin") {
       // console.log('fetching...');
       dispatch(fetchUsers());
     }
   }, [dispatch, toggle]);
 
   //? Glimpse Stopper
-  if(user && user.role !== 'admin') return;
+  if (user && user.role !== "admin") return;
 
   return (
     <div className="bg-slate-50 min-h-screen p-6 font-sans">
@@ -138,9 +150,14 @@ const UserManagement = () => {
           </select>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-700"
+            disabled={loading && aid ? true : false}
+            className={`w-full text-white font-semibold py-2 rounded-md ${
+              loading && aid
+                ? "cursor-not-allowed bg-blue-500"
+                : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
+            }`}
           >
-            Add New User
+            {loading && aid ? "Adding..." : "Add New User"}
           </button>
         </div>
       </form>
@@ -179,15 +196,21 @@ const UserManagement = () => {
                     <button
                       onClick={() => handleDelete(user._id)}
                       disabled={
-                        user._id === "689e359f51378e685a5e5ad5" ? true : false
+                        user._id === "689e359f51378e685a5e5ad5" ||
+                        (loading && did && did === user._id)
+                          ? true
+                          : false
                       }
                       className={`text-xs  text-white px-2 py-1 rounded  ${
-                        user._id === "689e359f51378e685a5e5ad5"
-                          ? "bg-red-400"
+                        user._id === "689e359f51378e685a5e5ad5" ||
+                        (loading && did && did === user._id)
+                          ? "cursor-not-allowed bg-red-400"
                           : "hover:bg-red-600 bg-red-500 cursor-pointer"
                       }`}
                     >
-                      Delete User
+                      {loading && did && did === user._id
+                        ? "Deleting..."
+                        : "Delete User"}
                     </button>
                   </td>
                 </tr>
