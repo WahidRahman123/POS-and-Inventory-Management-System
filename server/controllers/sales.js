@@ -3,7 +3,7 @@ const Product = require("../models/Product");
 
 module.exports.index = async (req, res) => {
   try {
-    const sales = await Sales.find({}).sort({createdAt: -1});
+    const sales = await Sales.find({}).sort({ createdAt: -1 });
 
     res.status(201).json(sales);
   } catch (error) {
@@ -26,7 +26,6 @@ module.exports.createSales = async (req, res) => {
         quantity,
         subtotal,
       } = arrayOfSales[i];
-
 
       const sales = new Sales({
         customerName,
@@ -62,11 +61,18 @@ module.exports.searchByDates = async (req, res) => {
     if (!date) return res.status(400).json({ message: "Invalid Dates!" });
 
     // Today's sales:
-    if (date && date == "t") {
-      const now = new Date();
-      const sales = await Sales.find({ createdAt: { $eq: now } }).sort({createdAt: -1});
+    if (date && date === "t") {
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
 
-      if (sales) {
+      const endOfDay = new Date();
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const sales = await Sales.find({
+        createdAt: { $gte: startOfDay, $lte: endOfDay },
+      }).sort({ createdAt: -1 });
+
+      if (sales.length > 0) {
         return res.status(200).json(sales);
       } else {
         return res.status(404).json({ message: "Sales not found" });
@@ -74,7 +80,7 @@ module.exports.searchByDates = async (req, res) => {
     }
 
     // Weekly sales:
-    if (date && date == "w") {
+    if (date && date === "w") {
       const now = new Date();
 
       const startOfWeek = new Date(now);
@@ -86,7 +92,7 @@ module.exports.searchByDates = async (req, res) => {
 
       const sales = await Sales.find({
         createdAt: { $gte: startOfWeek, $lte: now },
-      }).sort({createdAt: -1});
+      }).sort({ createdAt: -1 });
 
       if (sales) {
         return res.status(200).json(sales);
@@ -96,14 +102,14 @@ module.exports.searchByDates = async (req, res) => {
     }
 
     // Monthly sales:
-    if (date && date == "m") {
+    if (date && date === "m") {
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
       const sales = await Sales.find({
         createdAt: { $gte: startOfMonth, $lt: endOfMonth },
-      }).sort({createdAt: -1});
+      }).sort({ createdAt: -1 });
 
       if (sales) {
         return res.status(200).json(sales);
@@ -113,14 +119,14 @@ module.exports.searchByDates = async (req, res) => {
     }
 
     // Yearly sales:
-    if (date && date == "y") {
+    if (date && date === "y") {
       const now = new Date();
       const startOfYear = new Date(now.getFullYear(), 0, 1);
       const endOfYear = new Date(now.getFullYear() + 1, 0, 1);
 
       const sales = await Sales.find({
         createdAt: { $gte: startOfYear, $lt: endOfYear },
-      }).sort({createdAt: -1});
+      }).sort({ createdAt: -1 });
 
       if (sales) {
         return res.status(200).json(sales);
