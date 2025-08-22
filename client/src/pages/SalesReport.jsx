@@ -81,21 +81,21 @@ const SalesReport = () => {
           <div>
             Total Sales:{" "}
             <span className="text-green-600">
-              {totalSales ? "৳" : ""} {totalSales}
+              {totalSales ? "৳" : ""} {totalSales.toLocaleString("en-BD")}
             </span>
           </div>
 
           <div>
             Total Costs:{" "}
             <span className="text-green-600">
-              {totalCosts ? "৳" : ""} {totalCosts}
+              {totalCosts ? "৳" : ""} {totalCosts.toLocaleString("en-BD")}
             </span>
           </div>
 
           <div>
             Profit:{" "}
             <span className="text-green-600">
-              {profit ? "৳" : ""} {profit}
+              {profit ? "৳" : ""} {profit.toLocaleString("en-BD")}
             </span>
           </div>
         </div>
