@@ -14,11 +14,14 @@ const InvoicePage = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  // const title = `invoice-${new Date().toISOString().split('.')[0].replaceAll(':', '_')}`;
+  const title = `invoice-${new Date()
+    .toISOString()
+    .split(".")[0]
+    .replaceAll(":", "_")}`;
   // console.log(title)
 
   const contentRef = useRef(null);
-  const reactToPrintFn = useReactToPrint({ contentRef });
+  const reactToPrintFn = useReactToPrint({ contentRef, documentTitle: title });
 
   useEffect(() => {
     if (user && !location.state) {
@@ -33,12 +36,20 @@ const InvoicePage = () => {
   return (
     <>
       <div className="m-5">
-        <button
-          className="mt-5 bg-blue-500 text-white font-bold py-2 px-8 rounded shadow border-2 border-blue-500 hover:bg-transparent hover:text-blue-500 transition-all duration-300 cursor-pointer"
-          onClick={reactToPrintFn}
-        >
-          Print
-        </button>
+        <div className="flex gap-5">
+          <button
+            className="mt-5 bg-blue-500 text-white font-bold py-2 px-8 rounded shadow border-2 border-blue-500 hover:bg-transparent hover:text-blue-500 transition-all duration-300 cursor-pointer"
+            onClick={reactToPrintFn}
+          >
+            Print
+          </button>
+          <button
+            className="mt-5 bg-green-500 text-white font-bold py-2 px-6 rounded shadow border-2 border-green-500 hover:bg-transparent hover:text-green-500 transition-all duration-300 cursor-pointer"
+            onClick={() => navigate("/point-of-sale")}
+          >
+            Back
+          </button>
+        </div>
         <div className="m-5">
           <div ref={contentRef} className="max-w-3xl mx-auto bg-white p-6 mt-5">
             <div className="flex justify-between items-start border-b border-red-500 pb-2">

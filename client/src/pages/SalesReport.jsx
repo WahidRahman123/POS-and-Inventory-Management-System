@@ -9,15 +9,15 @@ const SalesReport = () => {
     if (!user) {
       navigate("/login");
     }
-    if (user && user.role !== 'admin') {
+    if (user && user.role !== "admin") {
       navigate("/");
     }
   }, []);
-  
-  const { sales, loading, error, totalSales } = useSelector(
+
+  const { sales, loading, error, totalSales, totalCosts, profit } = useSelector(
     (state) => state.sales
   );
-  
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [day, setDay] = useState("Today");
@@ -28,15 +28,15 @@ const SalesReport = () => {
   };
 
   useEffect(() => {
-    if(user && user.role === 'admin'){
+    if (user && user.role === "admin") {
       // console.log('fetching...')
       dispatch(fetchSalesByDate("t"));
     }
   }, [dispatch]);
 
   //? Glimpse Stopper
-  if(user && user.role !== 'admin') return;
- 
+  if (user && user.role !== "admin") return;
+
   return (
     <div className="p-6 bg-white min-h-screen">
       {/* Title */}
@@ -75,6 +75,34 @@ const SalesReport = () => {
       <h2 className="text-xl font-semibold mb-2">{day}'s Report</h2>
       <hr className="mb-4" />
 
+      {/* Total Sales */}
+      {sales.length > 0 ? (
+        <div className="my-4 font-semibold">
+          <div>
+            Total Sales:{" "}
+            <span className="text-green-600">
+              {totalSales ? "৳" : ""} {totalSales}
+            </span>
+          </div>
+
+          <div>
+            Total Costs:{" "}
+            <span className="text-green-600">
+              {totalCosts ? "৳" : ""} {totalCosts}
+            </span>
+          </div>
+
+          <div>
+            Profit:{" "}
+            <span className="text-green-600">
+              {profit ? "৳" : ""} {profit}
+            </span>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
+
       {/* Table */}
       <div className="overflow-x-auto border rounded">
         <table className="min-w-full border-collapse">
@@ -111,14 +139,6 @@ const SalesReport = () => {
             )}
           </tbody>
         </table>
-      </div>
-
-      {/* Total Sales */}
-      <div className="mt-4 font-semibold">
-        Total Sales {day}:
-        <span className="text-green-600">
-          {totalSales ? "৳" : ""} {totalSales}
-        </span>
       </div>
     </div>
   );

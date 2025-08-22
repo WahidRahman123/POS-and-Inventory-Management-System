@@ -72,7 +72,7 @@ module.exports.searchByDates = async (req, res) => {
         createdAt: { $gte: startOfDay, $lte: endOfDay },
       }).sort({ createdAt: -1 });
 
-      if (sales.length > 0) {
+      if (sales) {
         return res.status(200).json(sales);
       } else {
         return res.status(404).json({ message: "Sales not found" });
