@@ -74,6 +74,12 @@ const SalesReport = () => {
       {/* Today's Report Title */}
       <h2 className="text-xl font-semibold mb-2">{day}'s Report</h2>
       <hr className="mb-4" />
+      <div className="mt-4 font-semibold">
+        Total Sales {day}:
+        <span className="text-green-600">
+          {totalSales ? "৳" : ""} {totalSales}
+        </span>
+      </div>
 
       {/* Table */}
       <div className="overflow-x-auto border rounded">
@@ -114,12 +120,12 @@ const SalesReport = () => {
       </div>
 
       {/* Total Sales */}
-      <div className="mt-4 font-semibold">
+      {/* <div className="mt-4 font-semibold">
         Total Sales {day}:
         <span className="text-green-600">
           {totalSales ? "৳" : ""} {totalSales}
         </span>
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -61,112 +61,222 @@ const Product = () => {
   }, [deleteToggle]);
 
   return (
-    <div className="bg-slate-50 min-h-screen p-6 font-sans">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Inventory List</h1>
-        <Link
-          to="/product/add"
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-        >
-          Add Item
-        </Link>
-      </div>
+    <div className="bg-slate-50 min-h-screen p-3 sm:p-4 md:p-6 font-sans">
+  {/* Header */}
+  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
+    <h1 className="text-xl sm:text-2xl font-bold">Inventory List</h1>
+    <Link
+      to="/product/add"
+      className="bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 text-sm sm:text-base"
+    >
+      Add Item
+    </Link>
+  </div>
 
-      <div className="flex justify-between items-center mb-4">
-        <div className="text-sm text-gray-600">
-          Show{" "}
-          <span>
-            <input
-              type="number"
-              min={0}
-              value={limit}
-              onChange={(e) => setLimit(e.target.value)}
-              className="w-[60px] outline-1 px-1 rounded"
-            />
-          </span>{" "}
-          entries
-        </div>
-        <input
-          type="search"
-          placeholder="Search..."
-          value={searchProduct}
-          onChange={handleSearchProduct}
-          className="border border-gray-300 rounded-md px-3 py-1"
-        />
-      </div>
+  {/* Controls */}
+  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2 text-sm">
+    <div className="text-gray-600">
+      Show{" "}
+      <input
+        type="number"
+        min={0}
+        value={limit}
+        onChange={(e) => setLimit(e.target.value)}
+        className="w-14 outline-1 px-1 rounded"
+      />{" "}
+      entries
+    </div>
+    <input
+      type="search"
+      placeholder="Search..."
+      value={searchProduct}
+      onChange={handleSearchProduct}
+      className="border border-gray-300 rounded px-3 py-1 w-full sm:w-auto"
+    />
+  </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full bg-white shadow-md rounded-lg text-sm">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-2 text-left">#</th>
-              <th className="p-2 text-left">Name</th>
-              <th className="p-2 text-left">Category</th>
-              <th className="p-2 text-center">Quantity</th>
-              <th className="p-2 text-right">Cost Price</th>
-              <th className="p-2 text-right">Sale Price</th>
-              <th className="p-2 text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.length > 0 ? (
-              products.map((product, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  <td className="p-2">{index + 1}</td>
-                  <td className="p-2">{product.name}</td>
-                  <td className="p-2">{product.category.name}</td>
-
-                  <td
-                    className={`p-2 text-center ${
-                      product.quantity < 10 ? "font-bold text-red-500" : ""
+  {/* Table */}
+  <div className="overflow-x-auto">
+    <table className="w-full bg-white shadow-md rounded-lg text-xs sm:text-sm">
+      <thead className="bg-gray-100">
+        <tr>
+          <th className="p-2 text-left">#</th>
+          <th className="p-2 text-left">Name</th>
+          <th className="p-2 text-left">Category</th>
+          <th className="p-2 text-center">Qty</th>
+          <th className="p-2 text-right">Cost</th>
+          <th className="p-2 text-right">Sale</th>
+          <th className="p-2 text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {products.length > 0 ? (
+          products.map((product, index) => (
+            <tr key={index} className="hover:bg-gray-50">
+              <td className="p-2">{index + 1}</td>
+              <td className="p-2 whitespace-nowrap">{product.name}</td>
+              <td className="p-2 whitespace-nowrap">{product.category.name}</td>
+              <td
+                className={`p-2 text-center ${
+                  product.quantity < 10 ? "font-bold text-red-500" : ""
+                }`}
+              >
+                {product.quantity}
+              </td>
+              <td className="p-2 text-right">৳{product.costPrice}</td>
+              <td className="p-2 text-right">৳{product.sellPrice}</td>
+              <td className="p-2">
+                <div className="flex flex-wrap gap-1 justify-center">
+                  <Link
+                    to={`/product/${product._id}/add-stock`}
+                    className="text-xs bg-green-500 text-white px-2 py-1 rounded"
+                  >
+                    Stock
+                  </Link>
+                  <Link
+                    to={`/product/${product._id}/edit`}
+                    className="text-xs bg-blue-500 text-white px-2 py-1 rounded"
+                  >
+                    Edit
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(product._id)}
+                    disabled={
+                      loading && did && did === product._id ? true : false
+                    }
+                    className={`text-white py-1 rounded text-xs px-2 ${
+                      loading && did && did === product._id
+                        ? "bg-red-400 cursor-not-allowed"
+                        : "bg-red-500 hover:bg-red-600"
                     }`}
                   >
-                    {product.quantity}
-                  </td>
-                  <td className="p-2 text-right">৳ {product.costPrice}</td>
-                  <td className="p-2 text-right">৳ {product.sellPrice}</td>
-                  <td className="p-2 flex gap-2 justify-center">
-                    <Link
-                      to={`/product/${product._id}/add-stock`}
-                      className="text-xs bg-green-500 text-white px-2 py-1 rounded"
-                    >
-                      Stock Entry
-                    </Link>
-                    <Link
-                      to={`/product/${product._id}/edit`}
-                      className="text-xs bg-blue-500 text-white px-2 py-1 rounded"
-                    >
-                      Update
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(product._id)}
-                      disabled={
-                        loading && did && did === product._id ? true : false
-                      }
-                      className={`text-white  py-1 rounded ${
-                        loading && did && did === product._id
-                          ? "bg-red-400 cursor-not-allowed px-[12px]"
-                          : "cursor-pointer hover:bg-red-600 text-xs bg-red-500 px-2"
-                      }`}
-                    >
-                      {loading && did && did === product._id ? (
-                        <BeatLoader color="#FFFFFF" size={3} />
-                      ) : (
-                        "Delete"
-                      )}
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr className="text-center select-none text-gray-600 text-3xl">
-                <td colSpan={7}>No Products Available.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+                    {loading && did && did === product._id ? (
+                      <BeatLoader color="#FFFFFF" size={3} />
+                    ) : (
+                      "Delete"
+                    )}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan={7} className="text-center text-gray-600 py-10 text-xl">
+              No Products Available.
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
+    // <div className="bg-slate-50 min-h-screen p-6 font-sans">
+    //   <div className="flex justify-between items-center mb-4">
+    //     <h1 className="text-2xl font-bold">Inventory List</h1>
+    //     <Link
+    //       to="/product/add"
+    //       className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+    //     >
+    //       Add Item
+    //     </Link>
+    //   </div>
+
+    //   <div className="flex justify-between items-center mb-4">
+    //     <div className="text-sm text-gray-600">
+    //       Show{" "}
+    //       <span>
+    //         <input
+    //           type="number"
+    //           min={0}
+    //           value={limit}
+    //           onChange={(e) => setLimit(e.target.value)}
+    //           className="w-[60px] outline-1 px-1 rounded"
+    //         />
+    //       </span>{" "}
+    //       entries
+    //     </div>
+    //     <input
+    //       type="search"
+    //       placeholder="Search..."
+    //       value={searchProduct}
+    //       onChange={handleSearchProduct}
+    //       className="border border-gray-300 rounded-md px-3 py-1"
+    //     />
+    //   </div>
+
+    //   <div className="overflow-x-auto">
+    //     <table className="w-full bg-white shadow-md rounded-lg text-sm">
+    //       <thead className="bg-gray-100">
+    //         <tr>
+    //           <th className="p-2 text-left">#</th>
+    //           <th className="p-2 text-left">Name</th>
+    //           <th className="p-2 text-left">Category</th>
+    //           <th className="p-2 text-center">Quantity</th>
+    //           <th className="p-2 text-right">Cost Price</th>
+    //           <th className="p-2 text-right">Sale Price</th>
+    //           <th className="p-2 text-center">Actions</th>
+    //         </tr>
+    //       </thead>
+    //       <tbody>
+    //         {products.length > 0 ? (
+    //           products.map((product, index) => (
+    //             <tr key={index} className="hover:bg-gray-50">
+    //               <td className="p-2">{index + 1}</td>
+    //               <td className="p-2">{product.name}</td>
+    //               <td className="p-2">{product.category.name}</td>
+
+    //               <td
+    //                 className={`p-2 text-center ${
+    //                   product.quantity < 10 ? "font-bold text-red-500" : ""
+    //                 }`}
+    //               >
+    //                 {product.quantity}
+    //               </td>
+    //               <td className="p-2 text-right">৳ {product.costPrice}</td>
+    //               <td className="p-2 text-right">৳ {product.sellPrice}</td>
+    //               <td className="p-2 flex gap-2 justify-center">
+    //                 <Link
+    //                   to={`/product/${product._id}/add-stock`}
+    //                   className="text-xs bg-green-500 text-white px-2 py-1 rounded"
+    //                 >
+    //                   Stock Entry
+    //                 </Link>
+    //                 <Link
+    //                   to={`/product/${product._id}/edit`}
+    //                   className="text-xs bg-blue-500 text-white px-2 py-1 rounded"
+    //                 >
+    //                   Update
+    //                 </Link>
+    //                 <button
+    //                   onClick={() => handleDelete(product._id)}
+    //                   disabled={
+    //                     loading && did && did === product._id ? true : false
+    //                   }
+    //                   className={`text-white  py-1 rounded ${
+    //                     loading && did && did === product._id
+    //                       ? "bg-red-400 cursor-not-allowed px-[12px]"
+    //                       : "cursor-pointer hover:bg-red-600 text-xs bg-red-500 px-2"
+    //                   }`}
+    //                 >
+    //                   {loading && did && did === product._id ? (
+    //                     <BeatLoader color="#FFFFFF" size={3} />
+    //                   ) : (
+    //                     "Delete"
+    //                   )}
+    //                 </button>
+    //               </td>
+    //             </tr>
+    //           ))
+    //         ) : (
+    //           <tr className="text-center select-none text-gray-600 text-3xl">
+    //             <td colSpan={7}>No Products Available.</td>
+    //           </tr>
+    //         )}
+    //       </tbody>
+    //     </table>
+    //   </div>
+    // </div>
   );
 };
 
