@@ -5,6 +5,8 @@ import { toast } from "react-toastify";
 const initialState = {
   sales: [],
   totalSales: null,
+  totalCosts: null,
+  profit: null,
   createdSales: [],
   loading: false,
   error: null,
@@ -74,11 +76,18 @@ const salesSlice = createSlice({
         state.loading = false;
         state.sales = action.payload;
         if (state.sales.length > 0) {
-          const total = state.sales.reduce(
+          const totalSale = state.sales.reduce(
             (acc, sale) => acc + sale.subtotal,
             0
           );
-          state.totalSales = total;
+          const totalCost = state.sales.reduce(
+            (acc, sale) => acc + (sale.costPrice * sale.quantity),
+            0
+          );
+          
+          state.totalSales = totalSale;
+          state.totalCosts = totalCost;
+          state.profit = state.totalSales - state.totalCosts;
         } else {
           state.totalSales = null;
         }
