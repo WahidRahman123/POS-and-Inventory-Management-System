@@ -196,13 +196,13 @@ const UserManagement = () => {
                     <button
                       onClick={() => handleDelete(user._id)}
                       disabled={
-                        user._id === "689e359f51378e685a5e5ad5" ||
+                        user._id === "68ab6f07508a8b22fa153298" ||
                         (loading && did && did === user._id)
                           ? true
                           : false
                       }
                       className={`text-xs  text-white px-2 py-1 rounded  ${
-                        user._id === "689e359f51378e685a5e5ad5" ||
+                        user._id === "68ab6f07508a8b22fa153298" ||
                         (loading && did && did === user._id)
                           ? "cursor-not-allowed bg-red-400"
                           : "hover:bg-red-600 bg-red-500 cursor-pointer"
