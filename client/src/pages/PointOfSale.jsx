@@ -16,6 +16,7 @@ const PointOfSale = () => {
     if (!user) {
       navigate("/login");
     }
+
   }, []);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -35,7 +36,7 @@ const PointOfSale = () => {
     address: "",
   });
 
-  const { productsBySearch } = useSelector((state) => state.product);
+  const { productsBySearchforPOS } = useSelector((state) => state.product);
   const { createdSales, loading } = useSelector((state) => state.sales);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -55,7 +56,7 @@ const PointOfSale = () => {
   };
 
   const handleSearchOnClick = (pid) => {
-    let productToAdd = productsBySearch.find((product) => product._id === pid);
+    let productToAdd = productsBySearchforPOS.find((product) => product._id === pid);
     // console.log(productToAdd);
     if (productToAdd) {
       const foundProduct = selectedProducts.find(
@@ -118,6 +119,10 @@ const PointOfSale = () => {
     }
   }, [createdSales]);
 
+  useEffect(() => {
+    dispatch(setProductsBySearchToEmpty());
+  }, [])
+
   return (
     <>
       <form
@@ -169,13 +174,13 @@ const PointOfSale = () => {
             />
             <div
               className={`${
-                productsBySearch.length > 0
+                productsBySearchforPOS.length > 0
                   ? "shadow-md px-4 py-2 rounded "
                   : ""
               }`}
             >
-              {productsBySearch.length > 0
-                ? productsBySearch.map((product, index) => (
+              {productsBySearchforPOS.length > 0
+                ? productsBySearchforPOS.map((product, index) => (
                     <div
                       onClick={() => handleSearchOnClick(product._id)}
                       key={index}

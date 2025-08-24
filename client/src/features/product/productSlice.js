@@ -12,6 +12,7 @@ const initialState = {
     category: "",
   },
   productsBySearch: [],
+  productsBySearchforPOS: [],
   lowQuantityProducts: [],
   count: 0,
   deleteToggle: true,
@@ -253,7 +254,7 @@ const productSlice = createSlice({
   initialState,
   reducers: {
     setProductsBySearchToEmpty: (state) => {
-      state.productsBySearch = [];
+      state.productsBySearchforPOS = [];
     },
   },
   extraReducers: (builder) => {
@@ -310,7 +311,7 @@ const productSlice = createSlice({
       .addCase(searchProductsforPOS.fulfilled, (state, action) => {
         state.loading = false;
         state.products = action.payload;
-        state.productsBySearch = action.payload;
+        state.productsBySearchforPOS = action.payload;
       })
       .addCase(searchProductsforPOS.rejected, (state, action) => {
         state.loading = false;

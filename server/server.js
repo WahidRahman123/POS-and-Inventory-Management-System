@@ -43,9 +43,9 @@ const port = process.env.PORT || 4000;
 connectDB();
 
 // Api Routes
-app.get("/", (req, res) => {
-    res.send("Server is working!");
-});
+// app.get("/", (req, res) => {
+//     res.send("Server is working!");
+// });
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/users", userRoutes);
