@@ -102,6 +102,12 @@ const SalesReport = () => {
       ) : (
         ""
       )}
+      <div className="mt-4 font-semibold">
+        Total Sales {day}:
+        <span className="text-green-600">
+          {totalSales ? "৳" : ""} {totalSales}
+        </span>
+      </div>
 
       {/* Table */}
       <div className="overflow-x-auto border rounded">
