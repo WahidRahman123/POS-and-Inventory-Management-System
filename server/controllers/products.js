@@ -102,7 +102,7 @@ module.exports.searchProduct = async (req, res) => {
     try {
         const query = req.query.q;
 
-        const product = await Product.find({ name: {$regex: query, $options: 'i'} });
+        const product = await Product.find({ name: {$regex: query, $options: 'i'} }).populate('category');
 
         if(product) {
             res.status(200).json(product);
@@ -119,7 +119,7 @@ module.exports.searchProductForPOS = async (req, res) => {
     try {
         const query = req.query.q;
 
-        const product = await Product.find({ name: {$regex: query, $options: 'i'}, quantity: {$gt: 0} });
+        const product = await Product.find({ name: {$regex: query, $options: 'i'}, quantity: {$gt: 0} }).populate('category');
 
         if(product) {
             res.status(200).json(product);
