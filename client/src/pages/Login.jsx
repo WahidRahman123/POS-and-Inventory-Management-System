@@ -35,7 +35,7 @@ const Login = () => {
         {/* Topbar */}
         <header className="bg-blue-600 text-white py-4 shadow-md">
           <h1 className="text-center text-xl font-bold">
-            POS and Inventory Management System
+          Sobuj Auto
           </h1>
         </header>
 
