@@ -55,18 +55,19 @@ const InvoicePage = () => {
             <div className="flex justify-between items-start border-b border-red-500 pb-2">
               <div>
                 <h1 className="text-xl font-bold text-red-600">
-                  Inventory & POS{" "}
+                  Sobuj Auto{" "}
                 </h1>
                 <p className="text-sm text-gray-600">
-                  Address: Plot no 1000, park lane, NY City
+                  Address: G.L. Roy Road(Opposite of Lions School), Jhantur Mor, Rangpur.
                 </p>
-                <p className="text-sm text-gray-600">Mobile: 03xx-84xxxxxx</p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600">Mobile: 01773080202</p>
+                <p className="text-sm text-gray-600">Shop Mobile: 01979080202</p>
+                {/* <p className="text-sm text-gray-600">
                   Email: info@biznishike.com
                 </p>
                 <p className="text-sm text-gray-600">
                   WebSite: biznishike.com, facebook.com/biznishike
-                </p>
+                </p> */}
               </div>
               <div className="text-right">
                 <p className="text-sm font-semibold">We Care For You</p>
@@ -77,6 +78,10 @@ const InvoicePage = () => {
               <p>
                 <span className="font-semibold">M/s:</span>{" "}
                 {location.state ? location.state.customerName : ""}
+              </p>
+              <p>
+                <span className="font-semibold">Address: </span>
+                {location.state?.address ?? ""}
               </p>
               <div className="text-right">
                 {/* <p>

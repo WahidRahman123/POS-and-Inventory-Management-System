@@ -109,6 +109,7 @@ const PointOfSale = () => {
       const data = {
         sales: createdSales,
         customerName: customer.customerName,
+        address: customer.address,
         total: subTotal,
         due: Number(subTotal) - Number(cashInput),
         billPaid: Number(cashInput),
