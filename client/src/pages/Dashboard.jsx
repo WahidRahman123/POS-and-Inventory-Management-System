@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDashboardResult } from "../features/dashboard/dashboardSlice";
 import { useNavigate } from "react-router-dom";
+import CountUp from 'react-countup';
 
 const Dashboard = () => {
   const { user } = useSelector((state) => state.auth);
@@ -39,7 +40,7 @@ const Dashboard = () => {
         <div className="bg-blue-800 text-white p-4 sm:p-6 rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition">
           <span className="text-2xl sm:text-3xl font-bold">
             {dashboardResult
-              ? `${dashboardResult.totalCost.toLocaleString("en-BD")} ৳`
+              ? <CountUp end={dashboardResult.totalCost} duration={0.3} formattingFn={(value) => Number(value).toLocaleString('en-BD') + ' ৳'}/> 
               : "-"}
           </span>
           <span className="mt-1 sm:mt-2 text-xs sm:text-sm">PURCHASES (BDT)</span>
@@ -50,7 +51,7 @@ const Dashboard = () => {
         <div className="bg-blue-800 text-white p-4 sm:p-6 rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition">
           <span className="text-2xl sm:text-3xl font-bold">
             {dashboardResult
-              ? `${dashboardResult.totalSell.toLocaleString("en-BD")} ৳`
+              ? <CountUp end={dashboardResult.totalSell} duration={0.3} formattingFn={(value) => Number(value).toLocaleString('en-BD') + ' ৳'}/>
               : "-"}
           </span>
           <span className="mt-1 sm:mt-2 text-xs sm:text-sm">SALES (BDT)</span>
@@ -61,7 +62,7 @@ const Dashboard = () => {
         <div className="bg-blue-800 text-white p-4 sm:p-6 rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition">
           <span className="text-2xl sm:text-3xl font-bold">
             {dashboardResult
-              ? `${dashboardResult.profit.toLocaleString("en-BD")} ৳`
+              ? <CountUp end={dashboardResult.profit} duration={0.3} formattingFn={(value) => Number(value).toLocaleString('en-BD') + ' ৳'}/>
               : "-"}
           </span>
           <span className="mt-1 sm:mt-2 text-xs sm:text-sm">PROFIT (BDT)</span>
@@ -70,7 +71,7 @@ const Dashboard = () => {
 
       <div className="bg-blue-800 text-white p-4 sm:p-6 rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition">
         <span className="text-2xl sm:text-3xl font-bold">
-          {dashboardResult ? dashboardResult.numberOfProducts : "-"}
+          {dashboardResult ? <CountUp end={dashboardResult.numberOfProducts} duration={0.3} formattingFn={(value) => Number(value).toLocaleString('en-BD')} /> : "-"}
         </span>
         <span className="mt-1 sm:mt-2 text-xs sm:text-sm">TOTAL ITEMS</span>
       </div>
