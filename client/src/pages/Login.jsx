@@ -5,12 +5,12 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
 const Login = () => {
-  const { user } = useSelector((state) => state.auth);
+  const { user, loading } = useSelector((state) => state.auth);
   useEffect(() => {
-    if(user) {
-      navigate('/');
+    if (user) {
+      navigate("/");
     }
-  }, [])
+  }, []);
 
   const [userInput, setUserInput] = useState({
     name: "",
@@ -34,9 +34,7 @@ const Login = () => {
       <div className="flex flex-col min-h-screen bg-slate-100">
         {/* Topbar */}
         <header className="bg-blue-600 text-white py-4 shadow-md">
-          <h1 className="text-center text-xl font-bold">
-          Sobuj Auto
-          </h1>
+          <h1 className="text-center text-xl font-bold">Sobuj Auto</h1>
         </header>
 
         {/* Main Content */}
@@ -73,9 +71,10 @@ const Login = () => {
 
             <button
               type="submit"
-              className="cursor-pointer w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-700"
+              disabled={loading}
+              className="cursor-pointer w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-700 disabled:bg-blue-500 disabled:cursor-not-allowed"
             >
-              Login
+              {loading ? "Loging in..." : "Login"}
             </button>
           </form>
         </main>
