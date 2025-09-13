@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 
 const initialState = {
   categories: [],
+  categoriesNames: [],
   categoryById: {},
   page: 1,
   pages: null,
@@ -46,6 +47,27 @@ export const fetchCategoriesWithLimit = createAsyncThunk(
           },
           params: {
             l: limit,
+          },
+        }
+      );
+
+      return data;
+    } catch (error) {
+      const message = "Category Fetching Failed!";
+      return ThunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+export const fetchAllCategoriesNames = createAsyncThunk(
+  "category/fetchAllCategoriesNames",
+  async (_, ThunkAPI) => {
+    try {
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URI}/api/categories/name`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
         }
       );
@@ -183,6 +205,28 @@ const categorySlice = createSlice({
         state.categories = action.payload;
       })
       .addCase(fetchCategoriesWithLimit.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+        toast.error(action.payload, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
+      .addCase(fetchAllCategoriesNames.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllCategoriesNames.fulfilled, (state, action) => {
+        state.loading = false;
+        state.categoriesNames = action.payload;
+      })
+      .addCase(fetchAllCategoriesNames.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error;
         toast.error(action.payload, {

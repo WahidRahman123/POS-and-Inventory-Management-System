@@ -11,10 +11,15 @@ const router = express.Router();
 // @access Private
 router.get('/', protect, categories.index);
 
-//* @route GET /api/categories with limit
+//* @route GET /api/categories/limit with limit
 // @desc All category fetch
 // @access Private
 router.get('/limit', protect, categories.indexWithLimit);
+
+//* @route GET /api/categories/name with name
+// @desc All category name fetch
+// @access Private
+router.get('/name', protect, categories.indexWithName);
 
 //* @route GET /api/categories/search
 // @desc category fetching using search

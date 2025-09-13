@@ -187,7 +187,7 @@ import {
   fetchProductById,
   updateProduct,
 } from "../features/product/productSlice";
-import { fetchAllCategories } from "../features/category/categorySlice";
+import { fetchAllCategories, fetchAllCategoriesNames } from "../features/category/categorySlice";
 
 const EditProductPage = () => {
   const { user } = useSelector((state) => state.auth);
@@ -205,7 +205,7 @@ const EditProductPage = () => {
     .split(" ");
 
   const { productSearchedById, loading } = useSelector((state) => state.product);
-  const { categories } = useSelector((state) => state.category);
+  const { categoriesNames } = useSelector((state) => state.category);
   const dispatch = useDispatch();
 
   const [product, setProduct] = useState({
@@ -244,7 +244,7 @@ const EditProductPage = () => {
   useEffect(() => {
     if (!user) navigate("/login");
     dispatch(fetchProductById(id));
-    dispatch(fetchAllCategories());
+    dispatch(fetchAllCategoriesNames());
   }, [user, id, navigate, dispatch]);
 
   useEffect(() => {
@@ -296,8 +296,8 @@ const EditProductPage = () => {
               <option value="" disabled>
                 Select Category
               </option>
-              {categories.map((cat) => (
-                <option key={cat._id} value={cat.name}>
+              {categoriesNames.map((cat, index) => (
+                <option key={index} value={cat.name}>
                   {cat.name}
                 </option>
               ))}

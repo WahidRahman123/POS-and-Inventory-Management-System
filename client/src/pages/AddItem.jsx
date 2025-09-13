@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAllCategories } from "../features/category/categorySlice";
+import { fetchAllCategories, fetchAllCategoriesNames } from "../features/category/categorySlice";
 import { addProduct, countLowQuantityProduct } from "../features/product/productSlice";
 import { useNavigate } from "react-router-dom";
 
@@ -12,7 +12,7 @@ const AddItem = () => {
     }
   }, []);
 
-  const { categories } = useSelector((state) => state.category);
+  const { categoriesNames } = useSelector((state) => state.category);
   const { loading, toggle } = useSelector((state) => state.product);
 
   const dispatch = useDispatch();
@@ -60,7 +60,7 @@ const AddItem = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchAllCategories());
+    dispatch(fetchAllCategoriesNames());
   }, [dispatch]);
 
   useEffect(() => {
@@ -99,8 +99,8 @@ const AddItem = () => {
           required
         >
           <option value="" disabled>Select an Option</option>
-          {categories.length > 0 &&
-            categories.map((category, index) => (
+          {categoriesNames.length > 0 &&
+            categoriesNames.map((category, index) => (
               <option key={index} value={category.name}>
                 {category.name[0] + category.name.slice(1)}
               </option>

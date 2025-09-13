@@ -47,6 +47,18 @@ module.exports.indexWithLimit = async (req, res) => {
     }
 }
 
+module.exports.indexWithName = async (req, res) => {
+    try {
+        const category = await Category.find({});
+
+        res.status(201).json(category);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server Error');
+    }
+}
+
 module.exports.createCategory = async (req, res) => {
     const { name } = req.body;
 
