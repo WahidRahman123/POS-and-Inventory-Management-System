@@ -334,17 +334,16 @@ const Category = () => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { categories, loading, toggle } = useSelector(
+  const { categories, loading, toggle, page, pages } = useSelector(
     (state) => state.category
   );
 
   // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(15);
+  const [currentPage, setCurrentPage] = useState(page);
 
   // Search & Sort
   const [searchText, setSearchText] = useState("");
-  const [sortOrder, setSortOrder] = useState("asc");
+  const [sortOrder, setSortOrder] = useState(1);
 
   // Add
   const [categoryName, setCategoryName] = useState("");
@@ -356,25 +355,31 @@ const Category = () => {
   }, [user, navigate]);
 
   useEffect(() => {
-    dispatch(fetchAllCategories());
-  }, [dispatch, toggle]);
+    dispatch(
+      fetchAllCategories({
+        page: currentPage,
+        search: searchText,
+        order: sortOrder,
+      })
+    );
+  }, [dispatch, toggle, sortOrder, currentPage]);
 
   // Filter & Sort
-  const filtered = categories
-    .filter((cat) =>
-      cat.name.toLowerCase().includes(searchText.toLowerCase())
-    )
-    .sort((a, b) =>
-      sortOrder === "asc"
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name)
-    );
+  // const filtered = categories
+  //   .filter((cat) =>
+  //     cat.name.toLowerCase().includes(searchText.toLowerCase())
+  //   )
+  //   .sort((a, b) =>
+  //     sortOrder === "asc"
 
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
-  const currentItems = filtered.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  //       : b.name.localeCompare(a.name)
+  //   );
+
+  // const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  // const currentItems = filtered.slice(
+  //   (currentPage - 1) * itemsPerPage,
+  //   currentPage * itemsPerPage
+  // );
 
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -416,7 +421,9 @@ const Category = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 sm:mb-6">
         {/* Add Category Form */}
         <form onSubmit={handleAdd} className="max-w-xs">
-          <label className="block text-sm font-medium mb-1">Category Name</label>
+          <label className="block text-sm font-medium mb-1">
+            Category Name
+          </label>
           <div className="flex gap-2">
             <input
               type="text"
@@ -441,12 +448,20 @@ const Category = () => {
         {/* Search + Sort → top-right corner */}
         <div className="flex items-center gap-2 ml-auto sm:ml-0">
           <input
-            type="text"
+            type="search"
             placeholder="Search..."
             value={searchText}
             onChange={(e) => {
               setSearchText(e.target.value);
               setCurrentPage(1);
+
+              dispatch(
+                fetchAllCategories({
+                  page: currentPage,
+                  search: e.target.value,
+                  order: sortOrder,
+                })
+              );
             }}
             className="border border-gray-300 rounded-md px-3 py-2 text-sm w-32 sm:w-auto"
           />
@@ -455,8 +470,8 @@ const Category = () => {
             onChange={(e) => setSortOrder(e.target.value)}
             className="border border-gray-300 rounded-md px-3 py-2 text-sm"
           >
-            <option value="asc">Oldest First</option>
-            <option value="desc">Newest First</option>
+            <option value="1">Oldest First</option>
+            <option value="-1">Newest First</option>
           </select>
         </div>
       </div>
@@ -473,12 +488,10 @@ const Category = () => {
             </tr>
           </thead>
           <tbody>
-            {currentItems.length ? (
-              currentItems.map((cat, idx) => (
+            {categories.length ? (
+              categories.map((cat, idx) => (
                 <tr key={cat._id} className="hover:bg-gray-50">
-                  <td className="p-2">
-                    {(currentPage - 1) * itemsPerPage + idx + 1}
-                  </td>
+                  <td className="p-2">{(page - 1) * 15 + idx + 1}</td>
                   <td className="p-2 hidden sm:table-cell">
                     {cat.createdAt
                       ? `${new Date(cat.createdAt).toLocaleDateString(
@@ -524,22 +537,28 @@ const Category = () => {
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {pages && (
         <div className="flex justify-center items-center mt-4 gap-2 text-sm">
           <button
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-2 py-1 border rounded disabled:opacity-50"
+            disabled={page === 1}
+            className={`${
+              page === 1 ? "" : "cursor-pointer hover:bg-black hover:text-white"
+            } px-2 py-1 border rounded  disabled:opacity-50`}
           >
             Prev
           </button>
           <span>
-            Page {currentPage} of {totalPages}
+            Page {page} of {pages}
           </span>
           <button
-            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="px-2 py-1 border rounded disabled:opacity-50"
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, pages))}
+            disabled={page === pages}
+            className={`${
+              page === pages
+                ? ""
+                : "cursor-pointer hover:bg-black hover:text-white"
+            }  px-2 py-1 border rounded  disabled:opacity-50`}
           >
             Next
           </button>

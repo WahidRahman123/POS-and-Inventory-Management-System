@@ -5,6 +5,8 @@ import { toast } from "react-toastify";
 const initialState = {
   categories: [],
   categoryById: {},
+  page: 1,
+  pages: null,
   toggle: false,
   loading: false,
   error: null,
@@ -12,7 +14,7 @@ const initialState = {
 
 export const fetchAllCategories = createAsyncThunk(
   "category/fetchAllCategories",
-  async (_, ThunkAPI) => {
+  async (value, ThunkAPI) => {
     try {
       const { data } = await axios.get(
         `${import.meta.env.VITE_BACKEND_URI}/api/categories`,
@@ -20,6 +22,7 @@ export const fetchAllCategories = createAsyncThunk(
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
+          params: value,
         }
       );
 
@@ -153,7 +156,9 @@ const categorySlice = createSlice({
       })
       .addCase(fetchAllCategories.fulfilled, (state, action) => {
         state.loading = false;
-        state.categories = action.payload;
+        state.page = action.payload.page;
+        state.pages = action.payload.pages;
+        state.categories = action.payload.categories;
       })
       .addCase(fetchAllCategories.rejected, (state, action) => {
         state.loading = false;

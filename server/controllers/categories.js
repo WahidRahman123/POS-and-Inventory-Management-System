@@ -2,9 +2,31 @@ const Category = require('../models/Category');
 
 module.exports.index = async (req, res) => {
     try {
-        const category = await Category.find({});
 
-        res.status(201).json(category);
+        const { page = 1, search = "", order = 1 } = req.query;
+
+        const limit = 15;
+
+        // Search Filter
+        const searchQuery = search ? { name: { $regex: search, $options: "i" } } : {};
+
+        // Pagination
+        const skip = (parseInt(page) - 1) * limit;
+
+        const categories = await Category.find(searchQuery)
+        .sort({ createdAt: parseInt(order) })
+        .skip(skip)
+        .limit(limit);
+
+        // Count total Category
+        const total = await Category.countDocuments(searchQuery);
+
+        res.status(201).json({
+            total,
+            page: parseInt(page),
+            pages: Math.ceil(total / limit),
+            categories
+        });
 
     } catch (error) {
         console.error(error);
