@@ -201,7 +201,7 @@ const AddStock = () => {
             {[
               { label: "ID", value: productSearchedById._id },
               { label: "Name", value: productSearchedById.name },
-              { label: "Category", value: productSearchedById?.category?.name },
+              { label: "Category", value: productSearchedById?.category?.name || "-" },
               { label: "Quantity", value: productSearchedById.quantity },
               { label: "Price", value: productSearchedById.sellPrice },
             ].map(({ label, value }) => (

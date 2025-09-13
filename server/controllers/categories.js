@@ -49,7 +49,7 @@ module.exports.indexWithLimit = async (req, res) => {
 
 module.exports.indexWithName = async (req, res) => {
     try {
-        const category = await Category.find({});
+        const category = await Category.find({}).select('name');
 
         res.status(201).json(category);
 
