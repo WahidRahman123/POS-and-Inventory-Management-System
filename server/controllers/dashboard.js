@@ -24,17 +24,23 @@ module.exports.index = async (req, res) => {
       },
     ]);
 
-    let result = null;
+    let result = {
+      totalSell: sales[0]?.totalSell || 0,
+      totalCost: product[0]?.totalCost || 0,
+      numberOfSales: sales[0]?.numberOfSales || 0,
+      numberOfProducts: product[0]?.numberOfProducts || 0,
+      profit: (sales[0]?.totalSell && sales[0]?.totalCostInSale) ? sales[0].totalSell - sales[0].totalCostInSale : 0,
+    };
 
-    if (sales.length > 0) {
-      result = {
-        totalSell: sales[0].totalSell,
-        totalCost: product[0].totalCost,
-        numberOfSales: sales[0].numberOfSales,
-        numberOfProducts: product[0].numberOfProducts,
-        profit: sales[0].totalSell - sales[0].totalCostInSale,
-      };
-    }
+    // if (sales.length > 0 && product.length > 0) {
+    //   result = {
+    //     totalSell: sales[0].totalSell,
+    //     totalCost: product[0].totalCost,
+    //     numberOfSales: sales[0].numberOfSales,
+    //     numberOfProducts: product[0].numberOfProducts,
+    //     profit: sales[0].totalSell - sales[0].totalCostInSale,
+    //   };
+    // }
 
     res.status(201).json(result);
   } catch (error) {
