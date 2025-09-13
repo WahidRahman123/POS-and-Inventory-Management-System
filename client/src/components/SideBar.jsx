@@ -130,7 +130,7 @@ const SideBar = ({ closeSidebar }) => {
       <div className="flex justify-center mt-2">
         <button
           onClick={handleOnClick}
-          className="w-[60%] px-2 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800"
+          className="w-[60%] px-2 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 cursor-pointer"
         >
           Change Password
         </button>

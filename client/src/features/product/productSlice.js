@@ -11,6 +11,8 @@ const initialState = {
     quantity: 1,
     category: "",
   },
+  page: 1,
+  pages: null,
   productsBySearch: [],
   productsBySearchforPOS: [],
   lowQuantityProducts: [],
@@ -23,7 +25,7 @@ const initialState = {
 
 export const fetchAllProducts = createAsyncThunk(
   "product/fetchAllProducts",
-  async (limit, ThunkAPI) => {
+  async (value, ThunkAPI) => {
     try {
       const { data } = await axios.get(
         `${import.meta.env.VITE_BACKEND_URI}/api/products`,
@@ -31,9 +33,7 @@ export const fetchAllProducts = createAsyncThunk(
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
-          params: {
-            l: limit,
-          },
+          params: value,
         }
       );
 
@@ -265,7 +265,9 @@ const productSlice = createSlice({
       })
       .addCase(fetchAllProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload;
+        state.page = action.payload.page;
+        state.pages = action.payload.pages;
+        state.products = action.payload.products;
       })
       .addCase(fetchAllProducts.rejected, (state, action) => {
         state.loading = false;
@@ -310,7 +312,7 @@ const productSlice = createSlice({
       })
       .addCase(searchProductsforPOS.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload;
+        // state.products = action.payload;
         state.productsBySearchforPOS = action.payload;
       })
       .addCase(searchProductsforPOS.rejected, (state, action) => {

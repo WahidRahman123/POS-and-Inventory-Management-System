@@ -308,13 +308,13 @@ const Product = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { products, loading, deleteToggle } = useSelector(
+  const { products, loading, deleteToggle, page, pages } = useSelector(
     (state) => state.product
   );
   const [did, setDid] = useState(null);
-  const [limit] = useState(10); // page size
   const [searchProduct, setSearchProduct] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(page);
+  const [sortOrder, setSortOrder] = useState(1);
 
   useEffect(() => {
     if (!user) navigate("/login");
@@ -322,8 +322,12 @@ const Product = () => {
 
   // fetch on mount / limit change
   useEffect(() => {
-    dispatch(fetchAllProducts(limit));
-  }, [dispatch, limit, deleteToggle]);
+    dispatch(fetchAllProducts({
+      page: currentPage,
+      search: searchProduct,
+      order: sortOrder
+    }));
+  }, [dispatch, deleteToggle, sortOrder, currentPage]);
 
   useEffect(() => {
     dispatch(countLowQuantityProduct());
@@ -334,11 +338,12 @@ const Product = () => {
     const searchValue = e.target.value;
     setSearchProduct(searchValue);
     setCurrentPage(1); // reset page
-    if (!searchValue) {
-      dispatch(fetchAllProducts(limit));
-    } else {
-      dispatch(searchProducts(searchValue));
-    }
+    
+    dispatch(fetchAllProducts({
+      page: currentPage,
+      search: searchValue,
+      order: sortOrder
+    }));
   };
 
   // delete handler
@@ -356,11 +361,11 @@ const Product = () => {
   };
 
   // pagination logic
-  const totalPages = Math.ceil(products.length / limit);
-  const currentItems = products.slice(
-    (currentPage - 1) * limit,
-    currentPage * limit
-  );
+  // const totalPages = Math.ceil(products.length / limit);
+  // const currentItems = products.slice(
+  //   (currentPage - 1) * limit,
+  //   currentPage * limit
+  // );
 
   return (
     <div className="bg-slate-50 min-h-screen p-3 sm:p-4 md:p-6 font-sans">
@@ -377,17 +382,28 @@ const Product = () => {
 
       {/* Controls */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2 text-sm">
-        <div className="text-gray-600">
+        {/* <div className="text-gray-600">
           Show{" "}
           <input
             type="number"
             min={0}
             value={limit}
+            disabled
             onChange={(e) => dispatch(fetchAllProducts(+e.target.value))}
             className="w-14 outline-none px-1 rounded border"
           />{" "}
           entries
-        </div>
+        </div> */}
+
+        <select
+          value={sortOrder}
+          onChange={(e) => setSortOrder(e.target.value)}
+          className="border text-gray-700 border-gray-300 rounded-md px-3 py-2 text-sm"
+        >
+          <option value="1">Oldest First</option>
+          <option value="-1">Newest First</option>
+        </select>
+
         <input
           type="search"
           placeholder="Search..."
@@ -412,11 +428,11 @@ const Product = () => {
             </tr>
           </thead>
           <tbody>
-            {currentItems.length ? (
-              currentItems.map((product, index) => (
+            {products.length ? (
+              products.map((product, index) => (
                 <tr key={product._id} className="hover:bg-gray-50">
                   <td className="p-2">
-                    {(currentPage - 1) * limit + index + 1}
+                    { (page - 1) * 15 + index + 1 }
                   </td>
                   <td className="p-2 whitespace-nowrap">{product.name}</td>
                   <td className="p-2 whitespace-nowrap text-center">
@@ -466,7 +482,10 @@ const Product = () => {
               ))
             ) : (
               <tr>
-                <td colSpan={7} className="text-center text-gray-600 py-10 text-lg">
+                <td
+                  colSpan={7}
+                  className="text-center text-gray-600 py-10 text-lg"
+                >
                   No Products Available.
                 </td>
               </tr>
@@ -476,22 +495,22 @@ const Product = () => {
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {pages && (
         <div className="flex justify-center items-center mt-4 gap-2 text-sm">
           <button
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-2 py-1 border rounded disabled:opacity-50"
+            disabled={page === 1}
+            className={`${page === 1 ? '' : 'cursor-pointer hover:bg-black hover:text-white'} px-2 py-1 border rounded  disabled:opacity-50`}
           >
             Prev
           </button>
           <span>
-            Page {currentPage} of {totalPages}
+            Page {page} of {pages}
           </span>
           <button
-            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="px-2 py-1 border rounded disabled:opacity-50"
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, pages))}
+            disabled={page === pages}
+            className={`${page === pages ? '' : 'cursor-pointer hover:bg-black hover:text-white'}  px-2 py-1 border rounded  disabled:opacity-50`}
           >
             Next
           </button>

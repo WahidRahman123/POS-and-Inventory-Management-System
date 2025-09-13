@@ -41,6 +41,7 @@ const AddItem = () => {
         costPrice: Number(product.costPrice),
         quantity: Number(product.quantity),
       };
+      console.log(newProduct);
       // console.log(newProduct)
       await dispatch(addProduct(newProduct)).unwrap();
 

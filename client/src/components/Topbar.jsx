@@ -73,11 +73,11 @@ const Topbar = ({ onToggleSidebar }) => {
       <div className="flex items-center gap-2 sm:gap-4">
         <button
           onClick={handleLogout}
-          className="px-2 py-1 bg-red-500 text-white text-xs sm:text-sm rounded-lg hover:bg-red-600"
+          className="px-2 py-1 bg-red-500 text-white text-xs sm:text-sm rounded-lg hover:bg-red-600 cursor-pointer" 
         >
           Logout
         </button>
-        <span className="text-xs sm:text-sm text-gray-600">
+        <span className="text-xs sm:text-sm text-gray-600 select-none">
           {user && user.role === 'admin' ? 'Admin' : 'Cashier'}
         </span>
         <img
