@@ -8,6 +8,7 @@ const initialState = {
   totalCosts: null,
   profit: null,
   createdSales: null,
+  saleSearchedById: null,
   loading: false,
   error: null,
 };
@@ -24,6 +25,27 @@ export const fetchSalesByDate = createAsyncThunk(
           },
           params: {
             d: query,
+          },
+        }
+      );
+
+      return data;
+    } catch (error) {
+      const message = "Sales Fetching Failed!";
+      return ThunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+export const fetchSaleById = createAsyncThunk(
+  "sales/fetchSaleById",
+  async (id, ThunkAPI) => {
+    try {
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URI}/api/sales/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
         }
       );
@@ -58,6 +80,28 @@ export const addSales = createAsyncThunk(
   }
 );
 
+export const addPayment = createAsyncThunk(
+  "sales/addPayment",
+  async (sale, ThunkAPI) => {
+    try {
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URI}/api/sales/${sale.id}/payment`,
+        sale.info,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
+      );
+
+      return { message: "Payment updated Successful!" };
+    } catch (error) {
+      const message = "Payment updated Failed!";
+      return ThunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 const salesSlice = createSlice({
   name: "sales",
   initialState,
@@ -84,15 +128,40 @@ const salesSlice = createSlice({
             (acc, sale) => acc + sale.totalCost,
             0
           );
-          
+
           state.totalSales = totalSale;
           state.totalCosts = totalCost;
-          state.profit = state.totalSales - state.totalCosts;
+          state.profit =
+            state.totalSales - state.totalCosts < 0
+              ? 0
+              : state.totalSales - state.totalCosts;
         } else {
           state.totalSales = null;
         }
       })
       .addCase(fetchSalesByDate.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+        toast.error(action.payload, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
+      .addCase(fetchSaleById.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchSaleById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.saleSearchedById = action.payload;
+      })
+      .addCase(fetchSaleById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error;
         toast.error(action.payload, {
@@ -115,6 +184,37 @@ const salesSlice = createSlice({
         state.createdSales = action.payload;
       })
       .addCase(addSales.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+        toast.error(action.payload, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
+      .addCase(addPayment.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addPayment.fulfilled, (state, action) => {
+        state.loading = false;
+        toast.success(action.payload.message, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
+      .addCase(addPayment.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error;
         toast.error(action.payload, {

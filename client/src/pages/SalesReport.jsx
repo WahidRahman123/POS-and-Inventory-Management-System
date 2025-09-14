@@ -154,7 +154,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchSalesByDate } from "../features/sales/salesSlice";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const SalesReport = () => {
   const { user } = useSelector((state) => state.auth);
@@ -245,38 +245,142 @@ const SalesReport = () => {
       {/* Table */}
       <div className="overflow-x-auto border rounded">
         <table className="min-w-full text-xs sm:text-sm border-collapse">
-          <thead className="bg-gray-100">
-            <tr>
+          <thead className="bg-gray-300">
+            {/* <tr>
               <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Date</th>
               <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Item</th>
               <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Price</th>
               <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Qty</th>
               <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Sub Total</th>
+            </tr> */}
+
+            <tr>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Date
+              </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Cutomer Name
+              </th>
+              <th
+                colSpan={3}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-center"
+              >
+                Products
+              </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Total
+              </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Paid
+              </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Due
+              </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Action
+              </th>
+            </tr>
+            <tr>
+              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-center">
+                Name
+              </th>
+              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+                Price
+              </th>
+              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+                Qty
+              </th>
             </tr>
           </thead>
           <tbody>
             {sales.length > 0 ? (
-              sales.map((sale, index) => (
-                <tr key={index}>
-                  <td className="border px-2 py-1 sm:px-4 sm:py-2 whitespace-nowrap">
-                    {new Date(sale.createdAt)
-                      .toLocaleDateString("en-GB", { timeZone: "Asia/Dhaka" })
-                      .replaceAll("/", "-")}
-                  </td>
-                  <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                    {sale.productName}
-                  </td>
-                  <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                    ৳ {sale.sellPrice}
-                  </td>
-                  <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                    {sale.quantity}
-                  </td>
-                  <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                    ৳ {sale.subtotal}
-                  </td>
-                </tr>
-              ))
+              sales.map((sale, index) => {
+                const rowspan = sale.products.length;
+                const isEven = index % 2 === 0;
+
+                return sale.products.map((product, index) => (
+                  <tr key={index} className={isEven ? "bg-white" : "bg-gray-50"}>
+                    {index === 0 && (
+                      <>
+                        <td
+                          rowSpan={rowspan}
+                          className="border px-2 py-1 sm:px-4 sm:py-2"
+                        >
+                          {new Date(sale.createdAt)
+                            .toLocaleDateString("en-GB", {
+                              timeZone: "Asia/Dhaka",
+                            })
+                            .replaceAll("/", "-")}
+                        </td>
+                        <td
+                          rowSpan={rowspan}
+                          className="border px-2 py-1 sm:px-4 sm:py-2"
+                        >
+                          {sale.customerName}
+                        </td>
+                      </>
+                    )}
+
+                    {/* Product columns */}
+                    <td className={`border px-2 py-1 sm:px-4 sm:py-2 ${index !== sale.products.length - 1 ? 'border-b-gray-300': ''}`}>
+                      {product.productName}
+                    </td>
+                    <td className={`border px-2 py-1 sm:px-4 sm:py-2 ${index !== sale.products.length - 1 ? 'border-b-gray-300': ''}`}>
+                      {product.sellPrice}
+                    </td>
+                    <td className={`border px-2 py-1 sm:px-4 sm:py-2 ${index !== sale.products.length - 1 ? 'border-b-gray-300': ''}`}>
+                      {product.quantity}
+                    </td>
+
+                    {index === 0 && (
+                      <>
+                        <td
+                          rowSpan={rowspan}
+                          className="border px-2 py-1 sm:px-4 sm:py-2"
+                        >
+                          {sale.total}
+                        </td>
+                        <td
+                          rowSpan={rowspan}
+                          className="border px-2 py-1 sm:px-4 sm:py-2"
+                        >
+                          {sale.paid}
+                        </td>
+                        <td
+                          rowSpan={rowspan}
+                          className={`border px-2 py-1 sm:px-4 sm:py-2 ${sale.due > 0 ? 'text-red-500 font-bold': ''}`}
+                        >
+                          {sale.due}
+                        </td>
+                        <td
+                          rowSpan={rowspan}
+                          className="border px-2 py-1 sm:px-4 sm:py-2"
+                        >
+                          <Link to={`/sales-report/${sale._id}/edit-due`} className="text-blue-500 cursor-pointer hover:text-blue-600 hover:underline">Add Payment</Link>
+                        </td>
+                      </>
+                    )}
+                  </tr>
+                ));
+              })
             ) : (
               <tr>
                 <td

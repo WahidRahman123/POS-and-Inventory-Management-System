@@ -16,6 +16,7 @@ import Home from "./pages/Home";
 import ChangePassword from "./pages/ChangePassword";
 import InvoicePage from "./pages/InvoicePage";
 import LowQuantityProductsPage from "./pages/LowQuantityProductsPage";
+import EditDue from "./pages/EditDue";
 
 function App() {
   const { value } = useSelector((state) => state.counter);
@@ -44,6 +45,7 @@ function App() {
           <Route path="/point-of-sale" element={<PointOfSale />} />
           {/* for admin */}
           <Route path="/sales-report" element={<SalesReport />} />
+          <Route path="/sales-report/:id/edit-due" element={<EditDue />} />
           {/* for admin */}
           <Route path="/users" element={<UserManagement />} />
           <Route path="/changepassword" element={<ChangePassword />} />

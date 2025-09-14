@@ -70,7 +70,7 @@ module.exports.createSales = async (req, res) => {
       const { productName, quantity } = sales.products[i];
 
       const product = await Product.findOne({ name: productName });
-      
+
       product.quantity = product.quantity - quantity;
       await product.save();
     }
@@ -169,3 +169,38 @@ module.exports.searchByDates = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+module.exports.searchById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const sale = await Sales.findById(id);
+
+    res.status(201).json(sale);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};
+
+module.exports.addPayment = async (req, res) => {
+    const { id } = req.params;
+    const { amount } = req.body;
+
+    try {
+        const sale = await Sales.findById(id);
+
+        if(sale) {
+            sale.paid = sale.paid + amount;
+            sale.due = sale.due - amount;
+            await sale.save();
+
+            res.status(201).json({message: 'Payment updated successfully'});
+
+        } else {
+            res.status(404).json({message: "Sale not found"});
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server Error');
+    }
+}
