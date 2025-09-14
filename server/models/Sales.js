@@ -1,32 +1,65 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const salesSchema = new mongoose.Schema({
-    customerName: String,
-    address: String,
-    productName: {
-        type: String,
-        required: true,
-        trim: true
+const salesSchema = new mongoose.Schema(
+  {
+    // customerId: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: 'Customer'
+    // },
+    customerName: {
+      type: String,
+      required: true,
     },
-    sellPrice: {
+    address: {
+      type: String,
+      required: true
+    },
+    products: [
+      {
+        productName: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        sellPrice: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+        costPrice: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+        subtotal: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
+    total: {
       type: Number,
       required: true,
-      min: 0,
     },
-    costPrice: {
+    totalCost: {
       type: Number,
       required: true,
-      min: 0,
     },
-    quantity: {
+    due: {
       type: Number,
       required: true,
-      min: 0,
     },
-    subtotal: {
-        type: Number,
-        required: true
-    }
-}, { timestamps: true })
+    paid: {
+      type: Number,
+      required: true,
+    },
+  },
+  { timestamps: true }
+);
 
-module.exports = mongoose.model('Sales', salesSchema);
+module.exports = mongoose.model("Sales", salesSchema);

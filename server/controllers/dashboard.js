@@ -7,8 +7,8 @@ module.exports.index = async (req, res) => {
       {
         $group: {
           _id: null,
-          totalSell: { $sum: "$subtotal" },
-          totalCostInSale: { $sum: { $multiply: ["$costPrice", "$quantity"] } },
+          totalSell: { $sum: "$total" },
+          totalCostInSale: { $sum: "$totalCost" },
           numberOfSales: { $sum: 1 },
         },
       },

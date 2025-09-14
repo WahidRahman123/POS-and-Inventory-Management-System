@@ -5,7 +5,7 @@ import {
   searchProductsforPOS,
   setProductsBySearchToEmpty,
 } from "../features/product/productSlice";
-import { addSales, setCreatedSalesToEmpty } from "../features/sales/salesSlice";
+import { addSales, setCreatedSalesToNull } from "../features/sales/salesSlice";
 import { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 import { useNavigate } from "react-router-dom";
@@ -16,7 +16,6 @@ const PointOfSale = () => {
     if (!user) {
       navigate("/login");
     }
-
   }, []);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -27,11 +26,14 @@ const PointOfSale = () => {
     (acc, product) => acc + product.qty * product.sellPrice,
     0
   );
-  const [cashInput, setCashInput] = useState(0);
-  // const [discount, setDiscount] = useState(0);
-  // const total = subTotal - discount;
-  // const total = subTotal;
+  const totalCost = selectedProducts.reduce(
+    (acc, product) => acc + product.qty * product.costPrice,
+    0
+  );
+  const [cashInput, setCashInput] = useState("");
+
   const [customer, setCustomer] = useState({
+    customerId: "",
     customerName: "",
     address: "",
   });
@@ -56,7 +58,9 @@ const PointOfSale = () => {
   };
 
   const handleSearchOnClick = (pid) => {
-    let productToAdd = productsBySearchforPOS.find((product) => product._id === pid);
+    let productToAdd = productsBySearchforPOS.find(
+      (product) => product._id === pid
+    );
     // console.log(productToAdd);
     if (productToAdd) {
       const foundProduct = selectedProducts.find(
@@ -78,43 +82,60 @@ const PointOfSale = () => {
     try {
       e.preventDefault();
       if (selectedProducts.length > 0) {
-        setCid('Running');
+        setCid("Running");
         // console.log(selectedProducts);
+
         const finalProducts = selectedProducts.map((p, i) => {
           return {
-            customerName: customer.customerName,
-            address: customer.address,
             productName: p.name,
-            sellPrice: p.sellPrice,
-            costPrice: p.costPrice,
-            quantity: p.qty,
+            sellPrice: Number(p.sellPrice),
+            costPrice: Number(p.costPrice),
+            quantity: Number(p.qty),
             subtotal: Number(p.sellPrice) * Number(p.qty),
           };
         });
-        // console.log(finalProducts);
-        await dispatch(addSales(finalProducts)).unwrap();
+
+        await dispatch(
+          addSales({
+            // customerId: customer.customerId,
+            customerName: customer.customerName,
+            address: customer.address,
+            products: finalProducts,
+            total: Number(subTotal),
+            totalCost: Number(totalCost),
+            due: cashInput
+              ? Number(subTotal) - Number(cashInput) < 0
+                ? 0
+                : Number(subTotal) - Number(cashInput)
+              : Number(subTotal),
+            paid: cashInput
+              ? Number(cashInput) > Number(subTotal)
+                ? Number(subTotal)
+                : Number(cashInput)
+              : 0,
+          })
+        ).unwrap();
         setCid(null);
       } else {
         alert("Please select at least one product!");
         return;
       }
     } catch (error) {
-      console.log('Creating Failed!');
+      console.log("Creating Failed!");
       setCid(null);
     }
   };
 
   useEffect(() => {
-    if (createdSales.length > 0) {
+    if (createdSales) {
       const data = {
-        sales: createdSales,
-        customerName: customer.customerName,
-        address: customer.address,
-        total: subTotal,
-        due: Number(subTotal) - Number(cashInput),
-        billPaid: Number(cashInput),
+        ...createdSales,
+        due: cashInput
+          ? Number(subTotal) - Number(cashInput)
+          : Number(subTotal),
+        paid: cashInput ? Number(cashInput) : 0,
       };
-      dispatch(setCreatedSalesToEmpty());
+      dispatch(setCreatedSalesToNull());
       // Navigate to the page and print it
       navigate("/invoice", { state: data });
     }
@@ -122,7 +143,7 @@ const PointOfSale = () => {
 
   useEffect(() => {
     dispatch(setProductsBySearchToEmpty());
-  }, [])
+  }, []);
 
   return (
     <>
@@ -146,6 +167,7 @@ const PointOfSale = () => {
               }
               placeholder="Customer Name"
               className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
+              required
             />
           </div>
           <div>
@@ -158,6 +180,7 @@ const PointOfSale = () => {
                 setCustomer({ ...customer, address: e.target.value })
               }
               className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
+              required
             />
           </div>
         </div>
@@ -318,6 +341,7 @@ const PointOfSale = () => {
               value={cashInput}
               onChange={(e) => setCashInput(Number(e.target.value))}
               className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
+              min={0}
             />
           </div>
         </div>
@@ -343,9 +367,13 @@ const PointOfSale = () => {
         <button
           type="submit"
           disabled={loading && cid ? true : false}
-          className={`mt-4 w-full text-white font-bold py-2 rounded-sm ${loading && cid ? 'cursor-not-allowed bg-blue-500' : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'}`}
+          className={`mt-4 w-full text-white font-bold py-2 rounded-sm ${
+            loading && cid
+              ? "cursor-not-allowed bg-blue-500"
+              : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
+          }`}
         >
-          {loading && cid ? 'Paying...' : `Pay ${subTotal}`}
+          {loading && cid ? "Paying..." : `Pay ${subTotal}`}
         </button>
       </form>
     </>

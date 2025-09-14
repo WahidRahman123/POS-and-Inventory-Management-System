@@ -12,42 +12,72 @@ module.exports.index = async (req, res) => {
   }
 };
 
+// module.exports.createSales = async (req, res) => {
+//   try {
+//     const arrayOfResResults = [];
+//     const arrayOfSales = req.body;
+//     for (let i = 0; i < arrayOfSales.length; i++) {
+//       const {
+//         customerName,
+//         address,
+//         productName,
+//         sellPrice,
+//         costPrice,
+//         quantity,
+//         subtotal,
+//       } = arrayOfSales[i];
+
+//       const sales = new Sales({
+//         customerName,
+//         address,
+//         productName,
+//         sellPrice,
+//         costPrice,
+//         quantity,
+//         subtotal,
+//       });
+
+//       const createdSales = await sales.save();
+
+//       const product = await Product.findOne({ name: productName });
+//       if (!product) {
+//         return res
+//           .status(404)
+//           .json({ message: `Product ${productName} not found` });
+//       }
+//       product.quantity = product.quantity - quantity;
+//       await product.save();
+
+//       //* response result is push into an array so that it can be sent.
+//       arrayOfResResults.push(createdSales);
+//     }
+
+//     res.status(201).json(arrayOfResResults);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Server Error");
+//   }
+// };
+
 module.exports.createSales = async (req, res) => {
   try {
-    const arrayOfResResults = [];
-    const arrayOfSales = req.body;
-    for (let i = 0; i < arrayOfSales.length; i++) {
-      const {
-        customerName,
-        address,
-        productName,
-        sellPrice,
-        costPrice,
-        quantity,
-        subtotal,
-      } = arrayOfSales[i];
+    const sales = req.body;
 
-      const sales = new Sales({
-        customerName,
-        address,
-        productName,
-        sellPrice,
-        costPrice,
-        quantity,
-        subtotal,
-      });
+    //* sales creation
+    const sale = new Sales(sales);
 
-      const createdSales = await sales.save();
+    for (let i = 0; i < sales.products.length; i++) {
+      const { productName, quantity } = sales.products[i];
 
       const product = await Product.findOne({ name: productName });
+      
       product.quantity = product.quantity - quantity;
       await product.save();
-
-      //* response result is push into an array so that it can be sent.
-      arrayOfResResults.push(createdSales);
     }
 
-    res.status(201).json(arrayOfResResults);
+    const createdSale = await sale.save();
+
+    res.status(201).json(createdSale);
   } catch (error) {
     console.error(error);
     res.status(500).send("Server Error");

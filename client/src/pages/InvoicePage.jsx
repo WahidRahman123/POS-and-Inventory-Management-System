@@ -54,14 +54,15 @@ const InvoicePage = () => {
           <div ref={contentRef} className="max-w-3xl mx-auto bg-white p-6 mt-5">
             <div className="flex justify-between items-start border-b border-red-500 pb-2">
               <div>
-                <h1 className="text-xl font-bold text-red-600">
-                  Sobuj Auto{" "}
-                </h1>
+                <h1 className="text-xl font-bold text-red-600">Sobuj Auto </h1>
                 <p className="text-sm text-gray-600">
-                  Address: G.L. Roy Road(Opposite of Lions School), Jhantur Mor, Rangpur.
+                  Address: G.L. Roy Road(Opposite of Lions School), Jhantur Mor,
+                  Rangpur.
                 </p>
                 <p className="text-sm text-gray-600">Mobile: 01773080202</p>
-                <p className="text-sm text-gray-600">Shop Mobile: 01979080202</p>
+                <p className="text-sm text-gray-600">
+                  Shop Mobile: 01979080202
+                </p>
                 {/* <p className="text-sm text-gray-600">
                   Email: info@biznishike.com
                 </p>
@@ -115,7 +116,7 @@ const InvoicePage = () => {
               </thead>
               <tbody>
                 {location.state ? (
-                  location.state.sales.map((sale, index) => (
+                  location.state.products.map((sale, index) => (
                     <tr key={index}>
                       <td className="border border-gray-300 px-2 py-1 text-center">
                         {index + 1}
@@ -143,7 +144,8 @@ const InvoicePage = () => {
 
             <div className="mt-4 text-sm">
               <p className="font-semibold text-red-600">
-                Total Orders {location.state ? location.state.sales.length : ""}{" "}
+                Total Orders{" "}
+                {location.state ? location.state.products.length : ""}{" "}
                 <span className="float-right">
                   {location.state ? location.state.total : ""}
                 </span>
@@ -151,13 +153,17 @@ const InvoicePage = () => {
               <p>
                 Bill Paid{" "}
                 <span className="float-right">
-                  {location.state ? location.state.billPaid : ""}
+                  {location.state ? location.state.paid : ""}
                 </span>
               </p>
               <p>
                 Due{" "}
                 <span className="float-right">
-                  {location.state ? location.state.due : ""}
+                  {location.state
+                    ? location.state.due < 0
+                      ? `${Math.abs(location.state.due)} (ফেরত পাবে)`
+                      : location.state.due
+                    : ""}
                 </span>
               </p>
             </div>

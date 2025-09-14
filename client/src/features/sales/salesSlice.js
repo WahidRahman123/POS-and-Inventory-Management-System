@@ -7,7 +7,7 @@ const initialState = {
   totalSales: null,
   totalCosts: null,
   profit: null,
-  createdSales: [],
+  createdSales: null,
   loading: false,
   error: null,
 };
@@ -62,8 +62,8 @@ const salesSlice = createSlice({
   name: "sales",
   initialState,
   reducers: {
-    setCreatedSalesToEmpty: (state) => {
-      state.createdSales = [];
+    setCreatedSalesToNull: (state) => {
+      state.createdSales = null;
     },
   },
   extraReducers: (builder) => {
@@ -77,11 +77,11 @@ const salesSlice = createSlice({
         state.sales = action.payload;
         if (state.sales.length > 0) {
           const totalSale = state.sales.reduce(
-            (acc, sale) => acc + sale.subtotal,
+            (acc, sale) => acc + sale.paid,
             0
           );
           const totalCost = state.sales.reduce(
-            (acc, sale) => acc + (sale.costPrice * sale.quantity),
+            (acc, sale) => acc + sale.totalCost,
             0
           );
           
@@ -131,5 +131,5 @@ const salesSlice = createSlice({
   },
 });
 
-export const { setCreatedSalesToEmpty } = salesSlice.actions; //! Baki ase
+export const { setCreatedSalesToNull } = salesSlice.actions; //! Baki ase
 export default salesSlice.reducer;

@@ -206,7 +206,7 @@ const SalesReport = () => {
           <button
             key={query}
             onClick={() => handleOnClick(query, label)}
-            className="flex items-center border px-3 py-1 sm:px-4 sm:py-2 bg-white hover:bg-gray-50 text-xs sm:text-sm"
+            className="flex items-center border px-3 py-1 sm:px-4 sm:py-2 bg-white hover:bg-gray-50 text-xs sm:text-sm cursor-pointer"
           >
             <span className="mr-1 sm:mr-2">📅</span>
             {label}
