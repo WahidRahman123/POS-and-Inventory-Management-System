@@ -29,7 +29,7 @@ module.exports.index = async (req, res) => {
       totalCost: product[0]?.totalCost || 0,
       numberOfSales: sales[0]?.numberOfSales || 0,
       numberOfProducts: product[0]?.numberOfProducts || 0,
-      profit: (sales[0]?.totalSell && sales[0]?.totalCostInSale) ? sales[0].totalSell - sales[0].totalCostInSale : 0,
+      profit: (sales[0]?.totalSell && sales[0]?.totalCostInSale && sales[0].totalSell - sales[0].totalCostInSale > 0) ? sales[0].totalSell - sales[0].totalCostInSale : 0,
     };
 
     // if (sales.length > 0 && product.length > 0) {
