@@ -211,7 +211,7 @@ const PointOfSale = () => {
             <div
               className={`${
                 productsBySearchforPOS.length > 0
-                  ? "shadow-md px-4 py-2 rounded "
+                  ? "shadow-md px-4 py-2 rounded max-h-50 overflow-y-scroll"
                   : ""
               }`}
             >
