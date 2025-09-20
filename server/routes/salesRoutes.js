@@ -22,6 +22,11 @@ router.post('/', protect, sales.createSales);
 // @access Private
 router.get('/search', protect, admin, sales.searchByDates);
 
+//* @route GET /api/sales/searchIndividual
+// @desc search sales between dates
+// @access Private
+router.get('/searchIndividual', protect, admin, sales.searchByIndividualDate);
+
 //* @route GET /api/sales/:id/payment
 // @desc search sales between dates
 // @access Private

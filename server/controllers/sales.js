@@ -170,6 +170,26 @@ module.exports.searchByDates = async (req, res) => {
   }
 };
 
+module.exports.searchByIndividualDate = async (req, res) => {
+  try {
+    const { searchDate } = req.query;
+    const startOfDay = new Date(searchDate);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(searchDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const sales = await Sales.find({
+      createdAt: { $gte: startOfDay, $lte: endOfDay },
+    }).sort({ createdAt: -1 });
+
+    res.status(201).json(sales);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};
+
 module.exports.searchById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -183,24 +203,23 @@ module.exports.searchById = async (req, res) => {
 };
 
 module.exports.addPayment = async (req, res) => {
-    const { id } = req.params;
-    const { amount } = req.body;
+  const { id } = req.params;
+  const { amount } = req.body;
 
-    try {
-        const sale = await Sales.findById(id);
+  try {
+    const sale = await Sales.findById(id);
 
-        if(sale) {
-            sale.paid = sale.paid + amount;
-            sale.due = sale.due - amount;
-            await sale.save();
+    if (sale) {
+      sale.paid = sale.paid + amount;
+      sale.due = sale.due - amount;
+      await sale.save();
 
-            res.status(201).json({message: 'Payment updated successfully'});
-
-        } else {
-            res.status(404).json({message: "Sale not found"});
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Server Error');
+      res.status(201).json({ message: "Payment updated successfully" });
+    } else {
+      res.status(404).json({ message: "Sale not found" });
     }
-}
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};

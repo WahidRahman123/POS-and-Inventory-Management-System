@@ -2,33 +2,46 @@ const mongoose = require("mongoose");
 
 const purchaseSchema = new mongoose.Schema(
   {
-    name: {
+    memo: {
       type: String,
       required: true,
       trim: true,
     },
-    sellPrice: {
-      type: Number,
+    supplierName: {
+      type: String,
       required: true,
-      min: 0,
+      trim: true
     },
-    costPrice: {
-      type: Number,
+    productNames: {
+      type: String,
       required: true,
-      min: 0,
+      trim: true
     },
     quantity: {
       type: Number,
       required: true,
       min: 0,
     },
-    category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
+    totalAmount: {
+      type: Number,
       required: true,
+      min: 0,
     },
-  },
-  { timestamps: true, toJSON: { virtuals: true } }
+    paid: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    due: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    createdAt: {
+      type: Date,
+      required: true
+    }
+  }
 );
 
-module.exports = mongoose.model("Product", productSchema);
+module.exports = mongoose.model("Purchase", purchaseSchema);

@@ -153,13 +153,14 @@
 // export default SalesReport;
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchSalesByDate } from "../features/sales/salesSlice";
+import { fetchSalesByDate, fetchSalesByIndividualDate } from "../features/sales/salesSlice";
 import { Link, useNavigate } from "react-router-dom";
 
 const SalesReport = () => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [date, setDate] = useState("");
 
   const { sales, loading, error, totalSales, totalCosts, profit } = useSelector(
     (state) => state.sales
@@ -169,6 +170,8 @@ const SalesReport = () => {
 
   const handleOnClick = (query, d) => {
     setDay(d);
+    // set the date to empty string
+    setDate("");
     dispatch(fetchSalesByDate(query));
   };
 
@@ -226,6 +229,19 @@ const SalesReport = () => {
           </label>
           <input
             type="date"
+            value={date}
+            onChange={(e) => {
+              setDate(e.target.value);
+              if(e.target.value) {
+                setDay(e.target.value)
+                // Call the fetchSalesByDate
+                dispatch(fetchSalesByIndividualDate(e.target.value));
+              } else {
+                setDay("Today");
+                dispatch(fetchSalesByDate("t"));
+              }
+
+            }}
             className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-36 sm:w-40"
           />
         </div>
@@ -292,8 +308,15 @@ const SalesReport = () => {
                 rowSpan={2}
                 className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
               >
+                Discount
+              </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
                 Total
               </th>
+              
               <th
                 rowSpan={2}
                 className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
@@ -308,7 +331,7 @@ const SalesReport = () => {
               </th>
               <th
                 rowSpan={2}
-                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-center"
               >
                 Action
               </th>
@@ -392,8 +415,15 @@ const SalesReport = () => {
                           rowSpan={rowspan}
                           className="border px-2 py-1 sm:px-4 sm:py-2"
                         >
+                          {sale.discount ? sale.discount : 0}
+                        </td>
+                        <td
+                          rowSpan={rowspan}
+                          className="border px-2 py-1 sm:px-4 sm:py-2"
+                        >
                           {sale.total}
                         </td>
+                        
                         <td
                           rowSpan={rowspan}
                           className="border px-2 py-1 sm:px-4 sm:py-2"

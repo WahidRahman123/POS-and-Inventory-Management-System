@@ -37,6 +37,30 @@ export const fetchSalesByDate = createAsyncThunk(
   }
 );
 
+export const fetchSalesByIndividualDate = createAsyncThunk(
+  "sales/fetchSalesByIndividualDate",
+  async (query, ThunkAPI) => {
+    try {
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URI}/api/sales/searchIndividual`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+          params: {
+            searchDate: query,
+          },
+        }
+      );
+
+      return data;
+    } catch (error) {
+      const message = "Sales Fetching Failed!";
+      return ThunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 export const fetchSaleById = createAsyncThunk(
   "sales/fetchSaleById",
   async (id, ThunkAPI) => {
@@ -140,6 +164,47 @@ const salesSlice = createSlice({
         }
       })
       .addCase(fetchSalesByDate.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+        toast.error(action.payload, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
+      .addCase(fetchSalesByIndividualDate.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchSalesByIndividualDate.fulfilled, (state, action) => {
+        state.loading = false;
+        state.sales = action.payload;
+        if (state.sales.length > 0) {
+          const totalSale = state.sales.reduce(
+            (acc, sale) => acc + sale.paid,
+            0
+          );
+          const totalCost = state.sales.reduce(
+            (acc, sale) => acc + sale.totalCost,
+            0
+          );
+
+          state.totalSales = totalSale;
+          state.totalCosts = totalCost;
+          state.profit =
+            state.totalSales - state.totalCosts < 0
+              ? 0
+              : state.totalSales - state.totalCosts;
+        } else {
+          state.totalSales = null;
+        }
+      })
+      .addCase(fetchSalesByIndividualDate.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error;
         toast.error(action.payload, {

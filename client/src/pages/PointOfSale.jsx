@@ -28,7 +28,10 @@ const PointOfSale = () => {
   );
   const [discount, setDiscount] = useState(0);
   const subTotal = Number(orderTotal) - Number(discount);
-  const totalCost = Number(subTotal);
+  const totalCost = selectedProducts.reduce(
+    (acc, product) => acc + product.qty * product.costPrice,
+    0
+  );
   const [cashInput, setCashInput] = useState("");
   const [remarks, setRemarks] = useState("");
 
