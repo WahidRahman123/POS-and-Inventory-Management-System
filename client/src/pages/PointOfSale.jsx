@@ -297,7 +297,7 @@ const PointOfSale = () => {
               <tr>
                 <td
                   colSpan={7}
-                  className="text-center select-none text-gray-400 font-bold"
+                  className="text-center select-none text-gray-500 font-bold px-6 py-3"
                 >
                   No Orders Yet
                 </td>
@@ -313,18 +313,16 @@ const PointOfSale = () => {
               <span className="font-medium">OrderTotal(1pack,piece)</span>
               <span className="font-medium">{subTotal}</span>
             </div>
-            {/* <div className="flex justify-between">
+            <div className="flex justify-between">
               <span className="font-medium">Order&nbsp;Discount</span>
               <span className="font-medium">
                 <input
                   type="number"
-                  value={discount}
-                  onChange={(e) => setDiscount(Number(e.target.value))}
                   min={0}
-                  className="w-[80px] text-right border rounded border-gray-400"
+                  className="w-[80px] border rounded border-gray-400 px-1"
                 />
               </span>
-            </div> */}
+            </div>
             <div className="flex justify-between font-bold">
               <span>Sub&nbsp;Total</span>
               <span>{subTotal}</span>
@@ -333,7 +331,7 @@ const PointOfSale = () => {
         </div>
 
         {/* Payment */}
-        <div className="grid grid-cols-2 gap-x-6 mb-4">
+        <div className="flex flex-col gap-6 max-w-[50%] mb-4">
           <div>
             <label className="block text-sm font-medium mb-1">Cash</label>
             <input
@@ -343,6 +341,10 @@ const PointOfSale = () => {
               className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
               min={0}
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Remarks</label>
+            <textarea className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm" rows={3} value="laksdjf"/>
           </div>
         </div>
 

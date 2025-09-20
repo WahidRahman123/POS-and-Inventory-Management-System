@@ -85,7 +85,7 @@ const EditDue = () => {
                 : "bg-green-500 hover:bg-green-600 cursor-pointer"
             }`}
           >
-            {loading && aid ? "Updating..." : "Update"}
+            {loading && aid ? "Paying..." : "Pay"}
           </button>
         </form>
 

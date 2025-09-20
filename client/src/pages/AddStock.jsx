@@ -199,15 +199,15 @@ const AddStock = () => {
           <h2 className="text-lg sm:text-xl font-semibold mb-4">Item Information</h2>
           <div className="space-y-1 text-sm">
             {[
-              { label: "ID", value: productSearchedById._id },
-              { label: "Name", value: productSearchedById.name },
+              { label: "ID", value: productSearchedById?._id },
+              { label: "Name", value: productSearchedById?.name },
               { label: "Category", value: productSearchedById?.category?.name || "-" },
-              { label: "Quantity", value: productSearchedById.quantity },
-              { label: "Price", value: productSearchedById.sellPrice },
+              { label: "Quantity", value: productSearchedById?.quantity },
+              { label: "Price", value: productSearchedById?.sellPrice },
             ].map(({ label, value }) => (
               <div key={label} className="flex">
                 <span className="w-28 font-medium">{label}</span>
-                <span>: {value || ""}</span>
+                <span>: {value}</span>
               </div>
             ))}
           </div>
