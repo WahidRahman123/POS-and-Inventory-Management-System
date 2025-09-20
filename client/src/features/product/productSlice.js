@@ -13,6 +13,8 @@ const initialState = {
   },
   page: 1,
   pages: null,
+  lqpage: 1,
+  lqpages: null,
   productsBySearch: [],
   productsBySearchforPOS: [],
   lowQuantityProducts: [],
@@ -228,7 +230,7 @@ export const countLowQuantityProduct = createAsyncThunk(
 
 export const lowQuantityProductList = createAsyncThunk(
   "product/lowQuantityProductList",
-  async (_, ThunkAPI) => {
+  async (value, ThunkAPI) => {
     try {
       const { data } = await axios.get(
         `${
@@ -238,6 +240,7 @@ export const lowQuantityProductList = createAsyncThunk(
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
+          params: value
         }
       );
 
@@ -505,7 +508,9 @@ const productSlice = createSlice({
       })
       .addCase(lowQuantityProductList.fulfilled, (state, action) => {
         state.loading = false;
-        state.lowQuantityProducts = action.payload;
+        state.lqpage = action.payload.page;
+        state.lqpages = action.payload.pages;
+        state.lowQuantityProducts = action.payload.products;
       })
       .addCase(lowQuantityProductList.rejected, (state, action) => {
         state.loading = false;
