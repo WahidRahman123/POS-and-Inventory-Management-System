@@ -1,5 +1,6 @@
 const Sales = require("../models/Sales");
 const Product = require("../models/Product");
+const Purchase = require("../models/Purchase");
 
 module.exports.index = async (req, res) => {
   try {
@@ -18,15 +19,23 @@ module.exports.index = async (req, res) => {
       {
         $group: {
           _id: null,
-          totalCost: { $sum: { $multiply: ["$costPrice", "$quantity"] } },
           numberOfProducts: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const purchase = await Purchase.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalCost: { $sum: "$paid" },
         },
       },
     ]);
 
     let result = {
       totalSell: sales[0]?.totalSell || 0,
-      totalCost: product[0]?.totalCost || 0,
+      totalCost: purchase[0]?.totalCost || 0,
       numberOfSales: sales[0]?.numberOfSales || 0,
       numberOfProducts: product[0]?.numberOfProducts || 0,
       profit: (sales[0]?.totalSell && sales[0]?.totalCostInSale && sales[0].totalSell - sales[0].totalCostInSale > 0) ? sales[0].totalSell - sales[0].totalCostInSale : 0,

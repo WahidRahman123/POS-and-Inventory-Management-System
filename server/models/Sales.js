@@ -6,6 +6,18 @@ const salesSchema = new mongoose.Schema(
     //   type: mongoose.Schema.Types.ObjectId,
     //   ref: 'Customer'
     // },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    invoiceNo: {
+      type: Number,
+      required: true
+    },
+    remarks: {
+      type: String,
+      trim: true
+    },
     customerName: {
       type: String,
       required: true,
@@ -42,6 +54,10 @@ const salesSchema = new mongoose.Schema(
         },
       },
     ],
+    totalWithoutDiscount: {
+      type: Number,
+      required: true,
+    },
     total: {
       type: Number,
       required: true,

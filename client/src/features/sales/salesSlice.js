@@ -9,6 +9,7 @@ const initialState = {
   profit: null,
   createdSales: null,
   saleSearchedById: null,
+  totalSaleCount: 0,
   loading: false,
   error: null,
 };
@@ -99,6 +100,27 @@ export const addSales = createAsyncThunk(
       return data;
     } catch (error) {
       const message = "Sales Adding Failed!";
+      return ThunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+export const getTotalSaleCount = createAsyncThunk(
+  "sales/getTotalSaleCount",
+  async (_, ThunkAPI) => {
+    try {
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URI}/api/sales/getTotalSaleCount`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
+      );
+
+      return data;
+    } catch (error) {
+      const message = "Something went wrong!";
       return ThunkAPI.rejectWithValue(message);
     }
   }
@@ -292,7 +314,28 @@ const salesSlice = createSlice({
           progress: undefined,
           theme: "colored",
         });
-      });
+      }).addCase(getTotalSaleCount.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getTotalSaleCount.fulfilled, (state, action) => {
+        state.loading = false;
+        state.totalSaleCount = action.payload;
+      })
+      .addCase(getTotalSaleCount.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+        toast.error(action.payload, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
   },
 });
 

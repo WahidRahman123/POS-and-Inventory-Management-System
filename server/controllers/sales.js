@@ -223,3 +223,15 @@ module.exports.addPayment = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+module.exports.getTotalSaleCount = async (req, res) => {
+  try {
+    const count = await Sales.countDocuments();
+
+    res.status(201).json(count);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+}

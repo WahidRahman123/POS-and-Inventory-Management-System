@@ -44,3 +44,37 @@ module.exports.createPurchase = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+module.exports.searchById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const purchase = await Purchase.findById(id);
+
+    res.status(201).json(purchase);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};
+
+module.exports.addPayment = async (req, res) => {
+  const { id } = req.params;
+  const { amount } = req.body;
+
+  try {
+    const purchase = await Purchase.findById(id);
+
+    if (purchase) {
+      purchase.paid = purchase.paid + amount;
+      purchase.due = purchase.due - amount;
+      await purchase.save();
+
+      res.status(201).json({ message: "Payment updated successfully" });
+    } else {
+      res.status(404).json({ message: "Purchase not found" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};

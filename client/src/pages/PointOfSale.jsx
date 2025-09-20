@@ -5,13 +5,14 @@ import {
   searchProductsforPOS,
   setProductsBySearchToEmpty,
 } from "../features/product/productSlice";
-import { addSales, setCreatedSalesToNull } from "../features/sales/salesSlice";
+import { addSales, getTotalSaleCount, setCreatedSalesToNull } from "../features/sales/salesSlice";
 import { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 import { useNavigate } from "react-router-dom";
 
 const PointOfSale = () => {
   const { user } = useSelector((state) => state.auth);
+  const { totalSaleCount } = useSelector(state => state.sales);
   useEffect(() => {
     if (!user) {
       navigate("/login");
@@ -101,9 +102,13 @@ const PointOfSale = () => {
         await dispatch(
           addSales({
             // customerId: customer.customerId,
+            userId: user._id,
+            invoiceNo: Number(totalSaleCount) + 1,
+            remarks,
             customerName: customer.customerName,
             address: customer.address,
             products: finalProducts,
+            totalWithoutDiscount: Number(orderTotal),
             total: Number(subTotal),
             discount: Number(discount),
             totalCost: Number(totalCost),
@@ -147,7 +152,10 @@ const PointOfSale = () => {
 
   useEffect(() => {
     dispatch(setProductsBySearchToEmpty());
+    dispatch(getTotalSaleCount());
   }, []);
+
+  if(!user) return null;
 
   return (
     <>

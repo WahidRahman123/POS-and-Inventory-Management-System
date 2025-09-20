@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDashboardResult } from "../features/dashboard/dashboardSlice";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import CountUp from 'react-countup';
 
 const Dashboard = () => {
@@ -37,25 +37,25 @@ const Dashboard = () => {
     {/* KPI Cards */}
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
       {user && user.role === "admin" && (
-        <div className="bg-blue-800 text-white p-4 sm:p-6 rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition">
+        <Link to="/purchase" className="bg-blue-800 text-white p-4 sm:p-6 rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition">
           <span className="text-2xl sm:text-3xl font-bold">
             {dashboardResult
               ? <CountUp end={dashboardResult.totalCost} duration={0.3} formattingFn={(value) => Number(value).toLocaleString('en-BD') + ' ৳'}/> 
               : "-"}
           </span>
           <span className="mt-1 sm:mt-2 text-xs sm:text-sm">PURCHASES (BDT)</span>
-        </div>
+        </Link>
       )}
 
       {user && user.role === "admin" && (
-        <div className="bg-blue-800 text-white p-4 sm:p-6 rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition">
+        <Link to="/sales-report" className="bg-blue-800 text-white p-4 sm:p-6 rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition">
           <span className="text-2xl sm:text-3xl font-bold">
             {dashboardResult
               ? <CountUp end={dashboardResult.totalSell} duration={0.3} formattingFn={(value) => Number(value).toLocaleString('en-BD') + ' ৳'}/>
               : "-"}
           </span>
           <span className="mt-1 sm:mt-2 text-xs sm:text-sm">SALES (BDT)</span>
-        </div>
+        </Link>
       )}
 
       {user && user.role === "admin" && (
@@ -69,12 +69,12 @@ const Dashboard = () => {
         </div>
       )}
 
-      <div className="bg-blue-800 text-white p-4 sm:p-6 rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition">
+      <Link to="/product" className="bg-blue-800 text-white p-4 sm:p-6 rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition">
         <span className="text-2xl sm:text-3xl font-bold">
           {dashboardResult ? <CountUp end={dashboardResult.numberOfProducts} duration={0.3} formattingFn={(value) => Number(value).toLocaleString('en-BD')} /> : "-"}
         </span>
         <span className="mt-1 sm:mt-2 text-xs sm:text-sm">TOTAL ITEMS</span>
-      </div>
+      </Link>
     </div>
   </div>
 </div>

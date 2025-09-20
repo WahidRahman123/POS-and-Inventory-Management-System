@@ -17,6 +17,11 @@ router.get('/', protect, admin, sales.index);
 // @access Private
 router.post('/', protect, sales.createSales);
 
+//* @route GET /api/sales/getTotalSaleCount
+// @desc get the total sale count
+// @access Private
+router.get('/getTotalSaleCount', protect, sales.getTotalSaleCount);
+
 //* @route GET /api/sales/search
 // @desc search sales between dates
 // @access Private
@@ -27,7 +32,7 @@ router.get('/search', protect, admin, sales.searchByDates);
 // @access Private
 router.get('/searchIndividual', protect, admin, sales.searchByIndividualDate);
 
-//* @route GET /api/sales/:id/payment
+//* @route POST /api/sales/:id/payment
 // @desc search sales between dates
 // @access Private
 router.post('/:id/payment', protect, admin, sales.addPayment);

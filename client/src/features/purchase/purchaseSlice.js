@@ -1,0 +1,220 @@
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import axios from "axios";
+import { toast } from "react-toastify";
+
+const initialState = {
+  purchases: [],
+  purchaseSearchedById: null,
+  toggle: false,
+  loading: false,
+  error: null,
+};
+
+export const fetchPurchases = createAsyncThunk(
+  "purchase/fetchPurchases",
+  async (query, ThunkAPI) => {
+    try {
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URI}/api/purchase`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+          params: {
+            dateSearch: query,
+          },
+        }
+      );
+
+      return data;
+    } catch (error) {
+      const message = "Purchase Fetching Failed!";
+      return ThunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+export const fetchPurchaseById = createAsyncThunk(
+  "purchase/fetchPurchaseById",
+  async (id, ThunkAPI) => {
+    try {
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URI}/api/purchase/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
+      );
+
+      return data;
+    } catch (error) {
+      const message = "Purchase Fetching Failed!";
+      return ThunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+export const addPurchase = createAsyncThunk(
+  "purchase/addPurchase",
+  async (value, ThunkAPI) => {
+    try {
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URI}/api/purchase`,
+        value,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
+      );
+
+      return { message: "Purchase Added Successfully!" };
+    } catch (error) {
+      const message = "Purchase Adding Failed!";
+      return ThunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+export const addPayment = createAsyncThunk(
+  "purchase/addPayment",
+  async (purchase, ThunkAPI) => {
+    try {
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URI}/api/purchase/${
+          purchase.id
+        }/payment`,
+        purchase.info,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
+      );
+
+      return { message: "Payment updated Successful!" };
+    } catch (error) {
+      const message = "Payment updated Failed!";
+      return ThunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+const purchaseSlice = createSlice({
+  name: "purchase",
+  initialState,
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchPurchases.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchPurchases.fulfilled, (state, action) => {
+        state.loading = false;
+        state.purchases = action.payload;
+      })
+      .addCase(fetchPurchases.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+        toast.error(action.payload, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
+      .addCase(addPurchase.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addPurchase.fulfilled, (state, action) => {
+        state.loading = false;
+        state.toggle = !state.toggle;
+        toast.success(action.payload.message, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
+      .addCase(addPurchase.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+        toast.error(action.payload, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
+      .addCase(fetchPurchaseById.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchPurchaseById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.purchaseSearchedById = action.payload;
+      })
+      .addCase(fetchPurchaseById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+        toast.error(action.payload, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
+      .addCase(addPayment.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addPayment.fulfilled, (state, action) => {
+        state.loading = false;
+        toast.success(action.payload.message, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
+      .addCase(addPayment.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+        toast.error(action.payload, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      });
+  },
+});
+
+// export const { setCreatedSalesToNull } = purchaseSlice.actions; //! Baki ase
+export default purchaseSlice.reducer;
