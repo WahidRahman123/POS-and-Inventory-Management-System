@@ -463,12 +463,13 @@ const SalesReport = () => {
                             >
                               Add Payment
                             </Link>
-                            <button
-                              onClick={() => window.print()}
+                            <Link
+                              to="/invoice"
+                              state={sale}
                               className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 cursor-pointer"
                             >
                               Print
-                            </button>
+                            </Link>
                           </div>
                         </td>
                       </>

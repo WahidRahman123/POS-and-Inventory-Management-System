@@ -45,43 +45,74 @@ const InvoicePage = () => {
           </button>
           <button
             className="mt-5 bg-green-500 text-white font-bold py-2 px-6 rounded shadow border-2 border-green-500 hover:bg-transparent hover:text-green-500 transition-all duration-300 cursor-pointer"
-            onClick={() => navigate("/point-of-sale")}
+            onClick={() => navigate(-1)}
           >
             Back
           </button>
         </div>
         <div className="m-5">
           <div ref={contentRef} className="max-w-3xl mx-auto bg-white p-6 mt-5">
-            <div className="flex justify-between items-start border-b border-red-500 pb-2">
+            <div className="flex justify-between items-start border-b-2 border-red-600 pb-3">
+              {/* LEFT : centre-aligned text block */}
+              <div className="text-center sm:text-left space-y-1">
+                <h1 className="text-2xl font-extrabold text-red-700">
+                  সবুজ অটো
+                </h1>
+                <p className="text-sm font-bold text-gray-800">
+                  প্রোঃ মোঃ সবুজ
+                </p>
+                <p className="text-xs text-gray-800 font-medium">
+                  অটো রিকশা ও ভ্যানের পার্টস পাইকারি ও খুচরা বিক্রেতা
+                </p>
+                <p className="text-xs text-gray-700 leading-tight">
+                  ঠিকানা: জি. এল. রায় রো (লায়ন্স স্কুলের বিপরীতে), ঝন্টুর
+                  মোড়, রংপুর।
+                </p>
+              </div>
+              {/* RIGHT : mobile numbers + invoice number (image-মতো) */}
+              <div className="text-right space-y-1 text-xs text-gray-700">
+                <p>মোবাইল: 01773080202 | 01830685667</p>
+                <p>দোকান: 01979080202</p>
+                {/* Invoice Number sits exactly under mobile numbers, above the border */}
+
+                <p className="mt-6 font-semibold text-gray-800">
+                  মেমো নম্বর:{" "}
+                  <span className="text-red-700">
+                    {location.state?.invoiceNo || "--------"}
+                  </span>
+                </p>
+              </div>
+            </div>
+            {/* <div className="flex justify-between items-start border-b border-red-500 pb-2">
               <div>
-                <h1 className="text-xl font-bold text-red-600">Sobuj Auto </h1>
+                <h1 className="text-xl font-bold text-red-600">সবুজ অটো </h1>
                 <p className="text-sm text-gray-600">
-                  Address: G.L. Roy Road(Opposite of Lions School), Jhantur Mor,
-                  Rangpur.
+                  ঠিকানা: জি. এল. রায় রোড( লায়ন্স স্কুলের বিপরীতে), ঝন্টুর মোড়, রংপুর|
                 </p>
-                <p className="text-sm text-gray-600">Mobile: 01773080202</p>
+                <p className="text-sm text-gray-600">মোবাইল: 01773080202</p>
+                <p className="text-sm text-gray-600">মোবাইল: 01830685667</p>
                 <p className="text-sm text-gray-600">
-                  Shop Mobile: 01979080202
+                  দোকান: 01979080202
                 </p>
-                {/* <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600">
                   Email: info@biznishike.com
                 </p>
                 <p className="text-sm text-gray-600">
                   WebSite: biznishike.com, facebook.com/biznishike
-                </p> */}
+                </p>
               </div>
               <div className="text-right">
-                <p className="text-sm font-semibold">We Care For You</p>
+                <p className="text-sm font-semibold">অটো রিকশা ও ভ্যানের পার্টস পাইকারি ও খুচরা বিক্রেতা</p>
               </div>
-            </div>
+            </div> */}
 
             <div className="flex justify-between mt-4 border-b border-gray-300 pb-2">
               <p>
-                <span className="font-semibold">M/s:</span>{" "}
+                <span className="font-semibold">ক্রেতা:</span>{" "}
                 {location.state ? location.state.customerName : ""}
               </p>
               <p>
-                <span className="font-semibold">Address: </span>
+                <span className="font-semibold">ঠিকানা: </span>
                 {location.state?.address ?? ""}
               </p>
               <div className="text-right">
@@ -89,7 +120,7 @@ const InvoicePage = () => {
                   <span className="font-semibold">Sr.#</span> 4
                 </p> */}
                 <p>
-                  <span className="font-semibold">Date:</span>{" "}
+                  <span className="font-semibold">তারিখ:</span>{" "}
                   {new Date().toLocaleDateString("en-GB", {
                     timeZone: "Asia/Dhaka",
                     day: "2-digit",
@@ -106,12 +137,14 @@ const InvoicePage = () => {
             <table className="w-full border-collapse mt-4 text-sm">
               <thead>
                 <tr className="bg-red-600 text-white">
-                  <th className="border border-gray-300 px-2 py-1">No.</th>
-                  <th className="border border-gray-300 px-2 py-1">Products</th>
-                  <th className="border border-gray-300 px-2 py-1">QTY</th>
+                  <th className="border border-gray-300 px-2 py-1">নং.</th>
+                  <th className="border border-gray-300 px-2 py-1">
+                    পণ্য বিবরণ
+                  </th>
+                  <th className="border border-gray-300 px-2 py-1">পরিমান</th>
 
-                  <th className="border border-gray-300 px-2 py-1">RATE</th>
-                  <th className="border border-gray-300 px-2 py-1">AMOUNT</th>
+                  <th className="border border-gray-300 px-2 py-1">মূল্য</th>
+                  <th className="border border-gray-300 px-2 py-1">মোট</th>
                 </tr>
               </thead>
               <tbody>
@@ -127,7 +160,6 @@ const InvoicePage = () => {
                       <td className="border border-gray-300 px-2 py-1 text-center">
                         {sale.quantity}
                       </td>
-
                       <td className="border border-gray-300 px-2 py-1 text-right">
                         {sale.sellPrice}
                       </td>
@@ -144,20 +176,32 @@ const InvoicePage = () => {
 
             <div className="mt-4 text-sm">
               <p className="font-semibold text-red-600">
-                Total Orders{" "}
-                {location.state ? location.state.products.length : ""}{" "}
+                মোট {location.state ? location.state.products.length : ""}{" "}
+                <span className="float-right">
+                  {location.state ? location.state.totalWithoutDiscount : ""}
+                </span>
+              </p>
+              <p>
+                মূল্যছাড় (Discount){" "}
+                <span className="float-right">
+                  {location.state ? location.state.discount : ""}
+                </span>
+              </p>
+              <p>
+                পরিশোধযোগ্য টাকা{" "}
                 <span className="float-right">
                   {location.state ? location.state.total : ""}
                 </span>
               </p>
+              <br />
               <p>
-                Bill Paid{" "}
+                মোট জমা{" "}
                 <span className="float-right">
                   {location.state ? location.state.paid : ""}
                 </span>
               </p>
               <p>
-                Due{" "}
+                মোট বাকি{" "}
                 <span className="float-right">
                   {location.state
                     ? location.state.due < 0
@@ -169,8 +213,8 @@ const InvoicePage = () => {
             </div>
 
             <div className="mt-6">
-              <p className="text-red-600 font-semibold">Remarks:</p>
-              <div className="h-12 border border-gray-300 rounded"></div>
+              <p className="text-red-600 font-semibold">মন্তব্য:</p>
+              <div className="h-12 border border-gray-300 rounded">{location.state.remarks}</div>
             </div>
           </div>
         </div>

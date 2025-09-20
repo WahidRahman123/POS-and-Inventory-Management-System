@@ -19,6 +19,7 @@ import LowQuantityProductsPage from "./pages/LowQuantityProductsPage";
 import EditDue from "./pages/EditDue";
 import Purchase from "./pages/Purchase";
 import EditPurchaseDue from "./pages/EditPurchaseDue";
+import InvoiceForPurchase from "./pages/invoiceForPurchase";
 
 function App() {
   const { value } = useSelector((state) => state.counter);
@@ -29,6 +30,7 @@ function App() {
         {/* Login page without layout */}
         <Route path="/login" element={<Login />} />
         <Route path="/invoice" element={<InvoicePage />} />
+        <Route path="/invoice-purchase" element={<InvoiceForPurchase />} />
 
 
         {/* All other pages with Layout */}
