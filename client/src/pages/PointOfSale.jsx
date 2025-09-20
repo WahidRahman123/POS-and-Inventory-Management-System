@@ -22,15 +22,15 @@ const PointOfSale = () => {
   const [cid, setCid] = useState(null);
 
   const [searchValue, setSearchValue] = useState("");
-  const subTotal = selectedProducts.reduce(
+  const orderTotal = selectedProducts.reduce(
     (acc, product) => acc + product.qty * product.sellPrice,
     0
   );
-  const totalCost = selectedProducts.reduce(
-    (acc, product) => acc + product.qty * product.costPrice,
-    0
-  );
+  const [discount, setDiscount] = useState(0);
+  const subTotal = Number(orderTotal) - Number(discount);
+  const totalCost = Number(subTotal);
   const [cashInput, setCashInput] = useState("");
+  const [remarks, setRemarks] = useState("");
 
   const [customer, setCustomer] = useState({
     customerId: "",
@@ -102,6 +102,7 @@ const PointOfSale = () => {
             address: customer.address,
             products: finalProducts,
             total: Number(subTotal),
+            discount: Number(discount),
             totalCost: Number(totalCost),
             due: cashInput
               ? Number(subTotal) - Number(cashInput) < 0
@@ -311,7 +312,7 @@ const PointOfSale = () => {
           <div className="w-64 space-y-0.5 text-sm">
             <div className="flex justify-between">
               <span className="font-medium">OrderTotal(1pack,piece)</span>
-              <span className="font-medium">{subTotal}</span>
+              <span className="font-medium">{orderTotal}</span>
             </div>
             <div className="flex justify-between">
               <span className="font-medium">Order&nbsp;Discount</span>
@@ -319,7 +320,10 @@ const PointOfSale = () => {
                 <input
                   type="number"
                   min={0}
-                  className="w-[80px] border rounded border-gray-400 px-1"
+                  max={orderTotal}
+                  value={discount}
+                  onChange={(e) => setDiscount(e.target.value)}
+                  className="w-[80px] border rounded border-gray-400 px-1 py-0.5"
                 />
               </span>
             </div>
@@ -337,14 +341,19 @@ const PointOfSale = () => {
             <input
               type="number"
               value={cashInput}
-              onChange={(e) => setCashInput(Number(e.target.value))}
+              onChange={(e) => setCashInput(e.target.value)}
               className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
               min={0}
             />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Remarks</label>
-            <textarea className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm" rows={3} value="laksdjf"/>
+            <textarea
+              value={remarks}
+              onChange={(e) => setRemarks(e.target.value)}
+              className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
+              rows={3}
+            />
           </div>
         </div>
 
@@ -383,265 +392,3 @@ const PointOfSale = () => {
 };
 
 export default PointOfSale;
-
-// import React, { useEffect, useState } from "react";
-// import { useDispatch, useSelector } from "react-redux";
-// import {
-//   searchProducts,
-//   searchProductsforPOS,
-//   setProductsBySearchToEmpty,
-// } from "../features/product/productSlice";
-// import { addSales, setCreatedSalesToEmpty } from "../features/sales/salesSlice";
-// import { useReactToPrint } from "react-to-print";
-// import { useNavigate } from "react-router-dom";
-
-// const PointOfSale = () => {
-//   const { user } = useSelector((state) => state.auth);
-//   const navigate = useNavigate();
-//   const dispatch = useDispatch();
-
-//   const [selectedProducts, setSelectedProducts] = useState([]);
-//   const [cid, setCid] = useState(null);
-//   const [searchValue, setSearchValue] = useState("");
-//   const [cashInput, setCashInput] = useState(0);
-//   const [customer, setCustomer] = useState({ customerName: "", address: "" });
-
-//   const { productsBySearchforPOS } = useSelector((state) => state.product);
-//   const { createdSales, loading } = useSelector((state) => state.sales);
-
-//   const subTotal = selectedProducts.reduce(
-//     (acc, product) => acc + product.qty * product.sellPrice,
-//     0
-//   );
-
-//   useEffect(() => {
-//     if (!user) navigate("/login");
-//   }, [user, navigate]);
-
-//   const handleDeleteProduct = (pid) =>
-//     setSelectedProducts((prev) => prev.filter((p) => p._id !== pid));
-
-//   const handleSearchOnChange = (e) => {
-//     const val = e.target.value;
-//     setSearchValue(val);
-//     val
-//       ? dispatch(searchProductsforPOS(val))
-//       : dispatch(setProductsBySearchToEmpty());
-//   };
-
-//   const handleSearchOnClick = (pid) => {
-//     const product = productsBySearchforPOS.find((p) => p._id === pid);
-//     if (product && !selectedProducts.find((p) => p._id === pid)) {
-//       setSelectedProducts([...selectedProducts, { ...product, qty: 1 }]);
-//     }
-//     dispatch(setProductsBySearchToEmpty());
-//     setSearchValue("");
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     if (!selectedProducts.length) {
-//       alert("Please select at least one product!");
-//       return;
-//     }
-//     setCid("Running");
-//     const finalProducts = selectedProducts.map((p) => ({
-//       customerName: customer.customerName,
-//       address: customer.address,
-//       productName: p.name,
-//       sellPrice: p.sellPrice,
-//       costPrice: p.costPrice,
-//       quantity: p.qty,
-//       subtotal: p.sellPrice * p.qty,
-//     }));
-//     await dispatch(addSales(finalProducts)).unwrap();
-//     setCid(null);
-//   };
-
-//   useEffect(() => {
-//     if (createdSales.length > 0) {
-//       navigate("/invoice", {
-//         state: {
-//           sales: createdSales,
-//           customerName: customer.customerName,
-//           total: subTotal,
-//           due: subTotal - cashInput,
-//           billPaid: cashInput,
-//         },
-//       });
-//       dispatch(setCreatedSalesToEmpty());
-//     }
-//   }, [createdSales]);
-
-//   useEffect(() => {
-//     dispatch(setProductsBySearchToEmpty());
-//   }, [dispatch]);
-
-//   return (
-//     <form
-//       onSubmit={handleSubmit}
-//       className="max-w-5xl mx-auto bg-white shadow-md rounded-md p-3 sm:p-4 md:p-6"
-//     >
-//       <h1 className="text-lg sm:text-2xl font-bold text-gray-800 mb-4">Sale Order</h1>
-
-//       {/* Customer */}
-//       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-//         <div>
-//           <label className="block text-sm font-medium mb-1">Customer Name</label>
-//           <input
-//             type="text"
-//             value={customer.customerName}
-//             onChange={(e) =>
-//               setCustomer({ ...customer, customerName: e.target.value })
-//             }
-//             placeholder="Customer Name"
-//             className="w-full px-3 py-1.5 border rounded-sm text-sm"
-//           />
-//         </div>
-//         <div>
-//           <label className="block text-sm font-medium mb-1">Address</label>
-//           <input
-//             type="text"
-//             value={customer.address}
-//             placeholder="Address"
-//             onChange={(e) =>
-//               setCustomer({ ...customer, address: e.target.value })
-//             }
-//             className="w-full px-3 py-1.5 border rounded-sm text-sm"
-//           />
-//         </div>
-//       </div>
-
-//       {/* Search */}
-//       <div className="mb-4">
-//         <label className="block text-sm font-medium mb-1">Search Product</label>
-//         <input
-//           type="search"
-//           value={searchValue}
-//           onChange={handleSearchOnChange}
-//           placeholder="Search Products..."
-//           className="w-full px-3 py-1.5 border rounded-sm text-sm"
-//         />
-//         {productsBySearchforPOS.length > 0 && (
-//           <div className="shadow-md rounded mt-1">
-//             {productsBySearchforPOS.map((p) => (
-//               <div
-//                 key={p._id}
-//                 onClick={() => handleSearchOnClick(p._id)}
-//                 className="px-3 py-1 border-b cursor-pointer hover:bg-gray-100 text-sm"
-//               >
-//                 {p.name}
-//               </div>
-//             ))}
-//           </div>
-//         )}
-//       </div>
-
-//       {/* Table */}
-//       <div className="overflow-x-auto border rounded mb-4">
-//         <table className="min-w-full text-xs sm:text-sm">
-//           <thead className="bg-gray-50">
-//             <tr>
-//               <th className="px-2 py-1.5 font-semibold border-b">#</th>
-//               <th className="px-2 py-1.5 font-semibold border-b">Product</th>
-//               <th className="px-2 py-1.5 font-semibold border-b">Price</th>
-//               <th className="px-2 py-1.5 font-semibold border-b">Stock</th>
-//               <th className="px-2 py-1.5 font-semibold border-b">Qty</th>
-//               <th className="px-2 py-1.5 font-semibold border-b">Total</th>
-//               <th className="px-2 py-1.5 font-semibold border-b">Actions</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {selectedProducts.length ? (
-//               selectedProducts.map((p, i) => (
-//                 <tr key={p._id}>
-//                   <td className="px-2 py-1.5 text-center border-b">{i + 1}</td>
-//                   <td className="px-2 py-1.5 text-center border-b">{p.name}</td>
-//                   <td className="px-2 py-1.5 text-center border-b">
-//                     ৳ {p.sellPrice}
-//                   </td>
-//                   <td className="px-2 py-1.5 text-center border-b">
-//                     {p.quantity}
-//                   </td>
-//                   <td className="px-2 py-1.5 text-center border-b">
-//                     <input
-//                       type="number"
-//                       min={1}
-//                       max={p.quantity}
-//                       value={p.qty}
-//                       onChange={(e) =>
-//                         setSelectedProducts((prev) =>
-//                           prev.map((item, idx) =>
-//                             idx === i ? { ...item, qty: +e.target.value } : item
-//                           )
-//                         )
-//                       }
-//                       className="w-12 border rounded px-1 text-center"
-//                     />
-//                   </td>
-//                   <td className="px-2 py-1.5 text-center border-b">
-//                     ৳ {(p.sellPrice * p.qty).toLocaleString()}
-//                   </td>
-//                   <td className="px-2 py-1.5 text-center border-b">
-//                     <button
-//                       onClick={() => handleDeleteProduct(p._id)}
-//                       className="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-//                     >
-//                       Delete
-//                     </button>
-//                   </td>
-//                 </tr>
-//               ))
-//             ) : (
-//               <tr>
-//                 <td
-//                   colSpan={7}
-//                   className="text-center text-gray-400 py-6 font-bold"
-//                 >
-//                   No Orders Yet
-//                 </td>
-//               </tr>
-//             )}
-//           </tbody>
-//         </table>
-//       </div>
-
-//       {/* Totals & Payment */}
-//       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-//         <div className="space-y-1 text-sm">
-//           <div className="flex justify-between font-medium">
-//             <span>Sub Total</span>
-//             <span>৳ {subTotal.toLocaleString()}</span>
-//           </div>
-//           <div className="flex justify-between font-medium">
-//             <span>Cash</span>
-//             <input
-//               type="number"
-//               value={cashInput}
-//               onChange={(e) => setCashInput(Number(e.target.value))}
-//               className="w-20 border rounded px-1 text-right"
-//             />
-//           </div>
-//           <div className="flex justify-between font-bold">
-//             <span>Due</span>
-//             <span>৳ {(subTotal - cashInput).toLocaleString()}</span>
-//           </div>
-//         </div>
-//       </div>
-
-//       <button
-//         type="submit"
-//         disabled={loading && cid}
-//         className={`mt-4 w-full text-white font-bold py-2 rounded-sm ${
-//           loading && cid
-//             ? "cursor-not-allowed bg-blue-500"
-//             : "bg-blue-600 hover:bg-blue-700"
-//         }`}
-//       >
-//         {loading && cid ? "Paying..." : `Pay ৳${subTotal.toLocaleString()}`}
-//       </button>
-//     </form>
-//   );
-// };
-
-// export default PointOfSale;

@@ -50,6 +50,10 @@ const salesSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    discount: {
+      type: Number,
+      required: true,
+    },
     due: {
       type: Number,
       required: true,
