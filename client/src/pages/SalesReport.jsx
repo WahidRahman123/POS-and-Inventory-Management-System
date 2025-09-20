@@ -215,8 +215,21 @@ const SalesReport = () => {
       </div>
 
       {/* Report Title */}
-      <h2 className="text-lg sm:text-xl font-semibold mb-2">{day}'s Report</h2>
-      <hr className="mb-4" />
+
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+  <h2 className="text-lg sm:text-xl font-semibold">{day}'s Report</h2>
+
+  {/* Date Search — Right side top */}
+  <div className="flex items-center gap-2 ml-auto">
+    <label className="text-xs sm:text-sm text-gray-600">Search by Date:</label>
+    <input
+      type="date"
+      className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-36 sm:w-40"
+    />
+  </div>
+</div>
+      {/* <h2 className="text-lg sm:text-xl font-semibold mb-2">{day}'s Report</h2>
+      <hr className="mb-4" /> */}
 
       {/* Summary */}
       {sales.length > 0 && (
@@ -370,12 +383,28 @@ const SalesReport = () => {
                         >
                           {sale.due}
                         </td>
-                        <td
+                        {/* <td
                           rowSpan={rowspan}
                           className="border px-2 py-1 sm:px-4 sm:py-2"
                         >
                           <Link to={`/sales-report/${sale._id}/edit-due`} className="text-blue-500 cursor-pointer hover:text-blue-600 hover:underline">Add Payment</Link>
-                        </td>
+                        </td> */}
+                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">
+                    <div className="flex flex-wrap gap-1">
+                      <Link
+                        to={`/sales-report/${sale._id}/edit-due`}
+                        className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+                      >
+                        Add Payment
+                      </Link>
+                      <button
+                        onClick={() => window.print()}
+                        className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"
+                      >
+                        Print
+                      </button>
+                    </div>
+                  </td>
                       </>
                     )}
                   </tr>

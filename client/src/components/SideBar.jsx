@@ -105,7 +105,9 @@ const SideBar = ({ closeSidebar }) => {
         <Link to="/product/add" onClick={closeSidebar} className="flex items-center p-4 hover:bg-gray-300">
           <span className="mr-3">➕</span> Add Item
         </Link>
-
+        <Link to="/purchase" onClick={closeSidebar} className="flex items-center p-4 hover:bg-gray-300">
+          <span className="mr-3">📅</span> Purchase
+        </Link>
         {user?.role === "admin" && (
           <Link to="/sales-report" onClick={closeSidebar} className="flex items-center p-4 hover:bg-gray-300">
             <span className="mr-3">📅</span> Sales Report
