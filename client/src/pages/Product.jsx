@@ -183,7 +183,7 @@ const Product = () => {
               <tr>
                 <td
                   colSpan={7}
-                  className="text-center text-gray-600 py-10 text-lg"
+                  className="text-center text-gray-600 py-10 text-lg select-none"
                 >
                   No Products Available.
                 </td>
@@ -194,7 +194,7 @@ const Product = () => {
       </div>
 
       {/* Pagination */}
-      {pages && (
+      {pages ? (
         <div className="flex justify-center items-center mt-4 gap-2 text-sm">
           <button
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -214,7 +214,7 @@ const Product = () => {
             Next
           </button>
         </div>
-      )}
+      ) : ""}
     </div>
   );
 };

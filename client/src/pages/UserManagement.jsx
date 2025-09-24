@@ -216,7 +216,7 @@ const UserManagement = () => {
                 </tr>
               ))
             ) : (
-              <tr className="text-center select-none text-gray-500 text-3xl">
+              <tr className="text-center text-gray-500 text-lg select-none">
                 <td colSpan={4} className="px-4 py-2">
                   No Users Available.
                 </td>

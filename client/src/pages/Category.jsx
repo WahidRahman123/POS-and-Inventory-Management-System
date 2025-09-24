@@ -205,7 +205,7 @@ const Category = () => {
               ))
             ) : (
               <tr>
-                <td colSpan={4} className="text-center text-gray-500 py-10">
+                <td colSpan={4} className="text-center text-gray-500 py-10 text-lg select-none">
                   No Category Available.
                 </td>
               </tr>
@@ -215,7 +215,7 @@ const Category = () => {
       </div>
 
       {/* Pagination */}
-      {pages && (
+      {pages ? (
         <div className="flex justify-center items-center mt-4 gap-2 text-sm">
           <button
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -241,7 +241,7 @@ const Category = () => {
             Next
           </button>
         </div>
-      )}
+      ) : ""}
     </div>
   );
 };
