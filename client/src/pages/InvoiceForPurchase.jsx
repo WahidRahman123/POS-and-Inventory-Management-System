@@ -137,7 +137,7 @@ const InvoiceForPurchase = () => {
                   </td>
 
                   <td className="border px-2 py-1 text-right">
-                    ৳ {location.state.totalAmount.toLocaleString()}
+                    ৳ {(location.state.totalAmount / 10000).toLocaleString()}
                   </td>
                 </tr>
               </tbody>
@@ -148,13 +148,13 @@ const InvoiceForPurchase = () => {
               <p className="font-semibold text-gray-800">
                 Total:{" "}
                 <span className="float-right">
-                  ৳ {location.state.totalAmount.toLocaleString()}
+                  ৳ {(location.state.totalAmount / 10000).toLocaleString()}
                 </span>
               </p>
               <p className="font-semibold text-gray-800">
                 Paid:{" "}
                 <span className="float-right">
-                  ৳ {location.state.paid.toLocaleString()}
+                  ৳ {(location.state.paid / 10000).toLocaleString()}
                 </span>
               </p>
               <p
@@ -162,7 +162,7 @@ const InvoiceForPurchase = () => {
                   location.state.due > 0 ? "text-red-600" : "text-green-600"
                 }`}
               >
-                Due: <span>৳ {location.state.due.toLocaleString()}</span>
+                Due: <span>৳ {(location.state.due / 10000).toLocaleString()}</span>
               </p>
             </div>
           </div>

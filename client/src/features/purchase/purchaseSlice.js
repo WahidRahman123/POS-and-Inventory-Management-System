@@ -166,7 +166,16 @@ const purchaseSlice = createSlice({
       })
       .addCase(fetchPurchaseById.fulfilled, (state, action) => {
         state.loading = false;
-        state.purchaseSearchedById = action.payload;
+        const purchase = action.payload;
+        const newPurchase = purchase
+          ? {
+              ...purchase,
+              totalAmount: purchase.totalAmount / 10000,
+              paid: purchase.paid / 10000,
+              due: purchase.due / 10000,
+            }
+          : null;
+        state.purchaseSearchedById = newPurchase;
       })
       .addCase(fetchPurchaseById.rejected, (state, action) => {
         state.loading = false;
