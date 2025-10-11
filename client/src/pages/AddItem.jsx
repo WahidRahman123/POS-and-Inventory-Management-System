@@ -43,8 +43,8 @@ const AddItem = () => {
       setAid("Running");
       const newProduct = {
         ...product,
-        sellPrice: Number(product.sellPrice) * 10000,
-        costPrice: Number(product.costPrice) * 10000,
+        sellPrice: Number(product.sellPrice),
+        costPrice: Number(product.costPrice),
         quantity: Number(product.quantity),
       };
       await dispatch(addProduct(newProduct)).unwrap();
@@ -125,7 +125,6 @@ const AddItem = () => {
                 value={product.costPrice}
                 onChange={handleOnChange}
                 min={0}
-                step="any"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
@@ -139,7 +138,6 @@ const AddItem = () => {
                 name="sellPrice"
                 value={product.sellPrice}
                 onChange={handleOnChange}
-                step="any"
                 min={0}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required

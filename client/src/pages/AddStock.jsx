@@ -77,7 +77,7 @@ const AddStock = () => {
               { label: "Name", value: productSearchedById?.name },
               { label: "Category", value: productSearchedById?.category?.name || "-" },
               { label: "Quantity", value: productSearchedById?.quantity },
-              { label: "Price", value: productSearchedById?.sellPrice / 10000 },
+              { label: "Price", value: productSearchedById?.sellPrice },
             ].map(({ label, value }) => (
               <div key={label} className="flex">
                 <span className="w-28 font-medium">{label}</span>

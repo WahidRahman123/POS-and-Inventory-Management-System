@@ -20,9 +20,9 @@ const EditPurchaseDue = () => {
     setAid("Run");
     let amount;
     if (due > purchaseSearchedById.due) {
-      amount = Number(purchaseSearchedById.due) * 10000;
+      amount = Number(purchaseSearchedById.due);
     } else {
-      amount = Number(due) * 10000;
+      amount = Number(due);
     }
     try {
       await dispatch(addPayment({ id, info: { amount } })).unwrap();
@@ -67,7 +67,6 @@ const EditPurchaseDue = () => {
               value={due}
               onChange={(e) => setDue(e.target.value)}
               min={0}
-              step="any"
               placeholder="Add Payment"
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required

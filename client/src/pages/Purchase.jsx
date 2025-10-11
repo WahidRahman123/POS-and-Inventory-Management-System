@@ -38,14 +38,13 @@ const Purchase = () => {
   // console.log(purchases);
 
   const handleSubmit = async (value, setSubmitting, resetForm) => {
-    const ta = Number(value.totalAmount) * 10000;
     const paid =
       Number(value.paid) > Number(value.totalAmount)
-        ? Number(value.totalAmount) * 10000
-        : Number(value.paid) * 10000;
-    const due = (ta - paid);
+        ? Number(value.totalAmount)
+        : Number(value.paid);
+    const due = Number(value.totalAmount) - paid;
 
-    const purchaseValue = { ...value, paid, due, totalAmount: ta };
+    const purchaseValue = { ...value, paid, due };
 
     try {
       await dispatch(addPurchase(purchaseValue)).unwrap();
@@ -292,17 +291,17 @@ const Purchase = () => {
                       {purchase.quantity}
                     </td>
                     <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                      {purchase.totalAmount / 10000}
+                      {purchase.totalAmount}
                     </td>
                     <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                      {purchase.paid / 10000}
+                      {purchase.paid}
                     </td>
                     <td
                       className={`border px-2 py-1 sm:px-4 sm:py-2 ${
                         purchase.due > 0 ? "text-red-500 font-bold" : ""
                       }`}
                     >
-                      {purchase.due / 10000}
+                      {purchase.due}
                     </td>
                     <td className="border px-2 py-1 sm:px-4 sm:py-2">
                       <div className="flex flex-wrap gap-1">

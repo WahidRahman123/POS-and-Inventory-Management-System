@@ -144,8 +144,8 @@ const Product = () => {
                   >
                     {product.quantity}
                   </td>
-                  <td className="p-2 text-right">৳{product.costPrice / 10000}</td>
-                  <td className="p-2 text-right">৳{product.sellPrice / 10000}</td>
+                  <td className="p-2 text-right">৳{product.costPrice}</td>
+                  <td className="p-2 text-right">৳{product.sellPrice}</td>
                   <td className="p-2">
                     <div className="flex flex-wrap gap-1 justify-center">
                       <Link
