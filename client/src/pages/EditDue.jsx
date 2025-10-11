@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { addPayment, fetchSaleById } from "../features/sales/salesSlice";
 import { FaArrowLeft } from "react-icons/fa";
+import Decimal from "decimal.js";
 
 const EditDue = () => {
   const { user } = useSelector((state) => state.auth);
@@ -17,15 +18,13 @@ const EditDue = () => {
     e.preventDefault();
     setAid("Run");
     let amount;
-    if(due > saleSearchedById.due) {
-        amount = Number(saleSearchedById.due);
+    if (new Decimal(due).greaterThan(new Decimal(saleSearchedById.due))) {
+      amount = Number(new Decimal(saleSearchedById.due).toFixed(4));
     } else {
-        amount = Number(due);
+      amount = Number(new Decimal(due).toFixed(4));
     }
     try {
-      await dispatch(
-        addPayment({ id, info: { amount } })
-      ).unwrap();
+      await dispatch(addPayment({ id, info: { amount } })).unwrap();
       navigate("/sales-report");
     } catch {
       console.log("Payment Failed!");
@@ -70,6 +69,7 @@ const EditDue = () => {
               value={due}
               onChange={(e) => setDue(e.target.value)}
               min={0}
+              step="any"
               placeholder="Add Payment"
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required

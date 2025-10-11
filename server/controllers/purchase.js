@@ -1,4 +1,5 @@
 const Purchase = require("../models/Purchase");
+const Decimal = require("decimal.js");
 
 module.exports.index = async (req, res) => {
   try {
@@ -65,8 +66,14 @@ module.exports.addPayment = async (req, res) => {
     const purchase = await Purchase.findById(id);
 
     if (purchase) {
-      purchase.paid = purchase.paid + amount;
-      purchase.due = purchase.due - amount;
+      // purchase.paid = purchase.paid + amount;
+      purchase.paid = Number(
+        new Decimal(purchase.paid).plus(new Decimal(amount)).toFixed(4)
+      );
+      // purchase.due = purchase.due - amount;
+      purchase.due = Number(
+        new Decimal(purchase.due).minus(new Decimal(amount)).toFixed(4)
+      );
       await purchase.save();
 
       res.status(201).json({ message: "Payment updated successfully" });

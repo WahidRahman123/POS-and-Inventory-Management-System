@@ -9,6 +9,7 @@ import {
   countLowQuantityProduct,
 } from "../features/product/productSlice";
 import { useNavigate } from "react-router-dom";
+import Decimal from "decimal.js";
 
 const AddItem = () => {
   const { user } = useSelector((state) => state.auth);
@@ -43,8 +44,8 @@ const AddItem = () => {
       setAid("Running");
       const newProduct = {
         ...product,
-        sellPrice: Number(product.sellPrice),
-        costPrice: Number(product.costPrice),
+        sellPrice: Number(new Decimal(product.sellPrice).toFixed(4)),
+        costPrice: Number(new Decimal(product.costPrice).toFixed(4)),
         quantity: Number(product.quantity),
       };
       await dispatch(addProduct(newProduct)).unwrap();
@@ -125,6 +126,7 @@ const AddItem = () => {
                 value={product.costPrice}
                 onChange={handleOnChange}
                 min={0}
+                step="any"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
@@ -139,6 +141,7 @@ const AddItem = () => {
                 value={product.sellPrice}
                 onChange={handleOnChange}
                 min={0}
+                step="any"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />

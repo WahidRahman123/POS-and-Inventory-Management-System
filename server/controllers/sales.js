@@ -1,5 +1,6 @@
 const Sales = require("../models/Sales");
 const Product = require("../models/Product");
+const Decimal = require("decimal.js");
 
 module.exports.index = async (req, res) => {
   try {
@@ -210,8 +211,14 @@ module.exports.addPayment = async (req, res) => {
     const sale = await Sales.findById(id);
 
     if (sale) {
-      sale.paid = sale.paid + amount;
-      sale.due = sale.due - amount;
+      // sale.paid = sale.paid + amount;
+      sale.paid = Number(
+        new Decimal(sale.paid).plus(new Decimal(amount)).toFixed(4)
+      );
+      // sale.due = sale.due - amount;
+      sale.due = Number(
+        new Decimal(sale.due).minus(new Decimal(amount)).toFixed(4)
+      );
       await sale.save();
 
       res.status(201).json({ message: "Payment updated successfully" });
@@ -229,9 +236,8 @@ module.exports.getTotalSaleCount = async (req, res) => {
     const count = await Sales.countDocuments();
 
     res.status(201).json(count);
-
   } catch (error) {
     console.error(error);
     res.status(500).send("Server Error");
   }
-}
+};

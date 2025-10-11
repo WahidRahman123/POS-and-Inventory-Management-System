@@ -7,6 +7,7 @@ import {
   updateProduct,
 } from "../features/product/productSlice";
 import { fetchAllCategories, fetchAllCategoriesNames } from "../features/category/categorySlice";
+import Decimal from "decimal.js";
 
 const EditProductPage = () => {
   const { user } = useSelector((state) => state.auth);
@@ -47,8 +48,8 @@ const EditProductPage = () => {
     try {
       const newProduct = {
         ...product,
-        sellPrice: Number(product.sellPrice),
-        costPrice: Number(product.costPrice),
+        sellPrice: Number(new Decimal(product.sellPrice).toFixed(4)),
+        costPrice: Number(new Decimal(product.costPrice).toFixed(4)),
         quantity: Number(product.quantity),
       };
       await dispatch(updateProduct({ id, item: newProduct })).unwrap();
@@ -131,6 +132,7 @@ const EditProductPage = () => {
                 name="costPrice"
                 value={product.costPrice}
                 onChange={handleOnChange}
+                step="any"
                 min={0}
                 className="w-full border border-gray-300 rounded-md px-3 py-2"
                 required
@@ -143,6 +145,7 @@ const EditProductPage = () => {
                 name="sellPrice"
                 value={product.sellPrice}
                 onChange={handleOnChange}
+                step="any"
                 min={0}
                 className="w-full border border-gray-300 rounded-md px-3 py-2"
                 required
@@ -159,6 +162,7 @@ const EditProductPage = () => {
               value={product.quantity}
               onChange={handleOnChange}
               className="w-full border border-gray-300 rounded-md px-3 py-2"
+              required
             />
           </div>
 

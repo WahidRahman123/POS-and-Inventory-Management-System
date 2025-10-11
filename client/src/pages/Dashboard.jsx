@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchDashboardResult } from "../features/dashboard/dashboardSlice";
 import { Link, useNavigate } from "react-router-dom";
 import CountUp from "react-countup";
+import Decimal from "decimal.js";
 
 const Dashboard = () => {
   const { user } = useSelector((state) => state.auth);

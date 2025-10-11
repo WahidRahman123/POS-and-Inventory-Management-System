@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
 import { useRef } from "react";
 import { useSelector } from "react-redux";
+import Decimal from 'decimal.js';
 
 const InvoiceForPurchase = () => {
   const { user } = useSelector((state) => state.auth);
@@ -137,7 +138,7 @@ const InvoiceForPurchase = () => {
                   </td>
 
                   <td className="border px-2 py-1 text-right">
-                    ৳ {location.state.totalAmount.toLocaleString()}
+                    ৳ {new Decimal(location.state.totalAmount).toFixed(2)}
                   </td>
                 </tr>
               </tbody>
@@ -148,21 +149,21 @@ const InvoiceForPurchase = () => {
               <p className="font-semibold text-gray-800">
                 Total:{" "}
                 <span className="float-right">
-                  ৳ {location.state.totalAmount.toLocaleString()}
+                  ৳ {new Decimal(location.state.totalAmount).toFixed(2)}
                 </span>
               </p>
               <p className="font-semibold text-gray-800">
                 Paid:{" "}
                 <span className="float-right">
-                  ৳ {location.state.paid.toLocaleString()}
+                  ৳ {location.state.paid ? new Decimal(location.state.paid).toFixed(2) : 0}
                 </span>
               </p>
               <p
                 className={`font-semibold float-right ${
-                  location.state.due > 0 ? "text-red-600" : "text-green-600"
+                  new Decimal(location.state.due).greaterThan(new Decimal(0)) ? "text-red-600" : "text-green-600"
                 }`}
               >
-                Due: <span>৳ {location.state.due.toLocaleString()}</span>
+                Due: <span>৳ {location.state.due ? new Decimal(location.state.due).toFixed(2) : 0}</span>
               </p>
             </div>
           </div>

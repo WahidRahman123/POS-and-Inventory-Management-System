@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import { addPayment, fetchPurchaseById } from "../features/purchase/purchaseSlice";
+import Decimal from "decimal.js";
 
 const EditPurchaseDue = () => {
   const { user } = useSelector((state) => state.auth);
@@ -19,10 +20,10 @@ const EditPurchaseDue = () => {
     e.preventDefault();
     setAid("Run");
     let amount;
-    if (due > purchaseSearchedById.due) {
-      amount = Number(purchaseSearchedById.due);
+    if (new Decimal(due).greaterThan(new Decimal(purchaseSearchedById.due))) {
+      amount = Number(new Decimal(purchaseSearchedById.due).toFixed(4));
     } else {
-      amount = Number(due);
+      amount = Number(new Decimal(due).toFixed(4));
     }
     try {
       await dispatch(addPayment({ id, info: { amount } })).unwrap();
@@ -68,6 +69,7 @@ const EditPurchaseDue = () => {
               onChange={(e) => setDue(e.target.value)}
               min={0}
               placeholder="Add Payment"
+              step="any"
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />

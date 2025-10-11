@@ -1,6 +1,7 @@
 const Sales = require("../models/Sales");
 const Product = require("../models/Product");
 const Purchase = require("../models/Purchase");
+const Decimal = require("decimal.js");
 
 module.exports.index = async (req, res) => {
   try {
@@ -8,8 +9,8 @@ module.exports.index = async (req, res) => {
       {
         $group: {
           _id: null,
-          totalSell: { $sum: "$paid" },
-          totalCostInSale: { $sum: "$totalCost" },
+          totalSell: { $sum: { $multiply: ["$paid", 10000] } },
+          totalCostInSale: { $sum: { $multiply: ["$totalCost", 10000] } },
           numberOfSales: { $sum: 1 },
         },
       },
@@ -28,18 +29,24 @@ module.exports.index = async (req, res) => {
       {
         $group: {
           _id: null,
-          totalCost: { $sum: "$paid" },
+          totalCost: { $sum: { $multiply: ["$paid", 10000] } },
         },
       },
     ]);
 
     let result = {
-      totalSell: sales[0]?.totalSell || 0,
-      totalCost: purchase[0]?.totalCost || 0,
+      totalSell: sales[0] ? sales[0].totalSell / 10000 : 0,
+      totalCost: purchase[0] ? purchase[0].totalCost / 10000 : 0,
       numberOfSales: sales[0]?.numberOfSales || 0,
       numberOfProducts: product[0]?.numberOfProducts || 0,
-      profit: (sales[0]?.totalSell && sales[0]?.totalCostInSale && sales[0].totalSell - sales[0].totalCostInSale > 0) ? sales[0].totalSell - sales[0].totalCostInSale : 0,
+      profit:
+        sales[0]?.totalSell &&
+        sales[0]?.totalCostInSale &&
+        sales[0].totalSell - sales[0].totalCostInSale > 0
+          ? (sales[0].totalSell - sales[0].totalCostInSale) / 10000
+          : 0,
     };
+    // console.log(result)
 
     // if (sales.length > 0 && product.length > 0) {
     //   result = {

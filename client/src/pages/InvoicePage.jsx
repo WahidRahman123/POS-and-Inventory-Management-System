@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
 import { useRef } from "react";
 import { useSelector } from "react-redux";
+import Decimal from "decimal.js";
 
 const InvoicePage = () => {
   const { user } = useSelector((state) => state.auth);
@@ -161,10 +162,10 @@ const InvoicePage = () => {
                         {sale.quantity}
                       </td>
                       <td className="border border-gray-300 px-2 py-1 text-right">
-                        {sale.sellPrice}
+                        {new Decimal(sale.sellPrice).toFixed(2)}
                       </td>
                       <td className="border border-gray-300 px-2 py-1 text-right">
-                        {sale.subtotal}
+                        {new Decimal(sale.subtotal).toFixed(2)}
                       </td>
                     </tr>
                   ))
@@ -178,35 +179,53 @@ const InvoicePage = () => {
               <p className="font-semibold text-red-600">
                 মোট {location.state ? location.state.products.length : ""}{" "}
                 <span className="float-right">
-                  {location.state ? location.state.totalWithoutDiscount : ""}
+                  {location.state
+                    ? new Decimal(location.state.totalWithoutDiscount).toFixed(
+                        2
+                      )
+                    : ""}
                 </span>
               </p>
               <p>
                 মূল্যছাড় (Discount){" "}
                 <span className="float-right">
-                  {location.state ? location.state.discount : ""}
+                  {location.state
+                    ? location.state.discount
+                      ? new Decimal(location.state.discount).toFixed(2)
+                      : 0
+                    : ""}
                 </span>
               </p>
               <p>
                 পরিশোধযোগ্য টাকা{" "}
                 <span className="float-right">
-                  {location.state ? location.state.total : ""}
+                  {location.state
+                    ? new Decimal(location.state.total).toFixed(2)
+                    : ""}
                 </span>
               </p>
               <br />
               <p>
                 মোট জমা{" "}
                 <span className="float-right">
-                  {location.state ? location.state.paid : ""}
+                  {location.state
+                    ? location.state.paid
+                      ? new Decimal(location.state.paid).toFixed(2)
+                      : 0
+                    : ""}
                 </span>
               </p>
               <p>
                 মোট বাকি{" "}
                 <span className="float-right">
                   {location.state
-                    ? location.state.due < 0
-                      ? `${Math.abs(location.state.due)} (ফেরত পাবে)`
+                    ? new Decimal(location.state.due).lessThan(new Decimal(0))
+                      ? `${new Decimal(location.state.due)
+                          .abs()
+                          .toFixed(2)} (ফেরত পাবে)`
                       : location.state.due
+                      ? new Decimal(location.state.due).toFixed(2)
+                      : 0
                     : ""}
                 </span>
               </p>
@@ -214,7 +233,9 @@ const InvoicePage = () => {
 
             <div className="mt-6">
               <p className="text-red-600 font-semibold">মন্তব্য:</p>
-              <div className="h-12 border border-gray-300 rounded">{location.state.remarks}</div>
+              <div className="h-12 border border-gray-300 rounded">
+                {location.state.remarks}
+              </div>
             </div>
           </div>
         </div>

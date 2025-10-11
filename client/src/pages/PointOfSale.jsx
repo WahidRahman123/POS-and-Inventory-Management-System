@@ -5,14 +5,19 @@ import {
   searchProductsforPOS,
   setProductsBySearchToEmpty,
 } from "../features/product/productSlice";
-import { addSales, getTotalSaleCount, setCreatedSalesToNull } from "../features/sales/salesSlice";
+import {
+  addSales,
+  getTotalSaleCount,
+  setCreatedSalesToNull,
+} from "../features/sales/salesSlice";
 import { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 import { useNavigate } from "react-router-dom";
+import Decimal from 'decimal.js';
 
 const PointOfSale = () => {
   const { user } = useSelector((state) => state.auth);
-  const { totalSaleCount } = useSelector(state => state.sales);
+  const { totalSaleCount } = useSelector((state) => state.sales);
   useEffect(() => {
     if (!user) {
       navigate("/login");
@@ -24,14 +29,14 @@ const PointOfSale = () => {
 
   const [searchValue, setSearchValue] = useState("");
   const orderTotal = selectedProducts.reduce(
-    (acc, product) => acc + product.qty * product.sellPrice,
-    0
+    (acc, product) => acc.plus(new Decimal(Number(product.qty)).mul(new Decimal(Number(product.newSellPrice)))),
+    new Decimal(0)
   );
   const [discount, setDiscount] = useState(0);
-  const subTotal = Number(orderTotal) - Number(discount);
+  const subTotal = orderTotal.minus(new Decimal(Number(discount)));
   const totalCost = selectedProducts.reduce(
-    (acc, product) => acc + product.qty * product.costPrice,
-    0
+    (acc, product) => acc.plus(new Decimal(Number(product.qty)).mul(new Decimal(product.costPrice))),
+    new Decimal(0)
   );
   const [cashInput, setCashInput] = useState("");
   const [remarks, setRemarks] = useState("");
@@ -72,7 +77,11 @@ const PointOfSale = () => {
       );
       // console.log(foundProduct);
       if (!foundProduct) {
-        productToAdd = { ...productToAdd, qty: 1 }; //! iMPORTANT LINE
+        productToAdd = {
+          ...productToAdd,
+          qty: 1,
+          newSellPrice: productToAdd.sellPrice,
+        }; //! iMPORTANT LINE
         // setSelectedProducts(prev => [...prev, productToAdd]);
         setSelectedProducts([...selectedProducts, productToAdd]);
       }
@@ -92,10 +101,12 @@ const PointOfSale = () => {
         const finalProducts = selectedProducts.map((p, i) => {
           return {
             productName: p.name,
-            sellPrice: Number(p.sellPrice),
+            oldSellPrice: Number(p.sellPrice),
+            sellPrice: Number(p.newSellPrice),
             costPrice: Number(p.costPrice),
             quantity: Number(p.qty),
-            subtotal: Number(p.sellPrice) * Number(p.qty),
+            // subtotal: Number(p.sellPrice) * Number(p.qty),
+            subtotal: Number(new Decimal(p.newSellPrice).mul(new Decimal(p.qty)).toFixed(4)),
           };
         });
 
@@ -108,19 +119,19 @@ const PointOfSale = () => {
             customerName: customer.customerName,
             address: customer.address,
             products: finalProducts,
-            totalWithoutDiscount: Number(orderTotal),
-            total: Number(subTotal),
-            discount: Number(discount),
-            totalCost: Number(totalCost),
+            totalWithoutDiscount: Number(orderTotal.toFixed(4)),
+            total: Number(subTotal.toFixed(4)),
+            discount: discount ? Number(new Decimal(discount).toFixed(4)) : 0,
+            totalCost: Number(totalCost.toFixed(4)),
             due: cashInput
-              ? Number(subTotal) - Number(cashInput) < 0
+              ? subTotal.minus(new Decimal(cashInput)).lessThan(new Decimal(0))
                 ? 0
-                : Number(subTotal) - Number(cashInput)
-              : Number(subTotal),
+                : Number(subTotal.minus(new Decimal(cashInput)).toFixed(4))
+              : Number(subTotal.toFixed(4)),
             paid: cashInput
-              ? Number(cashInput) > Number(subTotal)
-                ? Number(subTotal)
-                : Number(cashInput)
+              ? new Decimal(cashInput).greaterThan(subTotal)
+                ? Number(subTotal.toFixed(4))
+                : Number(new Decimal(cashInput).toFixed(4))
               : 0,
           })
         ).unwrap();
@@ -140,9 +151,9 @@ const PointOfSale = () => {
       const data = {
         ...createdSales,
         due: cashInput
-          ? Number(subTotal) - Number(cashInput)
-          : Number(subTotal),
-        paid: cashInput ? Number(cashInput) : 0,
+          ? Number(subTotal.minus(new Decimal(cashInput)).toFixed(4))
+          : Number(subTotal.toFixed(4)),
+        paid: cashInput ? Number(new Decimal(cashInput).toFixed(4)) : 0,
       };
       dispatch(setCreatedSalesToNull());
       // Navigate to the page and print it
@@ -155,7 +166,7 @@ const PointOfSale = () => {
     dispatch(getTotalSaleCount());
   }, []);
 
-  if(!user) return null;
+  if (!user) return null;
 
   return (
     <>
@@ -269,7 +280,23 @@ const PointOfSale = () => {
                     {product.name}
                   </td>
                   <td className="px-3 py-1.5 text-sm text-gray-800 border-b text-center">
-                    ৳ {product.sellPrice}
+                    ৳{" "}
+                    <input
+                      type="number"
+                      min={product.sellPrice}
+                      value={product.newSellPrice}
+                      onChange={(e) => {
+                        const newSP = e.target.value;
+                        setSelectedProducts((prev) =>
+                          prev.map((p, i) =>
+                            i === index ? { ...p, newSellPrice: newSP } : p
+                          )
+                        );
+                      }}
+                      step="any"
+                      className="w-[100px] border rounded px-2"
+                      required
+                    />
                   </td>
                   <td className="px-3 py-1.5 text-sm text-gray-800 border-b text-center">
                     {product.quantity}
@@ -281,7 +308,7 @@ const PointOfSale = () => {
                       max={product.quantity}
                       value={product.qty}
                       onChange={(e) => {
-                        const newQty = Number(e.target.value);
+                        const newQty = e.target.value;
                         setSelectedProducts((prev) =>
                           prev.map((p, i) =>
                             i === index ? { ...p, qty: newQty } : p
@@ -289,11 +316,13 @@ const PointOfSale = () => {
                         );
                       }}
                       className="w-[60px] border rounded px-2"
+                      required
                     />
                   </td>
 
                   <td className="px-3 py-1.5 text-sm text-gray-800 border-b text-center">
-                    ৳ {(product.sellPrice * product.qty).toLocaleString()}
+                    {/* ৳ {(product.sellPrice * product.qty).toLocaleString()} */}
+                    ৳ {new Decimal(Number(product.newSellPrice)).mul(new Decimal(Number(product.qty))).toString()}
                   </td>
                   <td className="p-2 text-center border-b">
                     <button
@@ -323,7 +352,7 @@ const PointOfSale = () => {
           <div className="w-64 space-y-0.5 text-sm">
             <div className="flex justify-between">
               <span className="font-medium">OrderTotal(1pack,piece)</span>
-              <span className="font-medium">{orderTotal}</span>
+              <span className="font-medium">{orderTotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span className="font-medium">Order&nbsp;Discount</span>
@@ -333,6 +362,7 @@ const PointOfSale = () => {
                   min={0}
                   max={orderTotal}
                   value={discount}
+                  step="any"
                   onChange={(e) => setDiscount(e.target.value)}
                   className="w-[80px] border rounded border-gray-400 px-1 py-0.5"
                 />
@@ -340,7 +370,7 @@ const PointOfSale = () => {
             </div>
             <div className="flex justify-between font-bold">
               <span>Sub&nbsp;Total</span>
-              <span>{subTotal}</span>
+              <span>{subTotal.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -353,6 +383,7 @@ const PointOfSale = () => {
               type="number"
               value={cashInput}
               onChange={(e) => setCashInput(e.target.value)}
+              step="any"
               className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
               min={0}
             />
@@ -373,15 +404,16 @@ const PointOfSale = () => {
           <div className="w-64 space-y-0.5 text-sm">
             <div className="flex justify-between font-bold">
               <span>Total</span>
-              <span>{subTotal}</span>
+              <span>{subTotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between font-bold">
               <span>Paid</span>
-              <span>{cashInput}</span>
+              <span>{new Decimal(Number(cashInput)).toFixed(2)}</span>
             </div>
             <div className="flex justify-between font-bold">
               <span>Due</span>
-              <span>{subTotal - cashInput}</span>
+              {/* <span>{subTotal - cashInput}</span> */}
+              <span>{subTotal.minus(new Decimal(Number(cashInput))).toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -395,7 +427,7 @@ const PointOfSale = () => {
               : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
           }`}
         >
-          {loading && cid ? "Paying..." : `Pay ${subTotal}`}
+          {loading && cid ? "Paying..." : `Pay`}
         </button>
       </form>
     </>

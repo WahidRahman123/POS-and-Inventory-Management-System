@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Decimal from "decimal.js";
 
 const initialState = {
   sales: [],
@@ -167,20 +168,19 @@ const salesSlice = createSlice({
         state.sales = action.payload;
         if (state.sales.length > 0) {
           const totalSale = state.sales.reduce(
-            (acc, sale) => acc + sale.paid,
-            0
+            (acc, sale) => acc.plus(new Decimal(sale.paid)),
+            new Decimal(0)
           );
           const totalCost = state.sales.reduce(
-            (acc, sale) => acc + sale.totalCost,
-            0
+            (acc, sale) => acc.plus(new Decimal(sale.totalCost)),
+            new Decimal(0)
           );
 
           state.totalSales = totalSale;
           state.totalCosts = totalCost;
-          state.profit =
-            state.totalSales - state.totalCosts < 0
-              ? 0
-              : state.totalSales - state.totalCosts;
+          state.profit = totalSale.minus(totalCost).lessThan(new Decimal(0))
+            ? 0
+            : totalSale.minus(totalCost);
         } else {
           state.totalSales = null;
         }
@@ -208,20 +208,19 @@ const salesSlice = createSlice({
         state.sales = action.payload;
         if (state.sales.length > 0) {
           const totalSale = state.sales.reduce(
-            (acc, sale) => acc + sale.paid,
-            0
+            (acc, sale) => acc.plus(new Decimal(sale.paid)),
+            new Decimal(0)
           );
           const totalCost = state.sales.reduce(
-            (acc, sale) => acc + sale.totalCost,
-            0
+            (acc, sale) => acc.plus(new Decimal(sale.totalCost)),
+            new Decimal(0)
           );
 
           state.totalSales = totalSale;
           state.totalCosts = totalCost;
-          state.profit =
-            state.totalSales - state.totalCosts < 0
-              ? 0
-              : state.totalSales - state.totalCosts;
+          state.profit = totalSale.minus(totalCost).lessThan(new Decimal(0))
+            ? 0
+            : totalSale.minus(totalCost);
         } else {
           state.totalSales = null;
         }
@@ -314,7 +313,8 @@ const salesSlice = createSlice({
           progress: undefined,
           theme: "colored",
         });
-      }).addCase(getTotalSaleCount.pending, (state, action) => {
+      })
+      .addCase(getTotalSaleCount.pending, (state, action) => {
         state.loading = true;
         state.error = null;
       })
@@ -335,7 +335,7 @@ const salesSlice = createSlice({
           progress: undefined,
           theme: "colored",
         });
-      })
+      });
   },
 });
 

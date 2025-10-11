@@ -8,6 +8,7 @@ import {
   fetchPurchases,
 } from "../features/purchase/purchaseSlice";
 import { Link, useNavigate } from "react-router-dom";
+import Decimal from "decimal.js";
 
 const purchaseSchema = yup.object({
   createdAt: yup.date().required("*Date is required!"),
@@ -38,13 +39,20 @@ const Purchase = () => {
   // console.log(purchases);
 
   const handleSubmit = async (value, setSubmitting, resetForm) => {
-    const paid =
-      Number(value.paid) > Number(value.totalAmount)
-        ? Number(value.totalAmount)
-        : Number(value.paid);
-    const due = Number(value.totalAmount) - paid;
 
-    const purchaseValue = { ...value, paid, due };
+    const paid = new Decimal(value.paid).greaterThan(
+      new Decimal(value.totalAmount)
+    )
+      ? new Decimal(value.totalAmount)
+      : new Decimal(value.paid);
+
+    const due = new Decimal(value.totalAmount).minus(paid);
+
+    const purchaseValue = {
+      ...value,
+      paid: Number(paid.toFixed(4)),
+      due: Number(due.toFixed(4)),
+    };
 
     try {
       await dispatch(addPurchase(purchaseValue)).unwrap();
@@ -174,6 +182,7 @@ const Purchase = () => {
                   name="totalAmount"
                   type="number"
                   placeholder="Total Amount"
+                  step="any"
                   className="border border-gray-300 rounded-md px-3 py-2 text-sm"
                 />
                 <ErrorMessage
@@ -188,6 +197,7 @@ const Purchase = () => {
                   name="paid"
                   type="number"
                   placeholder="Paid"
+                  step="any"
                   className="border border-gray-300 rounded-md px-3 py-2 text-sm"
                 />
                 <ErrorMessage

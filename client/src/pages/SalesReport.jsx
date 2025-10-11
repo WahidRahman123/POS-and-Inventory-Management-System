@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchSalesByDate, fetchSalesByIndividualDate } from "../features/sales/salesSlice";
 import { Link, useNavigate } from "react-router-dom";
+import Decimal from "decimal.js";
 
 const SalesReport = () => {
   const { user } = useSelector((state) => state.auth);
@@ -102,19 +103,19 @@ const SalesReport = () => {
           <div>
             Total Sales:{" "}
             <span className="text-green-600">
-              ৳ {totalSales?.toLocaleString("en-BD")}
+              ৳ {totalSales ? new Decimal(totalSales).toFixed(2) : 0}
             </span>
           </div>
           <div>
             Total Costs:{" "}
             <span className="text-green-600">
-              ৳ {totalCosts?.toLocaleString("en-BD")}
+              ৳ {totalCosts ? new Decimal(totalCosts).toFixed(2) : 0}
             </span>
           </div>
           <div>
             Profit:{" "}
             <span className="text-green-600">
-              ৳ {profit?.toLocaleString("en-BD")}
+              ৳ {profit ? new Decimal(profit).toFixed(2) : 0}
             </span>
           </div>
         </div>

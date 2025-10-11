@@ -33,6 +33,11 @@ const salesSchema = new mongoose.Schema(
           required: true,
           trim: true,
         },
+        oldSellPrice: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
         sellPrice: {
           type: Number,
           required: true,
