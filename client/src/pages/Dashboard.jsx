@@ -45,7 +45,7 @@ const Dashboard = () => {
               <span className="text-2xl sm:text-3xl font-bold">
                 {dashboardResult ? (
                   <CountUp
-                    end={dashboardResult.totalCost}
+                    end={dashboardResult.totalSupplierCost}
                     duration={0.3}
                     formattingFn={(value) =>
                       Number(value).toLocaleString("en-BD") + " ৳"
@@ -56,7 +56,32 @@ const Dashboard = () => {
                 )}
               </span>
               <span className="mt-1 sm:mt-2 text-xs sm:text-sm">
-                PURCHASES (BDT)
+                SUPPLIER PURCHASES (BDT)
+              </span>
+            </Link>
+          )}
+
+
+          {user && user.role === "admin" && (
+            <Link
+              to="/product"
+              className="bg-blue-800 text-white p-4 sm:p-6 rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition"
+            >
+              <span className="text-2xl sm:text-3xl font-bold">
+                {dashboardResult ? (
+                  <CountUp
+                    end={dashboardResult.totalItemCost}
+                    duration={0.3}
+                    formattingFn={(value) =>
+                      Number(value).toLocaleString("en-BD") + " ৳"
+                    }
+                  />
+                ) : (
+                  "-"
+                )}
+              </span>
+              <span className="mt-1 sm:mt-2 text-xs sm:text-sm text-center">
+                INTERNAL ITEM PURCHASES (BDT)
               </span>
             </Link>
           )}

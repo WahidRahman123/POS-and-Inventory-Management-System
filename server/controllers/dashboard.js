@@ -20,6 +20,7 @@ module.exports.index = async (req, res) => {
       {
         $group: {
           _id: null,
+          totalItemCost: { $sum: { $multiply: ["$costPrice", "$quantity", 10000] } },
           numberOfProducts: { $sum: 1 },
         },
       },
@@ -29,14 +30,19 @@ module.exports.index = async (req, res) => {
       {
         $group: {
           _id: null,
-          totalCost: { $sum: { $multiply: ["$paid", 10000] } },
+          totalSupplierCost: { $sum: { $multiply: ["$paid", 10000] } },
         },
       },
     ]);
 
     let result = {
       totalSell: sales[0] ? sales[0].totalSell / 10000 : 0,
-      totalCost: purchase[0] ? purchase[0].totalCost / 10000 : 0,
+      totalSupplierCost: purchase[0]
+        ? purchase[0].totalSupplierCost / 10000
+        : 0,
+      totalItemCost: product[0]
+        ? product[0].totalItemCost / 10000
+        : 0,
       numberOfSales: sales[0]?.numberOfSales || 0,
       numberOfProducts: product[0]?.numberOfProducts || 0,
       profit:
