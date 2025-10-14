@@ -20,6 +20,11 @@ import EditDue from "./pages/EditDue";
 import Purchase from "./pages/Purchase";
 import EditPurchaseDue from "./pages/EditPurchaseDue";
 import InvoiceForPurchase from "./pages/invoiceForPurchase";
+import Customer from "./pages/Customer";
+import Purchaser from "./pages/Purchaser";
+import CustomerStatement from "./pages/CustomerStatement";
+import PurchaserStatement from "./pages/PurchaserStatement";
+import ExpenseManagement from "./pages/ExpenseManagement";
 
 function App() {
   const { value } = useSelector((state) => state.counter);
@@ -54,6 +59,11 @@ function App() {
           {/* for admin */}
           <Route path="/users" element={<UserManagement />} />
           <Route path="/changepassword" element={<ChangePassword />} />
+          <Route path="/customer" element={<Customer />} />
+          <Route path="/purchaser" element={<Purchaser />} />
+          <Route path="/customer-statement" element={<CustomerStatement />} />
+          <Route path="/purchaser-statement" element={<PurchaserStatement />} />
+          <Route path="/expense-management" element={<ExpenseManagement />} />          
         </Route>
       </Routes>
   );
