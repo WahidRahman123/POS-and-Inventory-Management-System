@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 
 const salesSchema = new mongoose.Schema(
   {
-    // customerId: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: 'Customer'
-    // },
+    customerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Customer'
+    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'

@@ -32,7 +32,8 @@ module.exports.index = async (req, res) => {
 
 module.exports.customersForPOS = async (req, res) => {
   try {
-    const customers = await Customer.find({});
+    const {q} = req.query;
+    const customers = await Customer.find({ name: { $regex: q, $options: "i" } });
 
     res.status(201).json(customers);
   } catch (error) {
