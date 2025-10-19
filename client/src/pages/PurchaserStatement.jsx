@@ -1,8 +1,10 @@
 // PurchaserStatement.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { fetchPurchasesForSupplierName } from "../features/statements/sStatementSlice";
+import { useReactToPrint } from "react-to-print";
+
 
 const PurchaserStatement = () => {
   const { user } = useSelector((state) => state.auth);
@@ -15,16 +17,26 @@ const PurchaserStatement = () => {
   console.log(purchases);
 
   const [filterToggler, setFilterToggler] = useState(true);
+  const [date, setDate] = useState("");
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(page);
 
+  // Printing
+  const documentTitle = `supplier-statement-${new Date()
+    .toISOString()
+    .split(".")[0]
+    .replaceAll(":", "_")}`;
+  const contentRef = useRef(null);
+  const reactToPrintFn = useReactToPrint({ contentRef, documentTitle });  
+
   useEffect(() => {
-    if (user && state.supplierName) {
+    if (user && state && state.supplierName) {
       dispatch(
         fetchPurchasesForSupplierName({
           supplierName: state.supplierName,
-          page: currentPage,
+          // page: currentPage,
+          dateSearch: date,
         })
       );
     }
@@ -40,7 +52,7 @@ const PurchaserStatement = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-700 via-maroon-800 to-red-700 p-4 sm:p-6">
       {state ? (
-        <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl ring-1 ring-black/5 p-6 space-y-6 min-h-screen">
+        <div ref={contentRef} className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl ring-1 ring-black/5 p-6 space-y-6 min-h-screen">
           {/* ---------- Header ---------- */}
 
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -50,12 +62,20 @@ const PurchaserStatement = () => {
             <div className="flex gap-2">
               <input
                 type="date"
-                className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="border border-gray-300 rounded-md px-3 py-2 text-sm print:hidden"
               />
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">
+              <button
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm cursor-pointer print:hidden"
+                onClick={() => setFilterToggler(!filterToggler)}
+              >
                 Filter
               </button>
-              <button className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 text-sm">
+              <button
+                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 cursor-pointer text-sm print:hidden"
+                onClick={reactToPrintFn}
+              >
                 Print
               </button>
             </div>
@@ -94,7 +114,10 @@ const PurchaserStatement = () => {
           </div>
 
           {/* ---------- Statement Table (Single Product Column) ---------- */}
-          <div className="overflow-x-auto border border-gray-200 rounded-lg">
+          <div
+            className="overflow-x-auto border border-gray-200 rounded-lg"
+            
+          >
             <table className="min-w-full text-xs sm:text-sm border-collapse">
               <thead className="bg-gray-100">
                 <tr>
@@ -119,7 +142,7 @@ const PurchaserStatement = () => {
                   <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
                     Due
                   </th>
-                  <th className="border px-2 py-1 sm:px-4 sm:py-2 text-center">
+                  <th className="border px-2 py-1 sm:px-4 sm:py-2 text-center print:hidden">
                     Action
                   </th>
                 </tr>
@@ -128,7 +151,7 @@ const PurchaserStatement = () => {
                 {/* ---- Example Row ---- */}
                 {purchases && purchases.length > 0 ? (
                   purchases.map((purchase, index) => (
-                    <tr className="hover:bg-gray-50">
+                    <tr className="hover:bg-gray-50" key={index}>
                       <td className="border px-2 py-1 sm:px-4 sm:py-2">
                         {new Date(purchase.createdAt)
                           .toLocaleDateString("en-GB", {
@@ -170,7 +193,7 @@ const PurchaserStatement = () => {
                             })
                           : 0}
                       </td>
-                      <td className="border px-2 py-1 sm:px-4 sm:py-2">
+                      <td className="border px-2 py-1 sm:px-4 sm:py-2 print:hidden">
                         <div className="flex flex-wrap gap-1">
                           {purchase.due ? (
                             <Link

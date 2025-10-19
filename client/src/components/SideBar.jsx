@@ -8,13 +8,13 @@ const SideBar = ({ closeSidebar }) => {
 
   const handleOnClick = () => {
     navigate("/changepassword");
-    closeSidebar?.(); // mobile এ থাকলে বন্ধ হবে
+    closeSidebar?.(); 
   };
 
   return (
     <div className="w-64 bg-gray-200 flex flex-col min-h-screen">
       <div className="p-6 text-lg font-bold border-b border-gray-300">
-       Sobuj Auto
+       POS-IMS
       </div>
 
       <nav className="flex flex-col mt-4">

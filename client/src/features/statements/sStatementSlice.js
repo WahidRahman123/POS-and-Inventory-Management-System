@@ -47,8 +47,8 @@ const sStatementSlice = createSlice({
       })
       .addCase(fetchPurchasesForSupplierName.fulfilled, (state, action) => {
         state.loading = false;
-        state.page = action.payload.page;
-        state.pages = action.payload.pages;
+        // state.page = action.payload.page;
+        // state.pages = action.payload.pages;
         state.purchases = action.payload.purchases;
         state.totalAmount = action.payload.totalAmount;
         state.totalPaid = action.payload.totalPaid;
