@@ -72,7 +72,7 @@ const SideBar = ({ closeSidebar }) => {
         </Link>
       </nav>
 
-      <div className="flex justify-center mt-2">
+      <div className="flex justify-center mt-2 mb-5">
         <button
           onClick={handleOnClick}
           className="w-[60%] px-2 py-1 bg-blue-700 text-white rounded-lg hover:bg-blue-800 cursor-pointer"

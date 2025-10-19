@@ -4,19 +4,7 @@ const salesSchema = new mongoose.Schema(
   {
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Customer'
-    },
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    invoiceNo: {
-      type: Number,
-      required: true
-    },
-    remarks: {
-      type: String,
-      trim: true
+      ref: "Customer",
     },
     customerName: {
       type: String,
@@ -24,7 +12,26 @@ const salesSchema = new mongoose.Schema(
     },
     address: {
       type: String,
-      required: true
+      required: true,
+    },
+    customerEmail: {
+      type: String,
+    },
+    customerPhone: {
+      type: String,
+      required: true,
+    },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    invoiceNo: {
+      type: Number,
+      required: true,
+    },
+    remarks: {
+      type: String,
+      trim: true,
     },
     products: [
       {

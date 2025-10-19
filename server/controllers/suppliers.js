@@ -1,0 +1,151 @@
+const Purchase = require("../models/Purchase");
+const Supplier = require("../models/Supplier");
+const Decimal = require("decimal.js");
+
+module.exports.index = async (req, res) => {
+  try {
+    const { page = 1, order = 1 } = req.query;
+
+    const limit = 15;
+
+    // Pagination
+    const skip = (parseInt(page) - 1) * limit;
+
+    const suppliers = await Supplier.find({})
+      .sort({ createdAt: parseInt(order) })
+      .skip(skip)
+      .limit(limit);
+
+    // Count total Customer
+    const total = await Supplier.countDocuments({});
+
+    res.status(201).json({
+      total,
+      page: parseInt(page),
+      pages: Math.ceil(total / limit),
+      suppliers,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};
+
+module.exports.supplierForPurchase = async (req, res) => {
+  try {
+    const {q} = req.query;
+    const suppliers = await Supplier.find({ name: { $regex: q, $options: "i" } });
+
+    res.status(201).json(suppliers);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};
+
+module.exports.createSupplier = async (req, res) => {
+  const { name, phone, email, address } = req.body;
+
+  try {
+    const supplier = new Supplier({
+      name,
+      phone,
+      email,
+      address
+    });
+
+    await supplier.save();
+
+    res.status(201).json({ message: "Supplier created successfully." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};
+
+module.exports.updateSupplier = async (req, res) => {
+    const { id } = req.params;
+    const { name, phone, email, address } = req.body;
+
+    try {
+        const supplier = await Supplier.findById(id);
+
+        if(supplier) {
+            supplier.name = name || supplier.name;
+            supplier.phone = phone || supplier.phone;
+            supplier.email = email || supplier.email;
+            supplier.address = address || supplier.address;
+
+            await supplier.save();
+
+            res.status(201).json({message: 'Supplier updated successfully'});
+
+        } else {
+            res.status(404).json({message: "Supplier not found"});
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server Error');
+    }
+}
+
+module.exports.deleteSupplier = async (req, res) => {
+  try {
+    const supplier = await Supplier.findById(req.params.id);
+    if (supplier) {
+      await supplier.deleteOne();
+      res.json({ message: "Supplier deleted successfully" });
+    } else {
+      res.status(404).json({ message: "Supplier not found" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};
+
+module.exports.purchaseBySupplierName = async (req, res) => {
+  try {
+    const { page = 1, supplierName="" } = req.query;
+
+    const limit = 10;
+
+    // Pagination
+    const skip = (parseInt(page) - 1) * limit;
+
+    const purchases = await Purchase.find({ supplierName })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    // Count total Customer
+    const total = await Purchase.countDocuments({ supplierName });
+
+    const result = await Purchase.aggregate([
+      {
+        $match: { supplierName }
+      },
+      {
+        $group: {
+          _id: null,
+          totalAmount: {$sum: { $multiply: ['$totalAmount', 10000] }},
+          totalPaid: {$sum: { $multiply: ['$paid', 10000] }},
+          totalDue: {$sum: { $multiply: ['$due', 10000] }}
+        }
+      }
+    ]);
+
+    res.status(201).json({
+      total,
+      page: parseInt(page),
+      pages: Math.ceil(total / limit),
+      purchases,
+      totalAmount: result.length > 0 ? result[0].totalAmount / 10000 : 0,
+      totalPaid: result.length > 0 ? result[0].totalPaid / 10000 : 0,
+      totalDue: result.length > 0 ? result[0].totalDue / 10000 : 0,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};

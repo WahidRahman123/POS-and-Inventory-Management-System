@@ -61,6 +61,8 @@ const PointOfSale = () => {
     customerId: "",
     customerName: "",
     address: "",
+    customerEmail: "",
+    customerPhone: "",
   });
   const [data, setData] = useState(null);
   const [disable, setDisable] = useState(false);
@@ -93,6 +95,8 @@ const PointOfSale = () => {
       customerId: customerData._id,
       customerName: customerData.name,
       address: customerData.address,
+      customerEmail: customerData.email,
+      customerPhone: customerData.phone,
     });
     setDisable(true);
   };
@@ -171,6 +175,8 @@ const PointOfSale = () => {
             remarks,
             customerName: customer.customerName,
             address: customer.address,
+            customerEmail: customer.customerEmail,
+            customerPhone: customer.customerPhone,
             products: finalProducts,
             totalWithoutDiscount: Number(orderTotal.toFixed(4)),
             total: Number(subTotal.toFixed(4)),
@@ -265,6 +271,8 @@ const PointOfSale = () => {
                     customerId: "",
                     customerName: "",
                     address: "",
+                    customerEmail: "",
+                    customerPhone: "",
                   });
                   setData(null);
                 }}
@@ -273,7 +281,11 @@ const PointOfSale = () => {
               </button>
             </div>
 
-            <div className="w-[85%] max-h-50 overflow-y-scroll">
+            <div
+              className={`w-[85%] max-h-50 ${
+                data ? "shadow-md overflow-y-scroll" : ""
+              }`}
+            >
               {data ? (
                 <table className="w-full">
                   {data.map((d, i) => (

@@ -3,10 +3,18 @@ const Decimal = require("decimal.js");
 
 module.exports.index = async (req, res) => {
   try {
-    const { dateSearch = "" } = req.query;
+    const {
+      dateSearch = "",
+      nameSearch = "",
+      page = 1,
+      order = -1,
+    } = req.query;
 
-    let searchQuery;
+    let searchQuery = [];
+    let dateSearchQuery;
+    let nameSearchQuery;
 
+    // For date search:
     if (dateSearch) {
       const startOfDay = new Date(dateSearch);
       startOfDay.setHours(0, 0, 0, 0);
@@ -14,16 +22,40 @@ module.exports.index = async (req, res) => {
       const endOfDay = new Date(dateSearch);
       endOfDay.setHours(23, 59, 59, 999);
 
-      searchQuery = {
+      dateSearchQuery = {
         createdAt: { $gte: startOfDay, $lte: endOfDay },
       };
-    } else {
-      searchQuery = {};
+      searchQuery.push(dateSearchQuery);
     }
 
-    const purchases = await Purchase.find(searchQuery).sort({ createdAt: -1 });
+    // For name search:
+    if (nameSearch) {
+      nameSearchQuery = { supplierName: { $regex: nameSearch, $options: "i" } };
+      searchQuery.push(nameSearchQuery);
+    }
 
-    res.status(201).json(purchases);
+    const mainSearch = searchQuery.length !== 0 ? { $and: searchQuery } : {};
+
+    const limit = 10;
+
+    // Pagination
+    const skip = (parseInt(page) - 1) * limit;
+
+    const purchases = await Purchase.find(mainSearch)
+      .sort({ createdAt: parseInt(order) })
+      .skip(skip)
+      .limit(limit);
+
+    // Count total documents
+    const total = await Purchase.countDocuments(mainSearch);
+
+    // res.status(201).json(purchases);
+    res.status(201).json({
+      total,
+      page: parseInt(page),
+      pages: Math.ceil(total / limit),
+      purchases,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send("Server Error");

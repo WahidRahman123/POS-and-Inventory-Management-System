@@ -15,6 +15,7 @@ const salesRoutes = require("./routes/salesRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const purchaseRoutes = require("./routes/purchaseRoutes");
 const customerRoutes = require("./routes/customerRoutes");
+const supplierRoutes = require("./routes/supplierRoutes");
 
 const app = express();
 app.use(express.json());
@@ -54,6 +55,7 @@ app.use("/api/sales", salesRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/purchase", purchaseRoutes);
 app.use("/api/customer", customerRoutes);
+app.use("/api/supplier", supplierRoutes);
 
 app.listen(port, () => {
   console.log(`LISTENING TO THE PORT ${port}`);

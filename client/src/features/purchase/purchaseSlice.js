@@ -5,6 +5,8 @@ import { toast } from "react-toastify";
 const initialState = {
   purchases: [],
   purchaseSearchedById: null,
+  page: 1,
+  pages: null,
   toggle: false,
   loading: false,
   error: null,
@@ -20,9 +22,7 @@ export const fetchPurchases = createAsyncThunk(
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
-          params: {
-            dateSearch: query,
-          },
+          params: query,
         }
       );
 
@@ -112,7 +112,9 @@ const purchaseSlice = createSlice({
       })
       .addCase(fetchPurchases.fulfilled, (state, action) => {
         state.loading = false;
-        state.purchases = action.payload;
+        state.page = action.payload.page;
+        state.pages = action.payload.pages;
+        state.purchases = action.payload.purchases;
       })
       .addCase(fetchPurchases.rejected, (state, action) => {
         state.loading = false;

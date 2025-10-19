@@ -93,6 +93,8 @@ const Customer = () => {
             placeholder="Phone"
             name="phone"
             value={customer.phone}
+            minLength={11}
+            maxLength={14}
             onChange={handleOnChange}
             className="border border-gray-300 rounded-md px-3 py-2"
             required

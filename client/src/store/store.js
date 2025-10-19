@@ -8,6 +8,8 @@ import userReducer from '../features/user/userSlice';
 import authReducer from '../features/user/authSlice';
 import purchaseReducer from '../features/purchase/purchaseSlice';
 import customerReducer from '../features/customer/customerSlice';
+import supplierReducer from '../features/supplier/supplierSlice';
+import sStatementReducer from '../features/statements/sStatementSlice';
 
 export const store = configureStore({
     reducer: {
@@ -19,6 +21,8 @@ export const store = configureStore({
         user: userReducer,
         auth: authReducer,
         purchase: purchaseReducer,
-        customer: customerReducer
+        customer: customerReducer,
+        supplier: supplierReducer,
+        sstatement: sStatementReducer
     }
 })

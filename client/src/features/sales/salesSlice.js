@@ -176,11 +176,11 @@ const salesSlice = createSlice({
             new Decimal(0)
           );
 
-          state.totalSales = totalSale;
-          state.totalCosts = totalCost;
+          state.totalSales = totalSale.toFixed(2);
+          state.totalCosts = totalCost.toFixed(2);
           state.profit = totalSale.minus(totalCost).lessThan(new Decimal(0))
             ? 0
-            : totalSale.minus(totalCost);
+            : totalSale.minus(totalCost).toFixed(2);
         } else {
           state.totalSales = null;
         }
@@ -216,11 +216,11 @@ const salesSlice = createSlice({
             new Decimal(0)
           );
 
-          state.totalSales = totalSale;
-          state.totalCosts = totalCost;
+          state.totalSales = totalSale.toFixed(2);
+          state.totalCosts = totalCost.toFixed(2);
           state.profit = totalSale.minus(totalCost).lessThan(new Decimal(0))
             ? 0
-            : totalSale.minus(totalCost);
+            : totalSale.minus(totalCost).toFixed(2);
         } else {
           state.totalSales = null;
         }

@@ -103,19 +103,19 @@ const SalesReport = () => {
           <div>
             Total Sales:{" "}
             <span className="text-green-600">
-              ৳ {totalSales ? new Decimal(totalSales).toFixed(2) : 0}
+              ৳ {totalSales ? totalSales : 0}
             </span>
           </div>
           <div>
             Total Costs:{" "}
             <span className="text-green-600">
-              ৳ {totalCosts ? new Decimal(totalCosts).toFixed(2) : 0}
+              ৳ {totalCosts ? totalCosts : 0}
             </span>
           </div>
           <div>
             Profit:{" "}
             <span className="text-green-600">
-              ৳ {profit ? new Decimal(profit).toFixed(2) : 0}
+              ৳ {profit ? profit : 0}
             </span>
           </div>
         </div>
