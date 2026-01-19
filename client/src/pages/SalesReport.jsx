@@ -93,6 +93,54 @@ const SalesReport = () => {
             className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-36 sm:w-40"
           />
         </div>
+
+        {/* Update */}
+        {/* <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2 ml-auto">
+              <label className="text-xs sm:text-sm text-gray-600">
+                Search by Supplier Name:
+              </label>
+              <input
+                type="search"
+                value={nameSearch}
+                onChange={(e) => setNameSearch(e.target.value)}
+                className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-36 sm:w-40"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 ml-auto">
+              <label className="text-xs sm:text-sm text-gray-600">
+                Search by Date:
+              </label>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-36 sm:w-40"
+              />
+            </div>
+
+            <div className="text-right">
+              <button
+                className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 cursor-pointer"
+                onClick={() => setFilterToggler(!filterToggler)}
+              >
+                Filter
+              </button>
+              <button
+                className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 cursor-pointer ml-2"
+                onClick={() => {
+                  if (date !== "" || nameSearch !== "") {
+                    date !== "" && setDate("");
+                    nameSearch !== "" && setNameSearch("");
+                    setFilterToggler(!filterToggler);
+                  }
+                }}
+              >
+                Clear
+              </button>
+            </div>
+          </div> */}
       </div>
       {/* <h2 className="text-lg sm:text-xl font-semibold mb-2">{day}'s Report</h2>
       <hr className="mb-4" /> */}

@@ -33,19 +33,19 @@ const PointOfSale = () => {
     (acc, product) =>
       acc.plus(
         new Decimal(Number(product.qty)).mul(
-          new Decimal(Number(product.newSellPrice))
-        )
+          new Decimal(Number(product.newSellPrice)),
+        ),
       ),
-    new Decimal(0)
+    new Decimal(0),
   );
   const [discount, setDiscount] = useState(0);
   const subTotal = orderTotal.minus(new Decimal(Number(discount)));
   const totalCost = selectedProducts.reduce(
     (acc, product) =>
       acc.plus(
-        new Decimal(Number(product.qty)).mul(new Decimal(product.costPrice))
+        new Decimal(Number(product.qty)).mul(new Decimal(product.costPrice)),
       ),
-    new Decimal(0)
+    new Decimal(0),
   );
   const [cashInput, setCashInput] = useState("");
   const [remarks, setRemarks] = useState("");
@@ -80,7 +80,7 @@ const PointOfSale = () => {
           params: {
             q: query,
           },
-        }
+        },
       );
 
       setData(data);
@@ -122,12 +122,12 @@ const PointOfSale = () => {
 
   const handleSearchOnClick = (pid) => {
     let productToAdd = productsBySearchforPOS.find(
-      (product) => product._id === pid
+      (product) => product._id === pid,
     );
     // console.log(productToAdd);
     if (productToAdd) {
       const foundProduct = selectedProducts.find(
-        (product) => product._id === productToAdd._id
+        (product) => product._id === productToAdd._id,
       );
       // console.log(foundProduct);
       if (!foundProduct) {
@@ -162,7 +162,7 @@ const PointOfSale = () => {
             quantity: Number(p.qty),
             // subtotal: Number(p.sellPrice) * Number(p.qty),
             subtotal: Number(
-              new Decimal(p.newSellPrice).mul(new Decimal(p.qty)).toFixed(4)
+              new Decimal(p.newSellPrice).mul(new Decimal(p.qty)).toFixed(4),
             ),
           };
         });
@@ -192,7 +192,7 @@ const PointOfSale = () => {
                 ? Number(subTotal.toFixed(4))
                 : Number(new Decimal(cashInput).toFixed(4))
               : 0,
-          })
+          }),
         ).unwrap();
         setCid(null);
       } else {
@@ -288,17 +288,19 @@ const PointOfSale = () => {
             >
               {data ? (
                 <table className="w-full">
-                  {data.map((d, i) => (
-                    <tr
-                      key={i}
-                      className="p-2 cursor-pointer border-b border-gray-300 hover:bg-gray-100 text-gray-800"
-                      onClick={() => handleCustomerOnClick(d)}
-                    >
-                      {/* {d.name} */}
-                      <td className="p-2">{d.name}</td>
-                      <td className="text-center">{d.address}</td>
-                    </tr>
-                  ))}
+                  <tbody>
+                    {data.map((d, i) => (
+                      <tr
+                        key={i}
+                        className="p-2 cursor-pointer border-b border-gray-300 hover:bg-gray-100 text-gray-800"
+                        onClick={() => handleCustomerOnClick(d)}
+                      >
+                        {/* {d.name} */}
+                        <td className="p-2">{d.name}</td>
+                        <td className="text-center">{d.address}</td>
+                      </tr>
+                    ))}
+                  </tbody>
                 </table>
               ) : (
                 ""
@@ -399,8 +401,8 @@ const PointOfSale = () => {
                         const newSP = e.target.value;
                         setSelectedProducts((prev) =>
                           prev.map((p, i) =>
-                            i === index ? { ...p, newSellPrice: newSP } : p
-                          )
+                            i === index ? { ...p, newSellPrice: newSP } : p,
+                          ),
                         );
                       }}
                       step="any"
@@ -421,8 +423,8 @@ const PointOfSale = () => {
                         const newQty = e.target.value;
                         setSelectedProducts((prev) =>
                           prev.map((p, i) =>
-                            i === index ? { ...p, qty: newQty } : p
-                          )
+                            i === index ? { ...p, qty: newQty } : p,
+                          ),
                         );
                       }}
                       className="w-[60px] border rounded px-2"

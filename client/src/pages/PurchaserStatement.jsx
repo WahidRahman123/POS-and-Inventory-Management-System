@@ -14,7 +14,7 @@ const PurchaserStatement = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
 
-  console.log(purchases);
+  // console.log(purchases);
 
   const [filterToggler, setFilterToggler] = useState(true);
   const [date, setDate] = useState("");
