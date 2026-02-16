@@ -25,6 +25,7 @@ import Purchaser from "./pages/Purchaser";
 import CustomerStatement from "./pages/CustomerStatement";
 import PurchaserStatement from "./pages/PurchaserStatement";
 import ExpenseManagement from "./pages/ExpenseManagement";
+import ProductExchange from "./pages/ProductExchange";
 
 function App() {
   const { value } = useSelector((state) => state.counter);
@@ -63,7 +64,8 @@ function App() {
           <Route path="/purchaser" element={<Purchaser />} />
           <Route path="/customer-statement" element={<CustomerStatement />} />
           <Route path="/purchaser-statement" element={<PurchaserStatement />} />
-          <Route path="/expense-management" element={<ExpenseManagement />} />          
+          <Route path="/expense-management" element={<ExpenseManagement />} /> 
+          <Route path="/product-exchange" element={<ProductExchange />} />         
         </Route>
       </Routes>
   );

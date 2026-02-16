@@ -54,6 +54,13 @@ const SideBar = ({ closeSidebar }) => {
         >
           <span className="mr-3">📅</span> Purchase
         </Link>
+        <Link
+            to="/product-exchange"
+            onClick={closeSidebar}
+            className="flex items-center p-4 hover:bg-gray-300"
+          >
+            <span className="mr-3">📅</span> Product Exchange
+          </Link>
         {user?.role === "admin" && (
           <Link
             to="/sales-report"
@@ -62,6 +69,7 @@ const SideBar = ({ closeSidebar }) => {
           >
             <span className="mr-3">📅</span> Sales Report
           </Link>
+          
         )}
 
         <Link
@@ -79,9 +87,9 @@ const SideBar = ({ closeSidebar }) => {
         >
           <span className="mr-3">👤</span> Customer
         </Link>
-        {/* <Link to="/customer-statement" onClick={closeSidebar} className="flex items-center p-4 hover:bg-gray-300">
+        <Link to="/customer-statement" onClick={closeSidebar} className="flex items-center p-4 hover:bg-gray-300">
           <span className="mr-3">📅</span> Customer Statement 
-        </Link> */}
+        </Link>
 
         <Link
           to="/purchaser"
