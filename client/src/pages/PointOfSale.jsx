@@ -398,7 +398,7 @@ const PointOfSale = () => {
                     ৳{" "}
                     <input
                       type="number"
-                      min={product.sellPrice}
+                      min={product.costPrice}
                       value={product.newSellPrice}
                       onChange={(e) => {
                         const newSP = e.target.value;
