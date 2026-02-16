@@ -79,9 +79,9 @@ const SideBar = ({ closeSidebar }) => {
         >
           <span className="mr-3">👤</span> Customer
         </Link>
-        {/* <Link to="/customer-statement" onClick={closeSidebar} className="flex items-center p-4 hover:bg-gray-300">
+        <Link to="/customer-statement" onClick={closeSidebar} className="flex items-center p-4 hover:bg-gray-300">
           <span className="mr-3">📅</span> Customer Statement 
-        </Link> */}
+        </Link>
 
         <Link
           to="/purchaser"

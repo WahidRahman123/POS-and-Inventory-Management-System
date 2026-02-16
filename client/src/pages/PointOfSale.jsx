@@ -15,6 +15,7 @@ import { useReactToPrint } from "react-to-print";
 import { useNavigate } from "react-router-dom";
 import Decimal from "decimal.js";
 import axios from "axios";
+import CustomerAddForm from "../components/POS/CustomerAddForm";
 
 const PointOfSale = () => {
   const { user } = useSelector((state) => state.auth);
@@ -228,18 +229,20 @@ const PointOfSale = () => {
   if (!user) return null;
 
   return (
-    <>
-      <form
-        onSubmit={handleSubmit}
-        className="max-w-5xl mx-auto bg-white shadow-md rounded-md p-6"
-      >
-        <h1 className="text-2xl font-bold text-gray-800 mb-4">Sale Order</h1>
+    <div className="max-w-5xl mx-auto bg-white shadow-md rounded-md p-6">
+      <h1 className="text-2xl font-bold text-gray-800 mb-4">Sale Order</h1>
+      <div>
+        <label className="block text-sm font-medium mb-1">Add Customer</label>
+        <CustomerAddForm />
+      </div>
 
+
+      <form onSubmit={handleSubmit}>
         {/* Customer */}
         <div className="grid grid-cols-2 gap-x-6 mb-4">
           <div>
             <label className="block text-sm font-medium mb-1">
-              CustomerName
+              Customer Name
             </label>
             {/* <input
               type="text"
@@ -547,7 +550,7 @@ const PointOfSale = () => {
           {loading && cid ? "Paying..." : `Pay`}
         </button>
       </form>
-    </>
+    </div>
   );
 };
 
