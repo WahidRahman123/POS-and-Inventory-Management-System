@@ -82,6 +82,13 @@ const SideBar = ({ closeSidebar }) => {
           >
             <span className="mr-3">📅</span> Sales Return
           </Link>
+          <Link
+            to="/sales-return-statement"
+            onClick={closeSidebar}
+            className="flex items-center p-4 hover:bg-gray-300"
+          >
+            <span className="mr-3">📅</span> Sales Return Statement
+          </Link>
 
         {user?.role === "admin" && (
           <Link

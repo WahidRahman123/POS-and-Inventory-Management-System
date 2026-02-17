@@ -29,6 +29,7 @@ import ProductExchange from "./pages/ProductExchange";
 import PurchaseReturn from "./pages/PurchaseReturn";
 import PurchaseReturnStatement from "./pages/PurchaseReturnStatement";
 import SalesReturn from "./pages/SalesReturn";
+import SalesReturnStatement from "./pages/SalesReturnStatement";
 
 
 function App() {
@@ -73,7 +74,7 @@ function App() {
           <Route path="/purchase-return" element={<PurchaseReturn />} />
           <Route path="/purchase-return-statement" element={<PurchaseReturnStatement />} />
           <Route path="/sales-return" element={<SalesReturn />} />
-          
+          <Route path="/sales-return-statement" element={<SalesReturnStatement />} />
                    
         </Route>
       </Routes>
