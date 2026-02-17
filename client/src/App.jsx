@@ -26,6 +26,10 @@ import CustomerStatement from "./pages/CustomerStatement";
 import PurchaserStatement from "./pages/PurchaserStatement";
 import ExpenseManagement from "./pages/ExpenseManagement";
 import ProductExchange from "./pages/ProductExchange";
+import PurchaseReturn from "./pages/PurchaseReturn";
+import PurchaseReturnStatement from "./pages/PurchaseReturnStatement";
+import SalesReturn from "./pages/SalesReturn";
+
 
 function App() {
   const { value } = useSelector((state) => state.counter);
@@ -65,7 +69,12 @@ function App() {
           <Route path="/customer-statement" element={<CustomerStatement />} />
           <Route path="/purchaser-statement" element={<PurchaserStatement />} />
           <Route path="/expense-management" element={<ExpenseManagement />} /> 
-          <Route path="/product-exchange" element={<ProductExchange />} />         
+          <Route path="/product-exchange" element={<ProductExchange />} />
+          <Route path="/purchase-return" element={<PurchaseReturn />} />
+          <Route path="/purchase-return-statement" element={<PurchaseReturnStatement />} />
+          <Route path="/sales-return" element={<SalesReturn />} />
+          
+                   
         </Route>
       </Routes>
   );
