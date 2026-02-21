@@ -5,6 +5,10 @@ import { toast } from "react-toastify";
 const initialState = {
   purchaseReturns: [],
   purchaseReturnSearchById: null,
+  purchaseReturnsForStatement: [],
+  totalAmount: null,
+  totalPaid: null,
+  totalDue: null,
   page: 1,
   pages: null,
   toggle: false,
@@ -98,6 +102,29 @@ export const addPayment = createAsyncThunk(
       return { message: "Payment updated Successful!" };
     } catch (error) {
       const message = "Payment updated Failed!";
+      return ThunkAPI.rejectWithValue(message);
+    }
+  },
+);
+
+//* This is only for the Purchase Return Statement
+export const fetchPurchaseReturnsForSupplierName = createAsyncThunk(
+  "purchaseReturn/fetchPurchaseReturnsForSupplierName",
+  async (value, ThunkAPI) => {
+    try {
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URI}/api/purchase-return/by-name`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+          params: value,
+        },
+      );
+
+      return data;
+    } catch (error) {
+      const message = "Fetching Failed!";
       return ThunkAPI.rejectWithValue(message);
     }
   },
@@ -204,6 +231,33 @@ const purchaseReturnSlice = createSlice({
         });
       })
       .addCase(addPayment.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+        toast.error(action.payload, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
+      .addCase(fetchPurchaseReturnsForSupplierName.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchPurchaseReturnsForSupplierName.fulfilled, (state, action) => {
+        state.loading = false;
+        // state.page = action.payload.page;
+        // state.pages = action.payload.pages;
+        state.purchaseReturnsForStatement = action.payload.purchaseReturns;
+        state.totalAmount = action.payload.totalAmount;
+        state.totalPaid = action.payload.totalPaid;
+        state.totalDue = action.payload.totalDue;
+      })
+      .addCase(fetchPurchaseReturnsForSupplierName.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error;
         toast.error(action.payload, {

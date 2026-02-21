@@ -169,9 +169,9 @@ module.exports.purchaseReturnBySupplierName = async (req, res) => {
       {
         $group: {
           _id: null,
-          totalreturnAmount: {$sum: { $multiply: ['$returnAmount', 10000] }},
-          totalRefundReceived: {$sum: { $multiply: ['$refundReceived', 10000] }},
-          totalRefundDue: {$sum: { $multiply: ['$drefundDueue', 10000] }}
+          totalAmount: {$sum: { $multiply: ['$returnAmount', 10000] }},
+          totalPaid: {$sum: { $multiply: ['$refundReceived', 10000] }},
+          totalDue: {$sum: { $multiply: ['$refundDue', 10000] }}
         }
       }
     ]);

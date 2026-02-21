@@ -721,8 +721,16 @@ const PurchaseReturn = () => {
 
                   return purchaseReturn.products.map((product, index) => (
                     <tr
+                      onClick={(e) => {
+                        if (e.target.tagName !== "TD") return;
+                        navigate("/purchase-return-statement", { state: purchaseReturn });
+                      }}
                       key={index}
-                      className={isEven ? "bg-white" : "bg-gray-50"}
+                      className={
+                        isEven
+                          ? "bg-white cursor-pointer"
+                          : "bg-gray-50 cursor-pointer"
+                      }
                     >
                       {index === 0 && (
                         <>

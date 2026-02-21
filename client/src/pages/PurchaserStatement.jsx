@@ -14,7 +14,6 @@ const PurchaserStatement = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
 
-  // console.log(purchases);
 
   const [filterToggler, setFilterToggler] = useState(true);
   const [date, setDate] = useState("");
@@ -171,7 +170,7 @@ const PurchaserStatement = () => {
                             {purchase.productNames}
                           </td>
                           <td className="border-b border-gray-300 px-3 py-3">
-                            3
+                            {purchase.quantity}
                           </td>
                           <td className="border-b border-gray-300 px-3 py-3">
                             ৳{" "}
