@@ -15,7 +15,10 @@ import { useReactToPrint } from "react-to-print";
 import { useNavigate } from "react-router-dom";
 import Decimal from "decimal.js";
 import axios from "axios";
+import AsyncSelect from "react-select/async";
 import CustomerAddForm from "../components/POS/CustomerAddForm";
+import CustomerSelect from "../components/POS/CustomerSelect";
+import { fetchExchangeByMemo } from "../features/Exchange/exchangeSlice";
 
 const PointOfSale = () => {
   const { user } = useSelector((state) => state.auth);
@@ -49,6 +52,7 @@ const PointOfSale = () => {
     new Decimal(0),
   );
   const [cashInput, setCashInput] = useState("");
+  const [exchangeValue, setExchangeValue] = useState("");
   const [remarks, setRemarks] = useState("");
 
   const { productsBySearchforPOS } = useSelector((state) => state.product);
@@ -56,8 +60,31 @@ const PointOfSale = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  //* Customer Search Handling Section
-  const [name, setName] = useState("");
+  //* For Exchange Select
+  const loadOptions = async (inputValue, callback) => {
+    if (!inputValue) {
+      callback([]);
+      return;
+    }
+
+    try {
+      const data = await dispatch(
+        fetchExchangeByMemo({ search: inputValue }),
+      ).unwrap();
+
+      const options = data.map((item) => ({
+        label: item.memo,
+        value: item.totalAmount,
+      }));
+
+      callback(options);
+    } catch (error) {
+      console.error(error);
+      callback([]);
+    }
+  };
+
+  //* For Customer Search Handling Section
   const [customer, setCustomer] = useState({
     customerId: "",
     customerName: "",
@@ -65,47 +92,6 @@ const PointOfSale = () => {
     customerEmail: "",
     customerPhone: "",
   });
-  const [data, setData] = useState(null);
-  const [disable, setDisable] = useState(false);
-  const customerNameRef = useRef(null);
-  const handleCustomerNameOnChange = async (e) => {
-    const query = e.target.value;
-    setName(query);
-    if (query) {
-      const { data } = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URI}/api/customer/pos`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-          },
-          params: {
-            q: query,
-          },
-        },
-      );
-
-      setData(data);
-    } else {
-      setData(null);
-    }
-  };
-  const handleCustomerOnClick = (customerData) => {
-    setData(null);
-    setName(customerData.name);
-    setCustomer({
-      customerId: customerData._id,
-      customerName: customerData.name,
-      address: customerData.address,
-      customerEmail: customerData.email,
-      customerPhone: customerData.phone,
-    });
-    setDisable(true);
-  };
-  useEffect(() => {
-    if (!disable && customerNameRef.current) {
-      customerNameRef.current.focus();
-    }
-  }, [disable]);
 
   const handleDeleteProduct = (pid) => {
     setSelectedProducts((prev) => prev.filter((p, i) => p._id !== pid));
@@ -183,16 +169,38 @@ const PointOfSale = () => {
             total: Number(subTotal.toFixed(4)),
             discount: discount ? Number(new Decimal(discount).toFixed(4)) : 0,
             totalCost: Number(totalCost.toFixed(4)),
-            due: cashInput
-              ? subTotal.minus(new Decimal(cashInput)).lessThan(new Decimal(0))
-                ? 0
-                : Number(subTotal.minus(new Decimal(cashInput)).toFixed(4))
-              : Number(subTotal.toFixed(4)),
-            paid: cashInput
-              ? new Decimal(cashInput).greaterThan(subTotal)
-                ? Number(subTotal.toFixed(4))
-                : Number(new Decimal(cashInput).toFixed(4))
-              : 0,
+            due:
+              cashInput || exchangeValue
+                ? subTotal
+                    .minus(
+                      new Decimal(Number(cashInput)).plus(
+                        new Decimal(Number(exchangeValue))
+                      )
+                    )
+                    .lessThan(new Decimal(0))
+                  ? 0
+                  : Number(
+                      subTotal
+                        .minus(
+                          new Decimal(Number(cashInput)).plus(
+                            new Decimal(Number(exchangeValue))
+                          )
+                        )
+                        .toFixed(4),
+                    )
+                : Number(subTotal.toFixed(4)),
+            paid:
+              cashInput || exchangeValue
+                ? new Decimal(Number(cashInput))
+                    .plus(new Decimal(Number(exchangeValue)))
+                    .greaterThan(subTotal)
+                  ? Number(subTotal.toFixed(4))
+                  : Number(
+                      new Decimal(Number(cashInput))
+                        .plus(new Decimal(Number(exchangeValue)))
+                        .toFixed(4),
+                    )
+                : 0,
           }),
         ).unwrap();
         setCid(null);
@@ -210,10 +218,17 @@ const PointOfSale = () => {
     if (createdSales) {
       const data = {
         ...createdSales,
-        due: cashInput
-          ? Number(subTotal.minus(new Decimal(cashInput)).toFixed(4))
+        due: cashInput || exchangeValue
+          ? Number(subTotal.minus(new Decimal(Number(cashInput)).plus(new Decimal(Number(exchangeValue)))).toFixed(4))
           : Number(subTotal.toFixed(4)),
-        paid: cashInput ? Number(new Decimal(cashInput).toFixed(4)) : 0,
+        paid:
+          cashInput || exchangeValue
+            ? Number(
+                new Decimal(Number(cashInput))
+                  .plus(new Decimal(Number(exchangeValue)))
+                  .toFixed(4),
+              )
+            : 0,
       };
       dispatch(setCreatedSalesToNull());
       // Navigate to the page and print it
@@ -231,97 +246,16 @@ const PointOfSale = () => {
   return (
     <div className="max-w-5xl mx-auto bg-white shadow-md rounded-md p-6">
       <h1 className="text-2xl font-bold text-gray-800 mb-4">Sale Order</h1>
+      {/* Customer Creation */}
       <div>
         <label className="block text-sm font-medium mb-1">Add Customer</label>
         <CustomerAddForm />
       </div>
 
-
       <form onSubmit={handleSubmit}>
-        {/* Customer */}
-        <div className="grid grid-cols-2 gap-x-6 mb-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Customer Name
-            </label>
-            {/* <input
-              type="text"
-              value={customer.customerName}
-              onChange={(e) =>
-                setCustomer({ ...customer, customerName: e.target.value })
-              }
-              placeholder="Customer Name"
-              className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
-              required
-            /> */}
-            <div className="flex">
-              <input
-                type="search"
-                value={name}
-                onChange={handleCustomerNameOnChange}
-                ref={customerNameRef}
-                placeholder="Customer Name"
-                className="block w-[85%] px-3 py-1.5 border border-gray-300 rounded-sm text-sm disabled:bg-gray-300"
-                disabled={disable}
-              />
-              <button
-                disabled={!disable}
-                className="bg-red-500 hover:bg-red-600 cursor-pointer ml-2 px-2 py-1 font-bold text-white rounded disabled:bg-red-300 disabled:cursor-not-allowed "
-                onClick={() => {
-                  setDisable(false);
-                  setName("");
-                  setCustomer({
-                    customerId: "",
-                    customerName: "",
-                    address: "",
-                    customerEmail: "",
-                    customerPhone: "",
-                  });
-                  setData(null);
-                }}
-              >
-                Change
-              </button>
-            </div>
+        {/* Customer Select*/}
+        <CustomerSelect customer={customer} setCustomer={setCustomer} />
 
-            <div
-              className={`w-[85%] max-h-50 ${
-                data ? "shadow-md overflow-y-scroll" : ""
-              }`}
-            >
-              {data ? (
-                <table className="w-full">
-                  <tbody>
-                    {data.map((d, i) => (
-                      <tr
-                        key={i}
-                        className="p-2 cursor-pointer border-b border-gray-300 hover:bg-gray-100 text-gray-800"
-                        onClick={() => handleCustomerOnClick(d)}
-                      >
-                        {/* {d.name} */}
-                        <td className="p-2">{d.name}</td>
-                        <td className="text-center">{d.address}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                ""
-              )}
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Address</label>
-            <input
-              type="text"
-              value={customer.address}
-              placeholder="Address"
-              disabled
-              className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm bg-gray-200 text-gray-700 select-none"
-              required
-            />
-          </div>
-        </div>
         <div className="grid grid-cols-2 gap-x-6 mb-4">
           <div>
             <label className="block text-sm font-medium mb-1">
@@ -444,6 +378,7 @@ const PointOfSale = () => {
                   </td>
                   <td className="p-2 text-center border-b">
                     <button
+                      type="button"
                       onClick={() => handleDeleteProduct(product._id)}
                       className="cursor-pointer text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
                     >
@@ -507,6 +442,23 @@ const PointOfSale = () => {
             />
           </div>
           <div>
+            <label className="block text-sm font-medium mb-1">Exchange</label>
+            <AsyncSelect
+              cacheOptions
+              loadOptions={loadOptions}
+              defaultOptions
+              isClearable
+              onChange={(selected) => {
+                if (selected) {
+                  setExchangeValue(selected.value);
+                } else {
+                  setExchangeValue("");
+                }
+              }}
+              placeholder="Search Exchange Memo..."
+            />
+          </div>
+          <div>
             <label className="block text-sm font-medium mb-1">Remarks</label>
             <textarea
               value={remarks}
@@ -526,13 +478,17 @@ const PointOfSale = () => {
             </div>
             <div className="flex justify-between font-bold">
               <span>Paid</span>
-              <span>{new Decimal(Number(cashInput)).toFixed(2)}</span>
+              <span>
+                {new Decimal(Number(cashInput))
+                  .plus(new Decimal(Number(exchangeValue)))
+                  .toFixed(2)}
+              </span>
             </div>
             <div className="flex justify-between font-bold">
               <span>Due</span>
               {/* <span>{subTotal - cashInput}</span> */}
               <span>
-                {subTotal.minus(new Decimal(Number(cashInput))).toFixed(2)}
+                {subTotal.minus(new Decimal(Number(cashInput)).plus(new Decimal(Number(exchangeValue)))).toFixed(2)}
               </span>
             </div>
           </div>

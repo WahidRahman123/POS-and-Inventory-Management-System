@@ -30,6 +30,7 @@ import PurchaseReturn from "./pages/PurchaseReturn";
 import PurchaseReturnStatement from "./pages/PurchaseReturnStatement";
 import SalesReturn from "./pages/SalesReturn";
 import SalesReturnStatement from "./pages/SalesReturnStatement";
+import InvoiceForExchange from "./pages/InvoiceForExchange";
 
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
         {/* Login page without layout */}
         <Route path="/login" element={<Login />} />
         <Route path="/invoice" element={<InvoicePage />} />
+        <Route path="/invoice-exchange" element={<InvoiceForExchange />} />
         <Route path="/invoice-purchase" element={<InvoiceForPurchase />} />
 
 

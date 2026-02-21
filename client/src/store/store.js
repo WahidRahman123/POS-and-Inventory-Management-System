@@ -10,6 +10,8 @@ import purchaseReducer from '../features/purchase/purchaseSlice';
 import customerReducer from '../features/customer/customerSlice';
 import supplierReducer from '../features/supplier/supplierSlice';
 import sStatementReducer from '../features/statements/sStatementSlice';
+import exchangeReducer from '../features/Exchange/exchangeSlice';
+import purchaseReturnReducer from '../features/PurchaseReturn/purchaseReturnSlice';
 
 export const store = configureStore({
     reducer: {
@@ -23,6 +25,8 @@ export const store = configureStore({
         purchase: purchaseReducer,
         customer: customerReducer,
         supplier: supplierReducer,
-        sstatement: sStatementReducer
+        sstatement: sStatementReducer,
+        exchange: exchangeReducer,
+        purchaseReturn: purchaseReturnReducer
     }
 })
