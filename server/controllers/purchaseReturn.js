@@ -91,19 +91,19 @@ module.exports.addPayment = async (req, res) => {
     const purchaseReturn = await PurchaseReturn.findById(id);
 
     if (purchaseReturn) {
-      // purchase.paid = purchase.paid + amount;
-      purchase.paid = Number(
-        new Decimal(purchase.paid).plus(new Decimal(amount)).toFixed(4)
+      // purchaseReturn.refundReceived = purchaseReturn.refundReceived + amount;
+      purchaseReturn.refundReceived = Number(
+        new Decimal(purchaseReturn.refundReceived).plus(new Decimal(amount)).toFixed(4)
       );
-      // purchase.due = purchase.due - amount;
-      purchase.due = Number(
-        new Decimal(purchase.due).minus(new Decimal(amount)).toFixed(4)
+      // purchaseReturn.refundDue = purchaseReturn.refundDue - amount;
+      purchaseReturn.refundDue = Number(
+        new Decimal(purchaseReturn.refundDue).minus(new Decimal(amount)).toFixed(4)
       );
-      await purchase.save();
+      await purchaseReturn.save();
 
       res.status(201).json({ message: "Payment updated successfully" });
     } else {
-      res.status(404).json({ message: "Purchase not found" });
+      res.status(404).json({ message: "Purchase Return not found" });
     }
   } catch (error) {
     console.error(error);
@@ -114,9 +114,10 @@ module.exports.addPayment = async (req, res) => {
 module.exports.searchById = async (req, res) => {
   try {
     const { id } = req.params;
-    const purchase = await Purchase.findById(id);
+    const purchaseReturn = await PurchaseReturn.findById(id);
+    if(!purchaseReturn) return res.status(409).json({ message: "Invalid Id" })
 
-    res.status(201).json(purchase);
+    res.status(201).json(purchaseReturn);
   } catch (error) {
     console.error(error);
     res.status(500).send("Server Error");

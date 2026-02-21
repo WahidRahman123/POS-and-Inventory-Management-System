@@ -13,7 +13,7 @@ const PurchaseReturn = () => {
   const { purchaseReturns, toggle, page, pages } = useSelector(
     (state) => state.purchaseReturn,
   );
-  console.log(purchaseReturns);
+  // console.log(purchaseReturns);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -137,6 +137,10 @@ const PurchaseReturn = () => {
 
     const newProducts = products.map(({ id, ...rest }) => rest);
 
+    const paid = new Decimal(refundReceived).greaterThan(returnAmount)
+      ? returnAmount
+      : new Decimal(refundReceived);
+
     const purchaseReturnData = {
       memo: formData.memo,
       createdAt: formData.date,
@@ -149,8 +153,10 @@ const PurchaseReturn = () => {
       userId: user._id,
       products: newProducts,
       returnAmount: Number(returnAmount.toFixed(4)),
-      refundReceived: Number(refundReceived),
-      refundDue: Number(refundDue.toFixed(4)),
+      refundReceived: Number(paid.toFixed(4)),
+      refundDue: refundDue.lessThan(new Decimal(0))
+        ? 0
+        : Number(refundDue.toFixed(4)),
     };
 
     try {
@@ -799,7 +805,7 @@ const PurchaseReturn = () => {
                           </td>
                           <td
                             rowSpan={rowspan}
-                            className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${purchaseReturn?.refundDue > 0 ? 'text-red-500 font-bold' : ''}`}
+                            className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${purchaseReturn?.refundDue > 0 ? "text-red-500 font-bold" : ""}`}
                           >
                             {purchaseReturn.refundDue}
                           </td>
@@ -809,13 +815,18 @@ const PurchaseReturn = () => {
                           >
                             <div className="flex flex-wrap gap-1">
                               <Link
-                                to="#"
-                                className="text-xs text-white px-2 py-1 rounded bg-green-600 hover:bg-green-700"
+                                onClick={(e) => e.stopPropagation()}
+                                to={
+                                  purchaseReturn.refundDue > 0
+                                    ? `/purchase-return/${purchaseReturn._id}/edit-due`
+                                    : "#"
+                                }
+                                className={`text-xs text-white px-2 py-1 rounded  ${purchaseReturn.refundDue > 0 ? "bg-green-600 hover:bg-green-700 cursor-pointer" : "bg-green-500 cursor-not-allowed"}`}
                               >
                                 Add Refund
                               </Link>
                               <Link
-                                to="#"
+                                to="/invoice-purchase-return"
                                 state={purchaseReturn}
                                 className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 cursor-pointer"
                               >

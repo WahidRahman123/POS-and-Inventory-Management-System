@@ -31,6 +31,8 @@ import PurchaseReturnStatement from "./pages/PurchaseReturnStatement";
 import SalesReturn from "./pages/SalesReturn";
 import SalesReturnStatement from "./pages/SalesReturnStatement";
 import InvoiceForExchange from "./pages/InvoiceForExchange";
+import EditPurchaseReturnDue from "./pages/EditPurchaseReturnDue";
+import InvoiceForPurchaseReturn from "./pages/InvoiceForPurchaseReturn";
 
 
 function App() {
@@ -44,6 +46,7 @@ function App() {
         <Route path="/invoice" element={<InvoicePage />} />
         <Route path="/invoice-exchange" element={<InvoiceForExchange />} />
         <Route path="/invoice-purchase" element={<InvoiceForPurchase />} />
+        <Route path="/invoice-purchase-return" element={<InvoiceForPurchaseReturn />} />
 
 
         {/* All other pages with Layout */}
@@ -75,6 +78,7 @@ function App() {
           <Route path="/product-exchange" element={<ProductExchange />} />
           <Route path="/purchase-return" element={<PurchaseReturn />} />
           <Route path="/purchase-return-statement" element={<PurchaseReturnStatement />} />
+          <Route path="/purchase-return/:id/edit-due" element={<EditPurchaseReturnDue />} />
           <Route path="/sales-return" element={<SalesReturn />} />
           <Route path="/sales-return-statement" element={<SalesReturnStatement />} />
                    

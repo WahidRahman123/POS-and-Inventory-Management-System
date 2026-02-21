@@ -1,6 +1,6 @@
 const express = require('express');
 const { protect, admin } = require('../middleware/authMiddleware');
-const PruchaseReturn = require('../controllers/purchaseReturn');
+const PurchaseReturn = require('../controllers/purchaseReturn');
 
 const router = express.Router();
 
@@ -9,21 +9,21 @@ const router = express.Router();
 //* @route GET /api/purchase-return
 // @desc show all purchase return with complete requirements
 // @access private
-router.get('/', protect, PruchaseReturn.index);
+router.get('/', protect, PurchaseReturn.index);
 
 //* @route POST /api/purchase-return
 // @desc create purchase-return
 // @access private
-router.post('/', protect, PruchaseReturn.createPurchaseReturn);
+router.post('/', protect, PurchaseReturn.createPurchaseReturn);
 
 //* @route POST /api/purchase-return/:id/payment
 // @desc search purchase-return between dates
 // @access Private
-router.post('/:id/payment', protect, PruchaseReturn.addPayment);
+router.post('/:id/payment', protect, PurchaseReturn.addPayment);
 
 //* @route GET /api/purchase-return/:id
 // @desc fetch specific purchase-return
 // @access Private
-router.get('/:id', protect, PruchaseReturn.searchById);
+router.get('/:id', protect, PurchaseReturn.searchById);
 
 module.exports = router;
