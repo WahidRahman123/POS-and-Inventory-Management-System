@@ -21,6 +21,11 @@ router.post('/', protect, PurchaseReturn.createPurchaseReturn);
 // @access Private
 router.post('/:id/payment', protect, PurchaseReturn.addPayment);
 
+//* @route get /api/purchase-return/by-name
+// @desc specific supplier purchase return details
+// @access Private
+router.get('/by-name', protect, PurchaseReturn.purchaseReturnBySupplierName);
+
 //* @route GET /api/purchase-return/:id
 // @desc fetch specific purchase-return
 // @access Private

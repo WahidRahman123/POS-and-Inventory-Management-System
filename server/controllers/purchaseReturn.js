@@ -123,3 +123,70 @@ module.exports.searchById = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+module.exports.purchaseReturnBySupplierName = async (req, res) => {
+  try {
+    const { page = 1, dateSearch = "", supplierName="" } = req.query;
+
+    let searchQuery = [];
+    let nameSearchQuery = { supplierName };
+    searchQuery.push(nameSearchQuery);
+
+    let dateSearchQuery;
+    // For date search:
+    if (dateSearch) {
+      const startOfDay = new Date(dateSearch);
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const endOfDay = new Date(dateSearch);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      dateSearchQuery = {
+        createdAt: { $gte: startOfDay, $lte: endOfDay },
+      };
+      searchQuery.push(dateSearchQuery);
+    }
+
+    const mainSearch = { $and: searchQuery };
+
+    // const limit = 10;
+
+    // Pagination
+    // const skip = (parseInt(page) - 1) * limit;
+
+    const purchaseReturns = await PurchaseReturn.find(mainSearch)
+      .sort({ createdAt: -1 })
+      // .skip(skip)
+      // .limit(limit);
+
+    // Count total Customer
+    // const total = await Purchase.countDocuments(mainSearch);
+
+    const result = await PurchaseReturn.aggregate([
+      {
+        $match: mainSearch
+      },
+      {
+        $group: {
+          _id: null,
+          totalreturnAmount: {$sum: { $multiply: ['$returnAmount', 10000] }},
+          totalRefundReceived: {$sum: { $multiply: ['$refundReceived', 10000] }},
+          totalRefundDue: {$sum: { $multiply: ['$drefundDueue', 10000] }}
+        }
+      }
+    ]);
+
+    res.status(201).json({
+      // total,
+      // page: parseInt(page),
+      // pages: Math.ceil(total / limit),
+      purchaseReturns,
+      totalAmount: result.length > 0 ? result[0].totalAmount / 10000 : 0,
+      totalPaid: result.length > 0 ? result[0].totalPaid / 10000 : 0,
+      totalDue: result.length > 0 ? result[0].totalDue / 10000 : 0,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};
