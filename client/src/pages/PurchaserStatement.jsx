@@ -167,10 +167,12 @@ const PurchaserStatement = () => {
                             {purchase.memo}
                           </td>
                           <td className="border-b border-gray-300 px-3 py-3 max-w-[90px]">
-                            {purchase.productNames}
+                            {purchase.products
+                              .map((p) => p.productName)
+                              .join(", ")}
                           </td>
                           <td className="border-b border-gray-300 px-3 py-3">
-                            {purchase.quantity}
+                            {purchase.products.reduce((sum, item) => sum + item.quantity, 0)}
                           </td>
                           <td className="border-b border-gray-300 px-3 py-3">
                             ৳{" "}

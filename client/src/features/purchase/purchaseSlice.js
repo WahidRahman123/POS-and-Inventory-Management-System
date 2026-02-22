@@ -71,7 +71,8 @@ export const addPurchase = createAsyncThunk(
 
       return { message: "Purchase Added Successfully!" };
     } catch (error) {
-      const message = "Purchase Adding Failed!";
+      let message = "Purchase Adding Failed!";
+      if(error.status) message = "Memo already exists!";
       return ThunkAPI.rejectWithValue(message);
     }
   }

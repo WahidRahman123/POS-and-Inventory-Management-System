@@ -108,7 +108,11 @@ const EditPurchaseDue = () => {
             </div>
             <div className="flex">
               <span className="w-28 font-medium">Products</span>
-              <span className="max-w-80">: {purchaseSearchedById?.productNames}</span>
+              <ul>
+                {purchaseSearchedById?.products?.map((p, i) => (
+                  <li key={i}>: {p.productName}</li>
+                ))}
+              </ul>
             </div>
             <div className="flex">
               <span className="w-28 font-medium">Total</span>

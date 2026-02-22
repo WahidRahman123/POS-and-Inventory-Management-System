@@ -66,6 +66,15 @@ module.exports.createPurchase = async (req, res) => {
   try {
     const purchases = req.body;
 
+    const { memo } = purchases;
+
+    //* Check if the memo exists or not
+    const returnFound = await Purchase.find({ memo });
+    if (returnFound.length > 0)
+      return res
+        .status(409)
+        .json({ message: "Purchase Already Existed!" });
+
     //* sales creation
     const purchase = new Purchase(purchases);
 
@@ -100,11 +109,11 @@ module.exports.addPayment = async (req, res) => {
     if (purchase) {
       // purchase.paid = purchase.paid + amount;
       purchase.paid = Number(
-        new Decimal(purchase.paid).plus(new Decimal(amount)).toFixed(4)
+        new Decimal(purchase.paid).plus(new Decimal(amount)).toFixed(4),
       );
       // purchase.due = purchase.due - amount;
       purchase.due = Number(
-        new Decimal(purchase.due).minus(new Decimal(amount)).toFixed(4)
+        new Decimal(purchase.due).minus(new Decimal(amount)).toFixed(4),
       );
       await purchase.save();
 

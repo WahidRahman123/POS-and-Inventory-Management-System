@@ -137,9 +137,9 @@ const PurchaseReturn = () => {
 
     const newProducts = products.map(({ id, ...rest }) => rest);
 
-    const paid = new Decimal(refundReceived).greaterThan(returnAmount)
+    const paid = new Decimal(Number(refundReceived)).greaterThan(returnAmount)
       ? returnAmount
-      : new Decimal(refundReceived);
+      : new Decimal(Number(refundReceived));
 
     const purchaseReturnData = {
       memo: formData.memo,
@@ -516,7 +516,6 @@ const PurchaseReturn = () => {
                 min={0}
                 placeholder="Enter Amount"
                 className="w-full px-4 py-2 border border-gray-400 rounded-md text-gray-700 font-semibold"
-                required
               />
             </div>
             <div>
@@ -611,40 +610,6 @@ const PurchaseReturn = () => {
 
         <div className="overflow-x-auto">
           <table className="min-w-full text-xs sm:text-sm border-collapse">
-            {/* <thead className="bg-gray-100">
-              <tr>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                  Date
-                </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                  Memo
-                </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                  Supplier
-                </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                  Products
-                </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                  Qty
-                </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                  Qty (kg)
-                </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                  Total
-                </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                  Paid
-                </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                  Due
-                </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                  Action
-                </th>
-              </tr>
-            </thead> */}
 
             <thead>
               <tr className="bg-gray-200">

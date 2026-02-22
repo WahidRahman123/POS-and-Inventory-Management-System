@@ -11,40 +11,19 @@ import { Link, useNavigate } from "react-router-dom";
 import Decimal from "decimal.js";
 import axios from "axios";
 
-const purchaseSchema = yup.object({
-  createdAt: yup.date().required("*Date is required!"),
-  memo: yup.string().required("*Memo is required!"),
-  // supplierName: yup.string().required("*Supplier name is required!"),
-  productNames: yup.string().required("*Product Names is required!"),
-  quantity: yup
-    .number()
-    .min(1, "*Cannot be less than 1!")
-    .required("*Quantity is required!"),
-  totalAmount: yup
-    .number()
-    .min(0, "*Cannot be less than 0!")
-    .required("*Total Amount is required!"),
-  paid: yup
-    .number()
-    .min(0, "*Cannot be less than 0!")
-    .required("*This field is required!"),
-});
-
 const Purchase = () => {
   const { user } = useSelector((state) => state.auth);
   const { purchases, toggle, page, pages } = useSelector(
-    (state) => state.purchase
+    (state) => state.purchase,
   );
+
   const dispatch = useDispatch();
-  const [date, setDate] = useState("");
   const navigate = useNavigate();
-
-  const [filterToggler, setFilterToggler] = useState(true);
-  const [nameSearch, setNameSearch] = useState("");
-
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(page);
-  const [sortOrder, setSortOrder] = useState(-1);
+  const [formData, setFormData] = useState({
+    date: "",
+    memo: "",
+  });
+  const [addLoading, setAddLoading] = useState(false);
 
   //* Supplier Search Handling Section
   const [name, setName] = useState("");
@@ -71,7 +50,7 @@ const Purchase = () => {
           params: {
             q: query,
           },
-        }
+        },
       );
 
       setData(data);
@@ -96,36 +75,110 @@ const Purchase = () => {
       supplierNameRef.current.focus();
     }
   }, [disable]);
+  //* Supplier Search Handling Section
 
-  // console.log(purchases);
+  //* Add Product Section Starts
+  const [products, setProducts] = useState([
+    {
+      id: 1,
+      productName: "",
+      quantity: "",
+      // qtyInKg: "",
+      unitPrice: "",
+      subTotal: "",
+    },
+  ]);
+  const handleProductChange = (id, field, value) => {
+    setProducts((prev) =>
+      prev.map((product) =>
+        product.id === id ? { ...product, [field]: value } : product,
+      ),
+    );
+  };
 
-  const handleSubmit = async (value, setSubmitting, resetForm) => {
+  const handleAddProduct = () => {
+    const newId =
+      products.length > 0 ? Math.max(...products.map((p) => p.id)) + 1 : 1;
+    setProducts([
+      ...products,
+      {
+        id: newId,
+        productName: "",
+        quantity: "",
+        // qtyInKg: "",
+        unitPrice: "",
+        subTotal: "",
+      },
+    ]);
+  };
+
+  const handleRemoveProduct = (id) => {
+    if (products.length > 1) {
+      setProducts(products.filter((product) => product.id !== id));
+    }
+  };
+  //* Add Product Section Ends
+
+  const totalQty = products.reduce(
+    (acc, p) => acc.plus(new Decimal(Number(p.quantity))),
+    new Decimal(0),
+  );
+  // const totalQtyInKg = products.reduce(
+  //   (acc, p) => acc.plus(new Decimal(Number(p.qtyInKg))),
+  //   new Decimal(0),
+  // );
+  const totalAmount = products.reduce(
+    (acc, p) => acc.plus(new Decimal(Number(p.subTotal))),
+    new Decimal(0),
+  );
+  const [paid, setPaid] = useState("");
+  const due = totalAmount.minus(new Decimal(Number(paid)));
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     if (supplier.supplierId === "") return alert("Select a supplier!");
-    const paid = new Decimal(value.paid).greaterThan(
-      new Decimal(value.totalAmount)
-    )
-      ? new Decimal(value.totalAmount)
-      : new Decimal(value.paid);
 
-    const due = new Decimal(value.totalAmount).minus(paid);
-    // console.log(supplier);
+    const newProducts = products.map(({ id, ...rest }) => rest);
 
-    const purchaseValue = {
-      ...value,
-      paid: Number(paid.toFixed(4)),
-      due: Number(due.toFixed(4)),
+    const newpPaid = new Decimal(Number(paid)).greaterThan(totalAmount)
+      ? totalAmount
+      : new Decimal(Number(paid));
+
+    const purchaseData = {
+      memo: formData.memo,
+      createdAt: formData.date,
+      issuedAt: new Date(),
       supplierId: supplier.supplierId,
-      userId: user._id,
       supplierName: supplier.supplierName,
       address: supplier.address,
       supplierEmail: supplier.supplierEmail,
       supplierPhone: supplier.supplierPhone,
+      userId: user._id,
+      products: newProducts,
+      totalAmount: Number(totalAmount.toFixed(4)),
+      paid: Number(newpPaid.toFixed(4)),
+      due: due.lessThan(new Decimal(0)) ? 0 : Number(due.toFixed(4)),
     };
 
     try {
-      await dispatch(addPurchase(purchaseValue)).unwrap();
-      resetForm();
-      //* For Supplier Name only
+      setAddLoading(true);
+      await dispatch(addPurchase(purchaseData)).unwrap();
+      setFormData({
+        date: "",
+        memo: "",
+      });
+      setProducts([
+        {
+          id: 1,
+          productName: "",
+          quantity: "",
+          qtyInKg: "",
+          unitPrice: "",
+          subTotal: "",
+        },
+      ]);
+      setPaid("");
+      //* For Customer Name only
       setDisable(false);
       setName("");
       setSupplier({
@@ -139,9 +192,17 @@ const Purchase = () => {
     } catch (error) {
       console.log("Failed!");
     } finally {
-      setSubmitting(false);
+      setAddLoading(false);
     }
   };
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(page);
+  const [sortOrder, setSortOrder] = useState(-1);
+
+  const [filterToggler, setFilterToggler] = useState(true);
+  const [nameSearch, setNameSearch] = useState("");
+  const [date, setDate] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -151,7 +212,7 @@ const Purchase = () => {
           nameSearch,
           page: currentPage,
           order: sortOrder,
-        })
+        }),
       );
     }
   }, [dispatch, user, toggle, filterToggler, sortOrder, currentPage]);
@@ -171,212 +232,329 @@ const Purchase = () => {
         Purchase Entry
       </h1>
       <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-4 sm:p-6 mb-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 mb-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Supplier Name
-            </label>
-            <div className="flex">
-              <input
-                type="search"
-                value={name}
-                onChange={handleSupplierNameOnChange}
-                ref={supplierNameRef}
-                placeholder="Supplier Name"
-                className="block w-[85%] px-3 py-1.5 border border-gray-300 rounded-sm text-sm disabled:bg-gray-300"
-                disabled={disable}
-              />
-              <button
-                disabled={!disable}
-                className="bg-red-500 hover:bg-red-600 cursor-pointer ml-2 px-2 py-1 font-bold text-white rounded disabled:bg-red-300 disabled:cursor-not-allowed "
-                onClick={() => {
-                  setDisable(false);
-                  setName("");
-                  setSupplier({
-                    supplierId: "",
-                    supplierName: "",
-                    address: "",
-                    supplierEmail: "",
-                    supplierPhone: "",
-                  });
-                  setData(null);
-                }}
-              >
-                Change
-              </button>
-            </div>
-
-            <div
-              className={`w-[85%] max-h-50 ${
-                data ? "shadow-md overflow-y-scroll" : ""
-              }`}
-            >
-              {data ? (
-                <table className="w-full">
-                  <tbody>
-                    {data.map((d, i) => (
-                      <tr
-                        key={i}
-                        className="p-2 cursor-pointer border-b border-gray-300 hover:bg-gray-100 text-gray-800"
-                        onClick={() => handleSupplierOnClick(d)}
-                      >
-                        {/* {d.name} */}
-                        <td className="p-2">{d.name}</td>
-                        <td className="text-center">{d.address}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                ""
-              )}
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Address</label>
-            <input
-              type="text"
-              value={supplier.address}
-              placeholder="Address"
-              disabled
-              className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm bg-gray-200 text-gray-700 select-none"
-              required
-            />
-          </div>
-        </div>
-
         {/* Purchase Add Form */}
-        <Formik
-          initialValues={{
-            createdAt: "",
-            memo: "",
-            // supplierName: "",
-            productNames: "",
-            quantity: "",
-            totalAmount: "",
-            paid: "",
-            due: "",
-          }}
-          validationSchema={purchaseSchema}
-          onSubmit={(value, { setSubmitting, resetForm }) =>
-            handleSubmit(value, setSubmitting, resetForm)
-          }
-        >
-          {({ isSubmitting, dirty, isValid }) => (
-            <Form>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                <div className="flex flex-col">
-                  <Field
-                    type="date"
-                    placeholder="Date"
-                    name="createdAt"
-                    className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-                  />
-                  <ErrorMessage
-                    name="createdAt"
-                    component="div"
-                    className="text-xs text-red-600"
-                  />
-                </div>
-
-                <div>
-                  <Field
-                    type="text"
-                    placeholder="Memo"
-                    name="memo"
-                    className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-                  />
-                  <ErrorMessage
-                    name="memo"
-                    component="div"
-                    className="text-xs text-red-600"
-                  />
-                </div>
-
-                {/* <div>
-                <Field
-                  type="text"
+        <form onSubmit={handleSubmit}>
+          {/* First Row - Customer Info */}
+          <div className="grid grid-cols-2 gap-x-6 mb-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Supplier Name
+              </label>
+              <div className="flex">
+                <input
+                  type="search"
+                  value={name}
+                  onChange={handleSupplierNameOnChange}
+                  ref={supplierNameRef}
                   placeholder="Supplier Name"
-                  name="supplierName"
-                  className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+                  className="block w-[85%] px-3 py-1.5 border border-gray-300 rounded-sm text-sm disabled:bg-gray-300"
+                  disabled={disable}
                 />
-                <ErrorMessage
-                  name="supplierName"
-                  component="div"
-                  className="text-xs text-red-600"
-                />
-              </div> */}
-
-                <div>
-                  <Field
-                    type="text"
-                    name="productNames"
-                    placeholder="Products Name (comma separated)"
-                    className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-                  />
-                  <ErrorMessage
-                    name="productNames"
-                    component="div"
-                    className="text-xs text-red-600"
-                  />
-                </div>
-                <div>
-                  <Field
-                    type="number"
-                    placeholder="Quantity"
-                    name="quantity"
-                    className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-                  />
-                  <ErrorMessage
-                    name="quantity"
-                    component="div"
-                    className="text-xs text-red-600"
-                  />
-                </div>
+                <button
+                  disabled={!disable}
+                  className="bg-red-500 hover:bg-red-600 cursor-pointer ml-2 px-2 py-1 font-bold text-white rounded disabled:bg-red-300 disabled:cursor-not-allowed "
+                  onClick={() => {
+                    setDisable(false);
+                    setName("");
+                    setSupplier({
+                      supplierId: "",
+                      supplierName: "",
+                      address: "",
+                      supplierEmail: "",
+                      supplierPhone: "",
+                    });
+                    setData(null);
+                  }}
+                >
+                  Change
+                </button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                <div>
-                  <Field
-                    name="totalAmount"
-                    type="number"
-                    placeholder="Total Amount"
-                    step="any"
-                    className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-                  />
-                  <ErrorMessage
-                    name="totalAmount"
-                    component="div"
-                    className="text-xs text-red-600"
-                  />
-                </div>
-
-                <div>
-                  <Field
-                    name="paid"
-                    type="number"
-                    placeholder="Paid"
-                    step="any"
-                    className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-                  />
-                  <ErrorMessage
-                    name="paid"
-                    component="div"
-                    className="text-xs text-red-600"
-                  />
-                </div>
-              </div>
-
-              <button
-                disabled={isSubmitting || !dirty || !isValid}
-                type="submit"
-                className="w-full sm:w-auto bg-blue-600 cursor-pointer text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-medium disabled:bg-blue-400 disabled:cursor-not-allowed"
+              <div
+                className={`w-[85%] max-h-50 ${
+                  data ? "shadow-md overflow-y-scroll" : ""
+                }`}
               >
-                {isSubmitting ? "Adding..." : "Add Purchase"}
-              </button>
-            </Form>
-          )}
-        </Formik>
+                {data ? (
+                  <table className="w-full">
+                    <tbody>
+                      {data.map((d, i) => (
+                        <tr
+                          key={i}
+                          className="p-2 cursor-pointer border-b border-gray-300 hover:bg-gray-100 text-gray-800"
+                          onClick={() => handleSupplierOnClick(d)}
+                        >
+                          {/* {d.name} */}
+                          <td className="p-2">{d.name}</td>
+                          <td className="text-center">{d.address}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  ""
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Address</label>
+              <input
+                type="text"
+                value={supplier.address}
+                placeholder="Address"
+                disabled
+                className="block w-full px-3 py-1.5 border border-gray-400 rounded-sm text-sm bg-gray-200 text-gray-700 select-none"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Second Row - Date and Memo */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Pick A Date
+              </label>
+              <input
+                type="date"
+                value={formData.date}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, date: e.target.value }))
+                }
+                placeholder="dd-----yyyy"
+                className="w-full px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Enter Memo
+                </label>
+                <input
+                  type="text"
+                  placeholder="Memo"
+                  value={formData.memo}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, memo: e.target.value }))
+                  }
+                  className="w-full px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleAddProduct}
+            className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap cursor-pointer mb-2"
+          >
+            + Add Product
+          </button>
+
+          {/* Products Section */}
+          <div className="bg-gray-50 rounded-lg p-4 mb-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+              Products
+            </h3>
+
+            {/* Single Product Row */}
+            {products.map((product, index) => (
+              <div
+                key={product.id}
+                className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-3 items-end"
+              >
+                <div className="md:col-span-2">
+                  <label className="block text-xs text-gray-600 mb-1">
+                    Product Name
+                  </label>
+                  <input
+                    type="text"
+                    value={product.productName}
+                    onChange={(e) =>
+                      handleProductChange(
+                        product.id,
+                        "productName",
+                        e.target.value,
+                      )
+                    }
+                    placeholder="Product Name"
+                    className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">
+                    Quantity
+                  </label>
+                  <input
+                    type="number"
+                    onWheel={(e) => e.target.blur()}
+                    value={product.quantity}
+                    onChange={(e) => {
+                      handleProductChange(
+                        product.id,
+                        "quantity",
+                        e.target.value,
+                      );
+
+                      const subTotal = new Decimal(Number(e.target.value)).mul(
+                        new Decimal(Number(product.unitPrice)),
+                      );
+
+                      handleProductChange(
+                        product.id,
+                        "subTotal",
+                        Number(subTotal.toFixed(4)),
+                      );
+                    }}
+                    placeholder="Qty"
+                    min={0}
+                    className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    required
+                  />
+                </div>
+                {/* <div>
+                  <label className="block text-xs text-gray-600 mb-1">
+                    Qty (kg)
+                  </label>
+                  <input
+                    type="number"
+                    value={product.qtyInKg}
+                    onChange={(e) => {
+                      handleProductChange(
+                        product.id,
+                        "qtyInKg",
+                        e.target.value,
+                      );
+
+                      const subTotal = new Decimal(Number(e.target.value)).mul(
+                        new Decimal(Number(product.unitPrice)),
+                      );
+
+                      handleProductChange(
+                        product.id,
+                        "subTotal",
+                        Number(subTotal.toFixed(4)),
+                      );
+                    }}
+                    placeholder="Qty in kg"
+                    step="any"
+                    className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    required
+                  />
+                </div> */}
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <label className="block text-xs text-gray-600 mb-1">
+                      Unit Price
+                    </label>
+                    <input
+                      type="number"
+                      onWheel={(e) => e.target.blur()}
+                      value={product.unitPrice}
+                      onChange={(e) => {
+                        handleProductChange(
+                          product.id,
+                          "unitPrice",
+                          e.target.value,
+                        );
+
+                        const subTotal = new Decimal(
+                          Number(e.target.value),
+                        ).mul(new Decimal(Number(product.quantity)));
+
+                        handleProductChange(
+                          product.id,
+                          "subTotal",
+                          Number(subTotal.toFixed(4)),
+                        );
+                      }}
+                      placeholder="Unit Price"
+                      step="any"
+                      className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      required
+                      min={0}
+                    />
+                  </div>
+                  {products.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveProduct(product.id)}
+                      className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-sm"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {/* Product Total Summary */}
+            <div className="border-t border-gray-400 pt-3 mt-3">
+              <div className="flex justify-end gap-6 text-sm">
+                <span className="text-gray-600">
+                  Total Qty: <strong>{totalQty.toFixed(0)}</strong>
+                </span>
+                {/* <span className="text-gray-600">
+                  Total Qty (kg): <strong>{totalQtyInKg.toFixed(0)}</strong>
+                </span> */}
+                <span className="text-gray-800 font-semibold">
+                  Products Total: ৳ {totalAmount.toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Payment Section */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Total Amount
+              </label>
+              <input
+                type="number"
+                value={totalAmount.toFixed(2)}
+                disabled
+                className="w-full px-4 py-2 border border-gray-400 rounded-md bg-gray-100 text-gray-600 font-semibold"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Paid
+              </label>
+              <input
+                type="number"
+                value={paid}
+                onChange={(e) => setPaid(e.target.value)}
+                min={0}
+                placeholder="Enter Amount"
+                className="w-full px-4 py-2 border border-gray-400 rounded-md text-gray-700 font-semibold"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Due
+              </label>
+              <input
+                type="number"
+                value={due.toFixed(2)}
+                disabled
+                className="w-full px-4 py-2 border border-gray-400 rounded-md bg-gray-300 text-gray-600 font-semibold"
+              />
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="w-full sm:w-auto bg-blue-600 cursor-pointer text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-medium transition-colors disabled:bg-blue-500 disabled:cursor-not-allowed"
+            disabled={addLoading}
+          >
+            {addLoading ? "Adding..." : "Add Purchase"}
+          </button>
+        </form>
       </div>
 
       {/* Purchase Report Table */}
@@ -448,114 +626,214 @@ const Purchase = () => {
 
         <div className="overflow-x-auto">
           <table className="min-w-full text-xs sm:text-sm border-collapse">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+            <thead>
+              <tr className="bg-gray-200">
+                <th
+                  className="border border-gray-400 px-4 py-3 text-left font-semibold text-gray-700"
+                  rowSpan={2}
+                >
                   Date
                 </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+                <th
+                  className="border border-gray-400 px-4 py-3 text-left font-semibold text-gray-700"
+                  rowSpan={2}
+                >
                   Memo
                 </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+                <th
+                  className="border border-gray-400 px-4 py-3 text-left font-semibold text-gray-700"
+                  rowSpan={2}
+                >
                   Supplier
                 </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+                <th
+                  className="border border-gray-400 px-4 py-3 text-center font-semibold text-gray-700"
+                  colSpan={3}
+                >
                   Products
                 </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                  Qty
-                </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+
+                <th
+                  className="border border-gray-400 px-4 py-3 text-left font-semibold text-gray-700"
+                  rowSpan={2}
+                >
                   Total
                 </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+                <th
+                  className="border border-gray-400 px-4 py-3 text-left font-semibold text-gray-700"
+                  rowSpan={2}
+                >
                   Paid
                 </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+                <th
+                  className="border border-gray-400 px-4 py-3 text-left font-semibold text-gray-700"
+                  rowSpan={2}
+                >
                   Due
                 </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+                <th
+                  className="border border-gray-400 px-4 py-3 text-left font-semibold text-gray-700"
+                  rowSpan={2}
+                >
                   Action
+                </th>
+              </tr>
+              <tr className="bg-gray-200">
+                <th className="border border-gray-400 px-4 py-3 text-left font-semibold text-gray-700">
+                  Product Names
+                </th>
+                <th className="border border-gray-400 px-4 py-3 text-left font-semibold text-gray-700">
+                  Qty
+                </th>
+                {/* <th className="border border-gray-400 px-4 py-3 text-left font-semibold text-gray-700">
+                  Qty (kg)
+                </th> */}
+                <th className="border border-gray-400 px-4 py-3 text-left font-semibold text-gray-700">
+                  Unit Price
                 </th>
               </tr>
             </thead>
             <tbody>
               {purchases.length > 0 ? (
-                purchases.map((purchase, index) => (
-                  <tr key={index} className="hover:bg-gray-50 cursor-pointer" 
-                    onClick={(e) => {                      
-                      if(e.target.tagName !== "TD") return;
-                      navigate("/purchaser-statement", { state: purchase })
-                    }
-                  }>
-                    <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                      {new Date(purchase.createdAt)
-                        .toLocaleDateString("en-GB", {
-                          timeZone: "Asia/Dhaka",
-                        })
-                        .replaceAll("/", "-")}
-                    </td>
-                    <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                      {purchase.memo}
-                    </td>
-                    <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                      {purchase.supplierName}
-                    </td>
-                    <td className="border px-2 py-1 sm:px-4 sm:py-2 max-w-40">
-                      {purchase.productNames}
-                    </td>
-                    <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                      {purchase.quantity}
-                    </td>
-                    <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                      {purchase.totalAmount}
-                    </td>
-                    <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                      {purchase.paid}
-                    </td>
-                    <td
-                      className={`border px-2 py-1 sm:px-4 sm:py-2 ${
-                        purchase.due > 0 ? "text-red-500 font-bold" : ""
-                      }`}
+                purchases.map((purchase, index) => {
+                  const rowspan = purchase.products.length;
+                  const isEven = index % 2 === 0;
+
+                  return purchase.products.map((product, index) => (
+                    <tr
+                      onClick={(e) => {
+                        if (e.target.tagName !== "TD") return;
+                        navigate("/purchaser-statement", { state: purchase });
+                      }}
+                      key={index}
+                      className={
+                        isEven
+                          ? "bg-white cursor-pointer"
+                          : "bg-gray-50 cursor-pointer"
+                      }
                     >
-                      {purchase.due}
-                    </td>
-                    <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                      <div className="flex flex-wrap gap-1">
-                        <Link
-                          onClick={(e) => e.stopPropagation()}
-                          to={
-                            purchase.due
-                              ? `/purchase-report/${purchase._id}/edit-due`
-                              : "#"
-                          }
-                          className={`text-xs text-white px-2 py-1 rounded ${
-                            purchase.due
-                              ? "bg-green-600 hover:bg-green-700"
-                              : "cursor-no-drop bg-green-500"
-                          }`}
-                        >
-                          Add Payment
-                        </Link>
-                        <Link
-                          onClick={(e) => e.stopPropagation()}
-                          to="/invoice-purchase"
-                          state={purchase}
-                          className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 cursor-pointer"
-                        >
-                          Print
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      {index === 0 && (
+                        <>
+                          <td
+                            rowSpan={rowspan}
+                            className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            {new Date(purchase.createdAt)
+                              .toLocaleDateString("en-GB", {
+                                timeZone: "Asia/Dhaka",
+                              })
+                              .replaceAll("/", "-")}
+                          </td>
+                          <td
+                            rowSpan={rowspan}
+                            className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            {purchase.memo}
+                          </td>
+                          <td
+                            rowSpan={rowspan}
+                            className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            {purchase.supplierName}
+                          </td>
+                        </>
+                      )}
+
+                      {/* Product columns */}
+                      <td
+                        className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${
+                          index !== purchase.products.length - 1
+                            ? "border-b-gray-200"
+                            : ""
+                        }`}
+                      >
+                        {product.productName}
+                      </td>
+                      <td
+                        className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${
+                          index !== purchase.products.length - 1
+                            ? "border-b-gray-200"
+                            : ""
+                        }`}
+                      >
+                        {product.quantity}
+                      </td>
+                      {/* <td
+                        className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${
+                          index !== purchase.products.length - 1
+                            ? "border-b-gray-200"
+                            : ""
+                        }`}
+                      >
+                        {product.qtyInKg}
+                      </td> */}
+                      <td
+                        className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${
+                          index !== purchase.products.length - 1
+                            ? "border-b-gray-200"
+                            : ""
+                        }`}
+                      >
+                        {product.unitPrice}
+                      </td>
+
+                      {index === 0 && (
+                        <>
+                          <td
+                            rowSpan={rowspan}
+                            className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            {purchase.totalAmount}
+                          </td>
+                          <td
+                            rowSpan={rowspan}
+                            className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            {purchase.paid}
+                          </td>
+                          <td
+                            rowSpan={rowspan}
+                            className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${purchase?.due > 0 ? "text-red-500 font-bold" : ""}`}
+                          >
+                            {purchase.due}
+                          </td>
+                          <td
+                            rowSpan={rowspan}
+                            className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            <div className="flex flex-wrap gap-1">
+                              <Link
+                                onClick={(e) => e.stopPropagation()}
+                                to={
+                                  purchase.due > 0
+                                    ? `/purchase-report/${purchase._id}/edit-due`
+                                    : "#"
+                                }
+                                className={`text-xs text-white px-2 py-1 rounded  ${purchase.due > 0 ? "bg-green-600 hover:bg-green-700 cursor-pointer" : "bg-green-500 cursor-not-allowed"}`}
+                              >
+                                Add Payment
+                              </Link>
+                              <Link
+                                to="/invoice-purchase"
+                                state={purchase}
+                                className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 cursor-pointer"
+                              >
+                                Print
+                              </Link>
+                            </div>
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  ));
+                })
               ) : (
                 <tr>
                   <td
-                    colSpan={9}
+                    colSpan={10}
                     className="text-center text-gray-500 py-10 text-lg select-none"
                   >
-                    No Purchase Available.
+                    No Purchase Returns Available.
                   </td>
                 </tr>
               )}
