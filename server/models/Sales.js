@@ -86,6 +86,14 @@ const salesSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    cash: {
+      type: Number,
+      required: true,
+    },
+    exchange: {
+      type: Number,
+      required: true,
+    },
     paid: {
       type: Number,
       required: true,

@@ -169,6 +169,8 @@ const PointOfSale = () => {
             total: Number(subTotal.toFixed(4)),
             discount: discount ? Number(new Decimal(discount).toFixed(4)) : 0,
             totalCost: Number(totalCost.toFixed(4)),
+            cash: Number(cashInput),
+            exchange: Number(exchangeValue),
             due:
               cashInput || exchangeValue
                 ? subTotal
