@@ -29,6 +29,7 @@ const InvoicePage = () => {
       navigate("/point-of-sale");
     }
   }, []);
+  
 
   //? Glimpse Stopper
   if (!user) return;
@@ -57,27 +58,29 @@ const InvoicePage = () => {
               {/* LEFT : centre-aligned text block */}
               <div className="text-center sm:text-left space-y-1">
                 <h1 className="text-2xl font-extrabold text-red-700">
-                  সবুজ অটো
+                  Ellite Bettary 
                 </h1>
-                <p className="text-sm font-bold text-gray-800">
+                {/* <p className="text-sm font-bold text-gray-800">
                   প্রোঃ মোঃ সবুজ
-                </p>
+                </p> */}
                 <p className="text-xs text-gray-800 font-medium">
-                  অটো রিকশা ও ভ্যানের পার্টস পাইকারি ও খুচরা বিক্রেতা
+                  Auto Rickshaw & Van Parts Wholesaler & Retailer
                 </p>
                 <p className="text-xs text-gray-700 leading-tight">
-                  ঠিকানা: জি. এল. রায় রো (লায়ন্স স্কুলের বিপরীতে), ঝন্টুর
-                  মোড়, রংপুর।
+                  
+                    Address:Shapla Chattar, College Road, Rangpur  
+                   
+                  
                 </p>
               </div>
               {/* RIGHT : mobile numbers + invoice number (image-মতো) */}
               <div className="text-right space-y-1 text-xs text-gray-700">
-                <p>মোবাইল: 01773080202 | 01830685667</p>
-                <p>দোকান: 01979080202</p>
+                <p>Mobile: 01773080202 | 01830685667</p>
+                <p>Shop: 01979080202</p>
                 {/* Invoice Number sits exactly under mobile numbers, above the border */}
 
                 <p className="mt-6 font-semibold text-gray-800">
-                  মেমো নম্বর:{" "}
+                  Invoice No:{" "}
                   <span className="text-red-700">
                     {location.state?.invoiceNo || "--------"}
                   </span>
@@ -109,11 +112,11 @@ const InvoicePage = () => {
 
             <div className="flex justify-between mt-4 border-b border-gray-300 pb-2">
               <p>
-                <span className="font-semibold">ক্রেতা:</span>{" "}
+                <span className="font-semibold">Customer:</span>{" "}
                 {location.state ? location.state.customerName : ""}
               </p>
               <p>
-                <span className="font-semibold">ঠিকানা: </span>
+                <span className="font-semibold">Address: </span>
                 {location.state?.address ?? ""}
               </p>
               <div className="text-right">
@@ -121,7 +124,7 @@ const InvoicePage = () => {
                   <span className="font-semibold">Sr.#</span> 4
                 </p> */}
                 <p>
-                  <span className="font-semibold">তারিখ:</span>{" "}
+                  <span className="font-semibold">Date:</span>{" "}
                   {new Date().toLocaleDateString("en-GB", {
                     timeZone: "Asia/Dhaka",
                     day: "2-digit",
@@ -138,14 +141,14 @@ const InvoicePage = () => {
             <table className="w-full border-collapse mt-4 text-sm">
               <thead>
                 <tr className="bg-red-600 text-white">
-                  <th className="border border-gray-300 px-2 py-1">নং.</th>
+                  <th className="border border-gray-300 px-2 py-1">SL.</th>
                   <th className="border border-gray-300 px-2 py-1">
-                    পণ্য বিবরণ
+                    Product Description
                   </th>
-                  <th className="border border-gray-300 px-2 py-1">পরিমান</th>
+                  <th className="border border-gray-300 px-2 py-1">Quantity</th>
 
-                  <th className="border border-gray-300 px-2 py-1">মূল্য</th>
-                  <th className="border border-gray-300 px-2 py-1">মোট</th>
+                  <th className="border border-gray-300 px-2 py-1">Price</th>
+                  <th className="border border-gray-300 px-2 py-1">Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -177,7 +180,7 @@ const InvoicePage = () => {
 
             <div className="mt-4 text-sm">
               <p className="font-semibold text-red-600">
-                মোট {location.state ? location.state.products.length : ""}{" "}
+                Total {location.state ? location.state.products.length : ""}{" "}
                 <span className="float-right">
                   {location.state
                     ? new Decimal(location.state.totalWithoutDiscount).toFixed(
@@ -187,7 +190,7 @@ const InvoicePage = () => {
                 </span>
               </p>
               <p>
-                মূল্যছাড় (Discount){" "}
+                Discount{" "}
                 <span className="float-right">
                   {location.state
                     ? location.state.discount
@@ -197,7 +200,7 @@ const InvoicePage = () => {
                 </span>
               </p>
               <p>
-                পরিশোধযোগ্য টাকা{" "}
+                Payable Amount{" "}
                 <span className="float-right">
                   {location.state
                     ? new Decimal(location.state.total).toFixed(2)
@@ -206,7 +209,27 @@ const InvoicePage = () => {
               </p>
               <br />
               <p>
-                মোট জমা{" "}
+                Cash{" "}
+                <span className="float-right">
+                  {location.state
+                    ? location.state.cash
+                      ? new Decimal(location.state.cash).toFixed(2)
+                      : 0
+                    : ""}
+                </span>
+              </p>
+              <p>
+                Exchange{" "}
+                <span className="float-right">
+                  {location.state
+                    ? location.state.exchange
+                      ? new Decimal(location.state.exchange).toFixed(2)
+                      : 0
+                    : ""}
+                </span>
+              </p>
+              <p>
+                Total Paid{" "}
                 <span className="float-right">
                   {location.state
                     ? location.state.paid
@@ -216,13 +239,13 @@ const InvoicePage = () => {
                 </span>
               </p>
               <p>
-                মোট বাকি{" "}
+                Due Amount{" "}
                 <span className="float-right">
                   {location.state
                     ? new Decimal(location.state.due).lessThan(new Decimal(0))
                       ? `${new Decimal(location.state.due)
                           .abs()
-                          .toFixed(2)} (ফেরত পাবে)`
+                          .toFixed(2)} (Refund)`
                       : location.state.due
                       ? new Decimal(location.state.due).toFixed(2)
                       : 0
@@ -232,7 +255,7 @@ const InvoicePage = () => {
             </div>
 
             <div className="mt-6">
-              <p className="text-red-600 font-semibold">মন্তব্য:</p>
+              <p className="text-red-600 font-semibold">Remarks:</p>
               <div className="h-12 border border-gray-300 rounded">
                 {location.state.remarks}
               </div>

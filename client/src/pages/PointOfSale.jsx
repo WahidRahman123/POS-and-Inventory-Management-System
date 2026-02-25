@@ -479,7 +479,15 @@ const PointOfSale = () => {
               <span>{subTotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between font-bold">
-              <span>Paid</span>
+              <span>Cash</span>
+              <span>{new Decimal(Number(cashInput)).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-bold">
+              <span>Exchange</span>
+              <span>{new Decimal(Number(exchangeValue)).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-bold">
+              <span>Total Paid</span>
               <span>
                 {new Decimal(Number(cashInput))
                   .plus(new Decimal(Number(exchangeValue)))
