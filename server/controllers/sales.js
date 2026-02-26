@@ -4,9 +4,25 @@ const Decimal = require("decimal.js");
 
 module.exports.index = async (req, res) => {
   try {
-    const sales = await Sales.find({}).sort({ createdAt: -1 });
+    const { page = 1 } = req.query;
 
-    res.status(201).json(sales);
+    const limit = 10;
+    const skip = (parseInt(page) - 1) * limit;
+
+    const sales = await Sales.find({})
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    // Count total documents
+    const total = await Sales.countDocuments({});
+
+    res.status(201).json({
+      total,
+      page: parseInt(page),
+      pages: Math.ceil(total / limit),
+      sales,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send("Server Error");
@@ -213,11 +229,11 @@ module.exports.addPayment = async (req, res) => {
     if (sale) {
       // sale.paid = sale.paid + amount;
       sale.paid = Number(
-        new Decimal(sale.paid).plus(new Decimal(amount)).toFixed(4)
+        new Decimal(sale.paid).plus(new Decimal(amount)).toFixed(4),
       );
       // sale.due = sale.due - amount;
       sale.due = Number(
-        new Decimal(sale.due).minus(new Decimal(amount)).toFixed(4)
+        new Decimal(sale.due).minus(new Decimal(amount)).toFixed(4),
       );
       await sale.save();
 
@@ -241,3 +257,80 @@ module.exports.getTotalSaleCount = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+async function getDateOnRange(date) {
+  // Today's sales:
+  if (date && date === "t") {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const sales = await Sales.find({
+      createdAt: { $gte: startOfDay, $lte: endOfDay },
+    }).sort({ createdAt: -1 });
+
+    if (sales) {
+      return res.status(200).json(sales);
+    } else {
+      return res.status(404).json({ message: "Sales not found" });
+    }
+  }
+
+  // Weekly sales:
+  if (date && date === "w") {
+    const now = new Date();
+
+    const startOfWeek = new Date(now);
+    startOfWeek.setHours(0, 0, 0, 0);
+    const day = startOfWeek.getDay();
+    const diff = day >= 6 ? day - 6 : day + 1;
+
+    startOfWeek.setDate(startOfWeek.getDate() - diff);
+
+    const sales = await Sales.find({
+      createdAt: { $gte: startOfWeek, $lte: now },
+    }).sort({ createdAt: -1 });
+
+    if (sales) {
+      return res.status(200).json(sales);
+    } else {
+      return res.status(404).json({ message: "Sales not found" });
+    }
+  }
+
+  // Monthly sales:
+  if (date && date === "m") {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+    const sales = await Sales.find({
+      createdAt: { $gte: startOfMonth, $lt: endOfMonth },
+    }).sort({ createdAt: -1 });
+
+    if (sales) {
+      return res.status(200).json(sales);
+    } else {
+      return res.status(404).json({ message: "Sales not found" });
+    }
+  }
+
+  // Yearly sales:
+  if (date && date === "y") {
+    const now = new Date();
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    const endOfYear = new Date(now.getFullYear() + 1, 0, 1);
+
+    const sales = await Sales.find({
+      createdAt: { $gte: startOfYear, $lt: endOfYear },
+    }).sort({ createdAt: -1 });
+
+    if (sales) {
+      return res.status(200).json(sales);
+    } else {
+      return res.status(404).json({ message: "Sales not found" });
+    }
+  }
+}

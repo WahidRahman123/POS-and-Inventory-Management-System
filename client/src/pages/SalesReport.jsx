@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchSalesByDate, fetchSalesByIndividualDate } from "../features/sales/salesSlice";
+import {
+  fetchSalesByDate,
+  fetchSalesByIndividualDate,
+} from "../features/sales/salesSlice";
 import { Link, useNavigate } from "react-router-dom";
 import Decimal from "decimal.js";
 
@@ -10,18 +13,21 @@ const SalesReport = () => {
   const dispatch = useDispatch();
   const [date, setDate] = useState("");
 
-  const { sales, loading, error, totalSales, totalCosts, profit } = useSelector(
-    (state) => state.sales
-  );
+  const { sales, loading, error, page, pages, totalSales, totalCosts, profit } =
+    useSelector((state) => state.sales);
 
   const [day, setDay] = useState("Today");
 
-  const handleOnClick = (query, d) => {
+  const handleSelection = (query, d) => {
     setDay(d);
     // set the date to empty string
     setDate("");
     dispatch(fetchSalesByDate(query));
   };
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(page);
+  const [sortOrder, setSortOrder] = useState(-1);
 
   useEffect(() => {
     if (!user) {
@@ -47,140 +53,166 @@ const SalesReport = () => {
       <hr className="mb-4" />
 
       {/* Buttons */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {[
-          { query: "t", label: "Today" },
-          { query: "w", label: "This Week" },
-          { query: "m", label: "This Month" },
-          { query: "y", label: "This Year" },
-        ].map(({ query, label }) => (
-          <button
-            key={query}
-            onClick={() => handleOnClick(query, label)}
-            className="flex items-center border px-3 py-1 sm:px-4 sm:py-2 bg-white hover:bg-gray-50 text-xs sm:text-sm cursor-pointer"
+      <div className="mb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-500 font-medium">View:</span>
+          <select
+            className="w-full sm:w-auto appearance-none border border-gray-300 rounded-md px-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-blue-500 bg-gray-50"
+            onChange={(e) => {
+              const q = e.target.value;
+              const l = e.target.selectedOptions[0].text;
+              handleSelection(q, l);
+            }}
           >
-            <span className="mr-1 sm:mr-2">📅</span>
-            {label}
-          </button>
-        ))}
+            {[
+              { query: "t", label: "Today" },
+              { query: "w", label: "This Week" },
+              { query: "m", label: "This Month" },
+              { query: "y", label: "This Year" },
+            ].map(({ query, label }) => (
+              <option key={query} value={query}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-md shadow-sm transition duration-200 cursor-pointer">
+          Full Due List
+        </button>
       </div>
 
       {/* Report Title */}
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+      <div className="flex flex-col sm:flex-row justify-between items-start my-4 gap-3">
         <h2 className="text-lg sm:text-xl font-semibold">{day}'s Report</h2>
-
-        {/* Date Search — Right side top */}
-        <div className="flex items-center gap-2 ml-auto">
-          <label className="text-xs sm:text-sm text-gray-600">
-            Search by Date:
-          </label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => {
-              setDate(e.target.value);
-              if(e.target.value) {
-                setDay(e.target.value)
-                // Call the fetchSalesByDate
-                dispatch(fetchSalesByIndividualDate(e.target.value));
-              } else {
-                setDay("Today");
-                dispatch(fetchSalesByDate("t"));
-              }
-
-            }}
-            className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-36 sm:w-40"
-          />
-        </div>
-
-        {/* Update */}
-        {/* <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2 ml-auto">
-              <label className="text-xs sm:text-sm text-gray-600">
-                Search by Supplier Name:
-              </label>
-              <input
-                type="search"
-                value={nameSearch}
-                onChange={(e) => setNameSearch(e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-36 sm:w-40"
-              />
-            </div>
-
-            <div className="flex items-center gap-2 ml-auto">
-              <label className="text-xs sm:text-sm text-gray-600">
-                Search by Date:
-              </label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-36 sm:w-40"
-              />
-            </div>
-
-            <div className="text-right">
-              <button
-                className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 cursor-pointer"
-                onClick={() => setFilterToggler(!filterToggler)}
-              >
-                Filter
-              </button>
-              <button
-                className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 cursor-pointer ml-2"
-                onClick={() => {
-                  if (date !== "" || nameSearch !== "") {
-                    date !== "" && setDate("");
-                    nameSearch !== "" && setNameSearch("");
-                    setFilterToggler(!filterToggler);
-                  }
-                }}
-              >
-                Clear
-              </button>
-            </div>
-          </div> */}
       </div>
-      {/* <h2 className="text-lg sm:text-xl font-semibold mb-2">{day}'s Report</h2>
-      <hr className="mb-4" /> */}
 
       {/* Summary */}
       {sales.length > 0 && (
-        <div className="mb-4 text-sm sm:text-base font-semibold space-y-1">
-          <div>
-            Total Sales:{" "}
-            <span className="text-green-600">
-              ৳ {totalSales ? totalSales : 0}
-            </span>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 shadow-sm">
+            <p className="text-sm text-gray-500">Total Sales</p>
+            <p className="text-lg font-bold text-green-600">
+              ৳ {totalSales || 0}
+            </p>
           </div>
-          <div>
-            Total Costs:{" "}
-            <span className="text-green-600">
-              ৳ {totalCosts ? totalCosts : 0}
-            </span>
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 shadow-sm">
+            <p className="text-sm text-gray-500">Total Costs</p>
+            <p className="text-lg font-bold text-green-600">
+              ৳ {totalCosts || 0}
+            </p>
           </div>
-          <div>
-            Profit:{" "}
-            <span className="text-green-600">
-              ৳ {profit ? profit : 0}
-            </span>
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 shadow-sm">
+            <p className="text-sm text-gray-500">Profit</p>
+            <p className="text-lg font-bold text-green-600">৳ {profit || 0}</p>
           </div>
         </div>
       )}
+
+      <div className="flex flex-col lg:flex-row justify-between items-start gap-4 mb-3">
+        <div>
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+            className="border border-gray-300 bg-white rounded-md px-3 py-2 text-sm shadow-sm hover:border-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          >
+            <option value="1">Oldest First</option>
+            <option value="-1">Newest First</option>
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-2 w-full lg:w-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
+            <label className="text-xs sm:text-sm text-gray-600">
+              Search by Product Name:
+            </label>
+            <input
+              type="search"
+              value={date}
+              onChange={(e) => {
+                setDate(e.target.value);
+                if (e.target.value) {
+                  setDay(e.target.value);
+                  // Call the fetchSalesByDate
+                  dispatch(fetchSalesByIndividualDate(e.target.value));
+                } else {
+                  setDay("Today");
+                  dispatch(fetchSalesByDate("t"));
+                }
+              }}
+              placeholder="Product Name"
+              className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
+            />
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
+            <label className="text-xs sm:text-sm text-gray-600">
+              Search by Customer Name:
+            </label>
+            <input
+              type="search"
+              value={date}
+              onChange={(e) => {
+                setDate(e.target.value);
+                if (e.target.value) {
+                  setDay(e.target.value);
+                  // Call the fetchSalesByDate
+                  dispatch(fetchSalesByIndividualDate(e.target.value));
+                } else {
+                  setDay("Today");
+                  dispatch(fetchSalesByDate("t"));
+                }
+              }}
+              placeholder="Customer Name"
+              className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
+            />
+          </div>
+
+          {/* Date Search — Right side top */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
+            <label className="text-xs sm:text-sm text-gray-600">
+              Search by Date:
+            </label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => {
+                setDate(e.target.value);
+                if (e.target.value) {
+                  setDay(e.target.value);
+                  // Call the fetchSalesByDate
+                  dispatch(fetchSalesByIndividualDate(e.target.value));
+                } else {
+                  setDay("Today");
+                  dispatch(fetchSalesByDate("t"));
+                }
+              }}
+              className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
+            />
+          </div>
+
+          <div className="flex gap-2 justify-start sm:justify-end  w-full">
+            <button
+              className="flex-1 sm:flex-none bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600"
+              type="button"
+            >
+              Filter
+            </button>
+            <button
+              className="flex-1 sm:flex-none bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600"
+              type="button"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Table */}
       <div className="overflow-x-auto border rounded">
         <table className="min-w-full text-xs sm:text-sm border-collapse">
           <thead className="bg-gray-300">
-            {/* <tr>
-              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Date</th>
-              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Item</th>
-              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Price</th>
-              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Qty</th>
-              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Sub Total</th>
-            </tr> */}
-
             <tr>
               <th
                 rowSpan={2}
@@ -212,7 +244,7 @@ const SalesReport = () => {
               >
                 Total
               </th>
-              
+
               <th
                 rowSpan={2}
                 className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
@@ -276,7 +308,6 @@ const SalesReport = () => {
                       </>
                     )}
 
-                    {/* Product columns */}
                     <td
                       className={`border px-2 py-1 sm:px-4 sm:py-2 ${
                         index !== sale.products.length - 1
@@ -319,7 +350,7 @@ const SalesReport = () => {
                         >
                           {sale.total}
                         </td>
-                        
+
                         <td
                           rowSpan={rowspan}
                           className="border px-2 py-1 sm:px-4 sm:py-2"
@@ -334,12 +365,6 @@ const SalesReport = () => {
                         >
                           {sale.due}
                         </td>
-                        {/* <td
-                          rowSpan={rowspan}
-                          className="border px-2 py-1 sm:px-4 sm:py-2"
-                        >
-                          <Link to={`/sales-report/${sale._id}/edit-due`} className="text-blue-500 cursor-pointer hover:text-blue-600 hover:underline">Add Payment</Link>
-                        </td> */}
                         <td
                           rowSpan={rowspan}
                           className="border px-2 py-1 sm:px-4 sm:py-2"
@@ -385,6 +410,38 @@ const SalesReport = () => {
             )}
           </tbody>
         </table>
+
+        {pages ? (
+          <div className="flex justify-center items-center mt-4 gap-2 text-sm">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={page === 1}
+              className={`${
+                page === 1
+                  ? ""
+                  : "cursor-pointer hover:bg-black hover:text-white"
+              } px-2 py-1 border rounded  disabled:opacity-50`}
+            >
+              Prev
+            </button>
+            <span>
+              Page {page} of {pages}
+            </span>
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, pages))}
+              disabled={page === pages}
+              className={`${
+                page === pages
+                  ? ""
+                  : "cursor-pointer hover:bg-black hover:text-white"
+              }  px-2 py-1 border rounded  disabled:opacity-50`}
+            >
+              Next
+            </button>
+          </div>
+        ) : (
+          ""
+        )}
       </div>
     </div>
   );

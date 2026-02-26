@@ -11,6 +11,8 @@ const initialState = {
   createdSales: null,
   saleSearchedById: null,
   totalSaleCount: 0,
+  page: 1,
+  pages: null,
   loading: false,
   error: null,
 };
@@ -166,6 +168,8 @@ const salesSlice = createSlice({
       .addCase(fetchSalesByDate.fulfilled, (state, action) => {
         state.loading = false;
         state.sales = action.payload;
+        state.page = action.payload.page;
+        state.pages = action.payload.pages;
         if (state.sales.length > 0) {
           const totalSale = state.sales.reduce(
             (acc, sale) => acc.plus(new Decimal(sale.paid)),
