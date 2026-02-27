@@ -96,9 +96,9 @@ const SalesReport = () => {
           </select>
         </div>
 
-        <button className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-md shadow-sm transition duration-200 cursor-pointer">
+        <Link to="/sales-report/due-list" className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-md shadow-sm transition duration-200 cursor-pointer">
           Full Due List
-        </button>
+        </Link>
       </div>
 
       {/* Report Title */}

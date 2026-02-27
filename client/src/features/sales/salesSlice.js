@@ -5,6 +5,7 @@ import Decimal from "decimal.js";
 
 const initialState = {
   sales: [],
+  salesOfDues: [],
 
   salesForStatement: [],
   totalAmount: null,
@@ -172,6 +173,29 @@ export const fetchSalesForCustomer = createAsyncThunk(
       return data;
     } catch (error) {
       const message = "Fetching Failed!";
+      return ThunkAPI.rejectWithValue(message);
+    }
+  },
+);
+
+export const fetchSalesDueList = createAsyncThunk(
+  "sales/fetchSalesDueList",
+  async (query, ThunkAPI) => {
+    try {
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URI}/api/sales/due-list`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+          params: query,
+        },
+      );
+
+      return data;
+    } catch (error) {
+      const message = "Sales Fetching Failed!";
+      console.log(error.message);
       return ThunkAPI.rejectWithValue(message);
     }
   },
@@ -398,7 +422,31 @@ const salesSlice = createSlice({
             theme: "colored",
           });
         },
-      );
+      )
+      .addCase(fetchSalesDueList.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchSalesDueList.fulfilled, (state, action) => {
+        state.loading = false;
+        state.salesOfDues = action.payload.sales;
+        state.page = action.payload.page;
+        state.pages = action.payload.pages;
+      })
+      .addCase(fetchSalesDueList.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+        toast.error(action.payload, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
   },
 });
 

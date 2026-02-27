@@ -370,6 +370,33 @@ module.exports.salesByCustomerName = async (req, res) => {
   }
 };
 
+module.exports.salesDueList = async (req, res) => {
+  try {
+    const { page = 1, order = -1 } = req.query;
+
+    const limit = 15;
+    const skip = (parseInt(page) - 1) * limit;
+
+    const sales = await Sales.find({ due: { $gt: 0 }})
+      .sort({ createdAt: parseInt(order) })
+      .skip(skip)
+      .limit(limit);
+
+    // Count total documents
+    const total = await Sales.countDocuments({ due: { $gt: 0 }});
+
+    res.status(201).json({
+      total,
+      page: parseInt(page),
+      pages: Math.ceil(total / limit),
+      sales,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};
+
 async function getSalesAndTotal(start, end, order, skip, limit) {
   const sales = await Sales.find({
     createdAt: { $gte: start, $lte: end },

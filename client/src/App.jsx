@@ -33,6 +33,7 @@ import SalesReturnStatement from "./pages/SalesReturnStatement";
 import InvoiceForExchange from "./pages/InvoiceForExchange";
 import EditPurchaseReturnDue from "./pages/EditPurchaseReturnDue";
 import InvoiceForPurchaseReturn from "./pages/InvoiceForPurchaseReturn";
+import SalesDueList from "./pages/SalesDueList";
 
 
 function App() {
@@ -66,6 +67,7 @@ function App() {
           <Route path="/point-of-sale" element={<PointOfSale />} />
           {/* for admin */}
           <Route path="/sales-report" element={<SalesReport />} />
+          <Route path="/sales-report/due-list" element={<SalesDueList />} />
           <Route path="/sales-report/:id/edit-due" element={<EditDue />} />
           {/* for admin */}
           <Route path="/users" element={<UserManagement />} />

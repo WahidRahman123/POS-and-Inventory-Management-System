@@ -25,7 +25,7 @@ const EditDue = () => {
     }
     try {
       await dispatch(addPayment({ id, info: { amount } })).unwrap();
-      navigate("/sales-report");
+      navigate(-1);
     } catch {
       console.log("Payment Failed!");
     } finally {
