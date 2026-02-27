@@ -5,6 +5,12 @@ import Decimal from "decimal.js";
 
 const initialState = {
   sales: [],
+
+  salesForStatement: [],
+  totalAmount: null,
+  totalPaid: null,
+  totalDue: null,
+
   totalSales: null,
   totalCosts: null,
   profit: null,
@@ -27,18 +33,17 @@ export const fetchSalesByDate = createAsyncThunk(
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
-          params: {
-            d: query,
-          },
-        }
+          params: query,
+        },
       );
 
       return data;
     } catch (error) {
       const message = "Sales Fetching Failed!";
+      console.log(error.message);
       return ThunkAPI.rejectWithValue(message);
     }
-  }
+  },
 );
 
 export const fetchSalesByIndividualDate = createAsyncThunk(
@@ -51,10 +56,8 @@ export const fetchSalesByIndividualDate = createAsyncThunk(
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
-          params: {
-            searchDate: query,
-          },
-        }
+          params: query,
+        },
       );
 
       return data;
@@ -62,7 +65,7 @@ export const fetchSalesByIndividualDate = createAsyncThunk(
       const message = "Sales Fetching Failed!";
       return ThunkAPI.rejectWithValue(message);
     }
-  }
+  },
 );
 
 export const fetchSaleById = createAsyncThunk(
@@ -75,7 +78,7 @@ export const fetchSaleById = createAsyncThunk(
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
-        }
+        },
       );
 
       return data;
@@ -83,7 +86,7 @@ export const fetchSaleById = createAsyncThunk(
       const message = "Sales Fetching Failed!";
       return ThunkAPI.rejectWithValue(message);
     }
-  }
+  },
 );
 
 export const addSales = createAsyncThunk(
@@ -97,7 +100,7 @@ export const addSales = createAsyncThunk(
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
-        }
+        },
       );
 
       return data;
@@ -105,7 +108,7 @@ export const addSales = createAsyncThunk(
       const message = "Sales Adding Failed!";
       return ThunkAPI.rejectWithValue(message);
     }
-  }
+  },
 );
 
 export const getTotalSaleCount = createAsyncThunk(
@@ -118,7 +121,7 @@ export const getTotalSaleCount = createAsyncThunk(
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
-        }
+        },
       );
 
       return data;
@@ -126,7 +129,7 @@ export const getTotalSaleCount = createAsyncThunk(
       const message = "Something went wrong!";
       return ThunkAPI.rejectWithValue(message);
     }
-  }
+  },
 );
 
 export const addPayment = createAsyncThunk(
@@ -140,7 +143,7 @@ export const addPayment = createAsyncThunk(
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
-        }
+        },
       );
 
       return { message: "Payment updated Successful!" };
@@ -148,7 +151,30 @@ export const addPayment = createAsyncThunk(
       const message = "Payment updated Failed!";
       return ThunkAPI.rejectWithValue(message);
     }
-  }
+  },
+);
+
+//* This is only for the customer statement
+export const fetchSalesForCustomer = createAsyncThunk(
+  "sales/fetchSalesForCustomer",
+  async (value, ThunkAPI) => {
+    try {
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URI}/api/sales/by-name`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+          params: value,
+        },
+      );
+
+      return data;
+    } catch (error) {
+      const message = "Fetching Failed!";
+      return ThunkAPI.rejectWithValue(message);
+    }
+  },
 );
 
 const salesSlice = createSlice({
@@ -168,16 +194,16 @@ const salesSlice = createSlice({
       .addCase(fetchSalesByDate.fulfilled, (state, action) => {
         state.loading = false;
         state.sales = action.payload;
-        state.page = action.payload.page;
-        state.pages = action.payload.pages;
+        // state.page = action.payload.page;
+        // state.pages = action.payload.pages;
         if (state.sales.length > 0) {
           const totalSale = state.sales.reduce(
             (acc, sale) => acc.plus(new Decimal(sale.paid)),
-            new Decimal(0)
+            new Decimal(0),
           );
           const totalCost = state.sales.reduce(
             (acc, sale) => acc.plus(new Decimal(sale.totalCost)),
-            new Decimal(0)
+            new Decimal(0),
           );
 
           state.totalSales = totalSale.toFixed(2);
@@ -213,11 +239,11 @@ const salesSlice = createSlice({
         if (state.sales.length > 0) {
           const totalSale = state.sales.reduce(
             (acc, sale) => acc.plus(new Decimal(sale.paid)),
-            new Decimal(0)
+            new Decimal(0),
           );
           const totalCost = state.sales.reduce(
             (acc, sale) => acc.plus(new Decimal(sale.totalCost)),
-            new Decimal(0)
+            new Decimal(0),
           );
 
           state.totalSales = totalSale.toFixed(2);
@@ -339,7 +365,40 @@ const salesSlice = createSlice({
           progress: undefined,
           theme: "colored",
         });
-      });
+      })
+      .addCase(fetchSalesForCustomer.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        fetchSalesForCustomer.fulfilled,
+        (state, action) => {
+          state.loading = false;
+          // state.page = action.payload.page;
+          // state.pages = action.payload.pages;
+          state.salesForStatement = action.payload.sales;
+          state.totalAmount = action.payload.totalAmount;
+          state.totalPaid = action.payload.totalPaid;
+          state.totalDue = action.payload.totalDue;
+        },
+      )
+      .addCase(
+        fetchSalesForCustomer.rejected,
+        (state, action) => {
+          state.loading = false;
+          state.error = action.error;
+          toast.error(action.payload, {
+            position: "bottom-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          });
+        },
+      );
   },
 });
 

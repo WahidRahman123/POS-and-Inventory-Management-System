@@ -32,6 +32,11 @@ router.get('/search', protect, admin, sales.searchByDates);
 // @access Private
 router.get('/searchIndividual', protect, admin, sales.searchByIndividualDate);
 
+//* @route get /api/sales/by-name
+// @desc specific supplier purchase return details
+// @access Private
+router.get('/by-name', protect, sales.salesByCustomerName);
+
 //* @route POST /api/sales/:id/payment
 // @desc search sales between dates
 // @access Private

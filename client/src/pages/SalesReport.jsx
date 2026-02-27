@@ -11,22 +11,21 @@ const SalesReport = () => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [date, setDate] = useState("");
+
+  const [selectedRange, setSelectedRange] = useState("t");
+  const [selectedRangeLabel, setSelectedRangeLabel] = useState("Today");
+  const [searchFilters, setSearchFilters] = useState({
+    productName: "",
+    customerName: "",
+    date: "",
+  });
+  const [filterToggle, setFilterToggle] = useState(false);
 
   const { sales, loading, error, page, pages, totalSales, totalCosts, profit } =
     useSelector((state) => state.sales);
 
-  const [day, setDay] = useState("Today");
-
-  const handleSelection = (query, d) => {
-    setDay(d);
-    // set the date to empty string
-    setDate("");
-    dispatch(fetchSalesByDate(query));
-  };
-
   // Pagination
-  const [currentPage, setCurrentPage] = useState(page);
+  // const [currentPage, setCurrentPage] = useState(page);
   const [sortOrder, setSortOrder] = useState(-1);
 
   useEffect(() => {
@@ -40,9 +39,24 @@ const SalesReport = () => {
 
   useEffect(() => {
     if (user && user.role === "admin") {
-      dispatch(fetchSalesByDate("t"));
+      if (selectedRange) {
+        dispatch(
+          fetchSalesByDate({
+            date: selectedRange,
+            // page: currentPage,
+            order: sortOrder,
+          }),
+        );
+      } else {
+        dispatch(
+          fetchSalesByIndividualDate({
+            ...searchFilters,
+            order: sortOrder,
+          }),
+        );
+      }
     }
-  }, [dispatch, user]);
+  }, [dispatch, user, selectedRange, sortOrder]);
 
   if (user && user.role !== "admin") return null;
 
@@ -57,23 +71,28 @@ const SalesReport = () => {
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-500 font-medium">View:</span>
           <select
+            value={selectedRange}
             className="w-full sm:w-auto appearance-none border border-gray-300 rounded-md px-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-blue-500 bg-gray-50"
             onChange={(e) => {
-              const q = e.target.value;
-              const l = e.target.selectedOptions[0].text;
-              handleSelection(q, l);
+              const query = e.target.value;
+              const label = e.target.selectedOptions[0].text;
+
+              setSelectedRangeLabel(label);
+              setSelectedRange(query);
+              setSearchFilters({
+                productName: "",
+                customerName: "",
+                date: "",
+              });
             }}
           >
-            {[
-              { query: "t", label: "Today" },
-              { query: "w", label: "This Week" },
-              { query: "m", label: "This Month" },
-              { query: "y", label: "This Year" },
-            ].map(({ query, label }) => (
-              <option key={query} value={query}>
-                {label}
-              </option>
-            ))}
+            <option disabled value="">
+              Select
+            </option>
+            <option value="t">Today</option>
+            <option value="w">This Week</option>
+            <option value="m">This Month</option>
+            <option value="y">This Year</option>
           </select>
         </div>
 
@@ -85,7 +104,10 @@ const SalesReport = () => {
       {/* Report Title */}
 
       <div className="flex flex-col sm:flex-row justify-between items-start my-4 gap-3">
-        <h2 className="text-lg sm:text-xl font-semibold">{day}'s Report</h2>
+        <h2 className="text-lg sm:text-xl font-semibold">
+          {selectedRangeLabel}
+          {selectedRangeLabel === "Filtered" ? "" : "'s"} Report
+        </h2>
       </div>
 
       {/* Summary */}
@@ -128,19 +150,14 @@ const SalesReport = () => {
               Search by Product Name:
             </label>
             <input
-              type="search"
-              value={date}
-              onChange={(e) => {
-                setDate(e.target.value);
-                if (e.target.value) {
-                  setDay(e.target.value);
-                  // Call the fetchSalesByDate
-                  dispatch(fetchSalesByIndividualDate(e.target.value));
-                } else {
-                  setDay("Today");
-                  dispatch(fetchSalesByDate("t"));
-                }
-              }}
+              type="text"
+              value={searchFilters.productName}
+              onChange={(e) =>
+                setSearchFilters((prev) => ({
+                  ...prev,
+                  productName: e.target.value,
+                }))
+              }
               placeholder="Product Name"
               className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
             />
@@ -151,19 +168,14 @@ const SalesReport = () => {
               Search by Customer Name:
             </label>
             <input
-              type="search"
-              value={date}
-              onChange={(e) => {
-                setDate(e.target.value);
-                if (e.target.value) {
-                  setDay(e.target.value);
-                  // Call the fetchSalesByDate
-                  dispatch(fetchSalesByIndividualDate(e.target.value));
-                } else {
-                  setDay("Today");
-                  dispatch(fetchSalesByDate("t"));
-                }
-              }}
+              type="text"
+              value={searchFilters.customerName}
+              onChange={(e) =>
+                setSearchFilters((prev) => ({
+                  ...prev,
+                  customerName: e.target.value,
+                }))
+              }
               placeholder="Customer Name"
               className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
             />
@@ -176,17 +188,12 @@ const SalesReport = () => {
             </label>
             <input
               type="date"
-              value={date}
+              value={searchFilters.date}
               onChange={(e) => {
-                setDate(e.target.value);
-                if (e.target.value) {
-                  setDay(e.target.value);
-                  // Call the fetchSalesByDate
-                  dispatch(fetchSalesByIndividualDate(e.target.value));
-                } else {
-                  setDay("Today");
-                  dispatch(fetchSalesByDate("t"));
-                }
+                setSearchFilters((prev) => ({
+                  ...prev,
+                  date: e.target.value,
+                }));
               }}
               className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
             />
@@ -194,12 +201,52 @@ const SalesReport = () => {
 
           <div className="flex gap-2 justify-start sm:justify-end  w-full">
             <button
+              onClick={() => {
+                if (
+                  searchFilters.customerName === "" &&
+                  searchFilters.productName === "" &&
+                  searchFilters.date === ""
+                ) {
+                  if (!selectedRange) {
+                    setSelectedRange("t");
+                    setSelectedRangeLabel("Today");
+                  }
+                } else {
+                  searchFilters.date
+                    ? setSelectedRangeLabel(searchFilters.date)
+                    : setSelectedRangeLabel("Filtered");
+
+                  setSelectedRange("");
+                  setFilterToggle(!filterToggle);
+                }
+              }}
               className="flex-1 sm:flex-none bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600"
               type="button"
             >
               Filter
             </button>
             <button
+              onClick={() => {
+                if (
+                  searchFilters.productName !== "" ||
+                  searchFilters.customerName !== "" ||
+                  searchFilters.date !== ""
+                ) {
+                  setSearchFilters({
+                    productName: "",
+                    customerName: "",
+                    date: "",
+                  });
+
+                  setSelectedRangeLabel("Today");
+                  setSelectedRange("t");
+                } else {
+                  if (!selectedRange) {
+                    setSelectedRangeLabel("Today");
+                    setSelectedRange("t");
+                  }
+                }
+              }}
               className="flex-1 sm:flex-none bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600"
               type="button"
             >
@@ -210,7 +257,7 @@ const SalesReport = () => {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto border rounded">
+      <div className="overflow-x-auto">
         <table className="min-w-full text-xs sm:text-sm border-collapse">
           <thead className="bg-gray-300">
             <tr>
@@ -284,8 +331,16 @@ const SalesReport = () => {
 
                 return sale.products.map((product, index) => (
                   <tr
+                    onClick={(e) => {
+                      if (e.target.tagName !== "TD") return;
+                      navigate("/customer-statement", { state: sale });
+                    }}
                     key={index}
-                    className={isEven ? "bg-white" : "bg-gray-50"}
+                    className={
+                      isEven
+                        ? "bg-white cursor-pointer"
+                        : "bg-gray-50 cursor-pointer"
+                    }
                   >
                     {index === 0 && (
                       <>
@@ -402,7 +457,7 @@ const SalesReport = () => {
               <tr>
                 <td
                   colSpan={10}
-                  className="text-center text-gray-500 py-10 text-lg select-none"
+                  className="text-center text-gray-500 py-10 text-lg select-none border"
                 >
                   No Sales Available.
                 </td>
@@ -410,38 +465,6 @@ const SalesReport = () => {
             )}
           </tbody>
         </table>
-
-        {pages ? (
-          <div className="flex justify-center items-center mt-4 gap-2 text-sm">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={page === 1}
-              className={`${
-                page === 1
-                  ? ""
-                  : "cursor-pointer hover:bg-black hover:text-white"
-              } px-2 py-1 border rounded  disabled:opacity-50`}
-            >
-              Prev
-            </button>
-            <span>
-              Page {page} of {pages}
-            </span>
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, pages))}
-              disabled={page === pages}
-              className={`${
-                page === pages
-                  ? ""
-                  : "cursor-pointer hover:bg-black hover:text-white"
-              }  px-2 py-1 border rounded  disabled:opacity-50`}
-            >
-              Next
-            </button>
-          </div>
-        ) : (
-          ""
-        )}
       </div>
     </div>
   );

@@ -1,245 +1,354 @@
-// CustomerStatement.jsx
-import React from "react";
+// PurchaserStatement.jsx
+import React, { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { fetchPurchasesForSupplierName } from "../features/statements/sStatementSlice";
+import { useReactToPrint } from "react-to-print";
+import { FaArrowLeft } from "react-icons/fa";
+import { fetchPurchaseReturnsForSupplierName } from "../features/PurchaseReturn/purchaseReturnSlice";
+import { fetchSalesForCustomer } from "../features/sales/salesSlice";
 
-const CustomerStatement = () => (
-  <div className="min-h-screen bg-gradient-to-br from-blue-700 via-maroon-800 to-red-700 p-4 sm:p-6">
-    <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl ring-1 ring-black/5 p-6 space-y-6">
-      {/* ---------- Header ---------- */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl font-bold text-gray-800">Customer Statement</h1>
-        <div className="flex gap-2">
-          <input
-            type="date"
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-          />
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">
-            Filter
-          </button>
-          <button className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 text-sm">
-            Print
-          </button>
-        </div>
-      </div>
+const CustomerStatement = () => {
+  const { user } = useSelector((state) => state.auth);
+  const {
+    salesForStatement,
+    totalAmount,
+    totalPaid,
+    totalDue,
+    page,
+  } = useSelector((state) => state.sales);
 
-      {/* ---------- Customer Info Card ---------- */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 border rounded-lg p-4 bg-gray-50">
-        <div>
-          <span className="text-xs text-gray-500">Name</span>
-          <div className="font-semibold">John Doe</div>
-        </div>
-        <div>
-          <span className="text-xs text-gray-500">Phone</span>
-          <div className="font-semibold">01712345678</div>
-        </div>
-        <div>
-          <span className="text-xs text-gray-500">Email</span>
-          <div className="font-semibold">john@mail.com</div>
-        </div>
-        <div>
-          <span className="text-xs text-gray-500">Total Due</span>
-          <div className="font-semibold text-red-600">৳ 16000</div>
-        </div>
-      </div>
 
-      {/* ---------- Statement Table (Row-span) ---------- */}
-      <div className="overflow-x-auto border border-gray-200 rounded-lg">
-        <table className="min-w-full text-xs sm:text-sm border-collapse">
-          <thead className="bg-gray-100">
-            <tr>
-              <th
-                rowSpan={2}
-                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
-              >
-                Date
-              </th>
-              <th
-                rowSpan={2}
-                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
-              >
-                Invoice
-              </th>
-              <th
-                colSpan={3}
-                className="border px-2 py-1 sm:px-4 sm:py-2 text-center"
-              >
-                Products
-              </th>
-              <th
-                rowSpan={2}
-                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
-              >
-                Discount
-              </th>
-              <th
-                rowSpan={2}
-                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
-              >
-                Total
-              </th>
-              <th
-                rowSpan={2}
-                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
-              >
-                Paid
-              </th>
-              <th
-                rowSpan={2}
-                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
-              >
-                Due
-              </th>
-              <th
-                rowSpan={2}
-                className="border px-2 py-1 sm:px-4 sm:py-2 text-center"
-              >
-                Action
-              </th>
-            </tr>
-            <tr>
-              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-center">
-                Name
-              </th>
-              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                Price
-              </th>
-              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                Qty
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* ---- Example Row ---- */}
-            {(() => {
-              const sale = {
-                date: "01-06-2025",
-                invoice: "INV-1001",
-                products: [
-                  { productName: "Laptop", sellPrice: 45000, quantity: 1 },
-                  { productName: "Mouse", sellPrice: 500, quantity: 2 },
-                ],
-                discount: 0,
-                total: 46000,
-                paid: 30000,
-                due: 16000,
-              };
-              const rowspan = sale.products.length;
-              return sale.products.map((p, idx) => (
-                <tr key={idx} className="hover:bg-gray-50">
-                  {idx === 0 && (
-                    <>
-                      <td
-                        rowSpan={rowspan}
-                        className="border px-2 py-1 sm:px-4 sm:py-2"
-                      >
-                        {sale.date}
-                      </td>
-                      <td
-                        rowSpan={rowspan}
-                        className="border px-2 py-1 sm:px-4 sm:py-2"
-                      >
-                        {sale.invoice}
-                      </td>
-                    </>
-                  )}
-                  <td
-                    className={`border px-2 py-1 sm:px-4 sm:py-2 ${
-                      idx !== sale.products.length - 1
-                        ? "border-b-gray-300"
-                        : ""
-                    }`}
-                  >
-                    {p.productName}
-                  </td>
-                  <td
-                    className={`border px-2 py-1 sm:px-4 sm:py-2 ${
-                      idx !== sale.products.length - 1
-                        ? "border-b-gray-300"
-                        : ""
-                    }`}
-                  >
-                    ৳ {p.sellPrice}
-                  </td>
-                  <td
-                    className={`border px-2 py-1 sm:px-4 sm:py-2 ${
-                      idx !== sale.products.length - 1
-                        ? "border-b-gray-300"
-                        : ""
-                    }`}
-                  >
-                    {p.quantity}
-                  </td>
-                  {idx === 0 && (
-                    <>
-                      <td
-                        rowSpan={rowspan}
-                        className="border px-2 py-1 sm:px-4 sm:py-2"
-                      >
-                        {sale.discount}
-                      </td>
-                      <td
-                        rowSpan={rowspan}
-                        className="border px-2 py-1 sm:px-4 sm:py-2"
-                      >
-                        ৳ {sale.total}
-                      </td>
-                      <td
-                        rowSpan={rowspan}
-                        className="border px-2 py-1 sm:px-4 sm:py-2"
-                      >
-                        ৳ {sale.paid}
-                      </td>
-                      <td
-                        rowSpan={rowspan}
-                        className="border px-2 py-1 sm:px-4 sm:py-2 text-red-600 font-semibold"
-                      >
-                        ৳ {sale.due}
-                      </td>
-                      <td
-                        rowSpan={rowspan}
-                        className="border px-2 py-1 sm:px-4 sm:py-2"
-                      >
-                        <div className="flex flex-wrap gap-1">
-                          <button className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700">
-                            Add Payment
-                          </button>
-                          <button className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700">
-                            Print
-                          </button>
-                        </div>
-                      </td>
-                    </>
-                  )}
-                </tr>
-              ));
-            })()}
-            <tr>
-              <td colSpan={10} className="text-center text-gray-500 py-6">
-                No transactions found.
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { state } = useLocation();
 
-      {/* ---------- Summary Card ---------- */}
-      <div className="flex justify-end">
-        <div className="w-80 border rounded-lg p-4 bg-gray-50 text-sm space-y-2">
-          <div className="flex justify-between">
-            <span>Total </span>
-            <span className="font-semibold">৳ 46,000</span>
+  // console.log(purchases);
+
+  const [filterToggler, setFilterToggler] = useState(true);
+  const [date, setDate] = useState("");
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(page);
+
+  // Printing
+  const documentTitle = `customer-statement-${new Date()
+    .toISOString()
+    .split(".")[0]
+    .replaceAll(":", "_")}`;
+  const contentRef = useRef(null);
+  const reactToPrintFn = useReactToPrint({ contentRef, documentTitle });
+
+  useEffect(() => {
+    if (user && state && state.customerName) {
+      dispatch(
+        fetchSalesForCustomer({
+          customerName: state.customerName,
+          // page: currentPage,
+          dateSearch: date,
+        }),
+      );
+    }
+  }, [dispatch, user, filterToggler, currentPage]);
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
+
+  if (!user) return null;
+  return (
+    <>
+      <div
+        className={`${state ? "" : "min-h-screen"} bg-slate-50 p-3 sm:p-4 md:p-6 font-sans`}
+      >
+        {state ? (
+          <div ref={contentRef} className="max-w-6xl print:m-7 space-y-6">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+                Customer Statement
+              </h1>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="border border-gray-300 rounded-md px-3 py-2 text-sm print:hidden"
+                />
+                <button
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors print:hidden"
+                  onClick={() => setFilterToggler(!filterToggler)}
+                >
+                  Filter
+                </button>
+                <button
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors print:hidden"
+                  onClick={reactToPrintFn}
+                >
+                  Print
+                </button>
+              </div>
+            </div>
+
+            {/* Supplier Info Card */}
+            <div className="bg-white border border-gray-300 rounded-lg p-4 sm:p-6 mb-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Customer Name</p>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {state.customerName}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Contact</p>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {state.customerPhone ? state.customerPhone : "----"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Email</p>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {state.customerEmail ? state.customerEmail : "----"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Total Due</p>
+                  <p className="text-sm font-bold text-red-600">
+                    ৳{" "}
+                    {totalDue
+                      ? totalDue.toLocaleString("en-BD", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })
+                      : 0}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Statement Table */}
+            <div className="bg-white border border-gray-300 rounded-lg overflow-hidden mb-6">
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs sm:text-sm">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="border-b border-gray-300 px-3 py-3 text-left font-semibold text-gray-700">
+                        Date
+                      </th>
+                      <th className="border-b border-gray-300 px-3 py-3 text-left font-semibold text-gray-700 max-w-[100px]">
+                        Invoice No.
+                      </th>
+                      <th className="border-b border-gray-300 px-3 py-3 text-left font-semibold text-gray-700 max-w-[90px]">
+                        Products
+                      </th>
+                      <th className="border-b border-gray-300 px-3 py-3 text-left font-semibold text-gray-700">
+                        Qty
+                      </th>
+                      <th className="border-b border-gray-300 px-3 py-3 text-left font-semibold text-gray-700">
+                        Total
+                      </th>
+                      <th className="border-b border-gray-300 px-3 py-3 text-left font-semibold text-gray-700">
+                        Paid
+                      </th>
+                      <th className="border-b border-gray-300 px-3 py-3 text-left font-semibold text-gray-700">
+                        Due
+                      </th>
+                      <th className="border-b border-gray-300 px-3 py-3 text-left font-semibold text-gray-700 print:hidden">
+                        Action
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {salesForStatement &&
+                    salesForStatement.length > 0 ? (
+                      salesForStatement.map((sale, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="border-b border-gray-300 px-3 py-3">
+                            {new Date(sale.createdAt)
+                              .toLocaleDateString("en-GB", {
+                                timeZone: "Asia/Dhaka",
+                              })
+                              .replaceAll("/", "-")}
+                          </td>
+                          <td className="border-b border-gray-300 px-3 py-3 max-w-[100px]">
+                            {sale.invoiceNo}
+                          </td>
+                          <td className="border-b border-gray-300 px-3 py-3 max-w-[90px]">
+                            {sale.products
+                              .map((p) => p.productName)
+                              .join(", ")}
+                          </td>
+                          <td className="border-b border-gray-300 px-3 py-3">
+                            {sale.products.reduce((sum, item) => sum + item.quantity, 0)}
+                          </td>
+                          <td className="border-b border-gray-300 px-3 py-3">
+                            ৳{" "}
+                            {sale.total
+                              ? sale.total.toLocaleString("en-BD", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })
+                              : 0}
+                          </td>
+                          <td className="border-b border-gray-300 px-3 py-3">
+                            ৳{" "}
+                            {sale.paid
+                              ? sale.paid.toLocaleString(
+                                  "en-BD",
+                                  {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  },
+                                )
+                              : 0}
+                          </td>
+                          <td className="border-b border-gray-300 px-3 py-3 text-red-600 font-semibold">
+                            ৳{" "}
+                            {sale.due
+                              ? sale.due.toLocaleString("en-BD", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })
+                              : 0}
+                          </td>
+                          <td className="border-b border-gray-300 px-3 py-3 print:hidden">
+                            <div className="flex gap-2">
+                              {sale.due ? (
+                                <Link
+                                  to={`/sales-report/${sale._id}/edit-due`}
+                                  className="text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded font-medium"
+                                >
+                                  Add Payment
+                                </Link>
+                              ) : (
+                                <button className="text-xs bg-green-400 text-white px-3 py-1.5 rounded cursor-not-allowed">
+                                  Add Payment
+                                </button>
+                              )}
+
+                              <Link
+                                onClick={(e) => e.stopPropagation()}
+                                to="/invoice"
+                                state={sale}
+                                className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded font-medium"
+                              >
+                                Print
+                              </Link>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td
+                          colSpan={8}
+                          className="text-center text-gray-500 py-6 select-none"
+                        >
+                          No transactions found.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Summary Card */}
+            <div className="flex justify-end">
+              <div className="bg-white border border-gray-300 rounded-lg p-4 w-full sm:w-80">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Total</span>
+                    <span className="text-sm font-medium">
+                      ৳{" "}
+                      {totalAmount
+                        ? totalAmount.toLocaleString("en-BD", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        : 0}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Total Paid</span>
+                    <span className="text-sm font-medium">
+                      ৳{" "}
+                      {totalPaid
+                        ? totalPaid.toLocaleString("en-BD", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        : 0}
+                    </span>
+                  </div>
+                  <div className="border-t border-gray-300 pt-3 flex justify-between items-center">
+                    <span className="text-sm font-bold text-gray-800">
+                      Total Due
+                    </span>
+                    <span className="text-sm font-bold text-red-600">
+                      ৳{" "}
+                      {totalDue
+                        ? totalDue.toLocaleString("en-BD", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        : 0}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="flex justify-between">
-            <span>Total Paid</span>
-            <span className="font-semibold">৳ 30,000</span>
+        ) : (
+          <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl ring-1 ring-black/5 p-6 space-y-6 min-h-screen">
+            {/* ---------- Header ---------- */}
+
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <h1 className="text-2xl font-bold text-gray-800">
+                Customer Statement
+              </h1>
+            </div>
+            <div className="flex flex-col items-center justify-center py-16 text-center text-gray-600">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-12 w-12 text-gray-400 mb-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 17v-2H5v-2h4v-2l3 3-3 3zM15 7v2h4v2h-4v2l-3-3 3-3z"
+                />
+              </svg>
+              <p className="text-lg font-medium select-none">
+                No data available
+              </p>
+              <p className="text-sm text-gray-500 select-none">
+                Please select a sale from the list to view the
+                statement.
+              </p>
+            </div>
           </div>
-          <div className="flex justify-between text-base font-bold border-t pt-2">
-            <span>Total Due</span>
-            <span className="text-red-600">৳ 16,000</span>
-          </div>
-        </div>
+        )}
       </div>
-    </div>
-  </div>
-);
+
+      {/* Back Button */}
+      <div className="flex justify-end mr-6">
+        <Link
+          to="/sales-report"
+          className="flex items-center text-sm sm:text-base font-medium text-green-600 hover:text-blue-800 cursor-pointer"
+        >
+          <FaArrowLeft className="mr-1 sm:mr-2" /> Go Back
+        </Link>
+      </div>
+    </>
+  );
+};
 
 export default CustomerStatement;
