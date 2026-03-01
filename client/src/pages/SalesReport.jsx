@@ -37,6 +37,8 @@ const SalesReport = () => {
     }
   }, [user, navigate]);
 
+  console.log(selectedRange)
+
   useEffect(() => {
     if (user && user.role === "admin") {
       if (selectedRange) {
@@ -56,7 +58,7 @@ const SalesReport = () => {
         );
       }
     }
-  }, [dispatch, user, selectedRange, sortOrder]);
+  }, [dispatch, user, filterToggle, selectedRange, sortOrder]);
 
   if (user && user.role !== "admin") return null;
 
