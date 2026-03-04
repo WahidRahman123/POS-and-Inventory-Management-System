@@ -35,6 +35,10 @@ const salesSchema = new mongoose.Schema(
     },
     products: [
       {
+        productId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+        },
         productName: {
           type: String,
           required: true,
@@ -99,7 +103,7 @@ const salesSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("Sales", salesSchema);
