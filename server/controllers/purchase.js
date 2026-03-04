@@ -1,5 +1,7 @@
+const { default: mongoose } = require("mongoose");
 const Purchase = require("../models/Purchase");
 const Decimal = require("decimal.js");
+const PurchaseTransaction = require("../models/PurchaseTransaction");
 
 module.exports.index = async (req, res) => {
   try {
@@ -63,25 +65,59 @@ module.exports.index = async (req, res) => {
 };
 
 module.exports.createPurchase = async (req, res) => {
+  const session = await mongoose.startSession();
   try {
     const purchases = req.body;
-
-    const { memo } = purchases;
+    // const { memo } = purchases;
+    const {
+      createdAt,
+      issuedAt,
+      products,
+      totalAmount,
+      paid,
+      due,
+      memo,
+      ...transactionDetail
+    } = purchases;
 
     //* Check if the memo exists or not
     const returnFound = await Purchase.find({ memo });
     if (returnFound.length > 0)
-      return res
-        .status(409)
-        .json({ message: "Purchase Already Existed!" });
+      return res.status(409).json({ message: "Purchase Already Existed!" });
+
+    session.startTransaction();
+
+    //* Transaction Creation
+    const transactionDetails = {
+      ...transactionDetail,
+      refMemo: memo,
+      amountToBePaid: totalAmount,
+      paidAmount: paid,
+      date: createdAt,
+      currentDue: due,
+    };
+    const transaction = new PurchaseTransaction(transactionDetails);
 
     //* sales creation
-    const purchase = new Purchase(purchases);
+    const purchase = new Purchase({
+      ...purchases,
+      transactionRecords: [transaction._id],
+    });
 
-    const createdPurchase = await purchase.save();
+    transaction.purchaseId = purchase._id;
+    await transaction.save({ session });
+
+    const createdPurchase = await purchase.save({ session });
+
+    // Commit
+    await session.commitTransaction();
+    session.endSession();
 
     res.status(201).json(createdPurchase);
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+
     console.error(error);
     res.status(500).send("Server Error");
   }
@@ -100,28 +136,71 @@ module.exports.searchById = async (req, res) => {
 };
 
 module.exports.addPayment = async (req, res) => {
+  const session = await mongoose.startSession();
+
   const { id } = req.params;
   const { amount } = req.body;
 
   try {
-    const purchase = await Purchase.findById(id);
+    session.startTransaction();
+    const purchase = await Purchase.findById(id).session(session);
 
     if (purchase) {
+      const {
+        createdAt,
+        issuedAt,
+        products,
+        transactionRecords,
+        totalAmount,
+        paid,
+        due,
+        memo,
+        _id,
+        ...transactionDetail
+      } = purchase.toObject();
+
+      const paidDate = new Date();
+      const refMemo = "REF-" + memo;
+      const paidAmount = Number(new Decimal(amount).toFixed(4));
       // purchase.paid = purchase.paid + amount;
       purchase.paid = Number(
-        new Decimal(purchase.paid).plus(new Decimal(amount)).toFixed(4),
+        new Decimal(paid).plus(new Decimal(amount)).toFixed(4),
       );
+
+      const amountToBePaid = due;
       // purchase.due = purchase.due - amount;
       purchase.due = Number(
-        new Decimal(purchase.due).minus(new Decimal(amount)).toFixed(4),
+        new Decimal(due).minus(new Decimal(amount)).toFixed(4),
       );
-      await purchase.save();
+      const currentDue = purchase.due;
+
+      // transaction creation
+      const transaction = new PurchaseTransaction({
+        ...transactionDetail,
+        refMemo,
+        amountToBePaid,
+        paidAmount,
+        date: paidDate,
+        currentDue,
+        purchaseId: _id,
+      });
+      await transaction.save({ session });
+
+      purchase.transactionRecords.push(transaction._id);
+      await purchase.save({ session });
+
+      // Commit
+      await session.commitTransaction();
+      session.endSession();
 
       res.status(201).json({ message: "Payment updated successfully" });
     } else {
       res.status(404).json({ message: "Purchase not found" });
     }
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+
     console.error(error);
     res.status(500).send("Server Error");
   }

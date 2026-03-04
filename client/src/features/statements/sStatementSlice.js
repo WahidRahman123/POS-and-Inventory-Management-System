@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const initialState = {
-  purchases: [],
+  transactions: [],
   totalAmount: null,
   totalPaid: null,
   totalDue: null,
@@ -49,7 +49,7 @@ const sStatementSlice = createSlice({
         state.loading = false;
         // state.page = action.payload.page;
         // state.pages = action.payload.pages;
-        state.purchases = action.payload.purchases;
+        state.transactions = action.payload.transactions;
         state.totalAmount = action.payload.totalAmount;
         state.totalPaid = action.payload.totalPaid;
         state.totalDue = action.payload.totalDue;

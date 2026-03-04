@@ -833,7 +833,7 @@ const Purchase = () => {
                     colSpan={10}
                     className="text-center text-gray-500 py-10 text-lg select-none"
                   >
-                    No Purchase Returns Available.
+                    No Purchase Available.
                   </td>
                 </tr>
               )}

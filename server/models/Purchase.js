@@ -56,6 +56,12 @@ const purchaseSchema = new mongoose.Schema({
       },
     },
   ],
+  transactionRecords: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PurchaseTransaction",
+    },
+  ],
   totalAmount: {
     type: Number,
     required: true,
@@ -77,8 +83,8 @@ const purchaseSchema = new mongoose.Schema({
   },
   issuedAt: {
     type: Date,
-    required: true
-  }
+    required: true,
+  },
 });
 
 module.exports = mongoose.model("Purchase", purchaseSchema);
