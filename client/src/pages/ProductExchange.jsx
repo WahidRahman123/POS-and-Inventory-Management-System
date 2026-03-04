@@ -1225,13 +1225,13 @@ const ProductExchange = () => {
                               >
                                 Memo Stat.
                               </Link>
-                              <Link
+                              {/* <Link
                                 to="/invoice-exchange"
                                 state={exchange}
                                 className="text-[10px] bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 text-center cursor-pointer font-bold"
                               >
                                 Print
-                              </Link>
+                              </Link> */}
                             </div>
                           </td>
                         </>
