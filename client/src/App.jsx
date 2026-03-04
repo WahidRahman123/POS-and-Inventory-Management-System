@@ -34,6 +34,7 @@ import InvoiceForExchange from "./pages/InvoiceForExchange";
 import EditPurchaseReturnDue from "./pages/EditPurchaseReturnDue";
 import InvoiceForPurchaseReturn from "./pages/InvoiceForPurchaseReturn";
 import SalesDueList from "./pages/SalesDueList";
+import ProductExchangeStatement from "./pages/ProductExchangeStatement";
 
 
 function App() {
@@ -83,6 +84,7 @@ function App() {
           <Route path="/purchase-return/:id/edit-due" element={<EditPurchaseReturnDue />} />
           <Route path="/sales-return" element={<SalesReturn />} />
           <Route path="/sales-return-statement" element={<SalesReturnStatement />} />
+          <Route path="/product-exchange-statement" element={<ProductExchangeStatement />} />
                    
         </Route>
       </Routes>
