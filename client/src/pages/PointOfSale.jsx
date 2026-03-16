@@ -61,8 +61,8 @@ const PointOfSale = () => {
   const dispatch = useDispatch();
 
     // Live Summary Calculations
-  const currentCash = new Decimal(Number(cashInput) || 0);
-  const currentExchange = new Decimal(Number(exchangeValue) || 0);
+  const currentCash = new Decimal(Number(cashInput));
+  const currentExchange = new Decimal(Number(exchangeValue));
   const totalPaidLive = currentCash.plus(currentExchange);
   const liveDue = subTotal.minus(totalPaidLive).lessThan(0)
     ? "0.00"
