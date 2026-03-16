@@ -17,9 +17,16 @@ const SalesReport = () => {
   const [searchFilters, setSearchFilters] = useState({
     productName: "",
     customerName: "",
-    date: "",
   });
   const [filterToggle, setFilterToggle] = useState(false);
+
+  //* For Date
+  const [dateMode, setDateMode] = useState("single");
+  const [dateSearch, setDateSearch] = useState("");
+  const [rangeDateSearch, setRangeDateSearch] = useState({
+    dateSearchStart: "",
+    dateSearchEnd: "",
+  });
 
   const { sales, loading, error, page, pages, totalSales, totalCosts, profit } =
     useSelector((state) => state.sales);
@@ -37,8 +44,6 @@ const SalesReport = () => {
     }
   }, [user, navigate]);
 
-  console.log(selectedRange)
-
   useEffect(() => {
     if (user && user.role === "admin") {
       if (selectedRange) {
@@ -50,12 +55,26 @@ const SalesReport = () => {
           }),
         );
       } else {
-        dispatch(
-          fetchSalesByIndividualDate({
-            ...searchFilters,
-            order: sortOrder,
-          }),
-        );
+        if (dateMode === "single") {
+          dispatch(
+            fetchSalesByIndividualDate({
+              ...searchFilters,
+              dateMode,
+              dateSearch,
+              order: sortOrder,
+            }),
+          );
+        } else {
+          dispatch(
+            fetchSalesByIndividualDate({
+              ...searchFilters,
+              dateMode,
+              dateSearchStart: rangeDateSearch.dateSearchStart,
+              dateSearchEnd: rangeDateSearch.dateSearchEnd,
+              order: sortOrder,
+            }),
+          );
+        }
       }
     }
   }, [dispatch, user, filterToggle, selectedRange, sortOrder]);
@@ -84,7 +103,11 @@ const SalesReport = () => {
               setSearchFilters({
                 productName: "",
                 customerName: "",
-                date: "",
+              });
+              setDateSearch("");
+              setRangeDateSearch({
+                dateSearchStart: "",
+                dateSearchEnd: "",
               });
             }}
           >
@@ -98,7 +121,10 @@ const SalesReport = () => {
           </select>
         </div>
 
-        <Link to="/sales-report/due-list" className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-md shadow-sm transition duration-200 cursor-pointer">
+        <Link
+          to="/sales-report/due-list"
+          className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-md shadow-sm transition duration-200 cursor-pointer"
+        >
           Full Due List
         </Link>
       </div>
@@ -134,7 +160,7 @@ const SalesReport = () => {
         </div>
       )}
 
-      <div className="flex flex-col lg:flex-row justify-between items-start gap-4 mb-3">
+      <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-3">
         <div>
           <select
             value={sortOrder}
@@ -184,7 +210,7 @@ const SalesReport = () => {
           </div>
 
           {/* Date Search — Right side top */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
+          {/* <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
             <label className="text-xs sm:text-sm text-gray-600">
               Search by Date:
             </label>
@@ -199,7 +225,97 @@ const SalesReport = () => {
               }}
               className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
             />
+          </div> */}
+
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
+            <div className="flex gap-4 items-center">
+              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <input
+                  type="radio"
+                  name="dateMode"
+                  value="single"
+                  checked={dateMode === "single"}
+                  onChange={(e) => setDateMode(e.target.value)}
+                  className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                />
+                Single Date
+              </label>
+              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <input
+                  type="radio"
+                  name="dateMode"
+                  value="range"
+                  checked={dateMode === "range"}
+                  onChange={(e) => setDateMode(e.target.value)}
+                  className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                />
+                Date Range
+              </label>
+            </div>
           </div>
+
+          {dateMode === "single" && (
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
+              <label className="text-xs sm:text-sm text-gray-600">
+                Search by Date:
+              </label>
+              <input
+                type="date"
+                value={dateSearch}
+                onChange={(e) => {
+                  setDateSearch(e.target.value);
+                }}
+                className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
+              />
+            </div>
+          )}
+
+          {dateMode === "range" && (
+            <>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
+                <label className="text-xs sm:text-sm text-gray-600">
+                  Start Date:
+                </label>
+                <input
+                  type="date"
+                  max={
+                    rangeDateSearch.dateSearchEnd
+                      ? rangeDateSearch.dateSearchEnd
+                      : ""
+                  }
+                  value={rangeDateSearch.dateSearchStart}
+                  onChange={(e) => {
+                    setRangeDateSearch((prev) => ({
+                      ...prev,
+                      dateSearchStart: e.target.value,
+                    }));
+                  }}
+                  className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
+                <label className="text-xs sm:text-sm text-gray-600">
+                  End Date:
+                </label>
+                <input
+                  type="date"
+                  min={
+                    rangeDateSearch.dateSearchStart
+                      ? rangeDateSearch.dateSearchStart
+                      : ""
+                  }
+                  value={rangeDateSearch.dateSearchEnd}
+                  onChange={(e) => {
+                    setRangeDateSearch((prev) => ({
+                      ...prev,
+                      dateSearchEnd: e.target.value,
+                    }));
+                  }}
+                  className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
+                />
+              </div>
+            </>
+          )}
 
           <div className="flex gap-2 justify-start sm:justify-end  w-full">
             <button
@@ -207,16 +323,16 @@ const SalesReport = () => {
                 if (
                   searchFilters.customerName === "" &&
                   searchFilters.productName === "" &&
-                  searchFilters.date === ""
+                  dateSearch === "" &&
+                  rangeDateSearch.dateSearchStart === "" &&
+                  rangeDateSearch.dateSearchEnd === ""
                 ) {
                   if (!selectedRange) {
                     setSelectedRange("t");
                     setSelectedRangeLabel("Today");
                   }
                 } else {
-                  searchFilters.date
-                    ? setSelectedRangeLabel(searchFilters.date)
-                    : setSelectedRangeLabel("Filtered");
+                  setSelectedRangeLabel("Filtered");
 
                   setSelectedRange("");
                   setFilterToggle(!filterToggle);
@@ -230,19 +346,34 @@ const SalesReport = () => {
             <button
               onClick={() => {
                 if (
-                  searchFilters.productName !== "" ||
-                  searchFilters.customerName !== "" ||
-                  searchFilters.date !== ""
+                  searchFilters.customerName === "" &&
+                  searchFilters.productName === "" &&
+                  dateSearch === "" &&
+                  rangeDateSearch.dateSearchStart === "" &&
+                  rangeDateSearch.dateSearchEnd === ""
                 ) {
                   setSearchFilters({
                     productName: "",
                     customerName: "",
-                    date: "",
+                  });
+                  setDateSearch("");
+                  setRangeDateSearch({
+                    dateSearchStart: "",
+                    dateSearchEnd: "",
                   });
 
                   setSelectedRangeLabel("Today");
                   setSelectedRange("t");
                 } else {
+                  setSearchFilters({
+                    productName: "",
+                    customerName: "",
+                  });
+                  setDateSearch("");
+                  setRangeDateSearch({
+                    dateSearchStart: "",
+                    dateSearchEnd: "",
+                  });
                   if (!selectedRange) {
                     setSelectedRangeLabel("Today");
                     setSelectedRange("t");

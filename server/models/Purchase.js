@@ -32,6 +32,8 @@ const purchaseSchema = new mongoose.Schema({
   },
   products: [
     {
+      _id: false,
+      
       productName: {
         type: String,
         required: true,
@@ -54,6 +56,12 @@ const purchaseSchema = new mongoose.Schema({
         type: Number,
         required: true,
       },
+    },
+  ],
+  purchaseReturnId: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PurchaseReturn",
     },
   ],
   transactionRecords: [

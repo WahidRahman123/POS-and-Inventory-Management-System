@@ -230,7 +230,7 @@ const ProductExchangeStatement = () => {
       {/* Main Document Content */}
       <div 
         ref={contentRef} 
-        className="max-w-4xl mx-auto bg-white shadow-2xl rounded-sm p-10 border-t-[10px] border-red-700"
+        className="max-w-4xl mx-auto bg-white shadow-2xl print:shadow-none rounded-sm p-10 border-t-[10px] border-red-700"
       >
         {/* --- Integrated Shop Header Section --- */}
         <div className="flex justify-between items-start border-b-2 border-red-600 pb-4 mb-8">

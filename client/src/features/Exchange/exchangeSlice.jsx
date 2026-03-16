@@ -3,8 +3,8 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const initialState = {
-  exchanges: [],
-  exchangesSearchedByMemo: null,
+  exchanges: [], // এটি আপনার আগের করা টেবিল/লিস্ট এবং কাস্টমার স্টেটমেন্টের জন্য
+  exchangesSearchedByMemo: [], // এটি শুধুমাত্র POS ড্রপডাউন সার্চের জন্য
   page: 1,
   pages: null,
   toggle: false,
@@ -12,6 +12,7 @@ const initialState = {
   error: null,
 };
 
+// ১. আগের ফাংশনালিটি: টেবিলের জন্য এক্সচেঞ্জ লিস্ট আনা
 export const fetchExchanges = createAsyncThunk(
   "exchange/fetchExchanges",
   async (query, ThunkAPI) => {
@@ -25,15 +26,70 @@ export const fetchExchanges = createAsyncThunk(
           params: query,
         }
       );
-
       return data;
     } catch (error) {
-      const message = "Exchange Fetching Failed!";
-      return ThunkAPI.rejectWithValue(message);
+      return ThunkAPI.rejectWithValue("Exchange Fetching Failed!");
     }
   }
 );
 
+// ২. নতুন ফাংশনালিটি: POS ড্রপডাউনের জন্য মেমো সার্চ
+// export const fetchExchangeByMemo = createAsyncThunk(
+//   "exchange/fetchExchangeByMemo",
+//   async (query, ThunkAPI) => {
+//     try {
+//       const { data } = await axios.get(
+//         `${import.meta.env.VITE_BACKEND_URI}/api/product-exchange/memo`,
+//         {
+//           headers: {
+//             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+//           },
+//           params: query, // এটি আপনার কন্ট্রোলারের req.query.search এ যাবে
+//         }
+//       );
+//       return data; // এটি অ্যারে রিটার্ন করবে
+//     } catch (error) {
+//       return ThunkAPI.rejectWithValue("Memo Search Failed!");
+//     }
+//   }
+// );
+export const fetchExchangeByMemo = createAsyncThunk(
+  "exchange/fetchExchangeByMemo",
+  async (inputValue, ThunkAPI) => {
+    try {
+      // ১. টোকেনটি চেক করুন (নিশ্চিত হয়ে নিন আপনার localStorage এ কি নামে টোকেন আছে)
+      const token = localStorage.getItem("userToken"); 
+
+      if (!token) {
+        console.error("Token missing in LocalStorage!");
+        return ThunkAPI.rejectWithValue("Session expired. Please login again.");
+      }
+
+      const backendUrl = import.meta.env.VITE_BACKEND_URI || "http://localhost:4000";
+      
+      const { data } = await axios.get(
+        `${backendUrl}/api/product-exchange/search/memo`,
+        {
+          headers: { 
+            // ২. নিশ্চিত করুন Bearer এবং token এর মাঝে একটি স্পেস আছে
+            Authorization: `Bearer ${token}` 
+          },
+          params: { search: inputValue },
+        }
+      );
+      
+      console.log("Memo Response:", data); // ডাটা আসলে কনসোলে দেখাবে
+      return data;
+    } catch (error) {
+      // যদি ৪০১ এরর আসে (Unauthorized), তার মানে টোকেন এক্সপায়ার হয়েছে
+      if (error.response && error.response.status === 401) {
+        return ThunkAPI.rejectWithValue("Not authorized, please login again.");
+      }
+      return ThunkAPI.rejectWithValue("Memo Search Failed!");
+    }
+  }
+);
+// ৩. এক্সচেঞ্জ ক্রিয়েট করা
 export const addExchange = createAsyncThunk(
   "exchange/addExchange",
   async (value, ThunkAPI) => {
@@ -47,116 +103,63 @@ export const addExchange = createAsyncThunk(
           },
         }
       );
-
       return { message: "Exchange Added Successfully!" };
     } catch (error) {
       let message = "Exchange Adding Failed!";
-      if(error.status === 409) message = "Memo Already Existed!"
+      if (error.response?.status === 409) {
+        message = "Memo Already Existed!";
+      }
       return ThunkAPI.rejectWithValue(message);
     }
   }
 );
-
-export const fetchExchangeByMemo = createAsyncThunk(
-  "purchase/fetchExchangeByMemo",
-  async (query, ThunkAPI) => {
-    try {
-      const { data } = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URI}/api/product-exchange/memo`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-          },
-          params: query,
-        }
-      );
-
-      return data;
-    } catch (error) {
-      const message = "Exchange Fetching Failed!";
-      console.log(message);
-      
-      return ThunkAPI.rejectWithValue(message);
-    }
-  }
-);
-
 
 const exchangeSlice = createSlice({
   name: "exchange",
   initialState,
+  reducers: {
+    setExchangesToEmpty: (state) => {
+      state.exchanges = [];
+    },
+  },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchExchanges.pending, (state, action) => {
+      // fetchExchanges (টেবিল লজিক ঠিক রাখার জন্য)
+      .addCase(fetchExchanges.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(fetchExchanges.fulfilled, (state, action) => {
         state.loading = false;
+        state.exchanges = action.payload.exchanges; // আপনার টেবিল ডেটা
         state.page = action.payload.page;
         state.pages = action.payload.pages;
-        state.exchanges = action.payload.exchanges;
       })
-      .addCase(fetchExchanges.rejected, (state, action) => {
+      
+      // fetchExchangeByMemo (POS ড্রপডাউন সার্চের জন্য আলাদা স্টেট)
+      .addCase(fetchExchangeByMemo.fulfilled, (state, action) => {
         state.loading = false;
-        state.error = action.error;
-        toast.error(action.payload, {
-          position: "bottom-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        });
+        state.exchangesSearchedByMemo = action.payload; // ডাটা আলাদা থাকলো, টেবিল হারাবে না
       })
-      .addCase(addExchange.pending, (state, action) => {
-        state.loading = true;
-        state.error = null;
-      })
+
       .addCase(addExchange.fulfilled, (state, action) => {
         state.loading = false;
         state.toggle = !state.toggle;
-        toast.success(action.payload.message, {
-          position: "bottom-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        });
+        toast.success(action.payload.message);
       })
-      .addCase(addExchange.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error;
-        toast.error(action.payload, {
-          position: "bottom-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        });
-      })
-      .addCase(fetchExchangeByMemo.pending, (state, action) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchExchangeByMemo.fulfilled, (state, action) => {
-        state.loading = false;
-        state.exchangesSearchedByMemo = action.payload;
-      })
-      .addCase(fetchExchangeByMemo.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error;
-      })
+      
+      // কমন রিজেক্টেড হ্যান্ডলার
+      .addMatcher(
+        (action) => action.type.endsWith("/rejected"),
+        (state, action) => {
+          state.loading = false;
+          state.error = action.payload;
+          if (action.payload) {
+            toast.error(action.payload);
+          }
+        }
+      );
   },
 });
 
-// export const { setCreatedSalesToNull } = exchangeSlices.actions; //! Baki ase
+export const { setExchangesToEmpty } = exchangeSlice.actions;
 export default exchangeSlice.reducer;

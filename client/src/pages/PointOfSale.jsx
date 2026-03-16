@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  searchProducts,
   searchProductsforPOS,
   setProductsBySearchToEmpty,
 } from "../features/product/productSlice";
@@ -10,11 +9,8 @@ import {
   getTotalSaleCount,
   setCreatedSalesToNull,
 } from "../features/sales/salesSlice";
-import { useRef } from "react";
-import { useReactToPrint } from "react-to-print";
 import { useNavigate } from "react-router-dom";
 import Decimal from "decimal.js";
-import axios from "axios";
 import AsyncSelect from "react-select/async";
 import CustomerAddForm from "../components/POS/CustomerAddForm";
 import CustomerSelect from "../components/POS/CustomerSelect";
@@ -22,12 +18,13 @@ import { fetchExchangeByMemo } from "../features/Exchange/exchangeSlice";
 
 const PointOfSale = () => {
   const { user } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
   const { totalSaleCount } = useSelector((state) => state.sales);
   useEffect(() => {
     if (!user) {
       navigate("/login");
     }
-  }, []);
+  }, [user, navigate]);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [cid, setCid] = useState(null);
@@ -53,13 +50,23 @@ const PointOfSale = () => {
   );
   const [cashInput, setCashInput] = useState("");
   const [exchangeValue, setExchangeValue] = useState("");
+
+  const [exchangeMemoId, setExchangeMemoId] = useState(null);
+  const [maxAvailableBalance, setMaxAvailableBalance] = useState(0);
+
   const [remarks, setRemarks] = useState("");
 
   const { productsBySearchforPOS } = useSelector((state) => state.product);
   const { createdSales, loading } = useSelector((state) => state.sales);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
+    // Live Summary Calculations
+  const currentCash = new Decimal(Number(cashInput) || 0);
+  const currentExchange = new Decimal(Number(exchangeValue) || 0);
+  const totalPaidLive = currentCash.plus(currentExchange);
+  const liveDue = subTotal.minus(totalPaidLive).lessThan(0)
+    ? "0.00"
+    : subTotal.minus(totalPaidLive).toFixed(2);
   //* For Exchange Select
   const loadOptions = async (inputValue, callback) => {
     if (!inputValue) {
@@ -68,16 +75,17 @@ const PointOfSale = () => {
     }
 
     try {
-      const data = await dispatch(
-        fetchExchangeByMemo({ search: inputValue }),
-      ).unwrap();
+      const response = await dispatch(fetchExchangeByMemo(inputValue)).unwrap();
 
-      const options = data.map((item) => ({
-        label: item.memo,
-        value: item.totalAmount,
-      }));
+      if (response && Array.isArray(response)) {
+        const options = response.map((item) => ({
+          label: `${item.memo} (Available: ৳${item.remainingBalance})`,
+          value: item.remainingBalance, // Default value as balance
+          id: item._id,
+        }));
+        callback(options);
+      }
 
-      callback(options);
     } catch (error) {
       console.error(error);
       callback([]);
@@ -135,6 +143,15 @@ const PointOfSale = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (customer.customerId === "") return alert("Select a customer!");
+    if (selectedProducts.length === 0)
+      return alert("Select at least one product!");
+
+    // Validation: মেমোর ব্যালেন্সের চেয়ে বেশি ব্যবহার করা যাবে না
+    if (exchangeMemoId && Number(exchangeValue) > maxAvailableBalance) {
+      return alert(
+        `Insufficient Balance! Available balance is ${maxAvailableBalance}`,
+      );
+    }
     try {
       if (selectedProducts.length > 0) {
         setCid("Running");
@@ -142,13 +159,14 @@ const PointOfSale = () => {
 
         const finalProducts = selectedProducts.map((p, i) => {
           return {
+            productId: p._id,
             productName: p.name,
             oldSellPrice: Number(p.sellPrice),
             sellPrice: Number(p.newSellPrice),
             costPrice: Number(p.costPrice),
             quantity: Number(p.qty),
             // subtotal: Number(p.sellPrice) * Number(p.qty),
-            subtotal: Number(
+            subTotal: Number(
               new Decimal(p.newSellPrice).mul(new Decimal(p.qty)).toFixed(4),
             ),
           };
@@ -171,13 +189,14 @@ const PointOfSale = () => {
             totalCost: Number(totalCost.toFixed(4)),
             cash: Number(cashInput),
             exchange: Number(exchangeValue),
+            exchangeMemoId,
             due:
               cashInput || exchangeValue
                 ? subTotal
                     .minus(
                       new Decimal(Number(cashInput)).plus(
-                        new Decimal(Number(exchangeValue))
-                      )
+                        new Decimal(Number(exchangeValue)),
+                      ),
                     )
                     .lessThan(new Decimal(0))
                   ? 0
@@ -185,8 +204,8 @@ const PointOfSale = () => {
                       subTotal
                         .minus(
                           new Decimal(Number(cashInput)).plus(
-                            new Decimal(Number(exchangeValue))
-                          )
+                            new Decimal(Number(exchangeValue)),
+                          ),
                         )
                         .toFixed(4),
                     )
@@ -203,6 +222,21 @@ const PointOfSale = () => {
                         .toFixed(4),
                     )
                 : 0,
+
+            unchangedPaid: Number(
+              new Decimal(Number(cashInput))
+                .plus(new Decimal(Number(exchangeValue)))
+                .toFixed(4),
+            ),
+            unchangedDue: Number(
+              subTotal
+                .minus(
+                  new Decimal(Number(cashInput)).plus(
+                    new Decimal(Number(exchangeValue)),
+                  ),
+                )
+                .toFixed(4),
+            ),
           }),
         ).unwrap();
         setCid(null);
@@ -220,9 +254,18 @@ const PointOfSale = () => {
     if (createdSales) {
       const data = {
         ...createdSales,
-        due: cashInput || exchangeValue
-          ? Number(subTotal.minus(new Decimal(Number(cashInput)).plus(new Decimal(Number(exchangeValue)))).toFixed(4))
-          : Number(subTotal.toFixed(4)),
+        due:
+          cashInput || exchangeValue
+            ? Number(
+                subTotal
+                  .minus(
+                    new Decimal(Number(cashInput)).plus(
+                      new Decimal(Number(exchangeValue)),
+                    ),
+                  )
+                  .toFixed(4),
+              )
+            : Number(subTotal.toFixed(4)),
         paid:
           cashInput || exchangeValue
             ? Number(
@@ -236,7 +279,7 @@ const PointOfSale = () => {
       // Navigate to the page and print it
       navigate("/invoice", { state: data });
     }
-  }, [createdSales]);
+  }, [createdSales, dispatch, navigate]);
 
   useEffect(() => {
     dispatch(setProductsBySearchToEmpty());
@@ -453,12 +496,31 @@ const PointOfSale = () => {
               onChange={(selected) => {
                 if (selected) {
                   setExchangeValue(selected.value);
+                  setExchangeMemoId(selected.id);
+                  setMaxAvailableBalance(selected.value); // লিমিট সেট হবে
                 } else {
                   setExchangeValue("");
+                  setExchangeMemoId(null);
+                  setMaxAvailableBalance(0);
                 }
               }}
               placeholder="Search Exchange Memo..."
             />
+            {exchangeMemoId && (
+              <div className="mt-2">
+                <label className="block text-xs font-semibold text-orange-600 mb-1">
+                  Adjust Exchange Amount (Max: {maxAvailableBalance})
+                </label>
+                <input
+                  type="number"
+                  value={exchangeValue}
+                  onChange={(e) => setExchangeValue(e.target.value)}
+                  className="block w-full px-3 py-1.5 border border-orange-300 bg-orange-50 rounded-sm text-sm"
+                  min={0}
+                  max={maxAvailableBalance}
+                />
+              </div>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Remarks</label>
@@ -488,18 +550,12 @@ const PointOfSale = () => {
             </div>
             <div className="flex justify-between font-bold">
               <span>Total Paid</span>
-              <span>
-                {new Decimal(Number(cashInput))
-                  .plus(new Decimal(Number(exchangeValue)))
-                  .toFixed(2)}
-              </span>
+              <span>{totalPaidLive.toFixed(2)}</span>
             </div>
             <div className="flex justify-between font-bold">
               <span>Due</span>
               {/* <span>{subTotal - cashInput}</span> */}
-              <span>
-                {subTotal.minus(new Decimal(Number(cashInput)).plus(new Decimal(Number(exchangeValue)))).toFixed(2)}
-              </span>
+              <span>{liveDue}</span>
             </div>
           </div>
         </div>

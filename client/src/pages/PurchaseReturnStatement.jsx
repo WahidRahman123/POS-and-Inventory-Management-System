@@ -1,38 +1,30 @@
-// PurchaserStatement.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { fetchPurchasesForSupplierName } from "../features/statements/sStatementSlice";
 import { useReactToPrint } from "react-to-print";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaPrint, FaFilter } from "react-icons/fa";
+import { fetchSalesReturnsForCustomerName } from "../features/SalesReturn/salesReturnSlice";
 import { fetchPurchaseReturnsForSupplierName } from "../features/PurchaseReturn/purchaseReturnSlice";
 
 const PurchaseReturnStatement = () => {
   const { user } = useSelector((state) => state.auth);
-  const {
-    purchaseReturnsForStatement,
-    totalAmount,
-    totalPaid,
-    totalDue,
-    page,
-  } = useSelector((state) => state.purchaseReturn);
+  const { transactions, totalAmount, totalPaid, totalDue } = useSelector(
+    (state) => state.purchaseReturn,
+  );
+
+  // console.log(transactions);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { state } = useLocation();
 
-  // console.log(purchases);
+  // console.log(state);
 
+  const [payModal, setPayModal] = useState(null);
   const [filterToggler, setFilterToggler] = useState(true);
   const [date, setDate] = useState("");
 
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(page);
-
-  // Printing
-  const documentTitle = `supplier-statement-${new Date()
-    .toISOString()
-    .split(".")[0]
-    .replaceAll(":", "_")}`;
+  // Printing logic
+  const documentTitle = `purchase-return-statement-${state?.supplierName || "report"}`;
   const contentRef = useRef(null);
   const reactToPrintFn = useReactToPrint({ contentRef, documentTitle });
 
@@ -41,12 +33,11 @@ const PurchaseReturnStatement = () => {
       dispatch(
         fetchPurchaseReturnsForSupplierName({
           supplierName: state.supplierName,
-          // page: currentPage,
           dateSearch: date,
         }),
       );
     }
-  }, [dispatch, user, filterToggler, currentPage]);
+  }, [dispatch, user, filterToggler, state]);
 
   useEffect(() => {
     if (!user) {
@@ -55,296 +46,396 @@ const PurchaseReturnStatement = () => {
   }, [user, navigate]);
 
   if (!user) return null;
+
   return (
-    <>
-      <div
-        className={`${state ? "" : "min-h-screen"} bg-slate-50 p-3 sm:p-4 md:p-6 font-sans`}
-      >
-        {state ? (
-          <div ref={contentRef} className="max-w-6xl print:m-7 space-y-6">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
-                Purchase Return Statement
-              </h1>
+    <div className="min-h-screen bg-slate-50 p-2 sm:p-4 md:p-6 font-sans text-gray-800">
+      {state ? (
+        <div
+          ref={contentRef}
+          className="max-w-6xl mx-auto space-y-4 sm:space-y-6 print:p-10"
+        >
+          <button
+            onClick={() => navigate("/purchase-return")}
+            className="flex items-center gap-2 cursor-pointer text-blue-600 hover:text-blue-800 font-bold text-sm transition-all group print:hidden"
+          >
+            <FaArrowLeft className="group-hover:-translate-x-1" />
+            Back to the List
+          </button>
+          {/* Header Section */}
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b pb-4">
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-800 uppercase tracking-tight">
+              Purchase Return Statement
+            </h1>
 
-              <div className="flex items-center gap-2">
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="border border-gray-300 rounded-md px-3 py-2 text-sm print:hidden"
-                />
-                <button
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors print:hidden"
-                  onClick={() => setFilterToggler(!filterToggler)}
-                >
-                  Filter
-                </button>
-                <button
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors print:hidden"
-                  onClick={reactToPrintFn}
-                >
-                  Print
-                </button>
+            <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto print:hidden">
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="flex-1 lg:flex-none border border-gray-300 rounded-md px-3 py-2 text-sm outline-none"
+              />
+              <button
+                onClick={() => setFilterToggler(!filterToggler)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 cursor-pointer"
+              >
+                Filter
+              </button>
+              <button
+                onClick={reactToPrintFn}
+                className="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 cursor-pointer"
+              >
+                Print
+              </button>
+            </div>
+          </div>
+
+          {/* Customer Info Card */}
+          <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="border-b sm:border-b-0 pb-2 sm:pb-0">
+                <p className="text-[10px] text-gray-400 font-bold uppercase">
+                  Supplier Name
+                </p>
+                <p className="text-sm font-semibold text-gray-800">
+                  {state.supplierName}
+                </p>
+              </div>
+              <div className="border-b sm:border-b-0 pb-2 sm:pb-0 text-left sm:text-right lg:text-left">
+                <p className="text-[10px] text-gray-400 font-bold uppercase">
+                  Contact
+                </p>
+                <p className="text-sm font-semibold text-gray-800">
+                  {state.supplierPhone}
+                </p>
+              </div>
+              <div className="border-b sm:border-b-0 pb-2 sm:pb-0">
+                <p className="text-[10px] text-gray-400 font-bold uppercase">
+                  Email
+                </p>
+                <p className="text-sm font-semibold text-gray-800 truncate">
+                  {state.supplierEmail}
+                </p>
+              </div>
+              <div className="text-left sm:text-right lg:text-left">
+                <p className="text-[10px] text-gray-400 font-bold uppercase">
+                  Total Due
+                </p>
+                <p className="text-sm font-bold text-red-600 font-mono">
+                  ৳{" "}
+                  {Number(totalDue).toLocaleString("en-BD", {
+                    minimumFractionDigits: 2,
+                  })}
+                </p>
               </div>
             </div>
+          </div>
 
-            {/* Supplier Info Card */}
-            <div className="bg-white border border-gray-300 rounded-lg p-4 sm:p-6 mb-6">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Supplier Name</p>
-                  <p className="text-sm font-semibold text-gray-800">
-                    {state.supplierName}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Contact</p>
-                  <p className="text-sm font-semibold text-gray-800">
-                    {state.supplierPhone ? state.supplierPhone : "----"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Email</p>
-                  <p className="text-sm font-semibold text-gray-800">
-                    {state.supplierEmail ? state.supplierEmail : "----"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Total Due</p>
-                  <p className="text-sm font-bold text-red-600">
-                    ৳{" "}
-                    {totalDue
-                      ? totalDue.toLocaleString("en-BD", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })
-                      : 0}
-                  </p>
-                </div>
-              </div>
-            </div>
+          {/* Responsive Table/Card Section */}
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+            {/* Desktop View: Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 border-b border-gray-200 text-gray-600 uppercase text-xs">
+                  <tr>
+                    <th className="px-4 py-4 text-left font-bold">Date</th>
+                    <th className="px-4 py-4 text-left font-bold">Memo/Ref</th>
+                    <th className="px-4 py-4 text-left font-bold">Type</th>
+                    <th className="px-4 py-4 text-left font-bold print:hidden">
+                      Description
+                    </th>
+                    <th className="px-4 py-4 text-right font-bold">Return</th>
+                    <th className="px-4 py-4 text-right font-bold">
+                      Paid/Exch
+                    </th>
+                    <th className="px-4 py-4 text-center font-bold">Status</th>
+                    <th className="px-4 py-4 text-center font-bold print:hidden">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {transactions && transactions.length > 0 ? (
+                    transactions.map((transaction, idx) => {
+                      const isPayment = transaction.refMemo?.startsWith("REF-");
 
-            {/* Statement Table */}
-            <div className="bg-white border border-gray-300 rounded-lg overflow-hidden mb-6">
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs sm:text-sm">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      <th className="border-b border-gray-300 px-3 py-3 text-left font-semibold text-gray-700">
-                        Date
-                      </th>
-                      <th className="border-b border-gray-300 px-3 py-3 text-left font-semibold text-gray-700 max-w-[100px]">
-                        Memo
-                      </th>
-                      <th className="border-b border-gray-300 px-3 py-3 text-left font-semibold text-gray-700 max-w-[90px]">
-                        Products
-                      </th>
-                      <th className="border-b border-gray-300 px-3 py-3 text-left font-semibold text-gray-700">
-                        Qty
-                      </th>
-                      <th className="border-b border-gray-300 px-3 py-3 text-left font-semibold text-gray-700">
-                        Total
-                      </th>
-                      <th className="border-b border-gray-300 px-3 py-3 text-left font-semibold text-gray-700">
-                        Paid
-                      </th>
-                      <th className="border-b border-gray-300 px-3 py-3 text-left font-semibold text-gray-700">
-                        Due
-                      </th>
-                      <th className="border-b border-gray-300 px-3 py-3 text-left font-semibold text-gray-700 print:hidden">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {purchaseReturnsForStatement &&
-                    purchaseReturnsForStatement.length > 0 ? (
-                      purchaseReturnsForStatement.map((purchase, index) => (
-                        <tr key={index} className="hover:bg-gray-50">
-                          <td className="border-b border-gray-300 px-3 py-3">
-                            {new Date(purchase.createdAt)
-                              .toLocaleDateString("en-GB", {
-                                timeZone: "Asia/Dhaka",
-                              })
+                      // Data structure for the single invoice page
+                      const invoiceData = {
+                        ...transaction,
+                        memo: transaction.refMemo,
+                        createdAt: transaction.date,
+                        totalAmount: transaction.amountToBePaid,
+                        paid: transaction.paidAmount,
+                        due: transaction.currentDue,
+                        customerName: state.customerName,
+                        customerPhone: state.customerPhone,
+                        customerEmail: state.customerEmail,
+                      };
+
+                      return (
+                        <tr
+                          key={idx}
+                          className={`${isPayment ? "bg-blue-50/30" : "hover:bg-gray-50/50"} transition-colors`}
+                        >
+                          <td className="px-4 py-4 whitespace-nowrap text-gray-500 font-medium text-xs">
+                            {new Date(transaction.date)
+                              .toLocaleDateString("en-GB")
                               .replaceAll("/", "-")}
                           </td>
-                          <td className="border-b border-gray-300 px-3 py-3 max-w-[100px]">
-                            {purchase.memo}
+                          <td className="px-6 py-4">
+                            <span className="px-4 py-4 font-bold text-blue-700">
+                              {transaction.refMemo}
+                            </span>
                           </td>
-                          <td className="border-b border-gray-300 px-3 py-3 max-w-[90px]">
-                            {purchase.products
-                              .map((p) => p.productName)
-                              .join(", ")}
+                          <td className="px-4 py-4">
+                            <span
+                              className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${isPayment ? "bg-blue-50 text-blue-700 border-blue-100" : transaction.returnType === "product" ? "bg-green-50 text-green-700 border-green-100" : "bg-orange-50 text-orange-700 border-orange-100"}`}
+                            >
+                              {isPayment ? "Payment" : transaction.returnType}
+                            </span>
                           </td>
-                          <td className="border-b border-gray-300 px-3 py-3">
-                            {purchase.products.reduce((sum, item) => sum + item.quantity, 0)}
+                          <td className="px-4 py-4 text-gray-700 font-medium print:hidden">
+                            <span
+                            // className={`text-xs ${isPayment ? "font-black text-green-700 italic" : "font-bold text-gray-700"}`}
+                            >
+                              {isPayment
+                                ? `Payment against Memo-${transaction.purchaseReturnId.memo}`
+                                : transaction.purchaseReturnId?.products
+                                    ?.map((p) => p.productName)
+                                    .join(", ") || "Sales Items"}
+                            </span>
                           </td>
-                          <td className="border-b border-gray-300 px-3 py-3">
+                          <td className="px-6 py-4 text-right font-black">
                             ৳{" "}
-                            {purchase.returnAmount
-                              ? purchase.returnAmount.toLocaleString("en-BD", {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })
-                              : 0}
+                            {transaction.amountToBePaid.toLocaleString(
+                              "en-BD",
+                              {
+                                minimumFractionDigits: 2,
+                              },
+                            )}
                           </td>
-                          <td className="border-b border-gray-300 px-3 py-3">
+                          <td className="px-6 py-4 text-right font-black text-green-600">
                             ৳{" "}
-                            {purchase.refundReceived
-                              ? purchase.refundReceived.toLocaleString(
-                                  "en-BD",
-                                  {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  },
-                                )
-                              : 0}
+                            {transaction.paidAmount.toLocaleString("en-BD", {
+                              minimumFractionDigits: 2,
+                            })}
                           </td>
-                          <td className="border-b border-gray-300 px-3 py-3 text-red-600 font-semibold">
+                          <td className="px-6 py-4 text-right font-black text-red-500 font-mono">
                             ৳{" "}
-                            {purchase.refundDue
-                              ? purchase.refundDue.toLocaleString("en-BD", {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })
-                              : 0}
+                            {transaction.currentDue?.toLocaleString("en-BD", {
+                              minimumFractionDigits: 2,
+                            })}
                           </td>
-                          <td className="border-b border-gray-300 px-3 py-3 print:hidden">
-                            <div className="flex gap-2">
-                              {purchase.refundDue ? (
-                                <Link
-                                  to={`/purchase-return/${purchase._id}/edit-due`}
-                                  className="text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded font-medium"
-                                >
-                                  Add Refund
-                                </Link>
-                              ) : (
-                                <button className="text-xs bg-green-400 text-white px-3 py-1.5 rounded cursor-not-allowed">
-                                  Add Refund
-                                </button>
-                              )}
-
-                              <Link
-                                onClick={(e) => e.stopPropagation()}
-                                to="/invoice-purchase-return"
-                                state={purchase}
-                                className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded font-medium"
-                              >
+                          <td className="px-4 py-4 text-center print:hidden ">
+                            <div className="flex justify-center gap-2">
+                              <button className="text-blue-600 hover:text-blue-800 font-bold cursor-pointer">
                                 Print
-                              </Link>
+                              </button>
+                              {!isPayment &&
+                                transaction.purchaseReturnId?.due > 0 && (
+                                  <button
+                                    onClick={() =>
+                                      setPayModal(transaction.purchaseReturnId._id)
+                                    }
+                                    className="text-indigo-600 hover:text-indigo-800 font-bold cursor-pointer"
+                                  >
+                                    Pay
+                                  </button>
+                                )}
+
+                              {payModal && (
+                                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xs p-4">
+                                  <div className="w-full max-w-sm bg-white rounded-xl shadow-xl p-7">
+                                    <h3 className="text-base font-semibold text-gray-700 mb-5 text-center">
+                                      Select Payment Method
+                                    </h3>
+
+                                    <div className="flex flex-col gap-3">
+                                      <Link
+                                        to={`/purchase-return/${payModal}/exchange-due`}
+                                        className="w-full bg-green-600 text-white text-sm font-semibold py-2.5 rounded-lg text-center hover:bg-green-700 transition"
+                                      >
+                                        Exchange Pay
+                                      </Link>
+
+                                      <Link
+                                        to={`/purchase-return/${payModal}/edit-due`}
+                                        className="w-full bg-blue-600 text-white text-sm font-semibold py-2.5 rounded-lg text-center hover:bg-blue-700 transition"
+                                      >
+                                        Cash Pay
+                                      </Link>
+
+                                      <button
+                                        onClick={() => setPayModal(null)}
+                                        className="text-sm text-gray-500 mt-2 hover:text-gray-600 cursor-pointer"
+                                      >
+                                        Cancel
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </td>
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan={8}
-                          className="text-center text-gray-500 py-6 select-none"
-                        >
-                          No transactions found.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={8}
+                        className="text-center text-gray-400 py-12 italic"
+                      >
+                        No transactions found for this period.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile View: Cards */}
+            {/* <div className="md:hidden divide-y divide-gray-100">
+            {returnHistory.map((item, idx) => (
+              <div
+                key={idx}
+                className={`p-4 ${item.type === "payment" ? "bg-blue-50/40" : ""}`}
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-xs text-gray-500 font-bold">
+                    {new Date(item.date).toLocaleDateString("en-GB")}
+                  </span>
+                  <span
+                    className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${item.type === "product" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"}`}
+                  >
+                    {item.type}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <h4 className="font-bold text-blue-700">{item.memo}</h4>
+                  <span className="text-xs font-medium text-gray-400 italic">
+                    {item.status}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 my-1">{item.products}</p>
+                <div className="flex justify-between mt-3 pt-3 border-t border-dashed border-gray-200">
+                  <div>
+                    <p className="text-[9px] text-gray-400 uppercase font-bold tracking-wider">
+                      Return
+                    </p>
+                    <p className="text-sm font-bold text-red-500">
+                      ৳{item.returnValue.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[9px] text-gray-400 uppercase font-bold tracking-wider">
+                      Paid/Exch
+                    </p>
+                    <p className="text-sm font-bold text-green-600">
+                      ৳{(item.exchangeValue + item.cashRefund).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-4 print:hidden">
+                  <button className="flex-1 bg-gray-100 py-2 rounded font-bold text-xs text-blue-600">
+                    Print
+                  </button>
+                  <button className="flex-1 bg-gray-100 py-2 rounded font-bold text-xs text-indigo-600">
+                    Payment
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div> */}
+          </div>
+
+          {/* Summary Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-center">
+                <p className="text-[10px] text-gray-500 uppercase font-bold">
+                  Total Return
+                </p>
+                <p className="text-xl font-black text-red-500">
+                  ৳{Number(totalAmount).toLocaleString()}
+                </p>
+              </div>
+              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-center">
+                <p className="text-[10px] text-gray-500 uppercase font-bold">
+                  Total Adjusted
+                </p>
+                <p className="text-xl font-black text-green-600">
+                  ৳{Number(totalPaid).toLocaleString()}
+                </p>
+              </div>
+              <div className="bg-white p-4 rounded-xl border border-blue-200 shadow-sm flex flex-col justify-center">
+                <p className="text-[10px] text-gray-500 uppercase font-bold">
+                  Pending
+                </p>
+                <p className="text-xl font-black text-orange-600">
+                  ৳{Number(totalDue).toLocaleString()}
+                </p>
               </div>
             </div>
 
-            {/* Summary Card */}
-            <div className="flex justify-end">
-              <div className="bg-white border border-gray-300 rounded-lg p-4 w-full sm:w-80">
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Total</span>
-                    <span className="text-sm font-medium">
-                      ৳{" "}
-                      {totalAmount
-                        ? totalAmount.toLocaleString("en-BD", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })
-                        : 0}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Total Paid</span>
-                    <span className="text-sm font-medium">
-                      ৳{" "}
-                      {totalPaid
-                        ? totalPaid.toLocaleString("en-BD", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })
-                        : 0}
-                    </span>
-                  </div>
-                  <div className="border-t border-gray-300 pt-3 flex justify-between items-center">
-                    <span className="text-sm font-bold text-gray-800">
-                      Total Due
-                    </span>
-                    <span className="text-sm font-bold text-red-600">
-                      ৳{" "}
-                      {totalDue
-                        ? totalDue.toLocaleString("en-BD", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })
-                        : 0}
-                    </span>
-                  </div>
+            <div className="bg-gray-800 text-white p-5 rounded-2xl shadow-lg border-t-4 border-yellow-500">
+              <div className="flex justify-between items-center border-b border-gray-700 pb-3 mb-3 ">
+                <h3 className="text-xs font-bold uppercase tracking-widest">
+                  Final Status
+                </h3>
+                <span className="bg-yellow-500 text-gray-900 text-[9px] px-2 py-0.5 rounded font-black">
+                  2026
+                </span>
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs font-medium">
+                  <span className="text-gray-400 tracking-tight">
+                    Net Returnable:
+                  </span>
+                  <span className="font-mono">
+                    ৳{Number(totalAmount).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs font-medium text-green-400">
+                  <span className="text-gray-400 tracking-tight">
+                    Total Settled:
+                  </span>
+                  <span className="font-mono">
+                    - ৳{Number(totalPaid).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between border-t border-gray-700 pt-3 mt-3">
+                  <span className="font-black uppercase text-[10px] self-center">
+                    {totalDue >= 0 ? "Payable" : "Credit"}
+                  </span>
+                  <span className="text-2xl font-black text-yellow-400 font-mono tracking-tighter">
+                    ৳{Number(totalDue).toLocaleString()}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
-        ) : (
-          <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl ring-1 ring-black/5 p-6 space-y-6 min-h-screen">
-            {/* ---------- Header ---------- */}
-
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <h1 className="text-2xl font-bold text-gray-800">
-                Purchase Return Statement
-              </h1>
-            </div>
-            <div className="flex flex-col items-center justify-center py-16 text-center text-gray-600">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-12 w-12 text-gray-400 mb-3"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 17v-2H5v-2h4v-2l3 3-3 3zM15 7v2h4v2h-4v2l-3-3 3-3z"
-                />
-              </svg>
-              <p className="text-lg font-medium select-none">
-                No data available
-              </p>
-              <p className="text-sm text-gray-500 select-none">
-                Please select a purchase return from the list to view the
-                statement.
-              </p>
-            </div>
+        </div>
+      ) : (
+        <div className="max-w-xl mx-auto bg-white rounded-2xl shadow-xl p-12 text-center mt-10">
+          <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <FaArrowLeft className="text-gray-400" />
           </div>
-        )}
-      </div>
-
-      {/* Back Button */}
-      <div className="flex justify-end mr-6">
-        <Link
-          to="/purchase-return"
-          className="flex items-center text-sm sm:text-base font-medium text-green-600 hover:text-blue-800 cursor-pointer"
-        >
-          <FaArrowLeft className="mr-1 sm:mr-2" /> Go Back
-        </Link>
-      </div>
-    </>
+          <h2 className="text-xl font-bold text-gray-800 mb-2">
+            No Purchase Return Selected
+          </h2>
+          <p className="text-gray-500 mb-6 text-sm">
+            Please select one purchase return list to view their
+            transaction history.
+          </p>
+          <button
+            onClick={() => navigate("/purchase-return")}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-blue-700 transition-colors shadow-lg cursor-pointer"
+          >
+            Go to Purchase Return List
+          </button>
+        </div>
+      )}
+    </div>
   );
 };
 

@@ -35,6 +35,10 @@ import EditPurchaseReturnDue from "./pages/EditPurchaseReturnDue";
 import InvoiceForPurchaseReturn from "./pages/InvoiceForPurchaseReturn";
 import SalesDueList from "./pages/SalesDueList";
 import ProductExchangeStatement from "./pages/ProductExchangeStatement";
+import EditSRExchangeDue from "./pages/EditSRExchangeDue";
+import EditSRCashDue from "./pages/EditSRCashDue";
+import EditPRExchangeDue from "./pages/EditPRExchangeDue";
+import EditPRCashDue from "./pages/EditPRCashDue";
 
 
 function App() {
@@ -79,11 +83,17 @@ function App() {
           <Route path="/purchaser-statement" element={<PurchaserStatement />} />
           <Route path="/expense-management" element={<ExpenseManagement />} /> 
           <Route path="/product-exchange" element={<ProductExchange />} />
+
           <Route path="/purchase-return" element={<PurchaseReturn />} />
           <Route path="/purchase-return-statement" element={<PurchaseReturnStatement />} />
-          <Route path="/purchase-return/:id/edit-due" element={<EditPurchaseReturnDue />} />
+          <Route path="/purchase-return/:id/exchange-due" element={<EditPRExchangeDue />} />
+          <Route path="/purchase-return/:id/edit-due" element={<EditPRCashDue />} />
+
           <Route path="/sales-return" element={<SalesReturn />} />
           <Route path="/sales-return-statement" element={<SalesReturnStatement />} />
+          <Route path="/sales-return/:id/exchange-due" element={<EditSRExchangeDue />}/>
+          <Route path="/sales-return/:id/edit-due" element={<EditSRCashDue />}/>
+
           <Route path="/product-exchange-statement" element={<ProductExchangeStatement />} />
                    
         </Route>

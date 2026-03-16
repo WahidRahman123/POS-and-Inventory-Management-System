@@ -29,15 +29,11 @@ const salesReturnSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Sales",
   },
-  returnType: {
-    type: String,
-    enum: ["product", "cash"],
-    required: true,
-  },
 
   //* which products are being returned
   products: [
     {
+      _id: false,
       productId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
@@ -62,12 +58,12 @@ const salesReturnSchema = new mongoose.Schema({
       },
       returnQuantity: {
         type: Number,
-        required: true,
+        // required: true,
         min: 1,
       },
       returnQtyInKg: {
         type: Number,
-        required: true,
+        // required: true,
       },
       returnPrice: {
         type: Number,
@@ -81,38 +77,6 @@ const salesReturnSchema = new mongoose.Schema({
     },
   ],
 
-  exchangeProducts: [
-    {
-      productId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-      },
-      productName: {
-        type: String,
-        //   required: true,
-        trim: true,
-      },
-      quantity: {
-        type: Number,
-        //   required: true,
-        min: 1,
-      },
-      qtyInKg: {
-        type: Number,
-        // required: true,
-      },
-      unitPrice: {
-        //* sellPrice
-        type: Number,
-        //   required: true,
-      },
-      subTotal: {
-        //* unitPrice * quantity
-        type: Number,
-        //   required: true,
-      },
-    },
-  ],
   transactionRecords: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -134,12 +98,6 @@ const salesReturnSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-
-  totalExchangeValue: { type: Number, default: 0 },
-  adjustmentAmount: { type: Number, default: 0 }, // Positive means customer pays more
-  cashRefundAmount: { type: Number, default: 0 },
-  paymentMethod: { type: String, default: "Cash" },
-  note: String,
 
   createdAt: {
     type: Date,

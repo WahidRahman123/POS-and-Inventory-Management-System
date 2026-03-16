@@ -1,15 +1,15 @@
 const mongoose = require("mongoose");
 
-const salesReturnTransactionSchema = new mongoose.Schema({
+const purchaseReturnTransactionSchema = new mongoose.Schema({
   refMemo: {  
     type: String,
     required: true,
   },
-  customerId: {
+  supplierId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Customer",
+    ref: "Supplier",
   },
-  customerName: {
+  supplierName: {
     type: String,
     required: true,
     trim: true,
@@ -18,14 +18,14 @@ const salesReturnTransactionSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  salesId: {
+  purchaseId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Sales",
+    ref: "Purchase",
   },
-  customerEmail: {
+  supplierEmail: {
     type: String,
   },
-  customerPhone: {
+  supplierPhone: {
     type: String,
     required: true,
   },
@@ -44,10 +44,6 @@ const salesReturnTransactionSchema = new mongoose.Schema({
   exchangeProducts: [
     {
       _id: false,
-      productId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-      },
       productName: {
         type: String,
         //   required: true,
@@ -99,13 +95,13 @@ const salesReturnTransactionSchema = new mongoose.Schema({
   cashRefundAmount: { type: Number, default: 0 },
   note: String,
 
-  salesReturnId: {
+  purchaseReturnId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "SalesReturn",
+    ref: "PurchaseReturn",
   },
 });
 
 module.exports = mongoose.model(
-  "SalesReturnTransaction",
-  salesReturnTransactionSchema,
+  "PurchaseReturnTransaction",
+  purchaseReturnTransactionSchema,
 );

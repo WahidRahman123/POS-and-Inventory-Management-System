@@ -1,9 +1,11 @@
-const Decimal = require("decimal.js");
-const PurchaseReturn = require("../models/PurchaseReturn");
-const Purchase = require("../models/Purchase");
-const PurchaseReturnTransaction = require("../models/PurchaseReturnTransaction");
-const { createCustomDate } = require("../utils/createCustomDate");
 const { default: mongoose } = require("mongoose");
+const Decimal = require("decimal.js");
+const Sales = require("../models/Sales");
+const SalesReturn = require("../models/SalesReturn");
+const SalesReturnTransaction = require("../models/SalesReturnTransaction");
+const Product = require("../models/Product");
+const { createCustomDate } = require("../utils/createCustomDate");
+
 
 module.exports.index = async (req, res) => {
   try {
@@ -49,7 +51,7 @@ module.exports.index = async (req, res) => {
 
     // For name search:
     if (nameSearch) {
-      nameSearchQuery = { supplierName: { $regex: nameSearch, $options: "i" } };
+      nameSearchQuery = { customerName: { $regex: nameSearch, $options: "i" } };
       searchQuery.push(nameSearchQuery);
     }
 
@@ -60,7 +62,7 @@ module.exports.index = async (req, res) => {
     // Pagination
     const skip = (parseInt(page) - 1) * limit;
 
-    const returns = await PurchaseReturn.find(mainSearch)
+    const salesReturns = await SalesReturn.find(mainSearch)
       .populate({
         path: "transactionRecords",
         select: "returnType",
@@ -71,13 +73,14 @@ module.exports.index = async (req, res) => {
       .limit(limit);
 
     // Count total documents
-    const total = await PurchaseReturn.countDocuments(mainSearch);
+    const total = await SalesReturn.countDocuments(mainSearch);
 
+    // res.status(201).json(purchases);
     res.status(201).json({
       total,
       page: parseInt(page),
       pages: Math.ceil(total / limit),
-      purchaseReturns: returns,
+      salesReturns,
     });
   } catch (error) {
     console.error(error);
@@ -85,11 +88,12 @@ module.exports.index = async (req, res) => {
   }
 };
 
-module.exports.createPurchaseReturn = async (req, res) => {
+module.exports.createSalesReturn = async (req, res) => {
   const session = await mongoose.startSession();
   try {
-    const purchaseReturns = req.body;
-
+    const salesReturns = req.body;
+    // console.log(salesReturns);
+    // return
     const {
       memo,
       returnType,
@@ -106,14 +110,20 @@ module.exports.createPurchaseReturn = async (req, res) => {
       createdAt,
       issuedAt,
       ...commonDetails
-    } = purchaseReturns;
+    } = salesReturns;
 
-    const { purchaseId } = purchaseReturns;
+    const { salesId } = salesReturns;
+    // const { salesId } = salesReturns;
+
+    //* Check if the memo exists or not
+    // const returnFound = await SalesReturn.find({ memo });
+    // if (returnFound.length > 0)
+    //   return res.status(409).json({ message: "Memo Already Existed!" });
 
     session.startTransaction();
 
-    // const s = await Purchase.findById(purchaseId, "purchaseReturnId");
-    // const memoLength = s.purchaseReturnId.length + 1;
+    // const s = await Sales.findById(salesId, "salesReturnId");
+    // const memoLength = s.salesReturnId.length + 1;
     // const newMemo = memo + memoLength;
 
     //* Transaction Creation
@@ -133,12 +143,12 @@ module.exports.createPurchaseReturn = async (req, res) => {
       paymentMethod,
       note,
     };
-    const transaction = new PurchaseReturnTransaction(transactionDetails);
+    const transaction = new SalesReturnTransaction(transactionDetails);
 
-    //* Purchase creation
-    const purchaseReturn = new PurchaseReturn({
+    //* sales creation
+    const salesReturn = new SalesReturn({
       ...commonDetails,
-      memo,
+      memo: memo,
       products,
       transactionRecords: [transaction._id],
       totalReturnValue,
@@ -148,26 +158,43 @@ module.exports.createPurchaseReturn = async (req, res) => {
       issuedAt,
     });
 
-    transaction.purchaseReturnId = purchaseReturn._id;
+    transaction.salesReturnId = salesReturn._id;
     await transaction.save({ session });
 
-    const createdPurchaseReturn = await purchaseReturn.save({ session });
+    const createdSalesReturn = await salesReturn.save({ session });
 
-    //* Insertion of purchaseReturn ID in purchase
-    const purchaseFound = await Purchase.findById(purchaseReturns.purchaseId).session(
+    //* Inventory Adjustment for ExchangeProducts
+    if (salesReturns.returnType === "product") {
+      for (const product of salesReturns.exchangeProducts) {
+        {
+          const productFound = await Product.findById(
+            product.productId,
+          ).session(session);
+
+          if (productFound) {
+            productFound.quantity = productFound.quantity - product.quantity;
+            // console.log(productFound);
+            await productFound.save({ session });
+          }
+        }
+      }
+    }
+
+    //* Insertion of salesReturn ID in sales
+    const saleFound = await Sales.findById(salesReturns.salesId).session(
       session,
     );
 
-    if (purchaseFound) {
-      purchaseFound.purchaseReturnId.push(createdPurchaseReturn._id);
-      await purchaseFound.save({ session });
+    if (saleFound) {
+      saleFound.salesReturnId.push(createdSalesReturn._id);
+      await saleFound.save({ session });
     }
 
     // Commit
     await session.commitTransaction();
     session.endSession();
 
-    res.status(201).json(createdPurchaseReturn);
+    res.status(201).json(createdSalesReturn);
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
@@ -185,24 +212,24 @@ module.exports.addPaymentByExchange = async (req, res) => {
 
   try {
     session.startTransaction();
-    const purchaseReturn = await PurchaseReturn.findById(id).session(session);
+    const salesReturn = await SalesReturn.findById(id).session(session);
 
-    if (purchaseReturn) {
+    if (salesReturn) {
       const paidAmount = Number(new Decimal(amount).toFixed(4));
       // purchase.paid = purchase.paid + amount;
-      purchaseReturn.paid = Number(
-        new Decimal(purchaseReturn.paid).plus(new Decimal(amount)).toFixed(4),
+      salesReturn.paid = Number(
+        new Decimal(salesReturn.paid).plus(new Decimal(amount)).toFixed(4),
       );
 
-      const amountToBePaid = purchaseReturn.due;
+      const amountToBePaid = salesReturn.due;
       // purchase.due = purchase.due - amount;
-      purchaseReturn.due = Number(
-        new Decimal(purchaseReturn.due).minus(new Decimal(amount)).toFixed(4),
+      salesReturn.due = Number(
+        new Decimal(salesReturn.due).minus(new Decimal(amount)).toFixed(4),
       );
-      const currentDue = purchaseReturn.due;
+      const currentDue = salesReturn.due;
 
       // transaction creation
-      const transaction = new PurchaseReturnTransaction({
+      const transaction = new SalesReturnTransaction({
         ...rest,
         date: createCustomDate(date),
         amountToBePaid,
@@ -211,8 +238,23 @@ module.exports.addPaymentByExchange = async (req, res) => {
       });
       await transaction.save({ session });
 
-      purchaseReturn.transactionRecords.push(transaction._id);
-      await purchaseReturn.save({ session });
+      salesReturn.transactionRecords.push(transaction._id);
+      await salesReturn.save({ session });
+
+      //* Inventory Adjustment for ExchangeProducts
+      for (const product of transaction.exchangeProducts) {
+        {
+          const productFound = await Product.findById(
+            product.productId,
+          ).session(session);
+
+          if (productFound) {
+            productFound.quantity = productFound.quantity - product.quantity;
+            // console.log(productFound);
+            await productFound.save({ session });
+          }
+        }
+      }
 
       // Commit
       await session.commitTransaction();
@@ -220,7 +262,7 @@ module.exports.addPaymentByExchange = async (req, res) => {
 
       res.status(201).json({ message: "Payment updated successfully" });
     } else {
-      res.status(404).json({ message: "Purchase Return not found" });
+      res.status(404).json({ message: "Sales Return not found" });
     }
   } catch (error) {
     await session.abortTransaction();
@@ -239,24 +281,24 @@ module.exports.addPaymentByCash = async (req, res) => {
 
   try {
     session.startTransaction();
-    const purchaseReturn = await PurchaseReturn.findById(id).session(session);
+    const salesReturn = await SalesReturn.findById(id).session(session);
 
-    if (purchaseReturn) {
+    if (salesReturn) {
       const paidAmount = Number(new Decimal(amount).toFixed(4));
       // purchase.paid = purchase.paid + amount;
-      purchaseReturn.paid = Number(
-        new Decimal(purchaseReturn.paid).plus(new Decimal(amount)).toFixed(4),
+      salesReturn.paid = Number(
+        new Decimal(salesReturn.paid).plus(new Decimal(amount)).toFixed(4),
       );
 
-      const amountToBePaid = purchaseReturn.due;
+      const amountToBePaid = salesReturn.due;
       // purchase.due = purchase.due - amount;
-      purchaseReturn.due = Number(
-        new Decimal(purchaseReturn.due).minus(new Decimal(amount)).toFixed(4),
+      salesReturn.due = Number(
+        new Decimal(salesReturn.due).minus(new Decimal(amount)).toFixed(4),
       );
-      const currentDue = purchaseReturn.due;
+      const currentDue = salesReturn.due;
 
       // transaction creation
-      const transaction = new PurchaseReturnTransaction({
+      const transaction = new SalesReturnTransaction({
         ...rest,
         date: createCustomDate(date),
         amountToBePaid,
@@ -265,8 +307,8 @@ module.exports.addPaymentByCash = async (req, res) => {
       });
       await transaction.save({ session });
 
-      purchaseReturn.transactionRecords.push(transaction._id);
-      await purchaseReturn.save({ session });
+      salesReturn.transactionRecords.push(transaction._id);
+      await salesReturn.save({ session });
 
       // Commit
       await session.commitTransaction();
@@ -274,7 +316,7 @@ module.exports.addPaymentByCash = async (req, res) => {
 
       res.status(201).json({ message: "Payment updated successfully" });
     } else {
-      res.status(404).json({ message: "Purchase Return not found" });
+      res.status(404).json({ message: "Sales Return not found" });
     }
   } catch (error) {
     await session.abortTransaction();
@@ -285,12 +327,12 @@ module.exports.addPaymentByCash = async (req, res) => {
   }
 };
 
-module.exports.purchaseReturnStatement = async (req, res) => {
+module.exports.salesReturnStatement = async (req, res) => {
   try {
-    const { page = 1, dateSearch = "", supplierName = "" } = req.query;
+    const { page = 1, dateSearch = "", customerName = "" } = req.query;
 
     let searchQuery = [];
-    let nameSearchQuery = { supplierName };
+    let nameSearchQuery = { customerName };
     searchQuery.push(nameSearchQuery);
 
     let dateSearchQuery;
@@ -310,11 +352,11 @@ module.exports.purchaseReturnStatement = async (req, res) => {
 
     const mainSearch = { $and: searchQuery };
 
-    const transactions = await PurchaseReturnTransaction.find(mainSearch)
-    .sort({ date: -1 })
-    .populate("purchaseReturnId");
+    const transactions = await SalesReturnTransaction.find(mainSearch)
+      .sort({ date: -1 })
+      .populate("salesReturnId");
 
-    const result = await PurchaseReturn.aggregate([
+    const result = await SalesReturn.aggregate([
       {
         $match: nameSearchQuery,
       },
@@ -340,25 +382,44 @@ module.exports.purchaseReturnStatement = async (req, res) => {
   }
 };
 
-module.exports.purchaseByInvoice = async (req, res) => {
-  try {
-    const { memo } = req.query;
+// module.exports.saleByInvoice = async (req, res) => {
+//   try {
+//     const { invoiceNo } = req.query;
+//     const sale = await Sales.findOne({ invoiceNo })
+//       .populate({
+//         path: "salesReturnId",
+//         select: "products",
+//       })
+//       .lean();
 
-    const purchase = await Purchase.findOne({ memo })
+//     if (!sale) return res.status(409).json({ message: "Sale Not Found!" });
+
+//     res.status(201).json(sale);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Server Error");
+//   }
+// };
+
+module.exports.saleByInvoice = async (req, res) => {
+  try {
+    const { invoiceNo } = req.query;
+
+    const sale = await Sales.findOne({ invoiceNo })
       .populate({
-        path: "purchaseReturnId",
-        select: "products.productName products.returnQuantity",
+        path: "salesReturnId",
+        select: "products.productId products.returnQuantity",
       })
       .lean();
 
-    if (!purchase) return res.status(409).json({ message: "Invalid Invoice No!" });
+    if (!sale) return res.status(409).json({ message: "Invalid Invoice No!" });
 
     //* Map to store returned quantities
     const returnedMap = {};
 
-    purchase.purchaseReturnId.forEach((ret) => {
+    sale.salesReturnId.forEach((ret) => {
       ret.products.forEach((p) => {
-        const pid = p.productName;
+        const pid = p.productId.toString();
 
         if (!returnedMap[pid]) {
           returnedMap[pid] = 0;
@@ -369,8 +430,8 @@ module.exports.purchaseByInvoice = async (req, res) => {
     });
 
     //* Calculate available return for each sale product
-    const products = purchase.products.map((p) => {
-      const pid = p.productName;
+    const products = sale.products.map((p) => {
+      const pid = p.productId.toString();
       const returnedQty = returnedMap[pid] || 0;
 
       return {
@@ -380,26 +441,26 @@ module.exports.purchaseByInvoice = async (req, res) => {
       };
     });
 
-    purchase.products = products.filter((p) => p.availableReturnQty > 0);
+    sale.products = products.filter((p) => p.availableReturnQty > 0);
 
-    if (purchase.products.length === 0)
+    if (sale.products.length === 0)
       return res.status(409).json({ message: "All items already returned!" });
 
-    res.status(201).json(purchase);
+    res.status(201).json(sale);
   } catch (error) {
     console.error(error);
     res.status(500).send("Server Error");
   }
 };
 
-module.exports.purchaseReturnById = async (req, res) => {
+module.exports.salesReturnById = async (req, res) => {
   try {
     const { id } = req.params;
-    const purchaseReturn = await PurchaseReturn.findById(id);
+    const salesReturn = await SalesReturn.findById(id);
 
-    if (!purchaseReturn) return res.status(409).json({ message: "Invalid ID!" });
+    if (!salesReturn) return res.status(409).json({ message: "Invalid ID!" });
 
-    res.status(201).json(purchaseReturn);
+    res.status(201).json(salesReturn);
   } catch (error) {
     console.error(error);
     res.status(500).send("Server Error");

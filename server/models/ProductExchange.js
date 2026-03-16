@@ -31,6 +31,7 @@ const productExchangeSchema = new mongoose.Schema({
   },
   products: [
     {
+      _id: false,
       productName: {
         type: String,
         required: true,
@@ -59,14 +60,20 @@ const productExchangeSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+
+  remainingBalance: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
   createdAt: {
     type: Date,
     required: true,
   },
   issuedAt: {
     type: Date,
-    required: true
-  }
+    required: true,
+  },
 });
 
 module.exports = mongoose.model("ProductExchange", productExchangeSchema);

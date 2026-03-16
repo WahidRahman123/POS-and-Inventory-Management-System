@@ -29,52 +29,82 @@ const purchaseReturnSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
+  purchaseId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Purchase",
+  },
   products: [
     {
+      _id: false,
       productName: {
         type: String,
         required: true,
         trim: true,
       },
-      quantity: {
+      purchaseQuantity: {
+        //* purchase's quantity
         type: Number,
-        required: true,
-        min: 0,
       },
-      qtyInKg: {
+      purchasePrice: {
+        //* purchase's sellPrice
         type: Number,
-        required: true,
-      },
-      unitPrice: {
-        type: Number,
-        required: true,
       },
       subTotal: {
+        //* purchase's subTotal
+        type: Number,
+        required: true,
+      },
+      returnQuantity: {
+        type: Number,
+        // required: true,
+        min: 1,
+      },
+      returnQtyInKg: {
+        type: Number,
+        // required: true,
+      },
+      returnPrice: {
+        type: Number,
+        required: true,
+      },
+      lineTotal: {
+        //* lineTotal = returnQuantity * returnPrice
         type: Number,
         required: true,
       },
     },
   ],
-  returnAmount: {
+
+  transactionRecords: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PurchaseReturnTransaction",
+    },
+  ],
+
+  // Financial Summary
+  totalReturnValue: {
+    type: Number,
+    default: 0,
+    required: true,
+  },
+  due: {
     type: Number,
     required: true,
   },
-  refundReceived: {
+  paid: {
     type: Number,
     required: true,
   },
-  refundDue: {
-    type: Number,
-    required: true,
-  },
+
   createdAt: {
     type: Date,
     required: true,
   },
   issuedAt: {
     type: Date,
-    required: true
-  }
+    required: true,
+  },
 });
 
 module.exports = mongoose.model("PurchaseReturn", purchaseReturnSchema);

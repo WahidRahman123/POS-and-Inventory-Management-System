@@ -7,7 +7,7 @@ const initialState = {
   sales: [],
   salesOfDues: [],
 
-  salesForStatement: [],
+  transactions: [],
   totalAmount: null,
   totalPaid: null,
   totalDue: null,
@@ -400,7 +400,7 @@ const salesSlice = createSlice({
           state.loading = false;
           // state.page = action.payload.page;
           // state.pages = action.payload.pages;
-          state.salesForStatement = action.payload.sales;
+          state.transactions = action.payload.transactions;
           state.totalAmount = action.payload.totalAmount;
           state.totalPaid = action.payload.totalPaid;
           state.totalDue = action.payload.totalDue;

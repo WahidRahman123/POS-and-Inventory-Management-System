@@ -12,6 +12,7 @@ import supplierReducer from '../features/supplier/supplierSlice';
 import sStatementReducer from '../features/statements/sStatementSlice';
 import exchangeReducer from '../features/Exchange/exchangeSlice';
 import purchaseReturnReducer from '../features/PurchaseReturn/purchaseReturnSlice';
+import salesReturnReducer from '../features/SalesReturn/salesReturnSlice';
 
 export const store = configureStore({
     reducer: {
@@ -27,6 +28,7 @@ export const store = configureStore({
         supplier: supplierReducer,
         sstatement: sStatementReducer,
         exchange: exchangeReducer,
-        purchaseReturn: purchaseReturnReducer
+        purchaseReturn: purchaseReturnReducer,
+        salesReturn: salesReturnReducer
     }
 })

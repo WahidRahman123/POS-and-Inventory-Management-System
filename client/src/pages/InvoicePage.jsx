@@ -168,7 +168,7 @@ const InvoicePage = () => {
                         {new Decimal(sale.sellPrice).toFixed(2)}
                       </td>
                       <td className="border border-gray-300 px-2 py-1 text-right">
-                        {new Decimal(sale.subtotal).toFixed(2)}
+                        {new Decimal(sale.subTotal).toFixed(2)}
                       </td>
                     </tr>
                   ))

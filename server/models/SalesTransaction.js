@@ -1,23 +1,22 @@
 const mongoose = require("mongoose");
 
-const purchaseTransactionSchema = new mongoose.Schema({
-  supplierId: {
+const salesTransactionSchema = new mongoose.Schema({
+  customerId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Supplier",
+    ref: "Customer",
   },
-  supplierName: {
+  customerName: {
     type: String,
     required: true,
-    trim: true,
   },
   address: {
     type: String,
     required: true,
   },
-  supplierEmail: {
+  customerEmail: {
     type: String,
   },
-  supplierPhone: {
+  customerPhone: {
     type: String,
     required: true,
   },
@@ -57,13 +56,13 @@ const purchaseTransactionSchema = new mongoose.Schema({
     required: true,
   },
 
-  purchaseId: {
+  salesId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Purchase",
+    ref: "Sales",
   }
 });
 
 module.exports = mongoose.model(
-  "PurchaseTransaction",
-  purchaseTransactionSchema,
+  "SalesTransaction",
+  salesTransactionSchema,
 );

@@ -12,23 +12,35 @@ const router = express.Router();
 router.get('/', protect, PurchaseReturn.index);
 
 //* @route POST /api/purchase-return
-// @desc create purchase-return
+// @desc create purchase return
 // @access private
 router.post('/', protect, PurchaseReturn.createPurchaseReturn);
 
-//* @route POST /api/purchase-return/:id/payment
-// @desc search purchase-return between dates
+//* @route GET /api/purchase-return/purchases-by-invoice
+// @desc get the specific purchase return 
+// @access private
+router.get('/purchases-by-invoice', protect, PurchaseReturn.purchaseByInvoice);
+
+//* @route POST /api/purchase-return/:id/exchange-payment
+//* This is the update or edit for the sales return
+// @desc add payment by exchange
 // @access Private
-router.post('/:id/payment', protect, PurchaseReturn.addPayment);
+router.post('/:id/exchange-payment', protect, PurchaseReturn.addPaymentByExchange);
 
 //* @route get /api/purchase-return/by-name
 // @desc specific supplier purchase return details
 // @access Private
-router.get('/by-name', protect, PurchaseReturn.purchaseReturnBySupplierName);
+router.get('/by-name', protect, PurchaseReturn.purchaseReturnStatement);
+
+//* @route POST /api/purchase-return/:id/cash-payment
+//* This is the update or edit for the sales return
+// @desc add payment by exchange
+// @access Private
+router.post('/:id/cash-payment', protect, PurchaseReturn.addPaymentByCash);
 
 //* @route GET /api/purchase-return/:id
-// @desc fetch specific purchase-return
+// @desc fetch specific purchase Return
 // @access Private
-router.get('/:id', protect, PurchaseReturn.searchById);
+router.get('/:id', protect, admin, PurchaseReturn.purchaseReturnById);
 
 module.exports = router;

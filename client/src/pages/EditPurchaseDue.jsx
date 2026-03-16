@@ -2,18 +2,23 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
-import { addPayment, fetchPurchaseById } from "../features/purchase/purchaseSlice";
+import {
+  addPayment,
+  fetchPurchaseById,
+} from "../features/purchase/purchaseSlice";
 import Decimal from "decimal.js";
 
 const EditPurchaseDue = () => {
   const { user } = useSelector((state) => state.auth);
   const { purchaseSearchedById, loading } = useSelector(
-    (state) => state.purchase
+    (state) => state.purchase,
   );
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [due, setDue] = useState(0);
   const [aid, setAid] = useState(null);
+  const [date, setDate] = useState("");
+  const [dateRestriction, setDateRestriction] = useState("");
   const { id } = useParams();
 
   const handleSubmit = async (e) => {
@@ -26,7 +31,16 @@ const EditPurchaseDue = () => {
       amount = Number(new Decimal(due).toFixed(4));
     }
     try {
-      await dispatch(addPayment({ id, info: { amount } })).unwrap();
+      await dispatch(
+        addPayment({
+          id,
+          info: {
+            date,
+            amount,
+            unchangedAmount: Number(new Decimal(due).toFixed(4)),
+          },
+        }),
+      ).unwrap();
       navigate("/purchase");
     } catch {
       console.log("Payment Failed!");
@@ -50,6 +64,17 @@ const EditPurchaseDue = () => {
   useEffect(() => {
     if (purchaseSearchedById) {
       setDue(purchaseSearchedById.due);
+      const restrictionDate = new Date(purchaseSearchedById.createdAt)
+        .toISOString()
+        .split("T")[0];
+      setDateRestriction(restrictionDate);
+    }
+  }, [purchaseSearchedById]);
+
+  //* Due 0 redirection
+  useEffect(() => {
+    if (purchaseSearchedById?.due === 0) {
+      navigate("/purchase");
     }
   }, [purchaseSearchedById]);
 
@@ -60,6 +85,18 @@ const EditPurchaseDue = () => {
         {/* Left: Stock Form */}
         <form onSubmit={handleSubmit} className="flex-1">
           <h2 className="text-lg sm:text-xl font-semibold mb-4">Add Payment</h2>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Date</label>
+            <input
+              type="date"
+              value={date}
+              min={dateRestriction}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
 
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Pay</label>

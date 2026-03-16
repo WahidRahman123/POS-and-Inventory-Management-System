@@ -2,11 +2,15 @@ const { default: mongoose } = require("mongoose");
 const Purchase = require("../models/Purchase");
 const Decimal = require("decimal.js");
 const PurchaseTransaction = require("../models/PurchaseTransaction");
+const { createCustomDate } = require("../utils/createCustomDate");
 
 module.exports.index = async (req, res) => {
   try {
     const {
+      dateMode,
       dateSearch = "",
+      dateSearchStart = "",
+      dateSearchEnd = "",
       nameSearch = "",
       page = 1,
       order = -1,
@@ -17,17 +21,29 @@ module.exports.index = async (req, res) => {
     let nameSearchQuery;
 
     // For date search:
-    if (dateSearch) {
-      const startOfDay = new Date(dateSearch);
-      startOfDay.setHours(0, 0, 0, 0);
+    if (dateMode === "range") {
+      if (dateSearchStart && dateSearchEnd) {
+        const startDate = new Date(dateSearchStart);
+        const endDate = new Date(dateSearchEnd);
 
-      const endOfDay = new Date(dateSearch);
-      endOfDay.setHours(23, 59, 59, 999);
+        dateSearchQuery = {
+          createdAt: { $gte: startDate, $lte: endDate },
+        };
+        searchQuery.push(dateSearchQuery);
+      }
+    } else if (dateMode === "single") {
+      if (dateSearch) {
+        const startOfDay = new Date(dateSearch);
+        startOfDay.setHours(0, 0, 0, 0);
 
-      dateSearchQuery = {
-        createdAt: { $gte: startOfDay, $lte: endOfDay },
-      };
-      searchQuery.push(dateSearchQuery);
+        const endOfDay = new Date(dateSearch);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        dateSearchQuery = {
+          createdAt: { $gte: startOfDay, $lte: endOfDay },
+        };
+        searchQuery.push(dateSearchQuery);
+      }
     }
 
     // For name search:
@@ -98,7 +114,7 @@ module.exports.createPurchase = async (req, res) => {
     };
     const transaction = new PurchaseTransaction(transactionDetails);
 
-    //* sales creation
+    //* Purchase creation
     const purchase = new Purchase({
       ...purchases,
       transactionRecords: [transaction._id],
@@ -139,7 +155,7 @@ module.exports.addPayment = async (req, res) => {
   const session = await mongoose.startSession();
 
   const { id } = req.params;
-  const { amount } = req.body;
+  const { date, amount, unchangedAmount } = req.body;
 
   try {
     session.startTransaction();
@@ -159,7 +175,11 @@ module.exports.addPayment = async (req, res) => {
         ...transactionDetail
       } = purchase.toObject();
 
-      const paidDate = new Date();
+      const unchangedPaid = Number(new Decimal(unchangedAmount).toFixed(4));
+      const unchangedDue = Number(
+        new Decimal(due).minus(new Decimal(unchangedAmount)).toFixed(4),
+      );
+
       const refMemo = "REF-" + memo;
       const paidAmount = Number(new Decimal(amount).toFixed(4));
       // purchase.paid = purchase.paid + amount;
@@ -180,9 +200,11 @@ module.exports.addPayment = async (req, res) => {
         refMemo,
         amountToBePaid,
         paidAmount,
-        date: paidDate,
+        date: createCustomDate(date),
         currentDue,
-        purchaseId: _id,
+        purchaseId: purchase._id,
+        unchangedPaid,
+        unchangedDue,
       });
       await transaction.save({ session });
 

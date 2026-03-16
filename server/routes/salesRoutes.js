@@ -3,9 +3,7 @@ const Sales = require('../models/Sales');
 const { protect, admin } = require('../middleware/authMiddleware');
 const sales = require('../controllers/sales');
 
-
 const router = express.Router();
-
 
 //* @route GET /api/sales
 // @desc All Sales fetch

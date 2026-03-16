@@ -1,6 +1,7 @@
 const Decimal = require("decimal.js");
 const ProductExchange = require("../models/ProductExchange");
 
+// List of all exchanges with pagination and search
 module.exports.index = async (req, res) => {
   try {
     const {
@@ -61,17 +62,23 @@ module.exports.index = async (req, res) => {
   }
 };
 
+// Create a new product exchange
 module.exports.createProductExchange = async (req, res) => {
   try {
     const exchanges = req.body;
-    const { memo } = exchanges;
+    const { memo, totalAmount } = exchanges;
 
     //* Check if the memo exists or not
-    const exchangeFound = await ProductExchange.find({ memo })
-    if(exchangeFound.length > 0) return res.status(409).json({message: "Exchange Already Existed!"});
-    
-    //* Exchange creation
-    const exchange = new ProductExchange(exchanges);
+    const exchangeFound = await ProductExchange.find({ memo });
+    if (exchangeFound.length > 0) {
+      return res.status(409).json({ message: "Exchange Already Existed!" });
+    }
+
+    //* Exchange creation with remainingBalance
+    const exchange = new ProductExchange({
+      ...exchanges,
+      remainingBalance: totalAmount,
+    });
 
     const createdExchange = await exchange.save();
 
@@ -82,13 +89,19 @@ module.exports.createProductExchange = async (req, res) => {
   }
 };
 
+// Search memo specifically for POS dropdown
 module.exports.searchByMemo = async (req, res) => {
   try {
     const { search } = req.query;
 
-    const exchanges = await ProductExchange.find({ memo: { $regex: search, $options: "i" } }, {memo: 1, totalAmount: 1, _id: 0 })
+    const exchanges = await ProductExchange.find(
+      {
+        memo: { $regex: search, $options: "i" },
+      },
+      { memo: 1, totalAmount: 1, remainingBalance: 1, _id: 1 },
+    );
 
-    res.status(201).json(exchanges);
+    res.status(200).json(exchanges);
   } catch (error) {
     console.error(error);
     res.status(500).send("Server Error");

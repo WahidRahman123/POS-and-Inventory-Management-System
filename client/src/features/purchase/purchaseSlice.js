@@ -94,9 +94,9 @@ export const addPayment = createAsyncThunk(
         }
       );
 
-      return { message: "Payment updated Successful!" };
+      return { message: "Payment Successful!" };
     } catch (error) {
-      const message = "Payment updated Failed!";
+      const message = "Payment Failed!";
       return ThunkAPI.rejectWithValue(message);
     }
   }

@@ -12,6 +12,8 @@ const EditDue = () => {
   const dispatch = useDispatch();
   const [due, setDue] = useState(0);
   const [aid, setAid] = useState(null);
+  const [date, setDate] = useState("");
+  const [dateRestriction, setDateRestriction] = useState("");
   const { id } = useParams();
 
   const handleSubmit = async (e) => {
@@ -24,7 +26,16 @@ const EditDue = () => {
       amount = Number(new Decimal(due).toFixed(4));
     }
     try {
-      await dispatch(addPayment({ id, info: { amount } })).unwrap();
+      await dispatch(
+        addPayment({
+          id,
+          info: {
+            date,
+            amount,
+            unchangedAmount: Number(new Decimal(due).toFixed(4)),
+          },
+        }),
+      ).unwrap();
       navigate(-1);
     } catch {
       console.log("Payment Failed!");
@@ -51,6 +62,17 @@ const EditDue = () => {
   useEffect(() => {
     if (saleSearchedById) {
       setDue(saleSearchedById.due);
+      const restrictionDate = new Date(saleSearchedById.createdAt)
+        .toISOString()
+        .split("T")[0];
+      setDateRestriction(restrictionDate);
+    }
+  }, [saleSearchedById]);
+
+  //* Due 0 redirection
+  useEffect(() => {
+    if (saleSearchedById?.due === 0) {
+      navigate("/sales-report");
     }
   }, [saleSearchedById]);
 
@@ -61,6 +83,18 @@ const EditDue = () => {
         {/* Left: Stock Form */}
         <form onSubmit={handleSubmit} className="flex-1">
           <h2 className="text-lg sm:text-xl font-semibold mb-4">Add Payment</h2>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Date</label>
+            <input
+              type="date"
+              value={date}
+              min={dateRestriction}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
 
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Pay</label>

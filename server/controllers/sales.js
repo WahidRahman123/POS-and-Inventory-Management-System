@@ -1,6 +1,10 @@
 const Sales = require("../models/Sales");
 const Product = require("../models/Product");
+const SalesTransaction = require("../models/SalesTransaction");
 const Decimal = require("decimal.js");
+const { default: mongoose } = require("mongoose");
+const { createCustomDate } = require("../utils/createCustomDate");
+const ProductExchange = require("../models/ProductExchange");
 
 module.exports.index = async (req, res) => {
   try {
@@ -29,73 +33,91 @@ module.exports.index = async (req, res) => {
   }
 };
 
-// module.exports.createSales = async (req, res) => {
-//   try {
-//     const arrayOfResResults = [];
-//     const arrayOfSales = req.body;
-//     for (let i = 0; i < arrayOfSales.length; i++) {
-//       const {
-//         customerName,
-//         address,
-//         productName,
-//         sellPrice,
-//         costPrice,
-//         quantity,
-//         subtotal,
-//       } = arrayOfSales[i];
-
-//       const sales = new Sales({
-//         customerName,
-//         address,
-//         productName,
-//         sellPrice,
-//         costPrice,
-//         quantity,
-//         subtotal,
-//       });
-
-//       const createdSales = await sales.save();
-
-//       const product = await Product.findOne({ name: productName });
-//       if (!product) {
-//         return res
-//           .status(404)
-//           .json({ message: `Product ${productName} not found` });
-//       }
-//       product.quantity = product.quantity - quantity;
-//       await product.save();
-
-//       //* response result is push into an array so that it can be sent.
-//       arrayOfResResults.push(createdSales);
-//     }
-
-//     res.status(201).json(arrayOfResResults);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).send("Server Error");
-//   }
-// };
-
 module.exports.createSales = async (req, res) => {
+  const session = await mongoose.startSession();
   try {
     const sales = req.body;
 
+    const {
+      exchangeMemoId,
+      invoiceNo,
+      remarks,
+      products,
+      totalWithoutDiscount,
+      total,
+      discount,
+      totalCost,
+      cash,
+      exchange,
+      due,
+      paid,
+      ...transactionDetail
+    } = sales;
+
+    session.startTransaction();
+
+    //* Transaction Creation
+    const transactionDetails = {
+      ...transactionDetail,
+      refMemo: invoiceNo,
+      amountToBePaid: total,
+      paidAmount: paid,
+      date: new Date(),
+      currentDue: due,
+    };
+    const transaction = new SalesTransaction(transactionDetails);
+
     //* sales creation
-    const sale = new Sales(sales);
+    const sale = new Sales({
+      ...sales,
+      transactionRecords: [transaction._id],
+    });
+
+    transaction.salesId = sale._id;
+    await transaction.save({ session });
 
     for (let i = 0; i < sales.products.length; i++) {
       const { productName, quantity } = sales.products[i];
 
-      const product = await Product.findOne({ name: productName });
+      const product = await Product.findOne({ name: productName }).session(
+        session,
+      );
 
       product.quantity = product.quantity - quantity;
-      await product.save();
+      await product.save({ session });
     }
 
-    const createdSale = await sale.save();
+    // ২. এক্সচেঞ্জ মেমো ব্যালেন্স ডিডাকশন (Main Logic)
+    if (exchangeMemoId && exchange > 0) {
+      const memoData = await ProductExchange.findById(exchangeMemoId);
+
+      if (memoData) {
+        const currentBalance = new Decimal(memoData.remainingBalance);
+        const usedAmount = new Decimal(exchange); // আপনি যা ইচ্ছামতো ইনপুট দিয়েছেন
+
+        // নতুন ব্যালেন্স ক্যালকুলেট করছি
+        let newBalance = Number(currentBalance.minus(usedAmount).toFixed(4));
+
+        if (newBalance < 0) {
+          newBalance = 0;
+        }
+
+        memoData.remainingBalance = newBalance;
+        await memoData.save();
+      }
+    }
+
+    const createdSale = await sale.save({ session });
+
+    // Commit
+    await session.commitTransaction();
+    session.endSession();
 
     res.status(201).json(createdSale);
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+
     console.error(error);
     res.status(500).send("Server Error");
   }
@@ -204,46 +226,68 @@ module.exports.searchByDates = async (req, res) => {
 
 module.exports.searchByIndividualDate = async (req, res) => {
   try {
-    const { date, productName, customerName, order = -1 } = req.query;
+    const {
+      dateMode,
+      dateSearch = "",
+      dateSearchStart = "",
+      dateSearchEnd = "",
+      productName,
+      customerName,
+      order = -1,
+    } = req.query;
 
     const searchQuery = [];
     let dateSearchQuery;
     let productNameSearchQuery;
     let customerNameSearchQuery;
 
-    if (date) {
-      const startOfDay = new Date(date);
-      startOfDay.setHours(0, 0, 0, 0);
+    // For date search:
+    if (dateMode === "range") {
+      if (dateSearchStart && dateSearchEnd) {
+        const startDate = new Date(dateSearchStart);
+        const endDate = new Date(dateSearchEnd);
 
-      const endOfDay = new Date(date);
-      endOfDay.setHours(23, 59, 59, 999);
+        dateSearchQuery = {
+          createdAt: { $gte: startDate, $lte: endDate },
+        };
+        searchQuery.push(dateSearchQuery);
+      }
+    } else if (dateMode === "single") {
+      if (dateSearch) {
+        const startOfDay = new Date(dateSearch);
+        startOfDay.setHours(0, 0, 0, 0);
 
-      dateSearchQuery = {
-        createdAt: { $gte: startOfDay, $lte: endOfDay },
-      };
+        const endOfDay = new Date(dateSearch);
+        endOfDay.setHours(23, 59, 59, 999);
 
-      searchQuery.push(dateSearchQuery);
+        dateSearchQuery = {
+          createdAt: { $gte: startOfDay, $lte: endOfDay },
+        };
+        searchQuery.push(dateSearchQuery);
+      }
     }
 
-    if(productName) {
+    if (productName) {
       productNameSearchQuery = {
-        "products.productName": { $regex: productName, $options: "i" }
-      }
+        "products.productName": { $regex: productName, $options: "i" },
+      };
 
       searchQuery.push(productNameSearchQuery);
     }
 
-    if(customerName) {
+    if (customerName) {
       customerNameSearchQuery = {
-        customerName: { $regex: customerName, $options: "i" }
-      }
+        customerName: { $regex: customerName, $options: "i" },
+      };
 
       searchQuery.push(customerNameSearchQuery);
     }
 
     const mainSearch = { $and: searchQuery };
 
-    const sales = await Sales.find(mainSearch).sort({ createdAt: parseInt(order) });
+    const sales = await Sales.find(mainSearch).sort({
+      createdAt: parseInt(order),
+    });
 
     res.status(201).json(sales);
   } catch (error) {
@@ -265,28 +309,84 @@ module.exports.searchById = async (req, res) => {
 };
 
 module.exports.addPayment = async (req, res) => {
+  const session = await mongoose.startSession();
+
   const { id } = req.params;
-  const { amount } = req.body;
+  const { date, amount, unchangedAmount } = req.body;
 
   try {
-    const sale = await Sales.findById(id);
+    session.startTransaction();
+    const sale = await Sales.findById(id).session(session);
 
     if (sale) {
+      const {
+        invoiceNo,
+        remarks,
+        products,
+        salesReturnId,
+        transactionRecords,
+        totalWithoutDiscount,
+        total,
+        totalCost,
+        discount,
+        due,
+        cash,
+        exchange,
+        paid,
+        createdAt,
+        updatedAt,
+        _id,
+        ...transactionDetail
+      } = sale.toObject();
+
+      const unchangedPaid = Number(new Decimal(unchangedAmount).toFixed(4));
+      const unchangedDue = Number(
+        new Decimal(due).minus(new Decimal(unchangedAmount)).toFixed(4),
+      );
+
+      const refMemo = "REF-" + invoiceNo;
+      const paidAmount = Number(new Decimal(amount).toFixed(4));
       // sale.paid = sale.paid + amount;
       sale.paid = Number(
         new Decimal(sale.paid).plus(new Decimal(amount)).toFixed(4),
       );
+
+      const amountToBePaid = due;
       // sale.due = sale.due - amount;
       sale.due = Number(
         new Decimal(sale.due).minus(new Decimal(amount)).toFixed(4),
       );
-      await sale.save();
+      const currentDue = sale.due;
+
+      // transaction creation
+      const transaction = new SalesTransaction({
+        ...transactionDetail,
+        refMemo,
+        amountToBePaid,
+        paidAmount,
+        date: createCustomDate(date),
+        currentDue,
+        salesId: sale._id,
+        unchangedPaid,
+        unchangedDue,
+      });
+      await transaction.save({ session });
+
+      sale.transactionRecords.push(transaction._id);
+      await sale.save({ session });
+
+      // Commit
+      await session.commitTransaction();
+      session.endSession();
 
       res.status(201).json({ message: "Payment updated successfully" });
     } else {
       res.status(404).json({ message: "Sale not found" });
     }
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+
     console.error(error);
     res.status(500).send("Server Error");
   }
@@ -321,7 +421,7 @@ module.exports.salesByCustomerName = async (req, res) => {
       endOfDay.setHours(23, 59, 59, 999);
 
       dateSearchQuery = {
-        createdAt: { $gte: startOfDay, $lte: endOfDay },
+        date: { $gte: startOfDay, $lte: endOfDay },
       };
       searchQuery.push(dateSearchQuery);
     }
@@ -333,33 +433,34 @@ module.exports.salesByCustomerName = async (req, res) => {
     // Pagination
     // const skip = (parseInt(page) - 1) * limit;
 
-    const sales = await Sales.find(mainSearch)
-      .sort({ createdAt: -1 })
-      // .skip(skip)
-      // .limit(limit);
+    const transactions = await SalesTransaction.find(mainSearch)
+      .sort({ date: -1 })
+      .populate("salesId");
+    // .skip(skip)
+    // .limit(limit);
 
     // Count total Customer
     // const total = await Purchase.countDocuments(mainSearch);
 
     const result = await Sales.aggregate([
       {
-        $match: mainSearch
+        $match: nameSearchQuery,
       },
       {
         $group: {
           _id: null,
-          totalAmount: {$sum: { $multiply: ['$total', 10000] }},
-          totalPaid: {$sum: { $multiply: ['$paid', 10000] }},
-          totalDue: {$sum: { $multiply: ['$due', 10000] }}
-        }
-      }
+          totalAmount: { $sum: { $multiply: ["$total", 10000] } },
+          totalPaid: { $sum: { $multiply: ["$paid", 10000] } },
+          totalDue: { $sum: { $multiply: ["$due", 10000] } },
+        },
+      },
     ]);
 
     res.status(201).json({
       // total,
       // page: parseInt(page),
       // pages: Math.ceil(total / limit),
-      sales,
+      transactions,
       totalAmount: result.length > 0 ? result[0].totalAmount / 10000 : 0,
       totalPaid: result.length > 0 ? result[0].totalPaid / 10000 : 0,
       totalDue: result.length > 0 ? result[0].totalDue / 10000 : 0,
@@ -377,13 +478,13 @@ module.exports.salesDueList = async (req, res) => {
     const limit = 15;
     const skip = (parseInt(page) - 1) * limit;
 
-    const sales = await Sales.find({ due: { $gt: 0 }})
+    const sales = await Sales.find({ due: { $gt: 0 } })
       .sort({ createdAt: parseInt(order) })
       .skip(skip)
       .limit(limit);
 
     // Count total documents
-    const total = await Sales.countDocuments({ due: { $gt: 0 }});
+    const total = await Sales.countDocuments({ due: { $gt: 0 } });
 
     res.status(201).json({
       total,

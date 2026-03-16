@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { ErrorMessage, Field, Form, Formik } from "formik";
-import * as yup from "yup";
+import { addSupplier } from "../features/supplier/supplierSlice";
+
 import {
   addPurchase,
   fetchPurchases,
@@ -16,6 +16,9 @@ const Purchase = () => {
   const { purchases, toggle, page, pages } = useSelector(
     (state) => state.purchase,
   );
+  const { loading: supplierAddLoading } = useSelector(
+    (state) => state.supplier,
+  );
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -23,6 +26,47 @@ const Purchase = () => {
     date: "",
     memo: "",
   });
+  //* For Date
+  const [dateMode, setDateMode] = useState("single");
+  const [dateSearch, setDateSearch] = useState("");
+  const [rangeDateSearch, setRangeDateSearch] = useState({
+    dateSearchStart: "",
+    dateSearchEnd: "",
+  });
+
+  //* For Supllier Addition - start
+  const [supplierToAdd, setSupplierToAdd] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    address: "",
+  });
+  const [aid, setAid] = useState(null);
+  const handleOnChange = (e) => {
+    const { name, value } = e.target;
+    setSupplierToAdd((prev) => {
+      return { ...prev, [name]: value };
+    });
+  };
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    setAid("Running");
+    try {
+      await dispatch(addSupplier(supplierToAdd)).unwrap();
+      setSupplierToAdd({
+        name: "",
+        phone: "",
+        email: "",
+        address: "",
+      });
+    } catch {
+      console.log("Add failed!");
+    } finally {
+      setAid(null);
+    }
+  };
+  //* For Supllier Addition - end
+
   const [addLoading, setAddLoading] = useState(false);
 
   //* Supplier Search Handling Section
@@ -158,6 +202,9 @@ const Purchase = () => {
       totalAmount: Number(totalAmount.toFixed(4)),
       paid: Number(newpPaid.toFixed(4)),
       due: due.lessThan(new Decimal(0)) ? 0 : Number(due.toFixed(4)),
+
+      unchangedPaid: Number(paid),
+      unchangedDue: Number(due.toFixed(4)),
     };
 
     try {
@@ -202,18 +249,31 @@ const Purchase = () => {
 
   const [filterToggler, setFilterToggler] = useState(true);
   const [nameSearch, setNameSearch] = useState("");
-  const [date, setDate] = useState("");
 
   useEffect(() => {
     if (user) {
-      dispatch(
-        fetchPurchases({
-          dateSearch: date,
-          nameSearch,
-          page: currentPage,
-          order: sortOrder,
-        }),
-      );
+      if (dateMode === "single") {
+        dispatch(
+          fetchPurchases({
+            dateMode,
+            dateSearch,
+            nameSearch,
+            page: currentPage,
+            order: sortOrder,
+          }),
+        );
+      } else {
+        dispatch(
+          fetchPurchases({
+            dateMode,
+            dateSearchStart: rangeDateSearch.dateSearchStart,
+            dateSearchEnd: rangeDateSearch.dateSearchEnd,
+            nameSearch,
+            page: currentPage,
+            order: sortOrder,
+          }),
+        );
+      }
     }
   }, [dispatch, user, toggle, filterToggler, sortOrder, currentPage]);
 
@@ -231,6 +291,64 @@ const Purchase = () => {
       <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
         Purchase Entry
       </h1>
+
+      <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-4 sm:p-6 mb-6">
+        <form
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+          onSubmit={handleAdd}
+        >
+          <input
+            type="text"
+            placeholder="Supplier Name"
+            name="name"
+            value={supplierToAdd.name}
+            onChange={handleOnChange}
+            className="border border-gray-300 rounded-md px-3 py-2"
+            required
+          />
+          <input
+            type="tel"
+            placeholder="Phone"
+            name="phone"
+            value={supplierToAdd.phone}
+            minLength={11}
+            maxLength={14}
+            onChange={handleOnChange}
+            className="border border-gray-300 rounded-md px-3 py-2"
+            required
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            name="email"
+            value={supplierToAdd.email}
+            onChange={handleOnChange}
+            className="border border-gray-300 rounded-md px-3 py-2"
+          />
+          <input
+            type="text"
+            placeholder="Address"
+            name="address"
+            value={supplierToAdd.address}
+            onChange={handleOnChange}
+            className="border border-gray-300 rounded-md px-3 py-2"
+            required
+          />
+          <div className="sm:col-span-2 flex justify-end">
+            <button
+              disabled={supplierAddLoading && aid}
+              className={`text-white px-6 py-2 rounded-md ${
+                supplierAddLoading && aid
+                  ? "bg-blue-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
+              }`}
+            >
+              {supplierAddLoading && aid ? "Adding..." : "Add Supplier"}
+            </button>
+          </div>
+        </form>
+      </div>
+
       <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-4 sm:p-6 mb-6">
         {/* Purchase Add Form */}
         <form onSubmit={handleSubmit}>
@@ -363,7 +481,7 @@ const Purchase = () => {
             {products.map((product, index) => (
               <div
                 key={product.id}
-                className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-3 items-end"
+                className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3 items-end"
               >
                 <div className="md:col-span-2">
                   <label className="block text-xs text-gray-600 mb-1">
@@ -583,23 +701,102 @@ const Purchase = () => {
               <input
                 type="search"
                 value={nameSearch}
+                placeholder="Supplier Name"
                 onChange={(e) => setNameSearch(e.target.value)}
                 className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-36 sm:w-40"
               />
             </div>
 
             {/* Date Search — Right side top */}
-            <div className="flex items-center gap-2 ml-auto">
-              <label className="text-xs sm:text-sm text-gray-600">
-                Search by Date:
-              </label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-36 sm:w-40"
-              />
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
+              <div className="flex gap-4 items-center">
+                <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="dateMode"
+                    value="single"
+                    checked={dateMode === "single"}
+                    onChange={(e) => setDateMode(e.target.value)}
+                    className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                  />
+                  Single Date
+                </label>
+                <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="dateMode"
+                    value="range"
+                    checked={dateMode === "range"}
+                    onChange={(e) => setDateMode(e.target.value)}
+                    className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                  />
+                  Date Range
+                </label>
+              </div>
             </div>
+
+            {dateMode === "single" && (
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
+                <label className="text-xs sm:text-sm text-gray-600">
+                  Search by Date:
+                </label>
+                <input
+                  type="date"
+                  value={dateSearch}
+                  onChange={(e) => {
+                    setDateSearch(e.target.value);
+                  }}
+                  className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
+                />
+              </div>
+            )}
+
+            {dateMode === "range" && (
+              <>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
+                  <label className="text-xs sm:text-sm text-gray-600">
+                    Start Date:
+                  </label>
+                  <input
+                    type="date"
+                    max={
+                      rangeDateSearch.dateSearchEnd
+                        ? rangeDateSearch.dateSearchEnd
+                        : ""
+                    }
+                    value={rangeDateSearch.dateSearchStart}
+                    onChange={(e) => {
+                      setRangeDateSearch((prev) => ({
+                        ...prev,
+                        dateSearchStart: e.target.value,
+                      }));
+                    }}
+                    className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
+                  />
+                </div>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
+                  <label className="text-xs sm:text-sm text-gray-600">
+                    End Date:
+                  </label>
+                  <input
+                    type="date"
+                    min={
+                      rangeDateSearch.dateSearchStart
+                        ? rangeDateSearch.dateSearchStart
+                        : ""
+                    }
+                    value={rangeDateSearch.dateSearchEnd}
+                    onChange={(e) => {
+                      setRangeDateSearch((prev) => ({
+                        ...prev,
+                        dateSearchEnd: e.target.value,
+                      }));
+                    }}
+                    className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
+                  />
+                </div>
+              </>
+            )}
 
             <div className="text-right">
               <button
@@ -611,11 +808,20 @@ const Purchase = () => {
               <button
                 className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 cursor-pointer ml-2"
                 onClick={() => {
-                  if (date !== "" || nameSearch !== "") {
-                    date !== "" && setDate("");
-                    nameSearch !== "" && setNameSearch("");
-                    setFilterToggler(!filterToggler);
-                  }
+                  // if (date !== "" || nameSearch !== "") {
+                  //   date !== "" && setDate("");
+                  //   nameSearch !== "" && setNameSearch("");
+                  //   setFilterToggler(!filterToggler);
+                  // }
+
+                  nameSearch !== "" && setNameSearch("");
+                  // date !== "" && setDate("");
+                  setDateSearch("");
+                  setRangeDateSearch({
+                    dateSearchStart: "",
+                    dateSearchEnd: "",
+                  });
+                  setFilterToggler(!filterToggler);
                 }}
               >
                 Clear
@@ -831,7 +1037,7 @@ const Purchase = () => {
                 <tr>
                   <td
                     colSpan={10}
-                    className="text-center text-gray-500 py-10 text-lg select-none"
+                    className="text-center text-gray-500 py-10 text-lg select-none border border-gray-400"
                   >
                     No Purchase Available.
                   </td>

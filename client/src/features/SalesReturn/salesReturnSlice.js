@@ -3,16 +3,16 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const initialState = {
-  purchaseReturns: [],
-  purchaseSearchedByInvoice: null,
-  purchaseReturnSearchById: null,
+  salesReturns: [],
+  saleSearchedByInvoice: null,
+  salesReturnSearchedById: null,
   invoiceLoading: false,
 
   transactions: [],
   totalAmount: null,
   totalPaid: null,
   totalDue: null,
-
+  
   page: 1,
   pages: null,
   toggle: false,
@@ -20,12 +20,12 @@ const initialState = {
   error: null,
 };
 
-export const fetchPurchaseReturn = createAsyncThunk(
-  "purchaseReturn/fetchPurchaseReturn",
+export const fetchSalesReturns = createAsyncThunk(
+  "salesReturn/fetchSalesReturns",
   async (query, ThunkAPI) => {
     try {
       const { data } = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URI}/api/purchase-return`,
+        `${import.meta.env.VITE_BACKEND_URI}/api/sales-return`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -36,18 +36,18 @@ export const fetchPurchaseReturn = createAsyncThunk(
 
       return data;
     } catch (error) {
-      const message = "Purchase Return Fetching Failed!";
+      const message = "Sales Return Fetching Failed!";
       return ThunkAPI.rejectWithValue(message);
     }
   },
 );
 
-export const addPurchaseReturn = createAsyncThunk(
-  "purchaseReturn/addPurchaseReturn",
+export const addSalesReturn = createAsyncThunk(
+  "salesReturn/addSalesReturn",
   async (value, ThunkAPI) => {
     try {
       const { data } = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URI}/api/purchase-return`,
+        `${import.meta.env.VITE_BACKEND_URI}/api/sales-return`,
         value,
         {
           headers: {
@@ -56,21 +56,21 @@ export const addPurchaseReturn = createAsyncThunk(
         },
       );
 
-      return { message: "Purchase Return Added Successfully!" };
+      return { message: "Sales Return Added Successfully!" };
     } catch (error) {
-      let message = "Purchase Return Adding Failed!";
+      let message = "Sales Return Adding Failed!";
       if (error.status === 409) message = "Memo Already Existed!";
       return ThunkAPI.rejectWithValue(message);
     }
   },
 );
 
-export const fetchPurchaseByInvoice = createAsyncThunk(
-  "purchaseReturn/fetchPurchaseByInvoice",
+export const fetchSaleByInvoice = createAsyncThunk(
+  "salesReturn/fetchSaleByInvoice",
   async (query, ThunkAPI) => {
     try {
       const { data } = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URI}/api/purchase-return/purchases-by-invoice`,
+        `${import.meta.env.VITE_BACKEND_URI}/api/sales-return/sales-by-invoice`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -81,19 +81,19 @@ export const fetchPurchaseByInvoice = createAsyncThunk(
 
       return data;
     } catch (error) {
-      let message = "Purchase Loading Failed!";
+      let message = "Sale Loading Failed!";
       if (error.status === 409) message = error.response.data.message;
       return ThunkAPI.rejectWithValue(message);
     }
   },
 );
 
-export const fetchPurchaseReturnById = createAsyncThunk(
-  "purchaseReturn/fetchPurchaseReturnById",
+export const fetchSalesReturnById = createAsyncThunk(
+  "salesReturn/fetchSalesReturnById",
   async (id, ThunkAPI) => {
     try {
       const { data } = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URI}/api/purchase-return/${id}`,
+        `${import.meta.env.VITE_BACKEND_URI}/api/sales-return/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -103,19 +103,19 @@ export const fetchPurchaseReturnById = createAsyncThunk(
 
       return data;
     } catch (error) {
-      let message = "Purchase Return Fetching Failed!";
-      if (error.status === 409) message = "Invalid Id!";
+      let message = "Sales Return Fetching Failed!";
+      if (error.status === 409) message = "Invalid ID!";
       return ThunkAPI.rejectWithValue(message);
     }
   },
 );
 
 export const addPaymentByExchange = createAsyncThunk(
-  "purchaseReturn/addPaymentByExchange",
+  "salesReturn/addPaymentByExchange",
   async (value, ThunkAPI) => {
     try {
       const { data } = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URI}/api/purchase-return/${
+        `${import.meta.env.VITE_BACKEND_URI}/api/sales-return/${
           value.id
         }/exchange-payment`,
         value.info,
@@ -135,11 +135,11 @@ export const addPaymentByExchange = createAsyncThunk(
 );
 
 export const addPaymentByCash = createAsyncThunk(
-  "purchaseReturn/addPaymentByCash",
+  "salesReturn/addPaymentByCash",
   async (value, ThunkAPI) => {
     try {
       const { data } = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URI}/api/purchase-return/${
+        `${import.meta.env.VITE_BACKEND_URI}/api/sales-return/${
           value.id
         }/cash-payment`,
         value.info,
@@ -158,13 +158,14 @@ export const addPaymentByCash = createAsyncThunk(
   },
 );
 
-//* This is only for the Purchase Return Statement
-export const fetchPurchaseReturnsForSupplierName = createAsyncThunk(
-  "purchaseReturn/fetchPurchaseReturnsForSupplierName",
+//* This is only for the Sales Return Statement
+export const fetchSalesReturnsForCustomerName = createAsyncThunk(
+  "salesReturn/fetchSalesReturnsForCustomerName",
   async (value, ThunkAPI) => {
     try {
+      // console.log("entered!");
       const { data } = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URI}/api/purchase-return/by-name`,
+        `${import.meta.env.VITE_BACKEND_URI}/api/sales-return/by-name`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -173,6 +174,7 @@ export const fetchPurchaseReturnsForSupplierName = createAsyncThunk(
         },
       );
 
+      // console.log(data);
       return data;
     } catch (error) {
       const message = "Fetching Failed!";
@@ -181,27 +183,27 @@ export const fetchPurchaseReturnsForSupplierName = createAsyncThunk(
   },
 );
 
-const purchaseReturnSlice = createSlice({
-  name: "purchaseReturn",
+const salesReturnSlice = createSlice({
+  name: "salesReturn",
   initialState,
   reducers: {
-      setPurchaseSearchedByInvoiceToEmpty: (state) => {
-        state.purchaseSearchedByInvoice = null;
-      },
+    setSaleSearchedByInvoiceToEmpty: (state) => {
+      state.saleSearchedByInvoice = null;
     },
+  },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchPurchaseReturn.pending, (state, action) => {
+      .addCase(fetchSalesReturns.pending, (state, action) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchPurchaseReturn.fulfilled, (state, action) => {
+      .addCase(fetchSalesReturns.fulfilled, (state, action) => {
         state.loading = false;
         state.page = action.payload.page;
         state.pages = action.payload.pages;
-        state.purchaseReturns = action.payload.purchaseReturns;
+        state.salesReturns = action.payload.salesReturns;
       })
-      .addCase(fetchPurchaseReturn.rejected, (state, action) => {
+      .addCase(fetchSalesReturns.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error;
         toast.error(action.payload, {
@@ -215,11 +217,11 @@ const purchaseReturnSlice = createSlice({
           theme: "colored",
         });
       })
-      .addCase(addPurchaseReturn.pending, (state, action) => {
+      .addCase(addSalesReturn.pending, (state, action) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(addPurchaseReturn.fulfilled, (state, action) => {
+      .addCase(addSalesReturn.fulfilled, (state, action) => {
         state.loading = false;
         state.toggle = !state.toggle;
         toast.success(action.payload.message, {
@@ -233,7 +235,7 @@ const purchaseReturnSlice = createSlice({
           theme: "colored",
         });
       })
-      .addCase(addPurchaseReturn.rejected, (state, action) => {
+      .addCase(addSalesReturn.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error;
         toast.error(action.payload, {
@@ -247,70 +249,15 @@ const purchaseReturnSlice = createSlice({
           theme: "colored",
         });
       })
-      .addCase(fetchPurchaseReturnById.pending, (state, action) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchPurchaseReturnById.fulfilled, (state, action) => {
-        state.loading = false;
-        state.purchaseReturnSearchById = action.payload;
-      })
-      .addCase(fetchPurchaseReturnById.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error;
-        toast.error(action.payload, {
-          position: "bottom-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        });
-      })
-      .addCase(fetchPurchaseReturnsForSupplierName.pending, (state, action) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(
-        fetchPurchaseReturnsForSupplierName.fulfilled,
-        (state, action) => {
-          state.loading = false;
-          // state.page = action.payload.page;
-          // state.pages = action.payload.pages;
-          state.transactions = action.payload.transactions;
-          state.totalAmount = action.payload.totalAmount;
-          state.totalPaid = action.payload.totalPaid;
-          state.totalDue = action.payload.totalDue;
-        },
-      )
-      .addCase(
-        fetchPurchaseReturnsForSupplierName.rejected,
-        (state, action) => {
-          state.loading = false;
-          state.error = action.error;
-          toast.error(action.payload, {
-            position: "bottom-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "colored",
-          });
-        },
-      )
-      .addCase(fetchPurchaseByInvoice.pending, (state, action) => {
+      .addCase(fetchSaleByInvoice.pending, (state, action) => {
         state.invoiceLoading = true;
         state.error = null;
       })
-      .addCase(fetchPurchaseByInvoice.fulfilled, (state, action) => {
+      .addCase(fetchSaleByInvoice.fulfilled, (state, action) => {
         state.invoiceLoading = false;
-        state.purchaseSearchedByInvoice = action.payload;
+        state.saleSearchedByInvoice = action.payload;
       })
-      .addCase(fetchPurchaseByInvoice.rejected, (state, action) => {
+      .addCase(fetchSaleByInvoice.rejected, (state, action) => {
         state.invoiceLoading = false;
         state.error = action.error;
         toast.error(action.payload, {
@@ -385,9 +332,64 @@ const purchaseReturnSlice = createSlice({
           progress: undefined,
           theme: "colored",
         });
+      })
+      .addCase(fetchSalesReturnsForCustomerName.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        fetchSalesReturnsForCustomerName.fulfilled,
+        (state, action) => {
+          state.loading = false;
+          // state.page = action.payload.page;
+          // state.pages = action.payload.pages;
+          state.transactions = action.payload.transactions;
+          state.totalAmount = action.payload.totalAmount;
+          state.totalPaid = action.payload.totalPaid;
+          state.totalDue = action.payload.totalDue;
+        },
+      )
+      .addCase(
+        fetchSalesReturnsForCustomerName.rejected,
+        (state, action) => {
+          state.loading = false;
+          state.error = action.error;
+          toast.error(action.payload, {
+            position: "bottom-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          });
+        },
+      )
+      .addCase(fetchSalesReturnById.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchSalesReturnById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.salesReturnSearchedById = action.payload;
+      })
+      .addCase(fetchSalesReturnById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+        toast.error(action.payload, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
       });
   },
 });
 
-export const { setPurchaseSearchedByInvoiceToEmpty } = purchaseReturnSlice.actions; //! Baki ase
-export default purchaseReturnSlice.reducer;
+export const { setSaleSearchedByInvoiceToEmpty } = salesReturnSlice.actions;
+export default salesReturnSlice.reducer;

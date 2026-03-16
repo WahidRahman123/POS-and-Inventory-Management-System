@@ -35,6 +35,7 @@ const salesSchema = new mongoose.Schema(
     },
     products: [
       {
+        _id: false,
         productId: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
@@ -64,10 +65,22 @@ const salesSchema = new mongoose.Schema(
           required: true,
           min: 0,
         },
-        subtotal: {
+        subTotal: {
           type: Number,
           required: true,
         },
+      },
+    ],
+    salesReturnId: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "SalesReturn",
+      },
+    ],
+    transactionRecords: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "SalesTransaction",
       },
     ],
     totalWithoutDiscount: {

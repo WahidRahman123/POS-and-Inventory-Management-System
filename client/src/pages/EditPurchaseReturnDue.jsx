@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import Decimal from "decimal.js";
-import { addPayment, fetchPurchaseReturnById } from "../features/PurchaseReturn/purchaseReturnSlice";
+import { fetchPurchaseReturnById } from "../features/PurchaseReturn/purchaseReturnSlice";
 
 const EditPurchaseReturnDue = () => {
   const { user } = useSelector((state) => state.auth);
@@ -26,7 +26,7 @@ const EditPurchaseReturnDue = () => {
       amount = Number(new Decimal(due).toFixed(4));
     }
     try {
-      await dispatch(addPayment({ id, info: { amount } })).unwrap();
+      // await dispatch(addPayment({ id, info: { amount } })).unwrap();
       navigate("/purchase-return");
     } catch {
       console.log("Payment Failed!");
