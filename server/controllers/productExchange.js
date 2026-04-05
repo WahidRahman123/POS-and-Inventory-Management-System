@@ -89,7 +89,45 @@ module.exports.createProductExchange = async (req, res) => {
   }
 };
 
+// // Search memo specifically for POS dropdown
+// module.exports.searchByMemo = async (req, res) => {
+//   try {
+//     const { search } = req.query;
+
+//     const exchanges = await ProductExchange.find(
+//       {
+//         memo: { $regex: search, $options: "i" },
+//       },
+//       { memo: 1, totalAmount: 1, remainingBalance: 1, _id: 1 },
+//     );
+
+//     res.status(200).json(exchanges);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Server Error");
+//   }
+// };
 // Search memo specifically for POS dropdown
+// module.exports.searchByMemo = async (req, res) => {
+//   try {
+//     const { search } = req.query;
+
+//     // customerName: 1 যোগ করা হয়েছে যাতে ড্রপডাউনে নাম দেখা যায়
+//     const exchanges = await ProductExchange.find(
+//       {
+//         memo: { $regex: search, $options: "i" },
+//       },
+//       { memo: 1, totalAmount: 1, remainingBalance: 1, customerName: 1, _id: 1 }
+//     );
+
+//     res.status(200).json(exchanges);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Server Error");
+//   }
+// };
+
+// Search memo specifically for POS dropdown (Updated)
 module.exports.searchByMemo = async (req, res) => {
   try {
     const { search } = req.query;
@@ -98,7 +136,8 @@ module.exports.searchByMemo = async (req, res) => {
       {
         memo: { $regex: search, $options: "i" },
       },
-      { memo: 1, totalAmount: 1, remainingBalance: 1, _id: 1 },
+      // products: 1 যোগ করা হয়েছে যাতে ফ্রন্টএন্ডে মেমোর ভেতরে কি পণ্য আছে তা দেখা যায়
+      { memo: 1, totalAmount: 1, remainingBalance: 1, customerName: 1, products: 1, _id: 1 }
     );
 
     res.status(200).json(exchanges);

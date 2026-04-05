@@ -39,6 +39,8 @@ import EditSRExchangeDue from "./pages/EditSRExchangeDue";
 import EditSRCashDue from "./pages/EditSRCashDue";
 import EditPRExchangeDue from "./pages/EditPRExchangeDue";
 import EditPRCashDue from "./pages/EditPRCashDue";
+import CompanyReturn from "./pages/CompanyReturn";
+import CompanyStatement from "./pages/CompanyStatement";
 
 
 function App() {
@@ -83,6 +85,9 @@ function App() {
           <Route path="/purchaser-statement" element={<PurchaserStatement />} />
           <Route path="/expense-management" element={<ExpenseManagement />} /> 
           <Route path="/product-exchange" element={<ProductExchange />} />
+          <Route path="/company-return" element={<CompanyReturn />} />
+          <Route path="/company-statement/:id" element={<CompanyStatement />} />
+
 
           <Route path="/purchase-return" element={<PurchaseReturn />} />
           <Route path="/purchase-return-statement" element={<PurchaseReturnStatement />} />

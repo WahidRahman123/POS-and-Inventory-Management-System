@@ -62,6 +62,14 @@ const SideBar = ({ closeSidebar }) => {
             <span className="mr-3">📅</span> Product Exchange
           </Link>
           <Link
+            to="/company-return"
+            onClick={closeSidebar}
+            className="flex items-center p-4 hover:bg-gray-300"
+          >
+            <span className="mr-3">📅</span> Company Return
+          </Link>
+
+          <Link
             to="/purchase-return"
             onClick={closeSidebar}
             className="flex items-center p-4 hover:bg-gray-300"
@@ -134,9 +142,9 @@ const SideBar = ({ closeSidebar }) => {
         >
           <span className="mr-3">📅</span> Supplier Statement
         </Link>
-        {/* <Link to="/expense-management" onClick={closeSidebar} className="flex items-center p-4 hover:bg-gray-300">
+        <Link to="/expense-management" onClick={closeSidebar} className="flex items-center p-4 hover:bg-gray-300">
           <span className="mr-3">💸</span> Expense Management
-        </Link> */}
+        </Link>
 
         {user?.role === "admin" && (
           <Link
