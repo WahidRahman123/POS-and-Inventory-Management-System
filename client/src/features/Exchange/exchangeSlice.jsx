@@ -57,7 +57,6 @@ export const fetchExchangeByMemo = createAsyncThunk(
   "exchange/fetchExchangeByMemo",
   async (inputValue, ThunkAPI) => {
     try {
-      // ১. টোকেনটি চেক করুন (নিশ্চিত হয়ে নিন আপনার localStorage এ কি নামে টোকেন আছে)
       const token = localStorage.getItem("userToken"); 
 
       if (!token) {
@@ -70,18 +69,16 @@ export const fetchExchangeByMemo = createAsyncThunk(
       const { data } = await axios.get(
         `${backendUrl}/api/product-exchange/search/memo`,
         {
-          headers: { 
-            // ২. নিশ্চিত করুন Bearer এবং token এর মাঝে একটি স্পেস আছে
+          headers: {
             Authorization: `Bearer ${token}` 
           },
           params: { search: inputValue },
         }
       );
       
-      console.log("Memo Response:", data); // ডাটা আসলে কনসোলে দেখাবে
+      console.log("Memo Response:", data); 
       return data;
     } catch (error) {
-      // যদি ৪০১ এরর আসে (Unauthorized), তার মানে টোকেন এক্সপায়ার হয়েছে
       if (error.response && error.response.status === 401) {
         return ThunkAPI.rejectWithValue("Not authorized, please login again.");
       }

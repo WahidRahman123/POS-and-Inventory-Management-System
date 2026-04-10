@@ -1,11 +1,6 @@
 const mongoose = require("mongoose");
 
-const companyProductReturnSchema = new mongoose.Schema({
-  memo: {
-    type: String,
-    required: true,
-    trim: true,
-  },
+const CompanyProductReturnTransactionSchema = new mongoose.Schema({
   supplierId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Supplier",
@@ -30,61 +25,45 @@ const companyProductReturnSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
-
-  productName: {
+  refMemo: {
     type: String,
     required: true,
-    trim: true,
   },
-  quantity: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-  qtyInKg: {
+  amountToBePaid: {
+    //* amountToBePaid = previous due
     type: Number,
     required: true,
   },
-  unitPrice: {
+  paidAmount: {
     type: Number,
     required: true,
   },
-  subTotal: {
-    type: Number,
-    required: true,
-  },
-  transactionRecords: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "CompanyProductReturnTransaction",
-    },
-  ],
-  totalAmount: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-  paid: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-  due: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-  createdAt: {
+  date: {
     type: Date,
     required: true,
   },
-  issuedAt: {
-    type: Date,
+  currentDue: {
+    //* Current Due
+    type: Number,
     required: true,
   },
+
+  unchangedPaid: {
+    type: Number,
+    required: true,
+  },
+  unchangedDue: {
+    type: Number,
+    required: true,
+  },
+
+  companyProductReturnId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "CompanyProductReturn",
+  }
 });
 
 module.exports = mongoose.model(
-  "CompanyProductReturn",
-  companyProductReturnSchema,
+  "CompanyProductReturnTransaction",
+  CompanyProductReturnTransactionSchema,
 );

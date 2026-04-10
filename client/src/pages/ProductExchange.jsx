@@ -334,6 +334,7 @@ const ProductExchange = () => {
                       onChange={(e) => {
                         const price = e.target.value;
                         handleProductChange(product.id, "unitPrice", price);
+                        
                         const sub = new Decimal(Number(price) || 0).mul(new Decimal(Number(product.qtyInKg) || 0));
                         handleProductChange(product.id, "subTotal", Number(sub.toFixed(4)));
                       }}

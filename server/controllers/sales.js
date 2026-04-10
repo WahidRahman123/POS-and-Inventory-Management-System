@@ -63,8 +63,6 @@ module.exports.createSales = async (req, res) => {
       paidAmount: paid,
       date: new Date(),
       currentDue: due,
-      unchangedPaid: 0,
-      unchangedDue: 0,
     };
     const transaction = new SalesTransaction(transactionDetails);
 

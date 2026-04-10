@@ -41,6 +41,7 @@ import EditPRExchangeDue from "./pages/EditPRExchangeDue";
 import EditPRCashDue from "./pages/EditPRCashDue";
 import CompanyReturn from "./pages/CompanyReturn";
 import CompanyStatement from "./pages/CompanyStatement";
+import EditCompanyReturnDue from "./pages/EditCompanyReturnDue";
 
 
 function App() {
@@ -84,9 +85,11 @@ function App() {
           <Route path="/customer-statement" element={<CustomerStatement />} />
           <Route path="/purchaser-statement" element={<PurchaserStatement />} />
           <Route path="/expense-management" element={<ExpenseManagement />} /> 
+          
           <Route path="/product-exchange" element={<ProductExchange />} />
           <Route path="/company-return" element={<CompanyReturn />} />
-          <Route path="/company-statement/:id" element={<CompanyStatement />} />
+          <Route path="/company-statement" element={<CompanyStatement />} />
+          <Route path="/company-return-report/:id/edit-due" element={<EditCompanyReturnDue />} />
 
 
           <Route path="/purchase-return" element={<PurchaseReturn />} />

@@ -19,6 +19,7 @@ const supplierRoutes = require("./routes/supplierRoutes");
 const productExchangeRoutes = require("./routes/productExchangeRoutes");
 const purchaseReturnRoutes = require("./routes/purchaseReturnRoutes");
 const salesReturnRoutes = require("./routes/salesReturnRoutes");
+const CompanyProductReturnRoutes = require("./routes/companyProductReturnRoutes");
 
 const app = express();
 app.use(express.json());
@@ -62,6 +63,8 @@ app.use("/api/supplier", supplierRoutes);
 app.use("/api/product-exchange", productExchangeRoutes); 
 app.use("/api/purchase-return", purchaseReturnRoutes); 
 app.use("/api/sales-return", salesReturnRoutes); 
+app.use("/api/company-product-return", CompanyProductReturnRoutes);
+
 
 app.listen(port, () => {
   console.log(`LISTENING TO THE PORT ${port}`);
