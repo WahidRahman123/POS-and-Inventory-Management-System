@@ -66,7 +66,14 @@ const SideBar = ({ closeSidebar }) => {
             onClick={closeSidebar}
             className="flex items-center p-4 hover:bg-gray-300"
           >
-            <span className="mr-3">📅</span> Company Return
+            <span className="mr-3">📅</span> Company Product Return
+          </Link>
+          <Link
+            to="/company-sales-return"
+            onClick={closeSidebar}
+            className="flex items-center p-4 hover:bg-gray-300"
+          >
+            <span className="mr-3">📅</span> Company Sales Return
           </Link>
 
           <Link

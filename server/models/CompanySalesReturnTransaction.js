@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const companyProductReturnTransactionSchema = new mongoose.Schema({
+const companySalesReturnTransactionSchema = new mongoose.Schema({
   supplierId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Supplier",
@@ -57,13 +57,13 @@ const companyProductReturnTransactionSchema = new mongoose.Schema({
     required: true,
   },
 
-  companyProductReturnId: {
+  companySalesReturnId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "CompanyProductReturn",
+    ref: "CompanySalesReturn",
   }
 });
 
 module.exports = mongoose.model(
-  "CompanyProductReturnTransaction",
-  companyProductReturnTransactionSchema,
+  "CompanySalesReturnTransaction",
+  companySalesReturnTransactionSchema,
 );

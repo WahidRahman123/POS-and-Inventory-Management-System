@@ -9,13 +9,13 @@ import {
 } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { useReactToPrint } from "react-to-print";
-import { fetchCompanyProductReturnTRForSupplierName } from "../features/CompanyProductReturn/companyProductReturnSlice";
 import { useEffect } from "react";
+import { fetchCompanySalesReturnTRForSupplierName } from "../features/CompanySalesReturn/companySalesReturnSlice";
 
-const CompanyStatement = () => {
+const CompanySalesReturnStatement = () => {
   const { user } = useSelector((state) => state.auth);
   const { transactions, totalAmount, totalPaid, totalDue } = useSelector(
-    (state) => state.companyProductReturn,
+    (state) => state.companySalesReturn,
   );
   const navigate = useNavigate();
   const { state } = useLocation();
@@ -32,7 +32,7 @@ const CompanyStatement = () => {
   useEffect(() => {
     if (user && state && state.supplierName) {
       dispatch(
-        fetchCompanyProductReturnTRForSupplierName({
+        fetchCompanySalesReturnTRForSupplierName({
           supplierName: state.supplierName,
           dateSearch: date,
         }),
@@ -90,7 +90,7 @@ const CompanyStatement = () => {
             <div className="border-b pb-4 flex justify-between items-end">
               <div>
                 <h1 className="text-xl sm:text-2xl font-black text-gray-800 uppercase tracking-tight">
-                  Company Ledger Statement
+                  Company Sales Return Ledger Statement
                 </h1>
                 <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">
                   Statement Date: {new Date().toLocaleDateString("en-GB")}
@@ -166,7 +166,7 @@ const CompanyStatement = () => {
 
                         // Data structure for the single invoice page
                         const invoiceData = {
-                          ...transaction.purchaseId,
+                          ...transaction,
                           memo: transaction.refMemo,
                           createdAt: transaction.date,
                           totalAmount: transaction.amountToBePaid,
@@ -200,13 +200,13 @@ const CompanyStatement = () => {
                               >
                                 {isPayment
                                   ? "CASH RECEIVED FROM COMPANY"
-                                  : transaction.companyProductReturnId
+                                  : transaction.companySalesReturnId
                                       ?.productName}
                               </span>
                               {!isPayment && (
                                 <div className="text-[9px] text-gray-400 font-black uppercase tracking-tighter">
                                   Qty:{" "}
-                                  {transaction.companyProductReturnId.quantity}
+                                  {transaction.companySalesReturnId.quantity}
                                 </div>
                               )}
                             </td>
@@ -222,9 +222,9 @@ const CompanyStatement = () => {
                             <td className="px-6 py-4 text-center print:hidden">
                               <div className="flex items-center justify-center gap-3">
                                 {!isPayment &&
-                                transaction.companyProductReturnId?.due > 0 ? (
+                                transaction.companySalesReturnId?.due > 0 ? (
                                   <Link
-                                    to={`/company-product-return/${transaction.companyProductReturnId._id}/edit-due`}
+                                    to={`/company-sales-return/${transaction.companySalesReturnId._id}/edit-due`}
                                     className="text-green-600 font-black text-[10px] uppercase underline hover:text-green-800"
                                   >
                                     Pay
@@ -302,14 +302,14 @@ const CompanyStatement = () => {
             <FaArrowLeft className="text-gray-400" />
           </div>
           <h2 className="text-xl font-bold text-gray-800 mb-2">
-            No Company Return Selected
+            No Company Sales Return Selected
           </h2>
           <p className="text-gray-500 mb-6 text-sm">
-            Please select a company return from the list to view their
+            Please select a company sales return from the list to view their
             transaction history.
           </p>
           <button
-            onClick={() => navigate("/company-return")}
+            onClick={() => navigate("/company-sales-return")}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-blue-700 transition-colors shadow-lg"
           >
             Go to the List
@@ -320,4 +320,4 @@ const CompanyStatement = () => {
   );
 };
 
-export default CompanyStatement;
+export default CompanySalesReturnStatement;

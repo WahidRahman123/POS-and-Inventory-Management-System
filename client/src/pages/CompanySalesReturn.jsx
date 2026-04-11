@@ -14,26 +14,21 @@ import axios from "axios";
 import { useState } from "react";
 import Decimal from "decimal.js";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  addCompanyProductReturn,
-  fetchCompanyProductReturnById,
-  fetchCompanyProductReturns,
-  fetchProductExchangeReportData,
-} from "../features/CompanyProductReturn/companyProductReturnSlice";
 import { useEffect } from "react";
+import { addCompanySalesReturn, fetchCompanySalesReturns, fetchSalesReturnReportData } from "../features/CompanySalesReturn/companySalesReturnSlice";
 
-const CompanyReturn = () => {
+const CompanySalesReturn = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const {
-    companyProductReturns,
-    productExchangeReportData,
+    companySalesReturns,
+    salesReturnReportData,
     addLoading,
     toggle,
     page,
     pages,
-  } = useSelector((state) => state.companyProductReturn);
+  } = useSelector((state) => state.companySalesReturn);
   const [currentPage, setCurrentPage] = useState(page);
   const [memoSearch, setMemoSearch] = useState("");
   const [formData, setFormData] = useState({
@@ -107,7 +102,7 @@ const CompanyReturn = () => {
     };
 
     try {
-      await dispatch(addCompanyProductReturn(returnData)).unwrap();
+      await dispatch(addCompanySalesReturn(returnData)).unwrap();
       setFormData({
         date: "",
         productName: "",
@@ -125,7 +120,7 @@ const CompanyReturn = () => {
   useEffect(() => {
     if (user) {
       dispatch(
-        fetchCompanyProductReturns({
+        fetchCompanySalesReturns({
           memoSearch,
           page: currentPage,
         }),
@@ -136,7 +131,7 @@ const CompanyReturn = () => {
   useEffect(() => {
     if (user) {
       dispatch(
-        fetchProductExchangeReportData({
+        fetchSalesReturnReportData({
           memoSearch,
           page: currentPage,
         }),
@@ -165,8 +160,8 @@ const CompanyReturn = () => {
               </p>
             </div>
             <p className="text-2xl font-black text-gray-800">
-              {productExchangeReportData
-                ? productExchangeReportData.totalSentItems
+              {salesReturnReportData
+                ? salesReturnReportData.totalSentItems
                 : "--"}{" "}
               <span className="text-xs">Pcs</span>
             </p>
@@ -180,8 +175,8 @@ const CompanyReturn = () => {
               </p>
             </div>
             <p className="text-2xl font-black text-gray-800">
-              {productExchangeReportData
-                ? productExchangeReportData.totalWeight
+              {salesReturnReportData
+                ? salesReturnReportData.totalWeight
                 : "--"}{" "}
               <span className="text-xs">Kg</span>
             </p>
@@ -196,8 +191,8 @@ const CompanyReturn = () => {
             </div>
             <p className="text-2xl font-black text-white">
               ৳{" "}
-              {productExchangeReportData
-                ? productExchangeReportData.totalAmount
+              {salesReturnReportData
+                ? salesReturnReportData.totalAmount
                 : "--"}
             </p>
           </div>
@@ -209,8 +204,8 @@ const CompanyReturn = () => {
                 Pending From Co.
               </p>
             </div>
-            <p className="text-2xl font-black text-gray-800">৳ {productExchangeReportData
-                ? productExchangeReportData.totalDue
+            <p className="text-2xl font-black text-gray-800">৳ {salesReturnReportData
+                ? salesReturnReportData.totalDue
                 : "--"}</p>
           </div>
         </div>
@@ -283,7 +278,16 @@ const CompanyReturn = () => {
                   min="1"
                   className="w-1/2 p-2 border border-gray-300 text-xs font-bold outline-none"
                   value={formData.quantity}
-                  onChange={(e) => handleOnChange("quantity", e.target.value)}
+                  onChange={(e) => {
+                    handleOnChange("quantity", e.target.value);
+
+                    const subTotal = new Decimal(Number(e.target.value)).mul(
+                      new Decimal(Number(formData.unitPrice)),
+                    );
+
+                    handleOnChange("subTotal", Number(subTotal.toFixed(4)));
+
+                }}
                   required
                 />
                 <input
@@ -295,12 +299,6 @@ const CompanyReturn = () => {
                   value={formData.qtyInKg}
                   onChange={(e) => {
                     handleOnChange("qtyInKg", e.target.value);
-
-                    const subTotal = new Decimal(Number(e.target.value)).mul(
-                      new Decimal(Number(formData.unitPrice)),
-                    );
-
-                    handleOnChange("subTotal", Number(subTotal.toFixed(4)));
                   }}
                   required
                 />
@@ -321,7 +319,7 @@ const CompanyReturn = () => {
                   handleOnChange("unitPrice", e.target.value);
 
                   const subTotal = new Decimal(Number(e.target.value)).mul(
-                    new Decimal(Number(formData.qtyInKg)),
+                    new Decimal(Number(formData.quantity)),
                   );
 
                   handleOnChange("subTotal", Number(subTotal.toFixed(4)));
@@ -386,46 +384,46 @@ const CompanyReturn = () => {
               </tr>
             </thead>
             <tbody className="text-xs">
-              {companyProductReturns.length > 0 ? (
-                companyProductReturns.map((productReturn, index) => (
+              {companySalesReturns.length > 0 ? (
+                companySalesReturns.map((salesReturn, index) => (
                   <tr
                     key={index}
                     className="border-b hover:bg-blue-50 transition-colors cursor-pointer group"
                     onClick={() =>
-                      navigate("/company-statement", { state: productReturn })
+                      navigate("/company-sales-return-statement", { state: salesReturn })
                     }
                   >
                     <td className="p-4 font-bold text-gray-400 italic font-mono">
-                      {new Date(productReturn.createdAt)
+                      {new Date(salesReturn.createdAt)
                         .toLocaleDateString("en-GB", {
                           timeZone: "Asia/Dhaka",
                         })
                         .replaceAll("/", "-")}
                     </td>
                     <td className="p-4 text-gray-500 uppercase font-black">
-                      {productReturn.memo}
+                      {salesReturn.memo}
                     </td>
                     <td className="p-4 font-black text-blue-600 group-hover:underline uppercase tracking-tighter">
-                      {productReturn.supplierName}
+                      {salesReturn.supplierName}
                     </td>
                     <td className="p-4 font-semibold text-gray-600 uppercase">
-                      {productReturn.productName}
+                      {salesReturn.productName}
                     </td>
                     <td className="p-4 text-center font-black">
-                      {`${productReturn.quantity} Pcs | ${productReturn.qtyInKg} Kg`}
+                      {`${salesReturn.quantity} Pcs | ${salesReturn.qtyInKg} Kg`}
                     </td>
                     <td className="p-4 text-right font-black text-gray-800 tracking-tighter text-sm">
-                      ৳ {productReturn.totalAmount}
+                      ৳ {salesReturn.totalAmount}
                     </td>
                     <td className="p-4 text-center">
-                      {productReturn.due > 0 ? (
+                      {salesReturn.due > 0 ? (
                         <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded-full">
                           <FaExclamationCircle
                             size={10}
                             className="animate-pulse"
                           />
                           <span className="text-[9px] font-black uppercase tracking-tighter italic">
-                            ৳ {productReturn.due} Pending
+                            ৳ {salesReturn.due} Pending
                           </span>
                         </div>
                       ) : (
@@ -480,4 +478,4 @@ const CompanyReturn = () => {
   );
 };
 
-export default CompanyReturn;
+export default CompanySalesReturn;

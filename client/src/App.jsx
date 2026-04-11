@@ -42,6 +42,9 @@ import EditPRCashDue from "./pages/EditPRCashDue";
 import CompanyReturn from "./pages/CompanyReturn";
 import CompanyStatement from "./pages/CompanyStatement";
 import EditCompanyReturnDue from "./pages/EditCompanyReturnDue";
+import CompanySalesReturn from "./pages/CompanySalesReturn";
+import CompanySalesReturnStatement from "./pages/CompanySalesReturnStatement";
+import EditCompanySalesReturnDue from "./pages/EditCompanySalesReturnDue";
 
 
 function App() {
@@ -89,7 +92,11 @@ function App() {
           <Route path="/product-exchange" element={<ProductExchange />} />
           <Route path="/company-return" element={<CompanyReturn />} />
           <Route path="/company-statement" element={<CompanyStatement />} />
-          <Route path="/company-return-report/:id/edit-due" element={<EditCompanyReturnDue />} />
+          <Route path="/company-product-return/:id/edit-due" element={<EditCompanyReturnDue />} />
+
+          <Route path="/company-sales-return" element={<CompanySalesReturn />} />
+          <Route path="/company-sales-return-statement" element={<CompanySalesReturnStatement />} />
+          <Route path="/company-sales-return/:id/edit-due" element={<EditCompanySalesReturnDue />} />
 
 
           <Route path="/purchase-return" element={<PurchaseReturn />} />
