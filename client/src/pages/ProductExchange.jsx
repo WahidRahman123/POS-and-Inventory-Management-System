@@ -126,7 +126,7 @@ const ProductExchange = () => {
     const newProducts = products.map(({ id, ...rest }) => rest);
 
     const exchangeData = {
-      memo: formData.memo,
+      // memo: formData.memo,
       createdAt: formData.date,
       issuedAt: new Date(),
       customerId: customer.customerId,
@@ -143,7 +143,7 @@ const ProductExchange = () => {
     try {
       setAddLoading(true);
       await dispatch(addExchange(exchangeData)).unwrap();
-      setFormData({ date: "", memo: "" });
+      setFormData({ date: "" });
       setProducts([
         { id: 1, productName: "", quantity: "", qtyInKg: "", unitPrice: "", subTotal: "" },
       ]);
@@ -264,7 +264,7 @@ const ProductExchange = () => {
                 required
               />
             </div>
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium mb-1">Enter Memo</label>
               <input
                 type="text"
@@ -274,7 +274,7 @@ const ProductExchange = () => {
                 className="w-full px-4 py-2 border border-gray-400 rounded-md"
                 required
               />
-            </div>
+            </div> */}
           </div>
 
           <button

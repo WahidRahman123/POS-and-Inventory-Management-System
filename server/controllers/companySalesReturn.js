@@ -4,7 +4,6 @@ const Decimal = require("decimal.js");
 const CompanySalesReturnTransaction = require("../models/CompanySalesReturnTransaction");
 const { createCustomDate } = require("../utils/createCustomDate");
 const { getNextSequenceForOther } = require("../utils/getNextSequenceForOther");
-const ProductExchange = require("../models/ProductExchange");
 const SalesReturn = require("../models/SalesReturn");
 
 module.exports.index = async (req, res) => {
