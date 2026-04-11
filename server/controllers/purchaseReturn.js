@@ -344,7 +344,7 @@ module.exports.purchaseByInvoice = async (req, res) => {
   try {
     const { memo } = req.query;
 
-    const purchase = await Purchase.findOne({ memo })
+    const purchase = await Purchase.findOne({ memo: memo.toUpperCase() })
       .populate({
         path: "purchaseReturnId",
         select: "products.productName products.returnQuantity",

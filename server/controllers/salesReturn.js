@@ -405,7 +405,7 @@ module.exports.saleByInvoice = async (req, res) => {
   try {
     const { invoiceNo } = req.query;
 
-    const sale = await Sales.findOne({ invoiceNo })
+    const sale = await Sales.findOne({ invoiceNo: invoiceNo.toUpperCase() })
       .populate({
         path: "salesReturnId",
         select: "products.productId products.returnQuantity",

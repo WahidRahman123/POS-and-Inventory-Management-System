@@ -3,6 +3,7 @@ const Purchase = require("../models/Purchase");
 const Decimal = require("decimal.js");
 const PurchaseTransaction = require("../models/PurchaseTransaction");
 const { createCustomDate } = require("../utils/createCustomDate");
+const { getNextSequenceForOther } = require("../utils/getNextSequenceForOther");
 
 module.exports.index = async (req, res) => {
   try {
@@ -92,16 +93,17 @@ module.exports.createPurchase = async (req, res) => {
       totalAmount,
       paid,
       due,
-      memo,
       ...transactionDetail
     } = purchases;
 
-    //* Check if the memo exists or not
-    const returnFound = await Purchase.find({ memo });
-    if (returnFound.length > 0)
-      return res.status(409).json({ message: "Purchase Already Existed!" });
-
     session.startTransaction();
+
+    //* Generate the memo
+    const count = await getNextSequenceForOther("Purchase", session);
+    if (!count) {
+      throw new Error("Failed to generate sequence");
+    }
+    const memo = "P-" + count.seq;
 
     //* Transaction Creation
     const transactionDetails = {
@@ -117,6 +119,7 @@ module.exports.createPurchase = async (req, res) => {
     //* Purchase creation
     const purchase = new Purchase({
       ...purchases,
+      memo,
       transactionRecords: [transaction._id],
     });
 

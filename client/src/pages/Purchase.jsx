@@ -31,7 +31,7 @@ const Purchase = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     date: "",
-    memo: "",
+    // memo: "",
   });
 
   // এই স্টেটটি ট্র্যাক করবে বর্তমানে কোন রো (row) তে প্রোডাক্ট সার্চ করা হচ্ছে
@@ -214,7 +214,7 @@ const Purchase = () => {
       : new Decimal(Number(paid));
 
     const purchaseData = {
-      memo: formData.memo,
+      // memo: formData.memo,
       createdAt: formData.date,
       issuedAt: new Date(),
       supplierId: supplier.supplierId,
@@ -237,7 +237,6 @@ const Purchase = () => {
       await dispatch(addPurchase(purchaseData)).unwrap();
       setFormData({
         date: "",
-        memo: "",
       });
       setProducts([
         {
@@ -445,7 +444,7 @@ const Purchase = () => {
                 required
               />
             </div>
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium mb-1">
                 Enter Memo
               </label>
@@ -459,7 +458,7 @@ const Purchase = () => {
                 className="w-full px-4 py-2 border border-gray-400 rounded-md"
                 required
               />
-            </div>
+            </div> */}
           </div>
 
           <button
