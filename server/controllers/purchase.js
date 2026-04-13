@@ -93,6 +93,7 @@ module.exports.createPurchase = async (req, res) => {
       totalAmount,
       paid,
       due,
+      companyMemo,
       ...transactionDetail
     } = purchases;
 
@@ -108,7 +109,7 @@ module.exports.createPurchase = async (req, res) => {
     //* Transaction Creation
     const transactionDetails = {
       ...transactionDetail,
-      refMemo: memo,
+      refMemo: companyMemo,
       amountToBePaid: totalAmount,
       paidAmount: paid,
       date: createdAt,
@@ -173,7 +174,7 @@ module.exports.addPayment = async (req, res) => {
         totalAmount,
         paid,
         due,
-        memo,
+        companyMemo,
         _id,
         ...transactionDetail
       } = purchase.toObject();
@@ -183,7 +184,7 @@ module.exports.addPayment = async (req, res) => {
         new Decimal(due).minus(new Decimal(unchangedAmount)).toFixed(4),
       );
 
-      const refMemo = "REF-" + memo;
+      const refMemo = "REF-" + companyMemo;
       const paidAmount = Number(new Decimal(amount).toFixed(4));
       // purchase.paid = purchase.paid + amount;
       purchase.paid = Number(

@@ -214,7 +214,7 @@ const Purchase = () => {
       : new Decimal(Number(paid));
 
     const purchaseData = {
-      // memo: formData.memo,
+      companyMemo: formData.memo,
       createdAt: formData.date,
       issuedAt: new Date(),
       supplierId: supplier.supplierId,
@@ -237,6 +237,7 @@ const Purchase = () => {
       await dispatch(addPurchase(purchaseData)).unwrap();
       setFormData({
         date: "",
+        memo: ""
       });
       setProducts([
         {
@@ -444,7 +445,7 @@ const Purchase = () => {
                 required
               />
             </div>
-            {/* <div>
+            <div>
               <label className="block text-sm font-medium mb-1">
                 Enter Memo
               </label>
@@ -458,7 +459,7 @@ const Purchase = () => {
                 className="w-full px-4 py-2 border border-gray-400 rounded-md"
                 required
               />
-            </div> */}
+            </div>
           </div>
 
           <button
@@ -781,7 +782,7 @@ const Purchase = () => {
                   className="border border-gray-400 px-4 py-3 text-left font-semibold"
                   rowSpan={2}
                 >
-                  Memo
+                  Company Memo
                 </th>
                 <th
                   className="border border-gray-400 px-4 py-3 text-left font-semibold"
@@ -866,7 +867,7 @@ const Purchase = () => {
                             rowSpan={rowspan}
                             className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2"
                           >
-                            {purchase.memo}
+                            {purchase.companyMemo || "--" }
                           </td>
                           <td
                             rowSpan={rowspan}
