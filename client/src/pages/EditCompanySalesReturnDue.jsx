@@ -27,11 +27,11 @@ const EditCompanySalesReturnDue = () => {
     let amount;
     if (
       new Decimal(due).greaterThan(
-        new Decimal(companySalesReturnSearchedById.due),
+        new Decimal(companySalesReturnSearchedById.dueQty),
       )
     ) {
       amount = Number(
-        new Decimal(companySalesReturnSearchedById.due).toFixed(4),
+        new Decimal(companySalesReturnSearchedById.dueQty).toFixed(4),
       );
     } else {
       amount = Number(new Decimal(due).toFixed(4));
@@ -69,7 +69,7 @@ const EditCompanySalesReturnDue = () => {
 
   useEffect(() => {
     if (companySalesReturnSearchedById) {
-      setDue(companySalesReturnSearchedById.due);
+      setDue(companySalesReturnSearchedById.dueQty);
       const restrictionDate = new Date(companySalesReturnSearchedById.createdAt)
         .toISOString()
         .split("T")[0];
@@ -79,7 +79,7 @@ const EditCompanySalesReturnDue = () => {
 
   //* Due 0 redirection
   useEffect(() => {
-    if (companySalesReturnSearchedById?.due === 0) {
+    if (companySalesReturnSearchedById?.dueQty === 0) {
       navigate("/company-return");
     }
   }, [companySalesReturnSearchedById]);
@@ -90,7 +90,7 @@ const EditCompanySalesReturnDue = () => {
       <div className="flex flex-col md:flex-row bg-white shadow-md rounded-lg p-3 sm:p-4 md:p-6 gap-4 md:gap-8">
         {/* Left: Stock Form */}
         <form onSubmit={handleSubmit} className="flex-1">
-          <h2 className="text-lg sm:text-xl font-semibold mb-4">Add Payment</h2>
+          <h2 className="text-lg sm:text-xl font-semibold mb-4">Receive Product</h2>
 
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Date</label>
@@ -105,7 +105,7 @@ const EditCompanySalesReturnDue = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Pay</label>
+            <label className="block text-sm font-medium mb-1">Product Amount</label>
             <input
               type="number"
               value={due}
@@ -127,7 +127,7 @@ const EditCompanySalesReturnDue = () => {
                 : "bg-green-500 hover:bg-green-600 cursor-pointer"
             }`}
           >
-            {loading && aid ? "Paying..." : "Pay"}
+            {loading && aid ? "Receiving..." : "Receive"}
           </button>
         </form>
 
@@ -156,30 +156,30 @@ const EditCompanySalesReturnDue = () => {
               </ul>
             </div>
             <div className="flex">
-              <span className="w-28 font-medium">Total</span>
+              <span className="w-28 font-medium">Total Quantity</span>
               <span>
                 :{" "}
                 <span className="font-bold">
-                  {companySalesReturnSearchedById?.totalAmount}
+                  {companySalesReturnSearchedById?.totalAmountQty}
                 </span>
               </span>
             </div>
             <div className="flex">
-              <span className="w-28 font-medium">Paid</span>
-              <span>: {companySalesReturnSearchedById?.paid}</span>
+              <span className="w-28 font-medium">Paid Quantity</span>
+              <span>: {companySalesReturnSearchedById?.paidQty}</span>
             </div>
             <div className="flex">
-              <span className="w-28 font-medium">Due</span>
+              <span className="w-28 font-medium">Due Quantity</span>
               <span>
                 :{" "}
                 <span
                   className={`w-28 ${
-                    companySalesReturnSearchedById?.due > 0
+                    companySalesReturnSearchedById?.dueQty > 0
                       ? "text-red-500 font-bold"
                       : "font-medium"
                   }`}
                 >
-                  {companySalesReturnSearchedById?.due}
+                  {companySalesReturnSearchedById?.dueQty}
                 </span>
               </span>
             </div>

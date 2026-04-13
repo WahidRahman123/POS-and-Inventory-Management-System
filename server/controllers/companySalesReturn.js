@@ -66,6 +66,9 @@ module.exports.createCompanySalesReturn = async (req, res) => {
       totalAmount,
       paid,
       due,
+      totalAmountQty,
+      paidQty,
+      dueQty,
       // memo,
       ...transactionDetail
     } = returns;
@@ -73,10 +76,7 @@ module.exports.createCompanySalesReturn = async (req, res) => {
     session.startTransaction();
 
     //* Generate the memo
-    const count = await getNextSequenceForOther(
-      "CompanySalesReturn",
-      session,
-    );
+    const count = await getNextSequenceForOther("CompanySalesReturn", session);
     if (!count) {
       throw new Error("Failed to generate sequence");
     }
@@ -86,10 +86,10 @@ module.exports.createCompanySalesReturn = async (req, res) => {
     const transactionDetails = {
       ...transactionDetail,
       refMemo: memo,
-      amountToBePaid: totalAmount,
-      paidAmount: paid,
+      amountToBePaid: totalAmountQty,
+      paidAmount: paidQty,
       date: createdAt,
-      currentDue: due,
+      currentDue: dueQty,
     };
     const transaction = new CompanySalesReturnTransaction(transactionDetails);
 
@@ -160,6 +160,11 @@ module.exports.addPayment = async (req, res) => {
         totalAmount,
         paid,
         due,
+
+        totalAmountQty,
+        paidQty,
+        dueQty,
+
         memo,
         _id,
         ...transactionDetail
@@ -167,22 +172,22 @@ module.exports.addPayment = async (req, res) => {
 
       const unchangedPaid = Number(new Decimal(unchangedAmount).toFixed(4));
       const unchangedDue = Number(
-        new Decimal(due).minus(new Decimal(unchangedAmount)).toFixed(4),
+        new Decimal(dueQty).minus(new Decimal(unchangedAmount)).toFixed(4),
       );
 
       const refMemo = "REF-" + memo;
       const paidAmount = Number(new Decimal(amount).toFixed(4));
       // companySalesReturn.paid = companySalesReturn.paid + amount;
-      companySalesReturn.paid = Number(
-        new Decimal(paid).plus(new Decimal(amount)).toFixed(4),
+      companySalesReturn.paidQty = Number(
+        new Decimal(paidQty).plus(new Decimal(amount)).toFixed(4),
       );
 
-      const amountToBePaid = due;
-      // companySalesReturn.due = companySalesReturn.due - amount;
-      companySalesReturn.due = Number(
-        new Decimal(due).minus(new Decimal(amount)).toFixed(4),
+      const amountToBePaid = dueQty;
+      // companySalesReturn.dueQty = companySalesReturn.dueQty - amount;
+      companySalesReturn.dueQty = Number(
+        new Decimal(dueQty).minus(new Decimal(amount)).toFixed(4),
       );
-      const currentDue = companySalesReturn.due;
+      const currentDue = companySalesReturn.dueQty;
 
       // transaction creation
       const transaction = new CompanySalesReturnTransaction({
@@ -254,18 +259,18 @@ module.exports.companySalesReturnStatement = async (req, res) => {
       {
         $group: {
           _id: null,
-          totalAmount: { $sum: { $multiply: ["$totalAmount", 10000] } },
-          totalPaid: { $sum: { $multiply: ["$paid", 10000] } },
-          totalDue: { $sum: { $multiply: ["$due", 10000] } },
+          totalAmount: { $sum: "$totalAmountQty" },
+          totalPaid: { $sum: "$paidQty" },
+          totalDue: { $sum: "$dueQty" },
         },
       },
     ]);
 
     res.status(201).json({
       transactions,
-      totalAmount: result.length > 0 ? result[0].totalAmount / 10000 : 0,
-      totalPaid: result.length > 0 ? result[0].totalPaid / 10000 : 0,
-      totalDue: result.length > 0 ? result[0].totalDue / 10000 : 0,
+      totalAmount: result.length > 0 ? result[0].totalAmount : 0,
+      totalPaid: result.length > 0 ? result[0].totalPaid: 0,
+      totalDue: result.length > 0 ? result[0].totalDue : 0,
     });
   } catch (error) {
     console.error(error);
@@ -295,10 +300,21 @@ module.exports.salesReturnReport = async (req, res) => {
             {
               $group: {
                 _id: null,
-                totalAmount: { $sum: { $multiply: ["$totalReturnValue", 10000] } },
+                totalAmount: {
+                  $sum: { $multiply: ["$totalReturnValue", 10000] },
+                },
               },
             },
           ],
+        },
+      },
+    ]);
+
+    const transactionData = await CompanySalesReturnTransaction.aggregate([
+      {
+        $group: {
+          _id: null,
+          transactiontotalSentItems: { $sum: "$paidAmount" },
         },
       },
     ]);
@@ -307,15 +323,17 @@ module.exports.salesReturnReport = async (req, res) => {
       {
         $group: {
           _id: null,
-          totalDue: { $sum: { $multiply: ["$due", 10000] } },
+          totalDue: { $sum: "$dueQty" },
         },
       },
     ]);
 
+    const transactionSentItems = transactionData[0]?.transactiontotalSentItems || 0;
+
     res.status(201).json({
       totalSentItems:
         salesReturn[0].total.length > 0
-          ? salesReturn[0].total[0].totalSentItems
+          ? salesReturn[0].total[0].totalSentItems - transactionSentItems
           : 0,
       totalWeight:
         salesReturn[0].total.length > 0
@@ -325,7 +343,7 @@ module.exports.salesReturnReport = async (req, res) => {
         salesReturn[0].total.length > 0
           ? salesReturn[0].totalAmount[0].totalAmount / 10000
           : 0,
-      totalDue: result.length > 0 ? result[0].totalDue / 10000 : 0,
+      totalDue: result.length > 0 ? result[0].totalDue : 0,
     });
   } catch (error) {
     console.error(error);

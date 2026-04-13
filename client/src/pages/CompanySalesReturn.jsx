@@ -97,6 +97,10 @@ const CompanySalesReturn = () => {
       paid: 0,
       due: Number(formData.subTotal),
 
+      totalAmountQty: Number(formData.quantity),
+      paidQty: 0,
+      dueQty: Number(formData.quantity),
+
       unchangedPaid: 0,
       unchangedDue: Number(formData.subTotal),
     };
@@ -204,8 +208,8 @@ const CompanySalesReturn = () => {
                 Pending From Co.
               </p>
             </div>
-            <p className="text-2xl font-black text-gray-800">৳ {salesReturnReportData
-                ? salesReturnReportData.totalDue
+            <p className="text-2xl font-black text-gray-800">{salesReturnReportData
+                ? salesReturnReportData.totalDue + " Pcs"
                 : "--"}</p>
           </div>
         </div>
@@ -276,6 +280,7 @@ const CompanySalesReturn = () => {
                   step="any"
                   placeholder="Qty"
                   min="1"
+                  max={salesReturnReportData.totalSentItems || ""}
                   className="w-1/2 p-2 border border-gray-300 text-xs font-bold outline-none"
                   value={formData.quantity}
                   onChange={(e) => {
@@ -379,8 +384,8 @@ const CompanySalesReturn = () => {
                 <th className="p-4">Company</th>
                 <th className="p-4">Product Info</th>
                 <th className="p-4 text-center">Dispatch Qty</th>
-                <th className="p-4 text-right">Claim Amount (৳)</th>
-                <th className="p-4 text-center">Payment Status</th>
+                <th className="p-4 text-right">Claim Product (Pcs)</th>
+                <th className="p-4 text-center">Product Status</th>
               </tr>
             </thead>
             <tbody className="text-xs">
@@ -412,25 +417,25 @@ const CompanySalesReturn = () => {
                     <td className="p-4 text-center font-black">
                       {`${salesReturn.quantity} Pcs | ${salesReturn.qtyInKg} Kg`}
                     </td>
-                    <td className="p-4 text-right font-black text-gray-800 tracking-tighter text-sm">
-                      ৳ {salesReturn.totalAmount}
+                    <td className="p-4 text-center font-black text-gray-800 tracking-tighter text-sm">
+                      {salesReturn.totalAmountQty}
                     </td>
                     <td className="p-4 text-center">
-                      {salesReturn.due > 0 ? (
+                      {salesReturn.dueQty > 0 ? (
                         <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded-full">
                           <FaExclamationCircle
                             size={10}
                             className="animate-pulse"
                           />
                           <span className="text-[9px] font-black uppercase tracking-tighter italic">
-                            ৳ {salesReturn.due} Pending
+                            {salesReturn.dueQty} Pcs Pending
                           </span>
                         </div>
                       ) : (
                         <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-700 border border-green-200 rounded-full">
                           <FaCheckCircle size={10} />
                           <span className="text-[9px] font-black uppercase tracking-tighter">
-                            Full Paid
+                            Full Received
                           </span>
                         </div>
                       )}

@@ -74,6 +74,22 @@ const companySalesReturnSchema = new mongoose.Schema({
     required: true,
     min: 0,
   },
+
+  totalAmountQty: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
+  paidQty: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
+  dueQty: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
   createdAt: {
     type: Date,
     required: true,
