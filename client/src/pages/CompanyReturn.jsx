@@ -283,6 +283,7 @@ const CompanyReturn = () => {
                   min="1"
                   className="w-1/2 p-2 border border-gray-300 text-xs font-bold outline-none"
                   value={formData.quantity}
+                  max={productExchangeReportData?.totalSentItems || ""}
                   onChange={(e) => handleOnChange("quantity", e.target.value)}
                   required
                 />
@@ -293,6 +294,7 @@ const CompanyReturn = () => {
                   min="1"
                   className="w-1/2 p-2 border border-gray-300 text-xs font-bold outline-none"
                   value={formData.qtyInKg}
+                  max={productExchangeReportData?.totalWeight || ""}
                   onChange={(e) => {
                     handleOnChange("qtyInKg", e.target.value);
 

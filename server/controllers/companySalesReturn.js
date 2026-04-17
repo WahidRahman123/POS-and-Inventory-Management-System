@@ -269,7 +269,7 @@ module.exports.companySalesReturnStatement = async (req, res) => {
     res.status(201).json({
       transactions,
       totalAmount: result.length > 0 ? result[0].totalAmount : 0,
-      totalPaid: result.length > 0 ? result[0].totalPaid: 0,
+      totalPaid: result.length > 0 ? result[0].totalPaid : 0,
       totalDue: result.length > 0 ? result[0].totalDue : 0,
     });
   } catch (error) {
@@ -328,7 +328,15 @@ module.exports.salesReturnReport = async (req, res) => {
       },
     ]);
 
-    const transactionSentItems = transactionData[0]?.transactiontotalSentItems || 0;
+    const transactionSentItems =
+      transactionData[0]?.transactiontotalSentItems || 0;
+
+    const companyData = await CompanySalesReturn.find();
+
+    const totalCompanyWeight =
+      companyData && companyData.length
+        ? companyData.reduce((acc, p) => acc + p.qtyInKg, 0)
+        : 0;
 
     res.status(201).json({
       totalSentItems:
@@ -337,7 +345,7 @@ module.exports.salesReturnReport = async (req, res) => {
           : 0,
       totalWeight:
         salesReturn[0].total.length > 0
-          ? salesReturn[0].total[0].totalWeight
+          ? salesReturn[0].total[0].totalWeight - totalCompanyWeight
           : 0,
       totalAmount:
         salesReturn[0].total.length > 0

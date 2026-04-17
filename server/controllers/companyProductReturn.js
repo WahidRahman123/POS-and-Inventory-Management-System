@@ -303,6 +303,13 @@ module.exports.productExchangeReport = async (req, res) => {
       },
     ]);
 
+    const companyData = await CompanyProductReturn.find();
+
+    const totalCompanySentItems = companyData && companyData.length ? companyData.reduce((acc, p) => acc + p.quantity, 0) : 0;
+
+    const totalCompanyWeight = companyData && companyData.length ? companyData.reduce((acc, p) => acc + p.qtyInKg, 0) : 0;
+
+
     const result = await CompanyProductReturn.aggregate([
       {
         $group: {
@@ -312,14 +319,15 @@ module.exports.productExchangeReport = async (req, res) => {
       },
     ]);
 
+
     res.status(201).json({
       totalSentItems:
         productExchange[0].total.length > 0
-          ? productExchange[0].total[0].totalSentItems
+          ? productExchange[0].total[0].totalSentItems - totalCompanySentItems
           : 0,
       totalWeight:
         productExchange[0].total.length > 0
-          ? productExchange[0].total[0].totalWeight
+          ? productExchange[0].total[0].totalWeight - totalCompanyWeight
           : 0,
       totalAmount:
         productExchange[0].total.length > 0

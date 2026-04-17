@@ -280,7 +280,7 @@ const CompanySalesReturn = () => {
                   step="any"
                   placeholder="Qty"
                   min="1"
-                  max={salesReturnReportData.totalSentItems || ""}
+                  max={salesReturnReportData?.totalSentItems || ""}
                   className="w-1/2 p-2 border border-gray-300 text-xs font-bold outline-none"
                   value={formData.quantity}
                   onChange={(e) => {
@@ -302,6 +302,7 @@ const CompanySalesReturn = () => {
                   min="1"
                   className="w-1/2 p-2 border border-gray-300 text-xs font-bold outline-none"
                   value={formData.qtyInKg}
+                  max={salesReturnReportData?.totalWeight || ""}
                   onChange={(e) => {
                     handleOnChange("qtyInKg", e.target.value);
                   }}
