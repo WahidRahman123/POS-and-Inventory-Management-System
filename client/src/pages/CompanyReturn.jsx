@@ -209,9 +209,12 @@ const CompanyReturn = () => {
                 Pending From Co.
               </p>
             </div>
-            <p className="text-2xl font-black text-gray-800">৳ {productExchangeReportData
+            <p className="text-2xl font-black text-gray-800">
+              ৳{" "}
+              {productExchangeReportData
                 ? productExchangeReportData.totalDue
-                : "--"}</p>
+                : "--"}
+            </p>
           </div>
         </div>
 
@@ -284,7 +287,14 @@ const CompanyReturn = () => {
                   className="w-1/2 p-2 border border-gray-300 text-xs font-bold outline-none"
                   value={formData.quantity}
                   max={productExchangeReportData?.totalSentItems || ""}
-                  onChange={(e) => handleOnChange("quantity", e.target.value)}
+                  onChange={(e) => {
+                    handleOnChange("quantity", e.target.value);
+                    const subTotal = new Decimal(Number(e.target.value)).mul(
+                      new Decimal(Number(formData.unitPrice)),
+                    );
+
+                    handleOnChange("subTotal", Number(subTotal.toFixed(4)));
+                  }}
                   required
                 />
                 <input
@@ -297,12 +307,6 @@ const CompanyReturn = () => {
                   max={productExchangeReportData?.totalWeight || ""}
                   onChange={(e) => {
                     handleOnChange("qtyInKg", e.target.value);
-
-                    const subTotal = new Decimal(Number(e.target.value)).mul(
-                      new Decimal(Number(formData.unitPrice)),
-                    );
-
-                    handleOnChange("subTotal", Number(subTotal.toFixed(4)));
                   }}
                   required
                 />
@@ -323,7 +327,7 @@ const CompanyReturn = () => {
                   handleOnChange("unitPrice", e.target.value);
 
                   const subTotal = new Decimal(Number(e.target.value)).mul(
-                    new Decimal(Number(formData.qtyInKg)),
+                    new Decimal(Number(formData.quantity)),
                   );
 
                   handleOnChange("subTotal", Number(subTotal.toFixed(4)));
