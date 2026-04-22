@@ -14,7 +14,7 @@ const SideBar = ({ closeSidebar }) => {
   return (
     <div className="w-64 bg-gray-200 flex flex-col min-h-screen">
       <div className="p-6 text-lg font-bold border-b border-gray-300">
-        POS-IMS
+        ELITE BATTERY
       </div>
 
       <nav className="flex flex-col mt-4">
