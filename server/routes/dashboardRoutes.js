@@ -7,7 +7,7 @@ const router = express.Router();
 //* @route GET /api/dashboard
 // @desc show dashboard aggregated results
 // @access private
-router.get('/',  dashboards.index);
+router.get('/', protect, dashboards.index);
 
 
 module.exports = router;
