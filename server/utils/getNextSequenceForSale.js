@@ -1,8 +1,9 @@
-const Counter = require('../models/Counter');
+const Counter = require("../models/Counter");
 
-const getNextSequenceForSale = async (session) => {
+const getNextSequenceForSale = async (session = "") => {
   try {
-    const count = await Counter.findOne({ name: "sales" }).session(session);
+    // const count = await Counter.findOne({ name: "sales" }).session(session);
+    const count = await Counter.findOne({ name: "sales" });
 
     if (count) {
       if (count.seq !== 1000) {
@@ -21,7 +22,8 @@ const getNextSequenceForSale = async (session) => {
         }
       }
 
-      await count.save({ session });
+      // await count.save({ session });
+      await count.save();
       return { seq: count.seq, seqChars: count.seqChars };
     } else {
       const newCount = new Counter({
@@ -29,12 +31,14 @@ const getNextSequenceForSale = async (session) => {
         seq: 1,
         seqChars: ["a"],
       });
-      await newCount.save({ session });
+      // await newCount.save({ session });
+      await newCount.save();
 
       return { seq: newCount.seq, seqChars: newCount.seqChars };
     }
   } catch (error) {
-    return null;
+    console.error("Sequence Error FULL:", error);
+    throw error;
   }
 };
 

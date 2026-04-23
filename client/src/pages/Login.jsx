@@ -34,7 +34,7 @@ const Login = () => {
       <div className="flex flex-col min-h-screen bg-slate-100">
         {/* Topbar */}
         <header className="bg-blue-600 text-white py-4 shadow-md">
-          <h1 className="text-center text-xl font-bold">Sobuj Auto</h1>
+          <h1 className="text-center text-xl font-bold">Elite Battery</h1>
         </header>
 
         {/* Main Content */}

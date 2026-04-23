@@ -12,12 +12,12 @@ const SideBar = ({ closeSidebar }) => {
   };
 
   return (
-    <div className="w-64 bg-gray-200 flex flex-col min-h-screen">
+    <div className="w-64 bg-gray-200 flex flex-col h-screen shadow-xl ">
       <div className="p-6 text-lg font-bold border-b border-gray-300">
         ELITE BATTERY
       </div>
 
-      <nav className="flex flex-col mt-4">
+      <nav className="flex flex-col mt-4 overflow-y-auto">
         <Link
           to="/"
           onClick={closeSidebar}

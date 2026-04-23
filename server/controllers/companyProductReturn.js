@@ -50,7 +50,7 @@ module.exports.index = async (req, res) => {
 };
 
 module.exports.createCompanyProductReturn = async (req, res) => {
-  const session = await mongoose.startSession();
+  // const session = await mongoose.startSession();
   try {
     const returns = req.body;
     // const { memo } = purchases;
@@ -70,12 +70,15 @@ module.exports.createCompanyProductReturn = async (req, res) => {
       ...transactionDetail
     } = returns;
 
-    session.startTransaction();
+    // session.startTransaction();
 
     //* Generate the memo
+    // const count = await getNextSequenceForOther(
+    //   "CompanyProductReturn",
+    //   session,
+    // );
     const count = await getNextSequenceForOther(
-      "CompanyProductReturn",
-      session,
+      "CompanyProductReturn"
     );
     if (!count) {
       throw new Error("Failed to generate sequence");
@@ -101,20 +104,22 @@ module.exports.createCompanyProductReturn = async (req, res) => {
     });
 
     transaction.companyProductReturnId = companyProductReturn._id;
-    await transaction.save({ session });
+    // await transaction.save({ session });
+    await transaction.save();
 
-    const createdCompanyProductReturn = await companyProductReturn.save({
-      session,
-    });
+    // const createdCompanyProductReturn = await companyProductReturn.save({
+    //   session,
+    // });
+    const createdCompanyProductReturn = await companyProductReturn.save();
 
     // Commit
-    await session.commitTransaction();
-    session.endSession();
+    // await session.commitTransaction();
+    // session.endSession();
 
     res.status(201).json(createdCompanyProductReturn);
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
+    // await session.abortTransaction();
+    // session.endSession();
 
     console.error(error);
     res.status(500).send("Server Error");
@@ -137,15 +142,17 @@ module.exports.searchById = async (req, res) => {
 };
 
 module.exports.addPayment = async (req, res) => {
-  const session = await mongoose.startSession();
+  // const session = await mongoose.startSession();
 
   const { id } = req.params;
   const { date, amount, unchangedAmount } = req.body;
 
   try {
-    session.startTransaction();
+    // session.startTransaction();
+    // const companyProductReturn =
+    //   await CompanyProductReturn.findById(id).session(session);
     const companyProductReturn =
-      await CompanyProductReturn.findById(id).session(session);
+      await CompanyProductReturn.findById(id);
 
     if (companyProductReturn) {
       const {
@@ -196,22 +203,24 @@ module.exports.addPayment = async (req, res) => {
         unchangedPaid,
         unchangedDue,
       });
-      await transaction.save({ session });
+      // await transaction.save({ session });
+      await transaction.save();
 
       companyProductReturn.transactionRecords.push(transaction._id);
-      await companyProductReturn.save({ session });
+      // await companyProductReturn.save({ session });
+      await companyProductReturn.save();
 
       // Commit
-      await session.commitTransaction();
-      session.endSession();
+      // await session.commitTransaction();
+      // session.endSession();
 
       res.status(201).json({ message: "Payment updated successfully" });
     } else {
       res.status(404).json({ message: "Not found" });
     }
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
+    // await session.abortTransaction();
+    // session.endSession();
 
     console.error(error);
     res.status(500).send("Server Error");

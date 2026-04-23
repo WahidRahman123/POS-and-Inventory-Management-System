@@ -89,7 +89,7 @@ module.exports.index = async (req, res) => {
 };
 
 module.exports.createSalesReturn = async (req, res) => {
-  const session = await mongoose.startSession();
+  // const session = await mongoose.startSession();
   try {
     const salesReturns = req.body;
     // console.log(salesReturns);
@@ -120,7 +120,7 @@ module.exports.createSalesReturn = async (req, res) => {
     // if (returnFound.length > 0)
     //   return res.status(409).json({ message: "Memo Already Existed!" });
 
-    session.startTransaction();
+    // session.startTransaction();
 
     // const s = await Sales.findById(salesId, "salesReturnId");
     // const memoLength = s.salesReturnId.length + 1;
@@ -159,45 +159,53 @@ module.exports.createSalesReturn = async (req, res) => {
     });
 
     transaction.salesReturnId = salesReturn._id;
-    await transaction.save({ session });
+    // await transaction.save({ session });
+    await transaction.save();
 
-    const createdSalesReturn = await salesReturn.save({ session });
+    // const createdSalesReturn = await salesReturn.save({ session });
+    const createdSalesReturn = await salesReturn.save();
 
     //* Inventory Adjustment for ExchangeProducts
     if (salesReturns.returnType === "product") {
       for (const product of salesReturns.exchangeProducts) {
         {
+          // const productFound = await Product.findById(
+          //   product.productId,
+          // ).session(session);
           const productFound = await Product.findById(
             product.productId,
-          ).session(session);
+          );
 
           if (productFound) {
             productFound.quantity = productFound.quantity - product.quantity;
             // console.log(productFound);
-            await productFound.save({ session });
+            // await productFound.save({ session });
+            await productFound.save();
           }
         }
       }
     }
 
     //* Insertion of salesReturn ID in sales
-    const saleFound = await Sales.findById(salesReturns.salesId).session(
-      session,
-    );
+    // const saleFound = await Sales.findById(salesReturns.salesId).session(
+    //   session,
+    // );
+    const saleFound = await Sales.findById(salesReturns.salesId);
 
     if (saleFound) {
       saleFound.salesReturnId.push(createdSalesReturn._id);
-      await saleFound.save({ session });
+      // await saleFound.save({ session });
+      await saleFound.save();
     }
 
     // Commit
-    await session.commitTransaction();
-    session.endSession();
+    // await session.commitTransaction();
+    // session.endSession();
 
     res.status(201).json(createdSalesReturn);
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
+    // await session.abortTransaction();
+    // session.endSession();
 
     console.error(error);
     res.status(500).send("Server Error");
@@ -205,14 +213,15 @@ module.exports.createSalesReturn = async (req, res) => {
 };
 
 module.exports.addPaymentByExchange = async (req, res) => {
-  const session = await mongoose.startSession();
+  // const session = await mongoose.startSession();
 
   const { id } = req.params;
   const { amount, date, ...rest } = req.body;
 
   try {
-    session.startTransaction();
-    const salesReturn = await SalesReturn.findById(id).session(session);
+    // session.startTransaction();
+    // const salesReturn = await SalesReturn.findById(id).session(session);
+    const salesReturn = await SalesReturn.findById(id);
 
     if (salesReturn) {
       const paidAmount = Number(new Decimal(amount).toFixed(4));
@@ -236,37 +245,43 @@ module.exports.addPaymentByExchange = async (req, res) => {
         paidAmount,
         currentDue,
       });
-      await transaction.save({ session });
+      // await transaction.save({ session });
+      await transaction.save();
 
       salesReturn.transactionRecords.push(transaction._id);
-      await salesReturn.save({ session });
+      // await salesReturn.save({ session });
+      await salesReturn.save();
 
       //* Inventory Adjustment for ExchangeProducts
       for (const product of transaction.exchangeProducts) {
         {
+          // const productFound = await Product.findById(
+          //   product.productId,
+          // ).session(session);
           const productFound = await Product.findById(
             product.productId,
-          ).session(session);
+          );
 
           if (productFound) {
             productFound.quantity = productFound.quantity - product.quantity;
             // console.log(productFound);
-            await productFound.save({ session });
+            // await productFound.save({ session });
+            await productFound.save();
           }
         }
       }
 
       // Commit
-      await session.commitTransaction();
-      session.endSession();
+      // await session.commitTransaction();
+      // session.endSession();
 
       res.status(201).json({ message: "Payment updated successfully" });
     } else {
       res.status(404).json({ message: "Sales Return not found" });
     }
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
+    // await session.abortTransaction();
+    // session.endSession();
 
     console.error(error);
     res.status(500).send("Server Error");
@@ -274,14 +289,15 @@ module.exports.addPaymentByExchange = async (req, res) => {
 };
 
 module.exports.addPaymentByCash = async (req, res) => {
-  const session = await mongoose.startSession();
+  // const session = await mongoose.startSession();
 
   const { id } = req.params;
   const { amount, date, ...rest } = req.body;
 
   try {
-    session.startTransaction();
-    const salesReturn = await SalesReturn.findById(id).session(session);
+    // session.startTransaction();
+    // const salesReturn = await SalesReturn.findById(id).session(session);
+    const salesReturn = await SalesReturn.findById(id);
 
     if (salesReturn) {
       const paidAmount = Number(new Decimal(amount).toFixed(4));
@@ -305,22 +321,24 @@ module.exports.addPaymentByCash = async (req, res) => {
         paidAmount,
         currentDue,
       });
-      await transaction.save({ session });
+      // await transaction.save({ session });
+      await transaction.save();
 
       salesReturn.transactionRecords.push(transaction._id);
-      await salesReturn.save({ session });
+      // await salesReturn.save({ session });
+      await salesReturn.save();
 
       // Commit
-      await session.commitTransaction();
-      session.endSession();
+      // await session.commitTransaction();
+      // session.endSession();
 
       res.status(201).json({ message: "Payment updated successfully" });
     } else {
       res.status(404).json({ message: "Sales Return not found" });
     }
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
+    // await session.abortTransaction();
+    // session.endSession();
 
     console.error(error);
     res.status(500).send("Server Error");

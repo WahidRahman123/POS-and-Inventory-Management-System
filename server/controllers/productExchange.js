@@ -66,15 +66,16 @@ module.exports.index = async (req, res) => {
 
 // Create a new product exchange
 module.exports.createProductExchange = async (req, res) => {
-  const session = await mongoose.startSession();
+  // const session = await mongoose.startSession();
   try {
     const exchanges = req.body;
     const { totalAmount } = exchanges;
 
-    session.startTransaction();
+    // session.startTransaction();
 
     //* Generate the memo
-    const count = await getNextSequenceForOther("ProductExchange", session);
+    // const count = await getNextSequenceForOther("ProductExchange", session);
+    const count = await getNextSequenceForOther("ProductExchange");
     if (!count) {
       throw new Error("Failed to generate sequence");
     }
@@ -87,16 +88,17 @@ module.exports.createProductExchange = async (req, res) => {
       remainingBalance: totalAmount,
     });
 
-    const createdExchange = await exchange.save({ session });
+    // const createdExchange = await exchange.save({ session });
+    const createdExchange = await exchange.save();
 
     // Commit
-    await session.commitTransaction();
-    session.endSession();
+    // await session.commitTransaction();
+    // session.endSession();
 
     res.status(201).json(createdExchange);
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
+    // await session.abortTransaction();
+    // session.endSession();
 
     console.error(error);
     res.status(500).send("Server Error");

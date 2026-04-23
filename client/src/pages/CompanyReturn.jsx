@@ -289,11 +289,7 @@ const CompanyReturn = () => {
                   max={productExchangeReportData?.totalSentItems || ""}
                   onChange={(e) => {
                     handleOnChange("quantity", e.target.value);
-                    const subTotal = new Decimal(Number(e.target.value)).mul(
-                      new Decimal(Number(formData.unitPrice)),
-                    );
-
-                    handleOnChange("subTotal", Number(subTotal.toFixed(4)));
+                    
                   }}
                   required
                 />
@@ -307,6 +303,12 @@ const CompanyReturn = () => {
                   max={productExchangeReportData?.totalWeight || ""}
                   onChange={(e) => {
                     handleOnChange("qtyInKg", e.target.value);
+
+                    const subTotal = new Decimal(Number(e.target.value)).mul(
+                      new Decimal(Number(formData.unitPrice)),
+                    );
+
+                    handleOnChange("subTotal", Number(subTotal.toFixed(4)));
                   }}
                   required
                 />
@@ -327,7 +329,7 @@ const CompanyReturn = () => {
                   handleOnChange("unitPrice", e.target.value);
 
                   const subTotal = new Decimal(Number(e.target.value)).mul(
-                    new Decimal(Number(formData.quantity)),
+                    new Decimal(Number(formData.qtyInKg)),
                   );
 
                   handleOnChange("subTotal", Number(subTotal.toFixed(4)));

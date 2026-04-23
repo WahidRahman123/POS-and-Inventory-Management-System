@@ -86,7 +86,7 @@ module.exports.index = async (req, res) => {
 };
 
 module.exports.createPurchaseReturn = async (req, res) => {
-  const session = await mongoose.startSession();
+  // const session = await mongoose.startSession();
   try {
     const purchaseReturns = req.body;
 
@@ -110,7 +110,7 @@ module.exports.createPurchaseReturn = async (req, res) => {
 
     const { purchaseId } = purchaseReturns;
 
-    session.startTransaction();
+    // session.startTransaction();
 
     // const s = await Purchase.findById(purchaseId, "purchaseReturnId");
     // const memoLength = s.purchaseReturnId.length + 1;
@@ -149,28 +149,32 @@ module.exports.createPurchaseReturn = async (req, res) => {
     });
 
     transaction.purchaseReturnId = purchaseReturn._id;
-    await transaction.save({ session });
+    // await transaction.save({ session });
+    await transaction.save();
 
-    const createdPurchaseReturn = await purchaseReturn.save({ session });
+    // const createdPurchaseReturn = await purchaseReturn.save({ session });
+    const createdPurchaseReturn = await purchaseReturn.save();
 
     //* Insertion of purchaseReturn ID in purchase
-    const purchaseFound = await Purchase.findById(purchaseReturns.purchaseId).session(
-      session,
-    );
+    // const purchaseFound = await Purchase.findById(purchaseReturns.purchaseId).session(
+    //   session,
+    // );
+    const purchaseFound = await Purchase.findById(purchaseReturns.purchaseId);
 
     if (purchaseFound) {
       purchaseFound.purchaseReturnId.push(createdPurchaseReturn._id);
-      await purchaseFound.save({ session });
+      // await purchaseFound.save({ session });
+      await purchaseFound.save();
     }
 
     // Commit
-    await session.commitTransaction();
-    session.endSession();
+    // await session.commitTransaction();
+    // session.endSession();
 
     res.status(201).json(createdPurchaseReturn);
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
+    // await session.abortTransaction();
+    // session.endSession();
 
     console.error(error);
     res.status(500).send("Server Error");
@@ -178,14 +182,15 @@ module.exports.createPurchaseReturn = async (req, res) => {
 };
 
 module.exports.addPaymentByExchange = async (req, res) => {
-  const session = await mongoose.startSession();
+  // const session = await mongoose.startSession();
 
   const { id } = req.params;
   const { amount, date, ...rest } = req.body;
 
   try {
-    session.startTransaction();
-    const purchaseReturn = await PurchaseReturn.findById(id).session(session);
+    // session.startTransaction();
+    // const purchaseReturn = await PurchaseReturn.findById(id).session(session);
+    const purchaseReturn = await PurchaseReturn.findById(id);
 
     if (purchaseReturn) {
       const paidAmount = Number(new Decimal(amount).toFixed(4));
@@ -209,22 +214,24 @@ module.exports.addPaymentByExchange = async (req, res) => {
         paidAmount,
         currentDue,
       });
-      await transaction.save({ session });
+      // await transaction.save({ session });
+      await transaction.save();
 
       purchaseReturn.transactionRecords.push(transaction._id);
-      await purchaseReturn.save({ session });
+      // await purchaseReturn.save({ session });
+      await purchaseReturn.save();
 
       // Commit
-      await session.commitTransaction();
-      session.endSession();
+      // await session.commitTransaction();
+      // session.endSession();
 
       res.status(201).json({ message: "Payment updated successfully" });
     } else {
       res.status(404).json({ message: "Purchase Return not found" });
     }
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
+    // await session.abortTransaction();
+    // session.endSession();
 
     console.error(error);
     res.status(500).send("Server Error");
@@ -232,14 +239,15 @@ module.exports.addPaymentByExchange = async (req, res) => {
 };
 
 module.exports.addPaymentByCash = async (req, res) => {
-  const session = await mongoose.startSession();
+  // const session = await mongoose.startSession();
 
   const { id } = req.params;
   const { amount, date, ...rest } = req.body;
 
   try {
-    session.startTransaction();
-    const purchaseReturn = await PurchaseReturn.findById(id).session(session);
+    // session.startTransaction();
+    // const purchaseReturn = await PurchaseReturn.findById(id).session(session);
+    const purchaseReturn = await PurchaseReturn.findById(id);
 
     if (purchaseReturn) {
       const paidAmount = Number(new Decimal(amount).toFixed(4));
@@ -263,22 +271,24 @@ module.exports.addPaymentByCash = async (req, res) => {
         paidAmount,
         currentDue,
       });
-      await transaction.save({ session });
+      // await transaction.save({ session });
+      await transaction.save();
 
       purchaseReturn.transactionRecords.push(transaction._id);
-      await purchaseReturn.save({ session });
+      // await purchaseReturn.save({ session });
+      await purchaseReturn.save();
 
       // Commit
-      await session.commitTransaction();
-      session.endSession();
+      // await session.commitTransaction();
+      // session.endSession();
 
       res.status(201).json({ message: "Payment updated successfully" });
     } else {
       res.status(404).json({ message: "Purchase Return not found" });
     }
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
+    // await session.abortTransaction();
+    // session.endSession();
 
     console.error(error);
     res.status(500).send("Server Error");

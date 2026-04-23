@@ -42,32 +42,32 @@ const salesSchema = new mongoose.Schema(
         },
         productName: {
           type: String,
-          required: true,
+          // required: true,
           trim: true,
         },
         oldSellPrice: {
           type: Number,
-          required: true,
+          // required: true,
           min: 0,
         },
         sellPrice: {
           type: Number,
-          required: true,
+          // required: true,
           min: 0,
         },
         costPrice: {
           type: Number,
-          required: true,
+          // required: true,
           min: 0,
         },
         quantity: {
           type: Number,
-          required: true,
+          // required: true,
           min: 0,
         },
         subTotal: {
           type: Number,
-          required: true,
+          // required: true,
         },
       },
     ],
@@ -85,26 +85,26 @@ const salesSchema = new mongoose.Schema(
     ],
     totalWithoutDiscount: {
       type: Number,
-      required: true,
+      // required: true,
       default: 0
     },
     total: {
       type: Number,
-      required: true,
+      // required: true,
     },
     totalCost: {
       type: Number,
-      required: true,
+      // required: true,
       default: 0
     },
     discount: {
       type: Number,
-      required: true,
+      // required: true,
       default: 0
     },
     due: {
       type: Number,
-      required: true,
+      // required: true,
     },
     loan: { 
       type: Number,
@@ -112,12 +112,12 @@ const salesSchema = new mongoose.Schema(
     },
     cash: {
       type: Number,
-      required: true,
+      // required: true,
     },
     // এক্সচেঞ্জ লজিকের জন্য প্রয়োজনীয় ফিল্ডস
     exchange: {
       type: Number,
-      required: true,
+      // required: true,
       default: 0
     },
     exchangeMemoId: {
@@ -142,7 +142,7 @@ const salesSchema = new mongoose.Schema(
     },
     paid: {
       type: Number,
-      required: true,
+      // required: true,
     },
   },
   { timestamps: true },

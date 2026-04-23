@@ -82,7 +82,7 @@ module.exports.index = async (req, res) => {
 };
 
 module.exports.createPurchase = async (req, res) => {
-  const session = await mongoose.startSession();
+  // const session = await mongoose.startSession();
   try {
     const purchases = req.body;
     // const { memo } = purchases;
@@ -97,10 +97,11 @@ module.exports.createPurchase = async (req, res) => {
       ...transactionDetail
     } = purchases;
 
-    session.startTransaction();
+    // session.startTransaction();
 
     //* Generate the memo
-    const count = await getNextSequenceForOther("Purchase", session);
+    // const count = await getNextSequenceForOther("Purchase", session);
+    const count = await getNextSequenceForOther("Purchase");
     if (!count) {
       throw new Error("Failed to generate sequence");
     }
@@ -125,18 +126,20 @@ module.exports.createPurchase = async (req, res) => {
     });
 
     transaction.purchaseId = purchase._id;
-    await transaction.save({ session });
+    // await transaction.save({ session });
+    await transaction.save();
 
-    const createdPurchase = await purchase.save({ session });
+    // const createdPurchase = await purchase.save({ session });
+    const createdPurchase = await purchase.save();
 
     // Commit
-    await session.commitTransaction();
-    session.endSession();
+    // await session.commitTransaction();
+    // session.endSession();
 
     res.status(201).json(createdPurchase);
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
+    // await session.abortTransaction();
+    // session.endSession();
 
     console.error(error);
     res.status(500).send("Server Error");
@@ -156,14 +159,15 @@ module.exports.searchById = async (req, res) => {
 };
 
 module.exports.addPayment = async (req, res) => {
-  const session = await mongoose.startSession();
+  // const session = await mongoose.startSession();
 
   const { id } = req.params;
   const { date, amount, unchangedAmount } = req.body;
 
   try {
-    session.startTransaction();
-    const purchase = await Purchase.findById(id).session(session);
+    // session.startTransaction();
+    // const purchase = await Purchase.findById(id).session(session);
+    const purchase = await Purchase.findById(id);
 
     if (purchase) {
       const {
@@ -210,22 +214,24 @@ module.exports.addPayment = async (req, res) => {
         unchangedPaid,
         unchangedDue,
       });
-      await transaction.save({ session });
+      // await transaction.save({ session });
+      await transaction.save();
 
       purchase.transactionRecords.push(transaction._id);
-      await purchase.save({ session });
+      // await purchase.save({ session });
+      await purchase.save();
 
       // Commit
-      await session.commitTransaction();
-      session.endSession();
+      // await session.commitTransaction();
+      // session.endSession();
 
       res.status(201).json({ message: "Payment updated successfully" });
     } else {
       res.status(404).json({ message: "Purchase not found" });
     }
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
+    // await session.abortTransaction();
+    // session.endSession();
 
     console.error(error);
     res.status(500).send("Server Error");

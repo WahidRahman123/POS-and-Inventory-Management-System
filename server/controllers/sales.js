@@ -7,7 +7,6 @@ const { createCustomDate } = require("../utils/createCustomDate");
 const ProductExchange = require("../models/ProductExchange");
 const { getNextSequenceForSale } = require("../utils/getNextSequenceForSale");
 
-// ১. সকল সেলস লিস্ট দেখার জন্য
 module.exports.index = async (req, res) => {
   try {
     const { page = 1 } = req.query;
@@ -35,7 +34,7 @@ module.exports.index = async (req, res) => {
 
 // ২. নতুন সেলস তৈরি করার মেইন ফাংশন (Updated)
 module.exports.createSales = async (req, res) => {
-  const session = await mongoose.startSession();
+  // const session = await mongoose.startSession();
   try {
     const salesData = req.body;
     const {
@@ -49,9 +48,14 @@ module.exports.createSales = async (req, res) => {
       ...transactionDetail
     } = salesData;
 
-    session.startTransaction();
+    // session.startTransaction();
 
-    const count = await getNextSequenceForSale(session);
+    // const count = await getNextSequenceForSale(session);
+    const count = await getNextSequenceForSale();
+
+    if (!count) {
+      throw new Error("Sequence generation failed");
+    }
     const chars = count.seqChars?.join("");
     const invoiceNo = ("s" + chars + "-" + count.seq).toUpperCase();
 
@@ -66,7 +70,6 @@ module.exports.createSales = async (req, res) => {
     };
     const transaction = new SalesTransaction(transactionDetails);
 
-    // ২. Sales creation (এখন এখানে exchangeDetails ও সেভ হবে)
     const sale = new Sales({
       ...salesData,
       invoiceNo,
@@ -74,26 +77,34 @@ module.exports.createSales = async (req, res) => {
     });
 
     transaction.salesId = sale._id;
-    await transaction.save({ session });
+    // await transaction.save({ session });
+    await transaction.save();
 
-    // ৩. Product stock update
+
     if (products && products.length > 0) {
       for (let i = 0; i < products.length; i++) {
         const { productName, quantity } = products[i];
-        const product = await Product.findOne({ name: productName }).session(session);
+        // const product = await Product.findOne({ name: productName }).session(
+        //   session,
+        // );
+        const product = await Product.findOne({ name: productName });
 
         if (!product) {
           throw new Error(`Product not found: ${productName}`);
         }
 
         product.quantity = product.quantity - quantity;
-        await product.save({ session });
+        // await product.save({ session });
+        await product.save();
       }
     }
 
     // ৪. Exchange memo logic (ব্যালেন্স কমানোর লজিক আগের মতই থাকবে)
     if (exchangeMemoId && salesData.exchange > 0) {
-      const memoData = await ProductExchange.findById(exchangeMemoId).session(session);
+      // const memoData =
+      //   await ProductExchange.findById(exchangeMemoId).session(session);
+      const memoData =
+        await ProductExchange.findById(exchangeMemoId);
 
       if (memoData) {
         const currentBalance = new Decimal(memoData.remainingBalance);
@@ -102,21 +113,24 @@ module.exports.createSales = async (req, res) => {
 
         if (newBalance < 0) newBalance = 0;
         memoData.remainingBalance = newBalance;
-        await memoData.save({ session });
+        // await memoData.save({ session });
+        await memoData.save();
       }
     }
 
-    const createdSale = await sale.save({ session });
+    // const createdSale = await sale.save({ session });
+    const createdSale = await sale.save();
 
-    await session.commitTransaction();
-    session.endSession();
+    // await session.commitTransaction();
+    // session.endSession();
 
     res.status(201).json(createdSale);
   } catch (error) {
-    if (session.inTransaction()) { // সংশোধিত চেক
-      await session.abortTransaction();
-    }
-    session.endSession();
+    // if (session.inTransaction()) {
+    //   // সংশোধিত চেক
+    //   await session.abortTransaction();
+    // }
+    // session.endSession();
     console.error("Sales Error:", error.message);
     res.status(500).json({ message: error.message || "Server Error" });
   }
@@ -131,20 +145,27 @@ module.exports.searchByDates = async (req, res) => {
     let start, end;
     const now = new Date();
 
-    if (date === "t") { // Today
-      start = new Date(); start.setHours(0, 0, 0, 0);
-      end = new Date(); end.setHours(23, 59, 59, 999);
-    } else if (date === "w") { // Weekly
+    if (date === "t") {
+      // Today
+      start = new Date();
+      start.setHours(0, 0, 0, 0);
+      end = new Date();
+      end.setHours(23, 59, 59, 999);
+    } else if (date === "w") {
+      // Weekly
       start = new Date(now);
       const day = start.getDay();
       const diff = day >= 6 ? day - 6 : day + 1;
       start.setDate(start.getDate() - diff);
       start.setHours(0, 0, 0, 0);
-      end = new Date(); end.setHours(23, 59, 59, 999);
-    } else if (date === "m") { // Monthly
+      end = new Date();
+      end.setHours(23, 59, 59, 999);
+    } else if (date === "m") {
+      // Monthly
       start = new Date(now.getFullYear(), now.getMonth(), 1);
       end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-    } else if (date === "y") { // Yearly
+    } else if (date === "y") {
+      // Yearly
       start = new Date(now.getFullYear(), 0, 1);
       end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
     }
@@ -160,22 +181,45 @@ module.exports.searchByDates = async (req, res) => {
 // ৪. কাস্টম ডেট বা নাম দিয়ে সার্চ
 module.exports.searchByIndividualDate = async (req, res) => {
   try {
-    const { dateMode, dateSearch, dateSearchStart, dateSearchEnd, productName, customerName, order = -1 } = req.query;
+    const {
+      dateMode,
+      dateSearch,
+      dateSearchStart,
+      dateSearchEnd,
+      productName,
+      customerName,
+      order = -1,
+    } = req.query;
     const searchQuery = [];
 
     if (dateMode === "range" && dateSearchStart && dateSearchEnd) {
-      searchQuery.push({ createdAt: { $gte: new Date(dateSearchStart), $lte: new Date(dateSearchEnd) } });
+      searchQuery.push({
+        createdAt: {
+          $gte: new Date(dateSearchStart),
+          $lte: new Date(dateSearchEnd),
+        },
+      });
     } else if (dateMode === "single" && dateSearch) {
-      const s = new Date(dateSearch); s.setHours(0, 0, 0, 0);
-      const e = new Date(dateSearch); e.setHours(23, 59, 59, 999);
+      const s = new Date(dateSearch);
+      s.setHours(0, 0, 0, 0);
+      const e = new Date(dateSearch);
+      e.setHours(23, 59, 59, 999);
       searchQuery.push({ createdAt: { $gte: s, $lte: e } });
     }
 
-    if (productName) searchQuery.push({ "products.productName": { $regex: productName, $options: "i" } });
-    if (customerName) searchQuery.push({ customerName: { $regex: customerName, $options: "i" } });
+    if (productName)
+      searchQuery.push({
+        "products.productName": { $regex: productName, $options: "i" },
+      });
+    if (customerName)
+      searchQuery.push({
+        customerName: { $regex: customerName, $options: "i" },
+      });
 
     const mainSearch = searchQuery.length > 0 ? { $and: searchQuery } : {};
-    const sales = await Sales.find(mainSearch).sort({ createdAt: parseInt(order) });
+    const sales = await Sales.find(mainSearch).sort({
+      createdAt: parseInt(order),
+    });
     res.status(200).json(sales);
   } catch (error) {
     console.error(error);
@@ -195,22 +239,34 @@ module.exports.searchById = async (req, res) => {
 
 // ৬. পেমেন্ট আপডেট (Add Payment)
 module.exports.addPayment = async (req, res) => {
-  const session = await mongoose.startSession();
+  // const session = await mongoose.startSession();
   try {
     const { id } = req.params;
     const { date, amount, unchangedAmount } = req.body;
 
-    session.startTransaction();
-    const sale = await Sales.findById(id).session(session);
+    // session.startTransaction();
+    // const sale = await Sales.findById(id).session(session);
+    const sale = await Sales.findById(id);
 
     if (!sale) return res.status(404).json({ message: "Sale not found" });
 
     const saleObj = sale.toObject();
-    const { invoiceNo, due, paid, products, transactionRecords, ...transactionDetail } = saleObj;
+    const {
+      invoiceNo,
+      due,
+      paid,
+      products,
+      transactionRecords,
+      ...transactionDetail
+    } = saleObj;
 
     const paidAmount = Number(new Decimal(amount).toFixed(4));
-    sale.paid = Number(new Decimal(sale.paid).plus(new Decimal(amount)).toFixed(4));
-    sale.due = Number(new Decimal(sale.due).minus(new Decimal(amount)).toFixed(4));
+    sale.paid = Number(
+      new Decimal(sale.paid).plus(new Decimal(amount)).toFixed(4),
+    );
+    sale.due = Number(
+      new Decimal(sale.due).minus(new Decimal(amount)).toFixed(4),
+    );
 
     const transaction = new SalesTransaction({
       ...transactionDetail,
@@ -221,19 +277,23 @@ module.exports.addPayment = async (req, res) => {
       currentDue: sale.due,
       salesId: sale._id,
       unchangedPaid: Number(new Decimal(unchangedAmount).toFixed(4)),
-      unchangedDue: Number(new Decimal(due).minus(new Decimal(unchangedAmount)).toFixed(4)),
+      unchangedDue: Number(
+        new Decimal(due).minus(new Decimal(unchangedAmount)).toFixed(4),
+      ),
     });
 
-    await transaction.save({ session });
+    // await transaction.save({ session });
+    await transaction.save();
     sale.transactionRecords.push(transaction._id);
-    await sale.save({ session });
+    // await sale.save({ session });
+    await sale.save();
 
-    await session.commitTransaction();
-    session.endSession();
+    // await session.commitTransaction();
+    // session.endSession();
     res.status(200).json({ message: "Payment updated successfully" });
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
+    // await session.abortTransaction();
+    // session.endSession();
     res.status(500).send("Server Error");
   }
 };
@@ -255,12 +315,16 @@ module.exports.salesByCustomerName = async (req, res) => {
     let matchQuery = { customerName: customerName };
 
     if (dateSearch) {
-      const s = new Date(dateSearch); s.setHours(0, 0, 0, 0);
-      const e = new Date(dateSearch); e.setHours(23, 59, 59, 999);
+      const s = new Date(dateSearch);
+      s.setHours(0, 0, 0, 0);
+      const e = new Date(dateSearch);
+      e.setHours(23, 59, 59, 999);
       matchQuery.createdAt = { $gte: s, $lte: e };
     }
 
-    const transactions = await SalesTransaction.find(matchQuery).sort({ date: -1 }).populate("salesId");
+    const transactions = await SalesTransaction.find(matchQuery)
+      .sort({ date: -1 })
+      .populate("salesId");
 
     const result = await Sales.aggregate([
       { $match: { customerName: customerName } },
@@ -293,10 +357,20 @@ module.exports.salesDueList = async (req, res) => {
     const limit = 15;
     const skip = (parseInt(page) - 1) * limit;
 
-    const sales = await Sales.find({ due: { $gt: 0 } }).sort({ createdAt: parseInt(order) }).skip(skip).limit(limit);
+    const sales = await Sales.find({ due: { $gt: 0 } })
+      .sort({ createdAt: parseInt(order) })
+      .skip(skip)
+      .limit(limit);
     const total = await Sales.countDocuments({ due: { $gt: 0 } });
 
-    res.status(200).json({ total, page: parseInt(page), pages: Math.ceil(total / limit), sales });
+    res
+      .status(200)
+      .json({
+        total,
+        page: parseInt(page),
+        pages: Math.ceil(total / limit),
+        sales,
+      });
   } catch (error) {
     res.status(500).send("Server Error");
   }
@@ -304,7 +378,11 @@ module.exports.salesDueList = async (req, res) => {
 
 // হেল্পার ফাংশন
 async function getSalesAndTotal(start, end, order) {
-  const sales = await Sales.find({ createdAt: { $gte: start, $lte: end } }).sort({ createdAt: parseInt(order) });
-  const total = await Sales.countDocuments({ createdAt: { $gte: start, $lte: end } });
+  const sales = await Sales.find({
+    createdAt: { $gte: start, $lte: end },
+  }).sort({ createdAt: parseInt(order) });
+  const total = await Sales.countDocuments({
+    createdAt: { $gte: start, $lte: end },
+  });
   return { sales, total };
 }
