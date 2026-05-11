@@ -950,6 +950,7 @@ const SalesReport = () => {
         <table className="min-w-full text-xs sm:text-sm border-collapse">
           <thead className="bg-gray-300">
             <tr>
+<<<<<<< HEAD
               <th
                 rowSpan={2}
                 className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
@@ -974,6 +975,15 @@ const SalesReport = () => {
               >
                 Discount
               </th>
+=======
+              <th rowSpan={2} className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Date</th>
+              <th rowSpan={2} className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Cutomer Name</th>
+              <th colSpan={3} className="border px-2 py-1 sm:px-4 sm:py-2 text-center">Products</th>
+              <th rowSpan={2} className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Discount</th>
+
+              {/* --- ADDED LOAN FIELD IN HEADER --- */}
+              <th rowSpan={2} className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Loan</th>
+>>>>>>> 25d6197813daf94bc2f8f059ef31a7ccd92d8c8d
 
               {/* --- ADDED LOAN FIELD IN HEADER --- */}
               <th
@@ -1023,10 +1033,12 @@ const SalesReport = () => {
           <tbody>
             {sales.length > 0 ? (
               sales.map((sale, saleIndex) => {
-                const rowspan = sale.products.length;
+                // Jodi products empty thake tobe row count 1 hobe
+                const rowspan = sale.products.length > 0 ? sale.products.length : 1;
                 const isEven = saleIndex % 2 === 0;
                 console.log(sale);
 
+<<<<<<< HEAD
                 if (sale.products.length > 0) {
                   return sale.products.map((product, pIndex) => (
                     <tr
@@ -1255,6 +1267,69 @@ const SalesReport = () => {
                 >
                   No Sales Available.
                 </td>
+=======
+                // Jodi product thake tobe map hobe, na thakle ekta empty row hobe
+                const productsToDisplay = sale.products.length > 0 ? sale.products : [{}];
+
+                return productsToDisplay.map((product, pIndex) => (
+                  <tr
+                    onClick={(e) => {
+                      if (e.target.tagName !== "TD") return;
+                      navigate("/customer-statement", { state: sale });
+                    }}
+                    key={`${saleIndex}-${pIndex}`}
+                    className={isEven ? "bg-white cursor-pointer" : "bg-gray-50 cursor-pointer"}
+                  >
+                    {pIndex === 0 && (
+                      <>
+                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">
+                          {new Date(sale.createdAt).toLocaleDateString("en-GB", { timeZone: "Asia/Dhaka" }).replaceAll("/", "-")}
+                        </td>
+                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">
+                          {sale.customerName}
+                        </td>
+                      </>
+                    )}
+
+                    {/* Product data (jodi thake) */}
+                    <td className="border px-2 py-1 sm:px-4 sm:py-2">{product.productName || "N/A"}</td>
+                    <td className="border px-2 py-1 sm:px-4 sm:py-2">{product.sellPrice || 0}</td>
+                    <td className="border px-2 py-1 sm:px-4 sm:py-2">{product.quantity || 0}</td>
+
+                    {pIndex === 0 && (
+                      <>
+                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">
+                          {sale.discount || 0}
+                        </td>
+                        {/* Apnar request onujayi Loan field ekhane thakleo problem nei, kintu Due-tei focus thakbe */}
+                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">
+                          {sale.loan || 0}
+                        </td>
+                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">{sale.total}</td>
+                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">{sale.paid}</td>
+                        <td rowSpan={rowspan} className={`border px-2 py-1 sm:px-4 sm:py-2 ${sale.due > 0 ? "text-red-500 font-bold" : ""}`}>
+                          {sale.due}
+                        </td>
+                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">
+                          <div className="flex flex-wrap gap-1">
+                            <Link to={sale.due ? `/sales-report/${sale._id}/edit-due` : "#"}
+                              className={`text-xs text-white px-2 py-1 rounded ${sale.due ? "bg-green-600 hover:bg-green-700" : "cursor-no-drop bg-green-500"}`}>
+                              Add Payment
+                            </Link>
+                            <Link to="/invoice" state={sale} className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 cursor-pointer">
+                              Print
+                            </Link>
+                          </div>
+                        </td>
+                      </>
+                    )}
+                  </tr>
+                ));
+              })
+            ) : (
+              <tr>
+                <td colSpan={12} className="text-center text-gray-500 py-10 text-lg border">No Sales Available.</td>
+>>>>>>> 25d6197813daf94bc2f8f059ef31a7ccd92d8c8d
               </tr>
             )}
           </tbody>

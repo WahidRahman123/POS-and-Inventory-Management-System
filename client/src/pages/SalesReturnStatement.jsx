@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
 import { FaArrowLeft, FaPrint, FaFilter } from "react-icons/fa";
 import { fetchSalesReturnsForCustomerName } from "../features/SalesReturn/salesReturnSlice";
+import Decimal from "decimal.js";
 
 const SalesReturnStatement = () => {
   const { user } = useSelector((state) => state.auth);
@@ -21,6 +22,7 @@ const SalesReturnStatement = () => {
   const [payModal, setPayModal] = useState(null);
   const [filterToggler, setFilterToggler] = useState(true);
   const [date, setDate] = useState("");
+  const [expandedTransactionIdx, setExpandedTransactionIdx] = useState(null);
 
   // Printing logic
   const documentTitle = `sales-return-statement-${state?.customerName || "report"}`;
@@ -136,6 +138,7 @@ const SalesReturnStatement = () => {
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b border-gray-200 text-gray-600 uppercase text-xs">
                   <tr>
+                    <th className="px-2 py-4 text-center font-bold w-8"></th>
                     <th className="px-4 py-4 text-left font-bold">Date</th>
                     <th className="px-4 py-4 text-left font-bold">Memo/Ref</th>
                     <th className="px-4 py-4 text-left font-bold">Type</th>
@@ -171,117 +174,302 @@ const SalesReturnStatement = () => {
                       };
 
                       return (
-                        <tr
-                          key={idx}
-                          className={`${isPayment ? "bg-blue-50/30" : "hover:bg-gray-50/50"} transition-colors`}
-                        >
-                          <td className="px-4 py-4 whitespace-nowrap text-gray-500 font-medium text-xs">
-                            {new Date(transaction.date)
-                              .toLocaleDateString("en-GB")
-                              .replaceAll("/", "-")}
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className="px-4 py-4 font-bold text-blue-700">
-                              {transaction.refMemo}
-                            </span>
-                          </td>
-                          <td className="px-4 py-4">
-                            <span
-                              className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${isPayment ? "bg-blue-50 text-blue-700 border-blue-100" : transaction.returnType === "product" ? "bg-green-50 text-green-700 border-green-100" : "bg-orange-50 text-orange-700 border-orange-100"}`}
-                            >
-                              {isPayment ? "Payment" : transaction.returnType}
-                            </span>
-                          </td>
-                          <td className="px-4 py-4 text-gray-700 font-medium print:hidden">
-                            <span
-                            // className={`text-xs ${isPayment ? "font-black text-green-700 italic" : "font-bold text-gray-700"}`}
-                            >
-                              {isPayment
-                                ? `Payment against Memo-${transaction.salesReturnId.memo}`
-                                : transaction.salesReturnId?.products
+                        <React.Fragment key={idx}>
+                          <tr
+                            className={`${isPayment ? "bg-blue-50/30" : "hover:bg-gray-50/50"} transition-colors`}
+                          >
+                            <td className="px-2 py-4 text-center">
+                              {!isPayment && (
+                                <button
+                                  onClick={() =>
+                                    setExpandedTransactionIdx(
+                                      expandedTransactionIdx === idx ? null : idx,
+                                    )
+                                  }
+                                  className="text-lg font-bold text-blue-600 hover:text-blue-800"
+                                >
+                                  {expandedTransactionIdx === idx ? "−" : "+"}
+                                </button>
+                              )}
+                            </td>
+                            <td className="px-4 py-4 whitespace-nowrap text-gray-500 font-medium text-xs">
+                              {new Date(transaction.date)
+                                .toLocaleDateString("en-GB")
+                                .replaceAll("/", "-")}
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="px-4 py-4 font-bold text-blue-700">
+                                {transaction.refMemo}
+                              </span>
+                            </td>
+                            <td className="px-4 py-4">
+                              <span
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${isPayment ? "bg-blue-50 text-blue-700 border-blue-100" : transaction.returnType === "product" ? "bg-green-50 text-green-700 border-green-100" : "bg-orange-50 text-orange-700 border-orange-100"}`}
+                              >
+                                {isPayment ? "Payment" : transaction.returnType}
+                              </span>
+                            </td>
+                            <td className="px-4 py-4 text-gray-700 font-medium print:hidden">
+                              <span>
+                                {isPayment
+                                  ? `Payment against Memo-${transaction.salesReturnId.memo}`
+                                  : transaction.salesReturnId?.products
                                     ?.map((p) => p.productName)
                                     .join(", ") || "Sales Items"}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-right font-black">
-                            ৳{" "}
-                            {transaction.amountToBePaid.toLocaleString(
-                              "en-BD",
-                              {
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-right font-black">
+                              ৳{" "}
+                              {transaction.amountToBePaid.toLocaleString(
+                                "en-BD",
+                                {
+                                  minimumFractionDigits: 2,
+                                },
+                              )}
+                            </td>
+                            <td className="px-6 py-4 text-right font-black text-green-600">
+                              ৳{" "}
+                              {transaction.paidAmount.toLocaleString("en-BD", {
                                 minimumFractionDigits: 2,
-                              },
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-right font-black text-green-600">
-                            ৳{" "}
-                            {transaction.paidAmount.toLocaleString("en-BD", {
-                              minimumFractionDigits: 2,
-                            })}
-                          </td>
-                          <td className="px-6 py-4 text-right font-black text-red-500 font-mono">
-                            ৳{" "}
-                            {transaction.currentDue?.toLocaleString("en-BD", {
-                              minimumFractionDigits: 2,
-                            })}
-                          </td>
-                          <td className="px-4 py-4 text-center print:hidden ">
-                            <div className="flex justify-center gap-2">
-                              <button className="text-blue-600 hover:text-blue-800 font-bold cursor-pointer">
-                                Print
-                              </button>
-                              {!isPayment &&
-                                transaction.salesReturnId?.due > 0 && (
-                                  <button
-                                    onClick={() =>
-                                      setPayModal(transaction.salesReturnId._id)
-                                    }
-                                    className="text-indigo-600 hover:text-indigo-800 font-bold cursor-pointer"
-                                  >
-                                    Pay
-                                  </button>
-                                )}
+                              })}
+                            </td>
+                            <td className="px-6 py-4 text-right font-black text-red-500 font-mono">
+                              ৳{" "}
+                              {transaction.currentDue?.toLocaleString("en-BD", {
+                                minimumFractionDigits: 2,
+                              })}
+                            </td>
+                            <td className="px-4 py-4 text-center print:hidden ">
+                              <div className="flex justify-center gap-2">
+                                <button className="text-blue-600 hover:text-blue-800 font-bold cursor-pointer">
+                                  Print
+                                </button>
+                                {!isPayment &&
+                                  transaction.salesReturnId?.due > 0 && (
+                                    <button
+                                      onClick={() =>
+                                        setPayModal(transaction.salesReturnId._id)
+                                      }
+                                      className="text-indigo-600 hover:text-indigo-800 font-bold cursor-pointer"
+                                    >
+                                      Pay
+                                    </button>
+                                  )}
 
-                              {payModal && (
-                                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xs p-4">
-                                  <div className="w-full max-w-sm bg-white rounded-xl shadow-xl p-7">
-                                    <h3 className="text-base font-semibold text-gray-700 mb-5 text-center">
-                                      Select Payment Method
-                                    </h3>
+                                {payModal && (
+                                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xs p-4">
+                                    <div className="w-full max-w-sm bg-white rounded-xl shadow-xl p-7">
+                                      <h3 className="text-base font-semibold text-gray-700 mb-5 text-center">
+                                        Select Payment Method
+                                      </h3>
 
-                                    <div className="flex flex-col gap-3">
-                                      <Link
-                                        to={`/sales-return/${payModal}/exchange-due`}
-                                        className="w-full bg-green-600 text-white text-sm font-semibold py-2.5 rounded-lg text-center hover:bg-green-700 transition"
-                                      >
-                                        Exchange Pay
-                                      </Link>
+                                      <div className="flex flex-col gap-3">
+                                        <Link
+                                          to={`/sales-return/${payModal}/exchange-due`}
+                                          className="w-full bg-green-600 text-white text-sm font-semibold py-2.5 rounded-lg text-center hover:bg-green-700 transition"
+                                        >
+                                          Exchange Pay
+                                        </Link>
 
-                                      <Link
-                                        to={`/sales-return/${payModal}/edit-due`}
-                                        className="w-full bg-blue-600 text-white text-sm font-semibold py-2.5 rounded-lg text-center hover:bg-blue-700 transition"
-                                      >
-                                        Cash Pay
-                                      </Link>
+                                        <Link
+                                          to={`/sales-return/${payModal}/edit-due`}
+                                          className="w-full bg-blue-600 text-white text-sm font-semibold py-2.5 rounded-lg text-center hover:bg-blue-700 transition"
+                                        >
+                                          Cash Pay
+                                        </Link>
 
-                                      <button
-                                        onClick={() => setPayModal(null)}
-                                        className="text-sm text-gray-500 mt-2 hover:text-gray-600 cursor-pointer"
-                                      >
-                                        Cancel
-                                      </button>
+                                        <button
+                                          onClick={() => setPayModal(null)}
+                                          className="text-sm text-gray-500 mt-2 hover:text-gray-600 cursor-pointer"
+                                        >
+                                          Cancel
+                                        </button>
+                                      </div>
                                     </div>
                                   </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+
+                          {/* Expanded Row - Products Details */}
+                          {expandedTransactionIdx === idx && !isPayment && (
+                            <tr className="bg-blue-50">
+                              <td colSpan={9} className="border px-4 py-4">
+                                <div className="space-y-4">
+                                  {/* RETURNED PRODUCTS */}
+                                  <div>
+                                    <h4 className="font-semibold text-red-700 mb-2 text-sm">
+                                      📦 Returned Products:
+                                    </h4>
+                                    <div className="overflow-x-auto bg-white rounded border border-red-200">
+                                      <table className="min-w-full text-xs">
+                                        <thead className="bg-red-100">
+                                          <tr>
+                                            <th className="border px-2 py-1 text-left">
+                                              Product Name
+                                            </th>
+                                            <th className="border px-2 py-1 text-center">
+                                              Return Qty
+                                            </th>
+                                            <th className="border px-2 py-1 text-center">
+                                              Qty (KG)
+                                            </th>
+                                            <th className="border px-2 py-1 text-center">
+                                              Return Price
+                                            </th>
+                                            <th className="border px-2 py-1 text-center">
+                                              Amount
+                                            </th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          {transaction.salesReturnId?.products
+                                            .length > 0 ? (
+                                            transaction.salesReturnId.products.map(
+                                              (product, pidx) => (
+                                                <tr
+                                                  key={pidx}
+                                                  className="border-t hover:bg-red-50"
+                                                >
+                                                  <td className="border px-2 py-1">
+                                                    {product.productName}
+                                                  </td>
+                                                  <td className="border px-2 py-1 text-center">
+                                                    {product.returnQuantity}
+                                                  </td>
+                                                  <td className="border px-2 py-1 text-center">
+                                                    {product.returnQtyInKg}
+                                                  </td>
+                                                  <td className="border px-2 py-1 text-center">
+                                                    ৳ {product.returnPrice}
+                                                  </td>
+                                                  <td className="border px-2 py-1 text-center font-semibold text-red-600">
+                                                    ৳{" "}
+                                                    {new Decimal(
+                                                      Number(product.lineTotal),
+                                                    ).toFixed(2)}
+                                                  </td>
+                                                </tr>
+                                              ),
+                                            )
+                                          ) : (
+                                            <tr>
+                                              <td
+                                                colSpan={5}
+                                                className="border px-2 py-2 text-center text-gray-500"
+                                              >
+                                                No products
+                                              </td>
+                                            </tr>
+                                          )}
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  </div>
+
+                                  {/* EXCHANGE PRODUCTS (if product exchange) */}
+                                  {transaction.returnType === "product" && (
+                                    <div>
+                                      <h4 className="font-semibold text-green-700 mb-2 text-sm">
+                                        🎁 Exchange Products:
+                                      </h4>
+                                      <div className="overflow-x-auto bg-white rounded border border-green-200">
+                                        <table className="min-w-full text-xs">
+                                          <thead className="bg-green-100">
+                                            <tr>
+                                              <th className="border px-2 py-1 text-left">
+                                                Product Name
+                                              </th>
+                                              <th className="border px-2 py-1 text-center">
+                                                Qty
+                                              </th>
+                                              <th className="border px-2 py-1 text-center">
+                                                Qty (KG)
+                                              </th>
+                                              <th className="border px-2 py-1 text-center">
+                                                Unit Price
+                                              </th>
+                                              <th className="border px-2 py-1 text-center">
+                                                Amount
+                                              </th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            {transaction.exchangeProducts
+                                              .length > 0 ? (
+                                              transaction.exchangeProducts.map(
+                                                (product, pidx) => (
+                                                  <tr
+                                                    key={pidx}
+                                                    className="border-t hover:bg-green-50"
+                                                  >
+                                                    <td className="border px-2 py-1">
+                                                      {product.productName}
+                                                    </td>
+                                                    <td className="border px-2 py-1 text-center">
+                                                      {product.quantity}
+                                                    </td>
+                                                    <td className="border px-2 py-1 text-center">
+                                                      {product.qtyInKg}
+                                                    </td>
+                                                    <td className="border px-2 py-1 text-center">
+                                                      ৳ {product.unitPrice}
+                                                    </td>
+                                                    <td className="border px-2 py-1 text-center font-semibold text-green-600">
+                                                      ৳{" "}
+                                                      {new Decimal(
+                                                        Number(product.subTotal),
+                                                      ).toFixed(2)}
+                                                    </td>
+                                                  </tr>
+                                                ),
+                                              )
+                                            ) : (
+                                              <tr>
+                                                <td
+                                                  colSpan={5}
+                                                  className="border px-2 py-2 text-center text-gray-500"
+                                                >
+                                                  No products
+                                                </td>
+                                              </tr>
+                                            )}
+                                          </tbody>
+                                        </table>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* CASH REFUND */}
+                                  {transaction.returnType === "cash" && (
+                                    <div className="bg-blue-100 border border-blue-300 rounded p-3">
+                                      <h4 className="font-semibold text-blue-700 mb-2 text-sm">
+                                        💰 Cash Refund:
+                                      </h4>
+                                      <p className="text-sm text-blue-700">
+                                        <strong>Amount:</strong> ৳{" "}
+                                        {transaction.cashRefundAmount}
+                                        <br />
+                                        <strong>Method:</strong>{" "}
+                                        {transaction.paymentMethod}
+                                        <br />
+                                        <strong>Note:</strong>{" "}
+                                        {transaction.note || "N/A"}
+                                      </p>
+                                    </div>
+                                  )}
                                 </div>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
                       );
                     })
                   ) : (
                     <tr>
                       <td
-                        colSpan={8}
+                        colSpan={9}
                         className="text-center text-gray-400 py-12 italic"
                       >
                         No transactions found for this period.

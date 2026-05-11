@@ -150,10 +150,17 @@ module.exports.createSalesReturn = async (req, res) => {
       ...commonDetails,
       memo: memo,
       products,
+      returnType,
+      exchangeProducts,
       transactionRecords: [transaction._id],
       totalReturnValue,
       due,
       paid,
+      totalExchangeValue,
+      adjustmentAmount,
+      cashRefundAmount,
+      paymentMethod,
+      note,
       createdAt,
       issuedAt,
     });
@@ -182,6 +189,17 @@ module.exports.createSalesReturn = async (req, res) => {
             // await productFound.save({ session });
             await productFound.save();
           }
+        }
+      }
+    }
+
+    //* Add returned products to return stock
+    for (const product of salesReturns.products) {
+      if (product.returnQuantity > 0) {
+        const productFound = await Product.findById(product.productId);
+        if (productFound) {
+          productFound.returnStock = (productFound.returnStock || 0) + product.returnQuantity;
+          await productFound.save();
         }
       }
     }

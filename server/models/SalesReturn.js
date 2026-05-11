@@ -77,6 +77,62 @@ const salesReturnSchema = new mongoose.Schema({
     },
   ],
 
+  //* Return type (product exchange or cash refund)
+  returnType: {
+    type: String,
+    enum: ["product", "cash"],
+    required: true,
+  },
+
+  //* which products are being given to customer as exchange (if returnType is 'product')
+  exchangeProducts: [
+    {
+      _id: false,
+      productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+      productName: {
+        type: String,
+        trim: true,
+      },
+      quantity: {
+        type: Number,
+        min: 1,
+      },
+      qtyInKg: {
+        type: Number,
+      },
+      unitPrice: {
+        //* sellPrice
+        type: Number,
+      },
+      subTotal: {
+        //* unitPrice * quantity
+        type: Number,
+      },
+    },
+  ],
+
+  //* Exchange and cash refund related fields
+  totalExchangeValue: {
+    type: Number,
+    default: 0,
+  },
+  adjustmentAmount: {
+    type: Number,
+    default: 0,
+  },
+  cashRefundAmount: {
+    type: Number,
+    default: 0,
+  },
+  paymentMethod: {
+    type: String,
+    default: "",
+  },
+  note: String,
+
   transactionRecords: [
     {
       type: mongoose.Schema.Types.ObjectId,
