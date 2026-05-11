@@ -194,7 +194,7 @@ const CompanySalesReturnStatement = () => {
                                 {transaction.refMemo}
                               </span>
                             </td>
-                            <td className="px-6 py-4">
+                            {/* <td className="px-6 py-4">
                               <span
                                 className={`text-xs ${isPayment ? "font-black text-green-700 italic" : "font-bold text-gray-700"}`}
                               >
@@ -206,10 +206,48 @@ const CompanySalesReturnStatement = () => {
                               {!isPayment && (
                                 <div className="text-[9px] text-gray-400 font-black uppercase tracking-tighter">
                                   Qty:{" "}
-                                  {transaction.companySalesReturnId.quantity}
+                                  {transaction.companySalesReturnId.totalAmountQty}
+                                </div>
+                              )}
+                            </td> */}
+
+                            <td className="px-6 py-4">
+                              {isPayment ? (
+                                // <span className="text-xs font-black text-green-700 italic">
+                                //   PRODUCT RECEIVED FROM COMPANY
+                                // </span>
+                                <div className="space-y-2">
+                                  {transaction.payDetails?.map((product, i) => (
+                                    <div key={i} className="leading-5">
+                                      <div className="text-xs font-bold text-green-700">
+                                        {product.productName}
+                                      </div>
+
+                                      <div className="text-[11px] text-green-600 font-medium">
+                                        Receive: {product.quantity} Pcs
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="space-y-2">
+                                  {transaction.companySalesReturnId?.products?.map(
+                                    (product, i) => (
+                                      <div key={i} className="leading-5">
+                                        <div className="text-xs font-bold text-gray-800">
+                                          {product.productName}
+                                        </div>
+
+                                        <div className="text-[11px] text-gray-600 font-medium">
+                                          Qty: {product.quantity} Pcs
+                                        </div>
+                                      </div>
+                                    ),
+                                  )}
                                 </div>
                               )}
                             </td>
+
                             <td className="px-6 py-4 text-right font-black">
                               {transaction.amountToBePaid}
                             </td>
@@ -229,10 +267,12 @@ const CompanySalesReturnStatement = () => {
                                   >
                                     Pay
                                   </Link>
-                                ) : !isPayment && (
-                                  <button className="text-green-600 font-black text-[10px] uppercase hover:underline flex items-center gap-1">
-                                    Received
-                                  </button>
+                                ) : (
+                                  !isPayment && (
+                                    <button className="text-green-600 font-black text-[10px] uppercase hover:underline flex items-center gap-1">
+                                      Received
+                                    </button>
+                                  )
                                 )}
                                 <button
                                   title="View Details"

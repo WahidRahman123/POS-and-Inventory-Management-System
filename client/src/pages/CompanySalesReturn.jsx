@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaTruck,
@@ -15,12 +15,21 @@ import { useState } from "react";
 import Decimal from "decimal.js";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import { addCompanySalesReturn, fetchCompanySalesReturns, fetchSalesReturnReportData } from "../features/CompanySalesReturn/companySalesReturnSlice";
+import {
+  addCompanySalesReturn,
+  fetchCompanySalesReturns,
+  fetchSalesReturnReportData,
+} from "../features/CompanySalesReturn/companySalesReturnSlice";
+import {
+  searchProductsforPOS,
+  setProductsBySearchToEmpty,
+} from "../features/product/productSlice";
 
 const CompanySalesReturn = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+  const { productsBySearchforPOS } = useSelector((state) => state.product);
   const {
     companySalesReturns,
     salesReturnReportData,
@@ -31,24 +40,23 @@ const CompanySalesReturn = () => {
   } = useSelector((state) => state.companySalesReturn);
   const [currentPage, setCurrentPage] = useState(page);
   const [memoSearch, setMemoSearch] = useState("");
-  const [formData, setFormData] = useState({
-    date: "",
-    productName: "",
-    quantity: "",
-    qtyInKg: "",
-    unitPrice: "",
-    subTotal: "",
+  //* Supplier Search Handling Section
+  const [name, setName] = useState("");
+  const [supplier, setSupplier] = useState({
+    supplierId: "",
+    supplierName: "",
+    address: "",
+    supplierEmail: "",
+    supplierPhone: "",
   });
-
-  const handleOnChange = (name, value) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  //* Company Name Handle - starts
-  const [supplier, setSupplier] = useState("");
-  const loadOptions = async (inputValue, callback) => {
-    if (!inputValue) return callback([]);
-    try {
+  // console.log(supplier)
+  const [data, setData] = useState(null);
+  const [disable, setDisable] = useState(false);
+  const supplierNameRef = useRef(null);
+  const handleSupplierNameOnChange = async (e) => {
+    const query = e.target.value;
+    setName(query);
+    if (query) {
       const { data } = await axios.get(
         `${import.meta.env.VITE_BACKEND_URI}/api/supplier/purchase`,
         {
@@ -56,70 +64,228 @@ const CompanySalesReturn = () => {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
           params: {
-            q: inputValue,
+            q: query,
           },
         },
       );
-      if (data && Array.isArray(data)) {
-        const options = data.map((item) => ({
-          label: item.name,
-          value: item,
-        }));
-        callback(options);
-      }
-    } catch (error) {
-      callback([]);
+
+      setData(data);
+    } else {
+      setData(null);
     }
   };
+  const handleSupplierOnClick = (supplierData) => {
+    setData(null);
+    setName(supplierData.name);
+    setSupplier({
+      supplierId: supplierData._id,
+      supplierName: supplierData.name,
+      address: supplierData.address,
+      supplierEmail: supplierData.email,
+      supplierPhone: supplierData.phone,
+    });
+    setDisable(true);
+  };
+  useEffect(() => {
+    if (!disable && supplierNameRef.current) {
+      supplierNameRef.current.focus();
+    }
+  }, [disable]);
+
+  const [formData, setFormData] = useState({
+    date: "",
+  });
+
+  const handleOnChange = (name, value) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  //* Company Name Handle - starts
+  // const [supplier, setSupplier] = useState("");
+  // const loadOptions = async (inputValue, callback) => {
+  //   if (!inputValue) return callback([]);
+  //   try {
+  //     const { data } = await axios.get(
+  //       `${import.meta.env.VITE_BACKEND_URI}/api/supplier/purchase`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+  //         },
+  //         params: {
+  //           q: inputValue,
+  //         },
+  //       },
+  //     );
+  //     if (data && Array.isArray(data)) {
+  //       const options = data.map((item) => ({
+  //         label: item.name,
+  //         value: item,
+  //       }));
+  //       callback(options);
+  //     }
+  //   } catch (error) {
+  //     callback([]);
+  //   }
+  // };
   //* Company Name Handle - ends
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!supplier) return alert("Select a Company!");
+    // if (!supplier) return alert("Select a Company!");
+    if (supplier.supplierId === "") return alert("Select a Company!");
+
+    const newProducts = products.map(({ id, ...rest }) => rest);
 
     const returnData = {
       createdAt: formData.date,
       issuedAt: new Date(),
-      supplierId: supplier._id,
-      supplierName: supplier.name,
+      // supplierId: supplier._id,
+      // supplierName: supplier.name,
+      // address: supplier.address,
+      // supplierEmail: supplier.email,
+      // supplierPhone: supplier.phone,
+      supplierId: supplier.supplierId,
+      supplierName: supplier.supplierName,
       address: supplier.address,
-      supplierEmail: supplier.email,
-      supplierPhone: supplier.phone,
+      supplierEmail: supplier.supplierEmail,
+      supplierPhone: supplier.supplierPhone,
       userId: user._id,
 
-      productName: formData.productName,
-      quantity: Number(formData.quantity),
-      qtyInKg: Number(formData.qtyInKg),
-      unitPrice: Number(formData.unitPrice),
-      subTotal: Number(formData.subTotal),
+      // productName: formData.productName,
+      // quantity: Number(formData.quantity),
+      // qtyInKg: Number(formData.qtyInKg),
+      // unitPrice: Number(formData.unitPrice),
+      // subTotal: Number(formData.subTotal),
+      products: newProducts,
 
-      totalAmount: Number(formData.subTotal),
+      totalAmount: Number(totalAmount.toFixed(4)),
       paid: 0,
-      due: Number(formData.subTotal),
+      due: Number(totalAmount.toFixed(4)),
 
-      totalAmountQty: Number(formData.quantity),
+      totalAmountQty: Number(totalAmountQty),
       paidQty: 0,
-      dueQty: Number(formData.quantity),
+      dueQty: Number(totalAmountQty),
 
       unchangedPaid: 0,
-      unchangedDue: Number(formData.subTotal),
+      unchangedDue: Number(totalAmount.toFixed(4)),
     };
 
     try {
       await dispatch(addCompanySalesReturn(returnData)).unwrap();
       setFormData({
         date: "",
+        // productName: "",
+        // quantity: "",
+        // qtyInKg: "",
+        // unitPrice: "",
+        // subTotal: "",
+      });
+      // setSupplier("");
+      setProducts([
+        {
+          id: 1,
+          productName: "",
+          quantity: "",
+          qtyInKg: "",
+          unitPrice: "",
+          subTotal: "",
+        },
+      ]);
+      setPaid("");
+      setDisable(false);
+      setName("");
+      setSupplier({
+        supplierId: "",
+        supplierName: "",
+        address: "",
+        supplierEmail: "",
+        supplierPhone: "",
+      });
+      setData(null);
+      
+    } catch (error) {
+      console.log("Failed!");
+    }
+  };
+
+  //* Add Product Section Starts
+  const [products, setProducts] = useState([
+    {
+      id: 1,
+      productName: "",
+      quantity: "",
+      qtyInKg: "",
+      unitPrice: "",
+      subTotal: "",
+    },
+  ]);
+
+  // প্রোডাক্ট সার্চ করার ফাংশন
+  const handleProductSearchChange = (id, value) => {
+    handleProductChange(id, "productName", value);
+    if (value) {
+      setActiveSearchRow(id);
+      dispatch(searchProductsforPOS(value));
+    } else {
+      setActiveSearchRow(null);
+      dispatch(setProductsBySearchToEmpty());
+    }
+  };
+
+  // সার্চ রেজাল্ট থেকে প্রোডাক্ট সিলেক্ট করার ফাংশন
+  const handleSelectProductFromSearch = (id, productName) => {
+    handleProductChange(id, "productName", productName);
+    dispatch(setProductsBySearchToEmpty());
+    setActiveSearchRow(null);
+  };
+
+  const handleProductChange = (id, field, value) => {
+    setProducts((prev) =>
+      prev.map((product) =>
+        product.id === id ? { ...product, [field]: value } : product,
+      ),
+    );
+  };
+
+  const handleAddProduct = () => {
+    const newId =
+      products.length > 0 ? Math.max(...products.map((p) => p.id)) + 1 : 1;
+    setProducts([
+      ...products,
+      {
+        id: newId,
         productName: "",
         quantity: "",
         qtyInKg: "",
         unitPrice: "",
         subTotal: "",
-      });
-      setSupplier("");
-    } catch (error) {
-      console.log("Failed!");
+      },
+    ]);
+  };
+
+  const handleRemoveProduct = (id) => {
+    if (products.length > 1) {
+      setProducts(products.filter((product) => product.id !== id));
     }
   };
+  const [activeSearchRow, setActiveSearchRow] = useState(null);
+
+  //* Add Product Section Ends
+
+  const totalQty = products.reduce(
+    (acc, p) => acc.plus(new Decimal(Number(p.quantity || 0))),
+    new Decimal(0),
+  );
+
+  const totalAmount = products.reduce(
+    (acc, p) => acc.plus(new Decimal(Number(p.subTotal || 0))),
+    new Decimal(0),
+  );
+
+  const totalAmountQty = products.reduce(
+    (acc, p) => acc.plus(new Decimal(Number(p.quantity || 0))),
+    new Decimal(0),
+  );
 
   useEffect(() => {
     if (user) {
@@ -179,9 +345,7 @@ const CompanySalesReturn = () => {
               </p>
             </div>
             <p className="text-2xl font-black text-gray-800">
-              {salesReturnReportData
-                ? salesReturnReportData.totalWeight
-                : "--"}{" "}
+              {salesReturnReportData ? salesReturnReportData.totalWeight : "--"}{" "}
               <span className="text-xs">Kg</span>
             </p>
           </div>
@@ -195,9 +359,7 @@ const CompanySalesReturn = () => {
             </div>
             <p className="text-2xl font-black text-white">
               ৳{" "}
-              {salesReturnReportData
-                ? salesReturnReportData.totalAmount
-                : "--"}
+              {salesReturnReportData ? salesReturnReportData.totalAmount : "--"}
             </p>
           </div>
 
@@ -208,9 +370,11 @@ const CompanySalesReturn = () => {
                 Pending From Co.
               </p>
             </div>
-            <p className="text-2xl font-black text-gray-800">{salesReturnReportData
+            <p className="text-2xl font-black text-gray-800">
+              {salesReturnReportData
                 ? salesReturnReportData.totalDue + " Pcs"
-                : "--"}</p>
+                : "--"}
+            </p>
           </div>
         </div>
 
@@ -219,7 +383,7 @@ const CompanySalesReturn = () => {
           <h2 className="text-xs font-black mb-4 flex items-center gap-2 text-gray-700 uppercase">
             <FaPlus className="text-blue-600" /> Dispatch New Return to Company
           </h2>
-          <form
+          {/* <form
             onSubmit={handleSubmit}
             className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-3 items-end"
           >
@@ -360,7 +524,282 @@ const CompanySalesReturn = () => {
                 )}
               </span>
             </button>
-          </form>
+          </form> */}
+
+          <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-4 sm:p-6 mb-6">
+            <form onSubmit={handleSubmit}>
+              <div className="grid grid-cols-2 gap-x-6 mb-4">
+                <div className="relative">
+                  <label className="block text-sm font-medium mb-1">
+                    Supplier Name
+                  </label>
+                  <div className="flex">
+                    <input
+                      type="search"
+                      value={name}
+                      onChange={handleSupplierNameOnChange}
+                      ref={supplierNameRef}
+                      placeholder="Supplier Name"
+                      className="block w-[85%] px-3 py-1.5 border border-gray-300 rounded-sm text-sm disabled:bg-gray-300"
+                      disabled={disable}
+                    />
+                    <button
+                      type="button"
+                      disabled={!disable}
+                      className="bg-red-500 hover:bg-red-600 cursor-pointer ml-2 px-2 py-1 font-bold text-white rounded disabled:bg-red-300 disabled:cursor-not-allowed"
+                      onClick={() => {
+                        setDisable(false);
+                        setName("");
+                        setData(null);
+                        setSupplier({
+                          supplierId: "",
+                          supplierName: "",
+                          address: "",
+                          supplierEmail: "",
+                          supplierPhone: "",
+                        });
+                      }}
+                    >
+                      Change
+                    </button>
+                  </div>
+                  {data && (
+                    <div className="absolute z-10 w-[85%] bg-white shadow-md border border-gray-300 max-h-50 overflow-y-scroll">
+                      <table className="w-full">
+                        <tbody>
+                          {data.map((d, i) => (
+                            <tr
+                              key={i}
+                              className="p-2 cursor-pointer border-b border-gray-300 hover:bg-gray-100 text-gray-800 text-sm"
+                              onClick={() => handleSupplierOnClick(d)}
+                            >
+                              <td className="p-2">{d.name}</td>
+                              <td className="text-center">{d.address}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Address
+                  </label>
+                  <input
+                    type="text"
+                    value={supplier.address}
+                    placeholder="Address"
+                    disabled
+                    className="block w-full px-3 py-1.5 border border-gray-400 rounded-sm text-sm bg-gray-200 text-gray-700 select-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Pick A Date
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, date: e.target.value }))
+                    }
+                    className="w-full px-4 py-2 border border-gray-400 rounded-md"
+                    required
+                  />
+                </div>
+                {/* <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Enter Memo
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Memo"
+                    value={formData.memo}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, memo: e.target.value }))
+                    }
+                    className="w-full px-4 py-2 border border-gray-400 rounded-md"
+                    required
+                  />
+                </div> */}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleAddProduct}
+                className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-sm font-medium mb-2 cursor-pointer"
+              >
+                + Add Product
+              </button>
+
+              {/* Products Section */}
+              <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                  Products
+                </h3>
+                {products.map((product) => (
+                  <div
+                    key={product.id}
+                    className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-3 items-end"
+                  >
+                    <div className="md:col-span-2 relative">
+                      <label className="block text-xs text-gray-600 mb-1">
+                        Product Name
+                      </label>
+                      <input
+                        type="text"
+                        value={product.productName}
+                        onChange={(e) =>
+                          handleProductSearchChange(product.id, e.target.value)
+                        }
+                        placeholder="Product Name"
+                        className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
+                        required
+                      />
+                      {/* প্রোডাক্ট সার্চ রেজাল্ট ড্রপডাউন */}
+                      {activeSearchRow === product.id &&
+                        productsBySearchforPOS.length > 0 && (
+                          <div className="absolute z-50 w-full bg-white shadow-xl border border-gray-300 rounded mt-1 max-h-60 overflow-y-auto">
+                            {productsBySearchforPOS.map((p, i) => (
+                              <div
+                                key={i}
+                                onClick={() =>
+                                  handleSelectProductFromSearch(
+                                    product.id,
+                                    p.name,
+                                  )
+                                }
+                                className="px-3 py-2 border-b border-gray-100 cursor-pointer hover:bg-blue-50 text-gray-800 text-sm"
+                              >
+                                {p.name}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">
+                        Quantity
+                      </label>
+                      <input
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        value={product.quantity}
+                        onChange={(e) => {
+                          const qty = e.target.value;
+                          handleProductChange(product.id, "quantity", qty);
+                          const sub = new Decimal(Number(qty || 0)).mul(
+                            new Decimal(Number(product.unitPrice || 0)),
+                          );
+                          handleProductChange(
+                            product.id,
+                            "subTotal",
+                            Number(sub.toFixed(4)),
+                          );
+                        }}
+                        placeholder="Qty"
+                        min={0}
+                        className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">
+                        Weight
+                      </label>
+                      <input
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        value={product.qtyInKg}
+                        onChange={(e) => {
+                          const qtyInKg = e.target.value;
+                          handleProductChange(product.id, "qtyInKg", qtyInKg);
+                        }}
+                        placeholder="Qty"
+                        min={0}
+                        className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
+                        required
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <label className="block text-xs text-gray-600 mb-1">
+                          Unit Price
+                        </label>
+                        <input
+                          type="number"
+                          onWheel={(e) => e.target.blur()}
+                          value={product.unitPrice}
+                          onChange={(e) => {
+                            const price = e.target.value;
+                            handleProductChange(product.id, "unitPrice", price);
+                            const sub = new Decimal(Number(price || 0)).mul(
+                              new Decimal(Number(product.quantity || 0)),
+                            );
+                            handleProductChange(
+                              product.id,
+                              "subTotal",
+                              Number(sub.toFixed(4)),
+                            );
+                          }}
+                          placeholder="Unit Price"
+                          step="any"
+                          min={0}
+                          className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
+                          required
+                        />
+                      </div>
+                      {products.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveProduct(product.id)}
+                          className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                <div className="border-t border-gray-400 pt-3 mt-3">
+                  <div className="flex justify-end gap-6 text-sm">
+                    <span className="text-gray-600">
+                      Total Qty: <strong>{totalQty.toFixed(0)}</strong>
+                    </span>
+                    <span className="text-gray-800 font-semibold">
+                      Products Total: ৳ {totalAmount.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Total Amount
+                  </label>
+                  <input
+                    type="number"
+                    value={totalAmount.toFixed(2)}
+                    disabled
+                    className="w-full px-4 py-2 border border-gray-400 rounded-md bg-gray-100 font-semibold"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full sm:w-auto bg-blue-600 cursor-pointer text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-medium disabled:bg-blue-500"
+                disabled={addLoading}
+              >
+                {addLoading ? "Adding..." : "Add Purchase"}
+              </button>
+            </form>
+          </div>
         </div>
 
         {/* --- Section 3: History Table (Payment Focused) --- */}
@@ -384,7 +823,7 @@ const CompanySalesReturn = () => {
                 <th className="p-4">Memo</th>
                 <th className="p-4">Company</th>
                 <th className="p-4">Product Info</th>
-                <th className="p-4 text-center">Dispatch Qty</th>
+                {/* <th className="p-4 text-center">Dispatch Qty</th> */}
                 <th className="p-4 text-right">Claim Product (Pcs)</th>
                 <th className="p-4 text-center">Product Status</th>
               </tr>
@@ -396,7 +835,9 @@ const CompanySalesReturn = () => {
                     key={index}
                     className="border-b hover:bg-blue-50 transition-colors cursor-pointer group"
                     onClick={() =>
-                      navigate("/company-sales-return-statement", { state: salesReturn })
+                      navigate("/company-sales-return-statement", {
+                        state: salesReturn,
+                      })
                     }
                   >
                     <td className="p-4 font-bold text-gray-400 italic font-mono">
@@ -412,12 +853,46 @@ const CompanySalesReturn = () => {
                     <td className="p-4 font-black text-blue-600 group-hover:underline uppercase tracking-tighter">
                       {salesReturn.supplierName}
                     </td>
-                    <td className="p-4 font-semibold text-gray-600 uppercase">
+                    {/* <td className="p-4 font-semibold text-gray-600 uppercase">
                       {salesReturn.productName}
+                    </td> */}
+                    <td className="p-4">
+                      <table className="w-full text-[10px] uppercase">
+                        <thead>
+                          <tr className="text-gray-400 border-b">
+                            <th className="text-left pb-1">Product</th>
+                            <th className="text-center pb-1">Qty</th>
+                            <th className="text-center pb-1">Weight</th>
+                            <th className="text-right pb-1">Unit</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {salesReturn.products?.map((product, i) => (
+                            <tr key={i} className="text-gray-700 font-bold">
+                              <td className="py-1 pr-2">
+                                {product.productName}
+                              </td>
+
+                              <td className="text-center">
+                                {product.quantity}
+                              </td>
+
+                              <td className="text-center">
+                                {product.qtyInKg} Kg
+                              </td>
+
+                              <td className="text-right">
+                                ৳ {product.unitPrice}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </td>
-                    <td className="p-4 text-center font-black">
+                    {/* <td className="p-4 text-center font-black">
                       {`${salesReturn.quantity} Pcs | ${salesReturn.qtyInKg} Kg`}
-                    </td>
+                    </td> */}
                     <td className="p-4 text-center font-black text-gray-800 tracking-tighter text-sm">
                       {salesReturn.totalAmountQty}
                     </td>

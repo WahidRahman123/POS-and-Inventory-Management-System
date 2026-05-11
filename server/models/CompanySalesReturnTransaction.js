@@ -29,6 +29,19 @@ const companySalesReturnTransactionSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+
+  payDetails: [
+    {
+      productName: {
+        type: String,
+      },
+      quantity: {
+        type: Number,
+        min: 0,
+      },
+    },
+  ],
+
   amountToBePaid: {
     //* amountToBePaid = previous due
     type: Number,
@@ -60,7 +73,7 @@ const companySalesReturnTransactionSchema = new mongoose.Schema({
   companySalesReturnId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "CompanySalesReturn",
-  }
+  },
 });
 
 module.exports = mongoose.model(

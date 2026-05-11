@@ -5,6 +5,7 @@ const CompanySalesReturnTransaction = require("../models/CompanySalesReturnTrans
 const { createCustomDate } = require("../utils/createCustomDate");
 const { getNextSequenceForOther } = require("../utils/getNextSequenceForOther");
 const SalesReturn = require("../models/SalesReturn");
+const Product = require("../models/Product");
 
 module.exports.index = async (req, res) => {
   try {
@@ -57,12 +58,12 @@ module.exports.createCompanySalesReturn = async (req, res) => {
     const {
       createdAt,
       issuedAt,
-      // products,
-      productName,
-      quantity,
-      qtyInKg,
-      unitPrice,
-      subTotal,
+      products,
+      // productName,
+      // quantity,
+      // qtyInKg,
+      // unitPrice,
+      // subTotal,
       totalAmount,
       paid,
       due,
@@ -83,6 +84,8 @@ module.exports.createCompanySalesReturn = async (req, res) => {
     }
     const memo = "CSR-" + count.seq;
 
+    const payDetails = [{ productName: "", quantity: 0 }];
+
     //* Transaction Creation
     const transactionDetails = {
       ...transactionDetail,
@@ -90,6 +93,7 @@ module.exports.createCompanySalesReturn = async (req, res) => {
       amountToBePaid: totalAmountQty,
       paidAmount: paidQty,
       date: createdAt,
+      payDetails,
       currentDue: dueQty,
     };
     const transaction = new CompanySalesReturnTransaction(transactionDetails);
@@ -127,12 +131,52 @@ module.exports.createCompanySalesReturn = async (req, res) => {
 module.exports.searchById = async (req, res) => {
   try {
     const { id } = req.params;
-    const companySalesReturn = await CompanySalesReturn.findById(id);
+    const companySalesReturn = await CompanySalesReturn.findById(id)
+      .populate({
+        path: "transactionRecords",
+        select: "payDetails",
+      })
+      .lean();
 
     if (!companySalesReturn)
       return res.status(409).json({ message: "Invalid ID!" });
 
-    res.status(201).json(companySalesReturn);
+    //* paid quantity map
+    const paidMap = {};
+
+    companySalesReturn.transactionRecords.forEach((trx) => {
+      trx.payDetails.forEach((item) => {
+        const productName = item.productName;
+
+        if (!paidMap[productName]) {
+          paidMap[productName] = 0;
+        }
+
+        paidMap[productName] += item.quantity || 0;
+      });
+    });
+
+    //* calculate remaining quantity
+    const products = companySalesReturn.products.map((product) => {
+      const paidQty = paidMap[product.productName] || 0;
+
+      return {
+        ...product,
+        alreadyPaidQty: paidQty,
+        availableQty: product.quantity - paidQty,
+      };
+    });
+
+    //* only remaining products
+    companySalesReturn.products = products.filter((p) => p.availableQty > 0);
+
+    if (companySalesReturn.products.length === 0) {
+      return res.status(409).json({
+        message: "All quantities already adjusted!",
+      });
+    }
+
+    return res.status(200).json(companySalesReturn);
   } catch (error) {
     console.error(error);
     res.status(500).send("Server Error");
@@ -143,24 +187,24 @@ module.exports.addPayment = async (req, res) => {
   // const session = await mongoose.startSession();
 
   const { id } = req.params;
-  const { date, amount, unchangedAmount } = req.body;
+  const { date, amount, payDetails, unchangedAmount } = req.body;
 
   try {
     // session.startTransaction();
     // const companySalesReturn =
     //   await CompanySalesReturn.findById(id).session(session);
-    const companySalesReturn =
-      await CompanySalesReturn.findById(id);
+    const companySalesReturn = await CompanySalesReturn.findById(id);
 
     if (companySalesReturn) {
       const {
         createdAt,
         issuedAt,
-        productName,
-        quantity,
-        qtyInKg,
-        unitPrice,
-        subTotal,
+        products,
+        // productName,
+        // quantity,
+        // qtyInKg,
+        // unitPrice,
+        // subTotal,
         transactionRecords,
         totalAmount,
         paid,
@@ -202,6 +246,7 @@ module.exports.addPayment = async (req, res) => {
         paidAmount,
         date: createCustomDate(date),
         currentDue,
+        payDetails,
         companySalesReturnId: companySalesReturn._id,
         unchangedPaid,
         unchangedDue,
@@ -212,6 +257,24 @@ module.exports.addPayment = async (req, res) => {
       companySalesReturn.transactionRecords.push(transaction._id);
       // await companySalesReturn.save({ session });
       await companySalesReturn.save();
+
+      if (payDetails && payDetails.length > 0) {
+        for (let i = 0; i < payDetails.length; i++) {
+          const { productName, quantity } = payDetails[i];
+          // const product = await Product.findOne({ name: productName }).session(
+          //   session,
+          // );
+          const product = await Product.findOne({ name: productName });
+
+          if (!product) {
+            throw new Error(`Product not found: ${productName}`);
+          }
+
+          product.quantity = product.quantity + quantity;
+          // await product.save({ session });
+          await product.save();
+        }
+      }
 
       // Commit
       // await session.commitTransaction();

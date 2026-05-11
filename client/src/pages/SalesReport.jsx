@@ -638,6 +638,8 @@ const SalesReport = () => {
   const { sales, loading, error, page, pages, totalSales, totalCosts, profit } =
     useSelector((state) => state.sales);
 
+  console.log(sales.length);
+
   const [sortOrder, setSortOrder] = useState(-1);
 
   useEffect(() => {
@@ -857,22 +859,44 @@ const SalesReport = () => {
           {dateMode === "range" && (
             <>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
-                <label className="text-xs sm:text-sm text-gray-600">Start Date:</label>
+                <label className="text-xs sm:text-sm text-gray-600">
+                  Start Date:
+                </label>
                 <input
                   type="date"
-                  max={rangeDateSearch.dateSearchEnd ? rangeDateSearch.dateSearchEnd : ""}
+                  max={
+                    rangeDateSearch.dateSearchEnd
+                      ? rangeDateSearch.dateSearchEnd
+                      : ""
+                  }
                   value={rangeDateSearch.dateSearchStart}
-                  onChange={(e) => setRangeDateSearch((prev) => ({ ...prev, dateSearchStart: e.target.value }))}
+                  onChange={(e) =>
+                    setRangeDateSearch((prev) => ({
+                      ...prev,
+                      dateSearchStart: e.target.value,
+                    }))
+                  }
                   className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
                 />
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
-                <label className="text-xs sm:text-sm text-gray-600">End Date:</label>
+                <label className="text-xs sm:text-sm text-gray-600">
+                  End Date:
+                </label>
                 <input
                   type="date"
-                  min={rangeDateSearch.dateSearchStart ? rangeDateSearch.dateSearchStart : ""}
+                  min={
+                    rangeDateSearch.dateSearchStart
+                      ? rangeDateSearch.dateSearchStart
+                      : ""
+                  }
                   value={rangeDateSearch.dateSearchEnd}
-                  onChange={(e) => setRangeDateSearch((prev) => ({ ...prev, dateSearchEnd: e.target.value }))}
+                  onChange={(e) =>
+                    setRangeDateSearch((prev) => ({
+                      ...prev,
+                      dateSearchEnd: e.target.value,
+                    }))
+                  }
                   className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
                 />
               </div>
@@ -882,7 +906,13 @@ const SalesReport = () => {
           <div className="flex gap-2 justify-start sm:justify-end w-full">
             <button
               onClick={() => {
-                if (searchFilters.customerName === "" && searchFilters.productName === "" && dateSearch === "" && rangeDateSearch.dateSearchStart === "" && rangeDateSearch.dateSearchEnd === "") {
+                if (
+                  searchFilters.customerName === "" &&
+                  searchFilters.productName === "" &&
+                  dateSearch === "" &&
+                  rangeDateSearch.dateSearchStart === "" &&
+                  rangeDateSearch.dateSearchEnd === ""
+                ) {
                   if (!selectedRange) {
                     setSelectedRange("t");
                     setSelectedRangeLabel("Today");
@@ -920,23 +950,74 @@ const SalesReport = () => {
         <table className="min-w-full text-xs sm:text-sm border-collapse">
           <thead className="bg-gray-300">
             <tr>
-              <th rowSpan={2} className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Date</th>
-              <th rowSpan={2} className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Cutomer Name</th>
-              <th colSpan={3} className="border px-2 py-1 sm:px-4 sm:py-2 text-center">Products</th>
-              <th rowSpan={2} className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Discount</th>
-              
-              {/* --- ADDED LOAN FIELD IN HEADER --- */}
-              <th rowSpan={2} className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Loan</th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Date
+              </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Cutomer Name
+              </th>
+              <th
+                colSpan={3}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-center"
+              >
+                Products
+              </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Discount
+              </th>
 
-              <th rowSpan={2} className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Total</th>
-              <th rowSpan={2} className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Paid</th>
-              <th rowSpan={2} className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Due</th>
-              <th rowSpan={2} className="border px-2 py-1 sm:px-4 sm:py-2 text-center">Action</th>
+              {/* --- ADDED LOAN FIELD IN HEADER --- */}
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Loan
+              </th>
+
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Total
+              </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Paid
+              </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Due
+              </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-center"
+              >
+                Action
+              </th>
             </tr>
             <tr>
-              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-center">Name</th>
-              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Price</th>
-              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Qty</th>
+              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-center">
+                Name
+              </th>
+              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+                Price
+              </th>
+              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+                Qty
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -944,66 +1025,236 @@ const SalesReport = () => {
               sales.map((sale, saleIndex) => {
                 const rowspan = sale.products.length;
                 const isEven = saleIndex % 2 === 0;
+                console.log(sale);
 
-                return sale.products.map((product, pIndex) => (
-                  <tr
-                    onClick={(e) => {
-                      if (e.target.tagName !== "TD") return;
-                      navigate("/customer-statement", { state: sale });
-                    }}
-                    key={`${saleIndex}-${pIndex}`}
-                    className={isEven ? "bg-white cursor-pointer" : "bg-gray-50 cursor-pointer"}
-                  >
-                    {pIndex === 0 && (
-                      <>
-                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">
-                          {new Date(sale.createdAt).toLocaleDateString("en-GB", { timeZone: "Asia/Dhaka" }).replaceAll("/", "-")}
-                        </td>
-                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">
-                          {sale.customerName}
-                        </td>
-                      </>
-                    )}
+                if (sale.products.length > 0) {
+                  return sale.products.map((product, pIndex) => (
+                    <tr
+                      onClick={(e) => {
+                        if (e.target.tagName !== "TD") return;
+                        navigate("/customer-statement", { state: sale });
+                      }}
+                      key={`${saleIndex}-${pIndex}`}
+                      className={
+                        isEven
+                          ? "bg-white cursor-pointer"
+                          : "bg-gray-50 cursor-pointer"
+                      }
+                    >
+                      {pIndex === 0 && (
+                        <>
+                          <td
+                            rowSpan={rowspan}
+                            className="border px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            {new Date(sale.createdAt)
+                              .toLocaleDateString("en-GB", {
+                                timeZone: "Asia/Dhaka",
+                              })
+                              .replaceAll("/", "-")}
+                          </td>
+                          <td
+                            rowSpan={rowspan}
+                            className="border px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            {sale.customerName}
+                          </td>
+                        </>
+                      )}
 
-                    <td className={`border px-2 py-1 sm:px-4 sm:py-2 ${pIndex !== sale.products.length - 1 ? "border-b-gray-300" : ""}`}>{product.productName}</td>
-                    <td className={`border px-2 py-1 sm:px-4 sm:py-2 ${pIndex !== sale.products.length - 1 ? "border-b-gray-300" : ""}`}>{product.sellPrice}</td>
-                    <td className={`border px-2 py-1 sm:px-4 sm:py-2 ${pIndex !== sale.products.length - 1 ? "border-b-gray-300" : ""}`}>{product.quantity}</td>
+                      <td
+                        className={`border px-2 py-1 sm:px-4 sm:py-2 ${pIndex !== sale.products.length - 1 ? "border-b-gray-300" : ""}`}
+                      >
+                        {product.productName}
+                      </td>
+                      <td
+                        className={`border px-2 py-1 sm:px-4 sm:py-2 ${pIndex !== sale.products.length - 1 ? "border-b-gray-300" : ""}`}
+                      >
+                        {product.sellPrice}
+                      </td>
+                      <td
+                        className={`border px-2 py-1 sm:px-4 sm:py-2 ${pIndex !== sale.products.length - 1 ? "border-b-gray-300" : ""}`}
+                      >
+                        {product.quantity}
+                      </td>
 
-                    {pIndex === 0 && (
-                      <>
-                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">
-                          {sale.discount ? sale.discount : 0}
-                        </td>
+                      {pIndex === 0 && (
+                        <>
+                          <td
+                            rowSpan={rowspan}
+                            className="border px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            {sale.discount ? sale.discount : 0}
+                          </td>
 
-                        {/* --- ADDED LOAN DATA CELL --- */}
-                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">
-                          {sale.loan ? sale.loan : 0}
-                        </td>
+                          {/* --- ADDED LOAN DATA CELL --- */}
+                          <td
+                            rowSpan={rowspan}
+                            className="border px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            {sale.loan ? sale.loan : 0}
+                          </td>
 
-                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">{sale.total}</td>
-                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">{sale.paid}</td>
-                        <td rowSpan={rowspan} className={`border px-2 py-1 sm:px-4 sm:py-2 ${sale.due > 0 ? "text-red-500 font-bold" : ""}`}>
-                          {sale.due}
-                        </td>
-                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">
-                          <div className="flex flex-wrap gap-1">
-                            <Link to={sale.due ? `/sales-report/${sale._id}/edit-due` : "#"} 
-                              className={`text-xs text-white px-2 py-1 rounded ${sale.due ? "bg-green-600 hover:bg-green-700" : "cursor-no-drop bg-green-500"}`}>
-                              Add Payment
-                            </Link>
-                            <Link to="/invoice" state={sale} className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 cursor-pointer">
-                              Print
-                            </Link>
-                          </div>
-                        </td>
-                      </>
-                    )}
-                  </tr>
-                ));
+                          <td
+                            rowSpan={rowspan}
+                            className="border px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            {sale.total}
+                          </td>
+                          <td
+                            rowSpan={rowspan}
+                            className="border px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            {sale.paid}
+                          </td>
+                          <td
+                            rowSpan={rowspan}
+                            className={`border px-2 py-1 sm:px-4 sm:py-2 ${sale.due > 0 ? "text-red-500 font-bold" : ""}`}
+                          >
+                            {sale.due}
+                          </td>
+                          <td
+                            rowSpan={rowspan}
+                            className="border px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            <div className="flex flex-wrap gap-1">
+                              <Link
+                                to={
+                                  sale.due
+                                    ? `/sales-report/${sale._id}/edit-due`
+                                    : "#"
+                                }
+                                className={`text-xs text-white px-2 py-1 rounded ${sale.due ? "bg-green-600 hover:bg-green-700" : "cursor-no-drop bg-green-500"}`}
+                              >
+                                Add Payment
+                              </Link>
+                              <Link
+                                to="/invoice"
+                                state={sale}
+                                className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 cursor-pointer"
+                              >
+                                Print
+                              </Link>
+                            </div>
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  ));
+                } else {
+                  return (
+                    <tr
+                      onClick={(e) => {
+                        if (e.target.tagName !== "TD") return;
+                        navigate("/customer-statement", { state: sale });
+                      }}
+                      key={saleIndex}
+                      className={
+                        isEven
+                          ? "bg-white cursor-pointer"
+                          : "bg-gray-50 cursor-pointer"
+                      }
+                    >
+                          <td
+                            className="border px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            {new Date(sale.createdAt)
+                              .toLocaleDateString("en-GB", {
+                                timeZone: "Asia/Dhaka",
+                              })
+                              .replaceAll("/", "-")}
+                          </td>
+                          <td
+                            className="border px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            {sale.customerName}
+                          </td>
+
+                      <td
+                        className="border px-2 py-1 sm:px-4 sm:py-2"
+                      >
+                        -
+                      </td>
+                      <td
+                        className="border px-2 py-1 sm:px-4 sm:py-2"
+                      >
+                        -
+                      </td>
+                      <td
+                        className="border px-2 py-1 sm:px-4 sm:py-2"
+                      >
+                        -
+                      </td>
+
+                          <td
+                        
+                            className="border px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            {sale.discount ? sale.discount : 0}
+                          </td>
+
+                          {/* --- ADDED LOAN DATA CELL --- */}
+                          <td
+                            className="border px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            {sale.loan ? sale.loan : 0}
+                          </td>
+
+                          <td
+                            rowSpan={rowspan}
+                            className="border px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            {sale.total}
+                          </td>
+                          <td
+                            rowSpan={rowspan}
+                            className="border px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            {sale.paid}
+                          </td>
+                          <td
+                            rowSpan={rowspan}
+                            className={`border px-2 py-1 sm:px-4 sm:py-2 ${sale.due > 0 ? "text-red-500 font-bold" : ""}`}
+                          >
+                            {sale.due}
+                          </td>
+                          <td
+                            rowSpan={rowspan}
+                            className="border px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            <div className="flex flex-wrap gap-1">
+                              <Link
+                                to={
+                                  sale.due
+                                    ? `/sales-report/${sale._id}/edit-due`
+                                    : "#"
+                                }
+                                className={`text-xs text-white px-2 py-1 rounded ${sale.due ? "bg-green-600 hover:bg-green-700" : "cursor-no-drop bg-green-500"}`}
+                              >
+                                Add Payment
+                              </Link>
+                              <Link
+                                to="/invoice"
+                                state={sale}
+                                className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 cursor-pointer"
+                              >
+                                Print
+                              </Link>
+                            </div>
+                          </td>
+
+                    </tr>
+                  );
+                }
               })
             ) : (
               <tr>
-                <td colSpan={11} className="text-center text-gray-500 py-10 text-lg select-none border">No Sales Available.</td>
+                <td
+                  colSpan={11}
+                  className="text-center text-gray-500 py-10 text-lg select-none border"
+                >
+                  No Sales Available.
+                </td>
               </tr>
             )}
           </tbody>
