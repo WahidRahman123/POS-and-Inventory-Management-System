@@ -31,7 +31,7 @@ const salesReturnStockManagementSchema = new mongoose.Schema({
   tempReturnQuantity: {
     type: Number,
     // required: true,
-    min: 1,
+    // min: 1,
   },
   returnQtyInKg: {
     type: Number,
