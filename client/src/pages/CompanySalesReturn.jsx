@@ -359,7 +359,7 @@ const CompanySalesReturn = () => {
             <div className="flex items-center gap-3 mb-2 text-blue-600">
               <FaBox size={20} />
               <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">
-                Total Sent Items
+                Sales Return Stock
               </p>
             </div>
             <p className="text-2xl font-black text-gray-800">
@@ -422,7 +422,7 @@ const CompanySalesReturn = () => {
               <div className="grid grid-cols-2 gap-x-6 mb-4">
                 <div className="relative">
                   <label className="block text-sm font-medium mb-1">
-                    Supplier Name
+                    Company Name
                   </label>
                   <div className="flex">
                     <input
@@ -430,7 +430,7 @@ const CompanySalesReturn = () => {
                       value={name}
                       onChange={handleSupplierNameOnChange}
                       ref={supplierNameRef}
-                      placeholder="Supplier Name"
+                      placeholder="Company Name"
                       className="block w-[85%] px-3 py-1.5 border border-gray-300 rounded-sm text-sm disabled:bg-gray-300"
                       disabled={disable}
                     />
@@ -695,7 +695,7 @@ const CompanySalesReturn = () => {
                 className="w-full sm:w-auto bg-blue-600 cursor-pointer text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-medium disabled:bg-blue-500"
                 disabled={addLoading}
               >
-                {addLoading ? "Adding..." : "Add Purchase"}
+                {addLoading ? "Saving..." : "Save & Send"}
               </button>
             </form>
           </div>
