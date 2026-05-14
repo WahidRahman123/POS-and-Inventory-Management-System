@@ -354,8 +354,8 @@ const CompanySalesReturn = () => {
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* --- Section 1: Financial Summary (Updated to reflect Cash flow) --- */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white p-5 shadow-sm border-b-4 border-blue-600 rounded-sm">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white p-5 shadow-sm border-b-4 border-blue-600 rounded-sm cursor-pointer" onClick={() => navigate("/sales-return")}>
             <div className="flex items-center gap-3 mb-2 text-blue-600">
               <FaBox size={20} />
               <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">
@@ -370,7 +370,7 @@ const CompanySalesReturn = () => {
             </p>
           </div>
 
-          <div className="bg-white p-5 shadow-sm border-b-4 border-orange-500 rounded-sm">
+          {/* <div className="bg-white p-5 shadow-sm border-b-4 border-orange-500 rounded-sm">
             <div className="flex items-center gap-3 mb-2 text-orange-500">
               <FaWeightHanging size={20} />
               <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">
@@ -381,7 +381,7 @@ const CompanySalesReturn = () => {
               {salesReturnReportData ? salesReturnReportData.totalWeight : "--"}{" "}
               <span className="text-xs">Kg</span>
             </p>
-          </div>
+          </div> */}
 
           <div className="bg-gray-900 p-5 shadow-sm border-b-4 border-green-600 rounded-sm">
             <div className="flex items-center gap-3 mb-2 text-green-500">
