@@ -6,6 +6,7 @@ const { createCustomDate } = require("../utils/createCustomDate");
 const { getNextSequenceForOther } = require("../utils/getNextSequenceForOther");
 const SalesReturn = require("../models/SalesReturn");
 const Product = require("../models/Product");
+const SalesReturnStockManagement = require("../models/SalesReturnStockManagement");
 
 module.exports.index = async (req, res) => {
   try {
@@ -113,6 +114,16 @@ module.exports.createCompanySalesReturn = async (req, res) => {
     //   session,
     // });
     const createdCompanySalesReturn = await companySalesReturn.save();
+
+    //* Eta completely company sales return er searching ta handle korar jonno (ekhane tempReturnQuantity update korbo khali, returnQuantity te haat deoar dorkar nei)
+    for (const product of products) {
+      const salesReturnStockSearchData = await SalesReturnStockManagement.findOne({ productId: product.productId });
+
+      salesReturnStockSearchData.tempReturnQuantity -= product.quantity;
+      salesReturnStockSearchData.tempReturnQtyInKg -= product.qtyInKg;
+      
+      await salesReturnStockSearchData.save();
+    }
 
     // Commit
     // await session.commitTransaction();
@@ -423,6 +434,23 @@ module.exports.salesReturnReport = async (req, res) => {
           : 0,
       totalDue: result.length > 0 ? result[0].totalDue : 0,
     });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};
+
+module.exports.salesReturnStockSearchedByProductName = async (req, res) => {
+  try {
+    const { productName } = req.query;
+    const salesReturnStockSearchData = await SalesReturnStockManagement.find({
+      $and: [
+        { productName: { $regex: productName, $options: "i" } },
+        { tempReturnQuantity: { $gt: 0 } },
+      ],
+    });
+
+    res.status(201).json(salesReturnStockSearchData);
   } catch (error) {
     console.error(error);
     res.status(500).send("Server Error");

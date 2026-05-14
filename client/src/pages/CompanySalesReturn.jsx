@@ -18,7 +18,9 @@ import { useEffect } from "react";
 import {
   addCompanySalesReturn,
   fetchCompanySalesReturns,
+  fetchSalesReturnByProductName,
   fetchSalesReturnReportData,
+  setSalesReturnSearchByProductNameToEmpty,
 } from "../features/CompanySalesReturn/companySalesReturnSlice";
 import {
   searchProductsforPOS,
@@ -33,6 +35,7 @@ const CompanySalesReturn = () => {
   const {
     companySalesReturns,
     salesReturnReportData,
+    companySalesReturnSearchedByProductName,
     addLoading,
     toggle,
     page,
@@ -134,7 +137,7 @@ const CompanySalesReturn = () => {
     // if (!supplier) return alert("Select a Company!");
     if (supplier.supplierId === "") return alert("Select a Company!");
 
-    const newProducts = products.map(({ id, ...rest }) => rest);
+    const newProducts = products.map(({ id, tempQuantity, tempQtyInKg, ...rest }) => rest);
 
     const returnData = {
       createdAt: formData.date,
@@ -184,9 +187,12 @@ const CompanySalesReturn = () => {
       setProducts([
         {
           id: 1,
+          productId: "",
           productName: "",
           quantity: "",
           qtyInKg: "",
+          tempQuantity: "",
+          tempQtyInKg: "",
           unitPrice: "",
           subTotal: "",
         },
@@ -202,7 +208,6 @@ const CompanySalesReturn = () => {
         supplierPhone: "",
       });
       setData(null);
-      
     } catch (error) {
       console.log("Failed!");
     }
@@ -212,9 +217,12 @@ const CompanySalesReturn = () => {
   const [products, setProducts] = useState([
     {
       id: 1,
+      productId: "",
       productName: "",
       quantity: "",
       qtyInKg: "",
+      tempQuantity: "",
+      tempQtyInKg: "",
       unitPrice: "",
       subTotal: "",
     },
@@ -225,17 +233,39 @@ const CompanySalesReturn = () => {
     handleProductChange(id, "productName", value);
     if (value) {
       setActiveSearchRow(id);
-      dispatch(searchProductsforPOS(value));
+      dispatch(fetchSalesReturnByProductName({ productName: value }));
     } else {
       setActiveSearchRow(null);
-      dispatch(setProductsBySearchToEmpty());
+      dispatch(setSalesReturnSearchByProductNameToEmpty());
     }
   };
 
   // সার্চ রেজাল্ট থেকে প্রোডাক্ট সিলেক্ট করার ফাংশন
-  const handleSelectProductFromSearch = (id, productName) => {
-    handleProductChange(id, "productName", productName);
-    dispatch(setProductsBySearchToEmpty());
+  // const handleSelectProductFromSearch = (id, productName) => {
+  //   handleProductChange(id, "productName", productName);
+  //   dispatch(setSalesReturnSearchByProductNameToEmpty());
+  //   setActiveSearchRow(null);
+  // };
+
+  const handleSelectProductFromSearch = (id, productData) => {
+    setProducts((prev) =>
+      prev.map((product) =>
+        product.id === id
+          ? {
+              ...product,
+              productId: productData.productId,
+              productName: productData.productName,
+              quantity: productData.tempReturnQuantity,
+              qtyInKg: productData.tempReturnQtyInKg,
+
+              tempQuantity: productData.tempReturnQuantity,
+              tempQtyInKg: productData.tempReturnQtyInKg,
+            }
+          : product,
+      ),
+    );
+
+    dispatch(setSalesReturnSearchByProductNameToEmpty());
     setActiveSearchRow(null);
   };
 
@@ -254,9 +284,12 @@ const CompanySalesReturn = () => {
       ...products,
       {
         id: newId,
+        productId: "",
         productName: "",
         quantity: "",
         qtyInKg: "",
+        tempQuantity: "",
+        tempQtyInKg: "",
         unitPrice: "",
         subTotal: "",
       },
@@ -383,148 +416,6 @@ const CompanySalesReturn = () => {
           <h2 className="text-xs font-black mb-4 flex items-center gap-2 text-gray-700 uppercase">
             <FaPlus className="text-blue-600" /> Dispatch New Return to Company
           </h2>
-          {/* <form
-            onSubmit={handleSubmit}
-            className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-3 items-end"
-          >
-            <div className="space-y-1">
-              <label className="text-[9px] font-black text-gray-400 uppercase tracking-tighter">
-                Dispatch Date
-              </label>
-              <input
-                type="date"
-                className="w-full p-2 border border-gray-300 text-xs font-bold outline-none"
-                value={formData.date}
-                onChange={(e) => handleOnChange("date", e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[9px] font-black text-gray-400 uppercase tracking-tighter">
-                Select Company
-              </label>
-
-              <AsyncSelect
-                className="text-xs font-bold"
-                cacheOptions
-                loadOptions={loadOptions}
-                defaultOptions
-                isClearable
-                value={
-                  supplier ? { label: supplier.name, value: supplier } : null
-                }
-                noOptionsMessage={() => "No Company Found!"}
-                components={{ DropdownIndicator: () => null }}
-                onChange={(selected) => {
-                  selected ? setSupplier(selected.value) : setSupplier("");
-                }}
-                placeholder="Search..."
-              />
-            </div>
-            <div className="space-y-1 lg:col-span-1">
-              <label className="text-[9px] font-black text-gray-400 uppercase tracking-tighter">
-                Product Name
-              </label>
-              <input
-                type="text"
-                placeholder="12V 100AH"
-                className="w-full p-2 border border-gray-300 text-xs outline-none"
-                value={formData.productName}
-                onChange={(e) => handleOnChange("productName", e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[9px] font-black text-gray-400 uppercase tracking-tighter">
-                Qty & Weight
-              </label>
-              <div className="flex gap-1">
-                <input
-                  type="number"
-                  step="any"
-                  placeholder="Qty"
-                  min="1"
-                  max={salesReturnReportData?.totalSentItems || ""}
-                  className="w-1/2 p-2 border border-gray-300 text-xs font-bold outline-none"
-                  value={formData.quantity}
-                  onChange={(e) => {
-                    handleOnChange("quantity", e.target.value);
-
-                    const subTotal = new Decimal(Number(e.target.value)).mul(
-                      new Decimal(Number(formData.unitPrice)),
-                    );
-
-                    handleOnChange("subTotal", Number(subTotal.toFixed(4)));
-
-                }}
-                  required
-                />
-                <input
-                  type="number"
-                  step="any"
-                  placeholder="Kg"
-                  min="1"
-                  className="w-1/2 p-2 border border-gray-300 text-xs font-bold outline-none"
-                  value={formData.qtyInKg}
-                  max={salesReturnReportData?.totalWeight || ""}
-                  onChange={(e) => {
-                    handleOnChange("qtyInKg", e.target.value);
-                  }}
-                  required
-                />
-              </div>
-            </div>
-            <div className="space-y-1">
-              <label className="text-[9px] font-black text-gray-400 uppercase tracking-tighter">
-                Price Per Unit
-              </label>
-              <input
-                type="number"
-                step="any"
-                placeholder="৳"
-                min="1"
-                className="w-full p-2 border border-gray-300 text-xs font-bold outline-none"
-                value={formData.unitPrice}
-                onChange={(e) => {
-                  handleOnChange("unitPrice", e.target.value);
-
-                  const subTotal = new Decimal(Number(e.target.value)).mul(
-                    new Decimal(Number(formData.quantity)),
-                  );
-
-                  handleOnChange("subTotal", Number(subTotal.toFixed(4)));
-                }}
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[9px] font-black text-gray-400 uppercase tracking-tighter">
-                Total Claim
-              </label>
-              <input
-                type="number"
-                step="any"
-                readOnly
-                className="w-full p-2 border border-gray-300 text-xs font-black bg-blue-50 text-blue-700 outline-none"
-                value={formData.subTotal}
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={addLoading}
-              className="relative bg-blue-700 hover:bg-black text-white font-black py-2.5 rounded-sm transition uppercase text-[10px] cursor-pointer tracking-widest disabled:cursor-not-allowed disabled:bg-blue-400"
-            >
-              <span className="invisible">Save & Send</span>
-
-              <span className="absolute inset-0 flex items-center justify-center">
-                {addLoading ? (
-                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                ) : (
-                  "Save & Send"
-                )}
-              </span>
-            </button>
-          </form> */}
 
           <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-4 sm:p-6 mb-6">
             <form onSubmit={handleSubmit}>
@@ -611,21 +502,6 @@ const CompanySalesReturn = () => {
                     required
                   />
                 </div>
-                {/* <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Enter Memo
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Memo"
-                    value={formData.memo}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, memo: e.target.value }))
-                    }
-                    className="w-full px-4 py-2 border border-gray-400 rounded-md"
-                    required
-                  />
-                </div> */}
               </div>
 
               <button
@@ -662,9 +538,9 @@ const CompanySalesReturn = () => {
                       />
                       {/* প্রোডাক্ট সার্চ রেজাল্ট ড্রপডাউন */}
                       {activeSearchRow === product.id &&
-                        productsBySearchforPOS.length > 0 && (
+                        companySalesReturnSearchedByProductName.length > 0 && (
                           <div className="absolute z-50 w-full bg-white shadow-xl border border-gray-300 rounded mt-1 max-h-60 overflow-y-auto">
-                            {productsBySearchforPOS.map((p, i) => (
+                            {/* {productsBySearchforPOS.map((p, i) => (
                               <div
                                 key={i}
                                 onClick={() =>
@@ -677,7 +553,28 @@ const CompanySalesReturn = () => {
                               >
                                 {p.name}
                               </div>
-                            ))}
+                            ))} */}
+
+                            {companySalesReturnSearchedByProductName.map(
+                              (p, i) => (
+                                <div
+                                  key={i}
+                                  onClick={() =>
+                                    handleSelectProductFromSearch(product.id, p)
+                                  }
+                                  className="px-3 py-2 border-b border-gray-100 cursor-pointer hover:bg-blue-50 text-gray-800 text-sm"
+                                >
+                                  <div className="font-semibold">
+                                    {p.productName}
+                                  </div>
+
+                                  <div className="flex gap-4 text-[11px] text-gray-500 mt-1">
+                                    <span>Qty: {p.tempReturnQuantity}</span>
+                                    <span>Weight: {p.tempReturnQtyInKg} Kg</span>
+                                  </div>
+                                </div>
+                              ),
+                            )}
                           </div>
                         )}
                     </div>
@@ -689,6 +586,7 @@ const CompanySalesReturn = () => {
                         type="number"
                         onWheel={(e) => e.target.blur()}
                         value={product.quantity}
+                        max={product.tempQuantity}
                         onChange={(e) => {
                           const qty = e.target.value;
                           handleProductChange(product.id, "quantity", qty);
@@ -715,6 +613,7 @@ const CompanySalesReturn = () => {
                         type="number"
                         onWheel={(e) => e.target.blur()}
                         value={product.qtyInKg}
+                        max={product.tempQtyInKg}
                         onChange={(e) => {
                           const qtyInKg = e.target.value;
                           handleProductChange(product.id, "qtyInKg", qtyInKg);

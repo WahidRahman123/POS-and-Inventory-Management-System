@@ -5,7 +5,7 @@ const SalesReturn = require("../models/SalesReturn");
 const SalesReturnTransaction = require("../models/SalesReturnTransaction");
 const Product = require("../models/Product");
 const { createCustomDate } = require("../utils/createCustomDate");
-
+const SalesReturnStockManagement = require("../models/SalesReturnStockManagement");
 
 module.exports.index = async (req, res) => {
   try {
@@ -179,9 +179,7 @@ module.exports.createSalesReturn = async (req, res) => {
           // const productFound = await Product.findById(
           //   product.productId,
           // ).session(session);
-          const productFound = await Product.findById(
-            product.productId,
-          );
+          const productFound = await Product.findById(product.productId);
 
           if (productFound) {
             productFound.quantity = productFound.quantity - product.quantity;
@@ -198,9 +196,42 @@ module.exports.createSalesReturn = async (req, res) => {
       if (product.returnQuantity > 0) {
         const productFound = await Product.findById(product.productId);
         if (productFound) {
-          productFound.returnStock = (productFound.returnStock || 0) + product.returnQuantity;
+          productFound.returnStock =
+            (productFound.returnStock || 0) + product.returnQuantity;
           await productFound.save();
         }
+      }
+    }
+    //* salesReturnStockManagement creation or updation
+    for (const product of salesReturns.products) {
+      const salesReturnStock = await SalesReturnStockManagement.findOne({
+        productId: product.productId,
+      });
+
+      if (salesReturnStock) {
+        salesReturnStock.returnQuantity += product.returnQuantity;
+        salesReturnStock.tempReturnQuantity += product.returnQuantity;
+
+        salesReturnStock.returnQtyInKg += product.returnQtyInKg;
+        salesReturnStock.tempReturnQtyInKg += product.returnQtyInKg;
+
+        salesReturnStock.returnPrice += product.returnPrice;
+        salesReturnStock.tempReturnPrice += product.returnPrice;
+
+        salesReturnStock.salesReturnRef.push(salesReturn._id);
+        await salesReturnStock.save();
+      } else {
+        const newProducts = {
+          ...product,
+          tempReturnQuantity: product.returnQuantity,
+          tempReturnQtyInKg: product.returnQtyInKg,
+          tempReturnPrice: product.returnPrice,
+        };
+        const salesRStock = new SalesReturnStockManagement(newProducts);
+
+        salesRStock.salesReturnRef.push(salesReturn._id);
+
+        await salesRStock.save();
       }
     }
 
@@ -276,9 +307,7 @@ module.exports.addPaymentByExchange = async (req, res) => {
           // const productFound = await Product.findById(
           //   product.productId,
           // ).session(session);
-          const productFound = await Product.findById(
-            product.productId,
-          );
+          const productFound = await Product.findById(product.productId);
 
           if (productFound) {
             productFound.quantity = productFound.quantity - product.quantity;

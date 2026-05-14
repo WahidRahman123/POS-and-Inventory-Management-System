@@ -6,6 +6,7 @@ const initialState = {
   companySalesReturns: [],
   salesReturnReportData: null,
   companySalesReturnSearchedById: null,
+  companySalesReturnSearchedByProductName: [],
 
   transactions: [],
   totalAmount: null,
@@ -29,6 +30,28 @@ export const fetchCompanySalesReturns = createAsyncThunk(
     try {
       const { data } = await axios.get(
         `${import.meta.env.VITE_BACKEND_URI}/api/company-sales-return`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+          params: query,
+        },
+      );
+
+      return data;
+    } catch (error) {
+      const message = "Return Fetching Failed!";
+      return ThunkAPI.rejectWithValue(message);
+    }
+  },
+);
+
+export const fetchSalesReturnByProductName = createAsyncThunk(
+  "companySalesReturn/fetchSalesReturnByProductName",
+  async (query, ThunkAPI) => {
+    try {
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URI}/api/company-sales-return/search-by-product-name`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -161,6 +184,11 @@ export const fetchCompanySalesReturnTRForSupplierName = createAsyncThunk(
 const companySalesReturnSlice = createSlice({
   name: "companySalesReturn",
   initialState,
+  reducers: {
+      setSalesReturnSearchByProductNameToEmpty: (state) => {
+        state.companySalesReturnSearchedByProductName = [];
+      },
+    },
   extraReducers: (builder) => {
     builder
       .addCase(fetchCompanySalesReturns.pending, (state, action) => {
@@ -174,6 +202,28 @@ const companySalesReturnSlice = createSlice({
         state.companySalesReturns = action.payload.companySalesReturns;
       })
       .addCase(fetchCompanySalesReturns.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+        toast.error(action.payload, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
+      .addCase(fetchSalesReturnByProductName.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchSalesReturnByProductName.fulfilled, (state, action) => {
+        state.loading = false;
+        state.companySalesReturnSearchedByProductName = action.payload;
+      })
+      .addCase(fetchSalesReturnByProductName.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error;
         toast.error(action.payload, {
@@ -330,5 +380,5 @@ const companySalesReturnSlice = createSlice({
   },
 });
 
-// export const { setSaleSearchedByInvoiceToEmpty } = companySalesReturnSlice.actions;
+export const { setSalesReturnSearchByProductNameToEmpty } = companySalesReturnSlice.actions;
 export default companySalesReturnSlice.reducer;

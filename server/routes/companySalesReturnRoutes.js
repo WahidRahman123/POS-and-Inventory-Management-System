@@ -24,6 +24,11 @@ router.get('/statement-by-name', protect, companySalesReturn.companySalesReturnS
 // @access Private
 router.get('/sales-return-report', protect, companySalesReturn.salesReturnReport);
 
+//* @route get /api/company-sales-return/search-by-product-name
+// @desc sales return searched by product name
+// @access Private
+router.get('/search-by-product-name', protect, companySalesReturn.salesReturnStockSearchedByProductName);
+
 //* @route POST /api/company-sales-return/:id/payment
 // @desc add payment
 // @access Private

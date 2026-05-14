@@ -35,6 +35,10 @@ const companySalesReturnSchema = new mongoose.Schema({
     {
       _id: false,
 
+      productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
       productName: {
         type: String,
         required: true,
