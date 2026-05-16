@@ -956,6 +956,12 @@ const SalesReport = () => {
               >
                 Date
               </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Memo
+              </th>
 
               <th
                 rowSpan={2}
@@ -1067,6 +1073,13 @@ const SalesReport = () => {
                               timeZone: "Asia/Dhaka",
                             })
                             .replaceAll("/", "-")}
+                        </td>
+
+                        <td
+                          rowSpan={rowspan}
+                          className="border px-2 py-1 sm:px-4 sm:py-2"
+                        >
+                          {sale.invoiceNo}
                         </td>
 
                         <td

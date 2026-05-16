@@ -1,164 +1,3 @@
-// import React, { useEffect } from "react";
-// import { useDispatch, useSelector } from "react-redux";
-// import { fetchDashboardResult } from "../features/dashboard/dashboardSlice";
-// import { Link, useNavigate } from "react-router-dom";
-// import CountUp from "react-countup";
-// import Decimal from "decimal.js";
-
-// const Dashboard = () => {
-//   const { user } = useSelector((state) => state.auth);
-//   useEffect(() => {
-//     if (!user) {
-//       navigate("/login");
-//     }
-//   }, []);
-
-//   const { dashboardResult, loading, error } = useSelector(
-//     (state) => state.dashboard
-//   );
-//   const dispatch = useDispatch();
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     if (user) {
-//       dispatch(fetchDashboardResult());
-//     }
-//   }, [dispatch]);
-
-//   return (
-//     <div className="min-h-screen bg-gray-100 font-sans flex flex-col lg:flex-row">
-//       {/* Sidebar (Responsive - Optional hidden on mobile) */}
-//       {/* Sidebar code thakle ekhane add koro */}
-
-//       {/* Main Content */}
-//       <div className="flex-1 p-4 sm:p-6">
-//         {/* Header */}
-//         <div className="flex justify-end mb-4 sm:mb-6 text-xs sm:text-sm text-gray-500"></div>
-
-//         {/* KPI Cards */}
-//         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-//           {user && user.role === "admin" && (
-//             <Link
-//               to="/purchase"
-//               className="bg-blue-800 text-white p-4 sm:p-6 rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition"
-//             >
-//               <span className="text-2xl sm:text-3xl font-bold">
-//                 {dashboardResult ? (
-//                   <CountUp
-//                     end={dashboardResult.totalSupplierCost}
-//                     duration={0.3}
-//                     formattingFn={(value) =>
-//                       Number(value).toLocaleString("en-BD") + " ৳"
-//                     }
-//                   />
-//                 ) : (
-//                   "-"
-//                 )}
-//               </span>
-//               <span className="mt-1 sm:mt-2 text-xs sm:text-sm">
-//                 SUPPLIER PURCHASES (BDT)
-//               </span>
-//             </Link>
-//           )}
-
-
-//           {user && user.role === "admin" && (
-//             <Link
-//               to="/product"
-//               className="bg-blue-800 text-white p-4 sm:p-6 rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition"
-//             >
-//               <span className="text-2xl sm:text-3xl font-bold">
-//                 {dashboardResult ? (
-//                   <CountUp
-//                     end={dashboardResult.totalItemCost}
-//                     duration={0.3}
-//                     formattingFn={(value) =>
-//                       Number(value).toLocaleString("en-BD") + " ৳"
-//                     }
-//                   />
-//                 ) : (
-//                   "-"
-//                 )}
-//               </span>
-//               <span className="mt-1 sm:mt-2 text-xs sm:text-sm text-center">
-//                 INTERNAL ITEM PURCHASES (BDT)
-//               </span>
-//             </Link>
-//           )}
-
-//           {user && user.role === "admin" && (
-//             <Link
-//               to="/sales-report"
-//               className="bg-blue-800 text-white p-4 sm:p-6 rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition"
-//             >
-//               <span className="text-2xl sm:text-3xl font-bold">
-//                 {dashboardResult ? (
-//                   <CountUp
-//                     end={dashboardResult.totalSell}
-//                     duration={0.3}
-//                     formattingFn={(value) =>
-//                       Number(value).toLocaleString("en-BD") + " ৳"
-//                     }
-//                   />
-//                 ) : (
-//                   "-"
-//                 )}
-//               </span>
-//               <span className="mt-1 sm:mt-2 text-xs sm:text-sm">
-//                 SALES (BDT)
-//               </span>
-//             </Link>
-//           )}
-
-//           {user && user.role === "admin" && (
-//             <div className="bg-blue-800 text-white p-4 sm:p-6 rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition">
-//               <span className="text-2xl sm:text-3xl font-bold">
-//                 {dashboardResult ? (
-//                   <CountUp
-//                     end={dashboardResult.profit}
-//                     duration={0.3}
-//                     formattingFn={(value) =>
-//                       Number(value).toLocaleString("en-BD") + " ৳"
-//                     }
-//                   />
-//                 ) : (
-//                   "-"
-//                 )}
-//               </span>
-//               <span className="mt-1 sm:mt-2 text-xs sm:text-sm">
-//                 PROFIT (BDT)
-//               </span>
-//             </div>
-//           )}
-
-//           <Link
-//             to="/product"
-//             className="bg-blue-800 text-white p-4 sm:p-6 rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition"
-//           >
-//             <span className="text-2xl sm:text-3xl font-bold">
-//               {dashboardResult ? (
-//                 <CountUp
-//                   end={dashboardResult.numberOfProducts}
-//                   duration={0.3}
-//                   formattingFn={(value) =>
-//                     Number(value).toLocaleString("en-BD")
-//                   }
-//                 />
-//               ) : (
-//                 "-"
-//               )}
-//             </span>
-//             <span className="mt-1 sm:mt-2 text-xs sm:text-sm">TOTAL ITEMS</span>
-//           </Link>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Dashboard;
-
-
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDashboardResult } from "../features/dashboard/dashboardSlice";
@@ -173,9 +12,7 @@ const Row = ({ label, value, suffix = "" }) => (
       <CountUp
         end={value || 0}
         duration={0.4}
-        formattingFn={(val) =>
-          Number(val).toLocaleString("en-BD") + suffix
-        }
+        formattingFn={(val) => Number(val).toLocaleString("en-BD") + suffix}
       />
     </span>
   </div>
@@ -207,9 +44,7 @@ const DashboardCard = ({
           <CountUp
             end={value || 0}
             duration={0.4}
-            formattingFn={(val) =>
-              Number(val).toLocaleString("en-BD") + suffix
-            }
+            formattingFn={(val) => Number(val).toLocaleString("en-BD") + suffix}
           />
         </div>
       </div>
@@ -222,9 +57,7 @@ const DashboardCard = ({
 
 const Dashboard = () => {
   const dispatch = useDispatch();
-  const { dashboardResult, loading } = useSelector(
-    (state) => state.dashboard
-  );
+  const { dashboardResult, loading } = useSelector((state) => state.dashboard);
 
   useEffect(() => {
     dispatch(fetchDashboardResult());
@@ -236,8 +69,51 @@ const Dashboard = () => {
 
   return (
     <div className="p-3 sm:p-5 lg:p-6 bg-gray-100 min-h-screen">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 items-stretch">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+            Dashboard
+          </h1>
+          <p className="text-sm text-gray-500">
+            Overview of your business statistics
+          </p>
+        </div>
 
+        {/* Due List Button */}
+        <Link
+          to="/sales-report/due-list"
+          className="
+          inline-flex items-center gap-2
+          bg-gradient-to-r from-red-500 to-rose-600
+          hover:from-red-600 hover:to-rose-700
+          text-white font-semibold
+          px-5 py-2.5
+          rounded-xl
+          shadow-md hover:shadow-lg
+          transition-all duration-200
+          hover:scale-[1.03]
+        "
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="w-5 h-5"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 8c-1.657 0-3 1.343-3 3m6 0a3 3 0 11-6 0m9 0c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.26-3.148A7.963 7.963 0 013 11c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+            />
+          </svg>
+          Due List
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 items-stretch">
         {/* PURCHASE */}
         <DashboardCard
           title="Total Purchase"
@@ -247,10 +123,7 @@ const Dashboard = () => {
           to="/purchase"
         >
           <Row label="Due" value={dashboardResult.purchaseDue} suffix=" ৳" />
-          <Row
-            label="Products"
-            value={dashboardResult.purchaseTotalQuantity}
-          />
+          <Row label="Products" value={dashboardResult.purchaseTotalQuantity} />
         </DashboardCard>
 
         {/* EXCHANGE */}
@@ -262,10 +135,7 @@ const Dashboard = () => {
           to="/product-exchange"
         >
           <Row label="QTY" value={dashboardResult.exchangeTotalQuantity} />
-          <Row
-            label="KG"
-            value={dashboardResult.exchangeTotalQuantityInKg}
-          />
+          <Row label="KG" value={dashboardResult.exchangeTotalQuantityInKg} />
           <Row
             label="Remaining"
             value={dashboardResult.exchangeTotalRemaining}
@@ -282,11 +152,7 @@ const Dashboard = () => {
           to="/sales-report"
         >
           <Row label="Due" value={dashboardResult.salesDue} suffix=" ৳" />
-          <Row
-            label="Profit"
-            value={dashboardResult.salesProfit}
-            suffix=" ৳"
-          />
+          <Row label="Profit" value={dashboardResult.salesProfit} suffix=" ৳" />
         </DashboardCard>
 
         {/* STOCK */}
@@ -301,6 +167,64 @@ const Dashboard = () => {
           </div>
         </DashboardCard>
 
+        <DashboardCard
+          title="Total Sales Return"
+          value={dashboardResult.totalSentItemsForSalesReturn}
+          suffix=" Pcs"
+          color="bg-indigo-600"
+          to="/sales-return"
+        >
+          <Row
+            label="Customer Receivable"
+            value={dashboardResult.totalAmountForSalesReturn}
+            suffix=" ৳"
+          />
+          <Row
+            label="Total Given"
+            value={dashboardResult.totalPaidForSalesReturn}
+            suffix=" ৳"
+          />
+
+          <Row
+            label="Total Due"
+            value={dashboardResult.totalDueForSalesReturn}
+            suffix=" ৳"
+          />
+        </DashboardCard>
+
+        <DashboardCard
+          title="Total Company Sales Return"
+          value={dashboardResult.totalAmountQtyForCSR}
+          suffix=" Pcs"
+          color="bg-red-600"
+          to="/company-sales-return"
+        >
+          <Row
+            label="Total Given"
+            value={dashboardResult.totalPaidQtyForCSR}
+            suffix=" Pcs"
+          />
+          <Row
+            label="Claim Amount"
+            value={dashboardResult.totalDueQtyForCSR}
+            suffix=" Pcs"
+          />
+          <Row
+            label="Amount Receivable"
+            value={dashboardResult.totalAmountForCSR}
+            suffix=" ৳"
+          />
+          <Row
+            label="Total Received"
+            value={dashboardResult.totalPaidForCSR}
+            suffix=" ৳"
+          />
+          <Row
+            label="Total Due"
+            value={dashboardResult.totalDueForCSR}
+            suffix=" ৳"
+          />
+        </DashboardCard>
       </div>
     </div>
   );

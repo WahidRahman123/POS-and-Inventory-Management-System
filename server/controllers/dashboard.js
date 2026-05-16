@@ -6,6 +6,7 @@ const ProductExchange = require("../models/ProductExchange");
 const PurchaseReturn = require("../models/PurchaseReturn");
 const SalesReturn = require("../models/SalesReturn");
 const CompanySalesReturn = require("../models/CompanySalesReturn");
+const CompanySalesReturnTransaction = require("../models/CompanySalesReturnTransaction");
 
 // module.exports.index = async (req, res) => {
 //   try {
@@ -242,28 +243,117 @@ module.exports.index = async (req, res) => {
       ]),
     ]);
 
-    const mainQuantity = mainStock[0]
-        ? mainStock[0].totalStock
+    //* For Sales Return Data - starts
+    const salesReturnForNewData = await SalesReturn.aggregate([
+      {
+        $facet: {
+          total: [
+            {
+              $unwind: "$products",
+            },
+            {
+              $group: {
+                _id: null,
+                totalSentItems: { $sum: "$products.returnQuantity" },
+                totalWeight: { $sum: "$products.returnQtyInKg" },
+              },
+            },
+          ],
+
+          totalAmount: [
+            {
+              $group: {
+                _id: null,
+                totalAmount: {
+                  $sum: { $multiply: ["$totalReturnValue", 10000] },
+                },
+                totalPaid: {
+                  $sum: { $multiply: ["$paid", 10000] },
+                },
+                totalDue: {
+                  $sum: { $multiply: ["$due", 10000] },
+                },
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+    const transactionData = await CompanySalesReturnTransaction.aggregate([
+      {
+        $group: {
+          _id: null,
+          transactiontotalSentItems: { $sum: "$paidAmount" },
+        },
+      },
+    ]);
+
+    const transactionSentItems =
+      transactionData[0]?.transactiontotalSentItems || 0;
+
+    const companyData = await CompanySalesReturn.find();
+
+    const totalCompanyWeight =
+      companyData && companyData.length
+        ? companyData.reduce((acc, p) => acc + p.qtyInKg, 0)
         : 0;
+    //* For Sales Return Data - ends
 
-    const companySaleReturnQuantity = companySalesReturn[0] ? companySalesReturn[0].productQuantityTotal : 0;
+    //* For Company Sales Return Data - starts
+    const companySalesReturnForDashboard = await CompanySalesReturn.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalAmountQty: {
+            $sum: "$totalAmountQty",
+          },
+          totalPaidQty: {
+            $sum: "$paidQty" ,
+          },
+          totalDueQty: {
+            $sum: "$dueQty",
+          },
+          totalAmount: {
+            $sum: { $multiply: ["$totalAmount", 10000] },
+          },
+          totalPaid: {
+            $sum: { $multiply: ["$paid", 10000] },
+          },
+          totalDue: {
+            $sum: { $multiply: ["$due", 10000] },
+          },
+        },
+      },
+    ]);
+    //* For Company Sales Return Data - ends
 
-    const purchaseReturnQuantity = purchaseReturn[0] ? purchaseReturn[0].productQuantityTotal : 0;
+    const mainQuantity = mainStock[0] ? mainStock[0].totalStock : 0;
 
-    const salesReturnQuantity = salesReturn[0] ? salesReturn[0].productQuantityTotal : 0;
+    const companySaleReturnQuantity = companySalesReturn[0]
+      ? companySalesReturn[0].productQuantityTotal
+      : 0;
 
-    const salesQuantity = 
-        sales[0].forStockDetails.length > 0
-          ? sales[0].forStockDetails[0].productQuantityTotal
-          : 0;
+    const purchaseReturnQuantity = purchaseReturn[0]
+      ? purchaseReturn[0].productQuantityTotal
+      : 0;
+
+    const salesReturnQuantity = salesReturn[0]
+      ? salesReturn[0].productQuantityTotal
+      : 0;
+
+    const salesQuantity =
+      sales[0].forStockDetails.length > 0
+        ? sales[0].forStockDetails[0].productQuantityTotal
+        : 0;
 
     const quantityDetails = {
       mainQuantity,
       companySaleReturnQuantity,
       purchaseReturnQuantity,
       salesReturnQuantity,
-      salesQuantity
-    }
+      salesQuantity,
+    };
 
     let result = {
       purchaseTotal:
@@ -311,9 +401,57 @@ module.exports.index = async (req, res) => {
             10000
           : 0,
 
-      productQuantity: mainQuantity ? (mainQuantity + companySaleReturnQuantity + purchaseReturnQuantity - salesReturnQuantity - salesQuantity) : 0,
+      productQuantity: mainQuantity
+        ? mainQuantity +
+          companySaleReturnQuantity +
+          purchaseReturnQuantity -
+          salesReturnQuantity -
+          salesQuantity
+        : 0,
 
-      quantityDetails
+      quantityDetails,
+
+      totalSentItemsForSalesReturn:
+        salesReturnForNewData[0].total.length > 0
+          ? salesReturnForNewData[0].total[0].totalSentItems -
+            transactionSentItems
+          : 0,
+      totalWeightForSalesReturn:
+        salesReturnForNewData[0].total.length > 0
+          ? salesReturnForNewData[0].total[0].totalWeight - totalCompanyWeight
+          : 0,
+      totalAmountForSalesReturn:
+        salesReturnForNewData[0].total.length > 0
+          ? salesReturnForNewData[0].totalAmount[0].totalAmount / 10000
+          : 0,
+      totalPaidForSalesReturn:
+        salesReturnForNewData[0].total.length > 0
+          ? salesReturnForNewData[0].totalAmount[0].totalPaid / 10000
+          : 0,
+      totalDueForSalesReturn:
+        salesReturnForNewData[0].total.length > 0
+          ? salesReturnForNewData[0].totalAmount[0].totalDue / 10000
+          : 0,
+
+      totalAmountQtyForCSR: companySalesReturnForDashboard[0]
+      ? companySalesReturnForDashboard[0].totalAmountQty
+      : 0,
+      totalPaidQtyForCSR: companySalesReturnForDashboard[0]
+      ? companySalesReturnForDashboard[0].totalPaidQty
+      : 0,
+      totalDueQtyForCSR: companySalesReturnForDashboard[0]
+      ? companySalesReturnForDashboard[0].totalDueQty
+      : 0,
+      totalAmountForCSR: companySalesReturnForDashboard[0]
+      ? companySalesReturnForDashboard[0].totalAmount / 10000
+      : 0,
+      totalPaidForCSR: companySalesReturnForDashboard[0]
+      ? companySalesReturnForDashboard[0].totalPaid / 10000
+      : 0,
+      totalDueForCSR: companySalesReturnForDashboard[0]
+      ? companySalesReturnForDashboard[0].totalDue / 10000
+      : 0,
+
     };
 
     res.status(201).json(result);
