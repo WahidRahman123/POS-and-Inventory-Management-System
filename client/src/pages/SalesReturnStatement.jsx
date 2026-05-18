@@ -8,9 +8,16 @@ import Decimal from "decimal.js";
 
 const SalesReturnStatement = () => {
   const { user } = useSelector((state) => state.auth);
-  const { transactions, totalAmount, totalPaid, totalDue } = useSelector(
-    (state) => state.salesReturn,
-  );
+  const {
+    transactions,
+    totalAmount,
+    totalPaid,
+    totalDue,
+    totalReturnQuantity,
+    totalReturnQuantityInKg,
+    totalExchangeQuantity,
+    remainingQuantity,
+  } = useSelector((state) => state.salesReturn);
 
   // console.log(transactions);
   const dispatch = useDispatch();
@@ -183,7 +190,9 @@ const SalesReturnStatement = () => {
                                 <button
                                   onClick={() =>
                                     setExpandedTransactionIdx(
-                                      expandedTransactionIdx === idx ? null : idx,
+                                      expandedTransactionIdx === idx
+                                        ? null
+                                        : idx,
                                     )
                                   }
                                   className="text-lg font-bold text-blue-600 hover:text-blue-800"
@@ -214,8 +223,8 @@ const SalesReturnStatement = () => {
                                 {isPayment
                                   ? `Payment against Memo-${transaction.salesReturnId.memo}`
                                   : transaction.salesReturnId?.products
-                                    ?.map((p) => p.productName)
-                                    .join(", ") || "Sales Items"}
+                                      ?.map((p) => p.productName)
+                                      .join(", ") || "Sales Items"}
                               </span>
                             </td>
                             <td className="px-6 py-4 text-right font-black">
@@ -248,7 +257,9 @@ const SalesReturnStatement = () => {
                                   transaction.salesReturnId?.due > 0 && (
                                     <button
                                       onClick={() =>
-                                        setPayModal(transaction.salesReturnId._id)
+                                        setPayModal(
+                                          transaction.salesReturnId._id,
+                                        )
                                       }
                                       className="text-indigo-600 hover:text-indigo-800 font-bold cursor-pointer"
                                     >
@@ -419,7 +430,9 @@ const SalesReturnStatement = () => {
                                                     <td className="border px-2 py-1 text-center font-semibold text-green-600">
                                                       ৳{" "}
                                                       {new Decimal(
-                                                        Number(product.subTotal),
+                                                        Number(
+                                                          product.subTotal,
+                                                        ),
                                                       ).toFixed(2)}
                                                     </td>
                                                   </tr>
@@ -564,7 +577,7 @@ const SalesReturnStatement = () => {
               </div>
             </div>
 
-            <div className="bg-gray-800 text-white p-5 rounded-2xl shadow-lg border-t-4 border-yellow-500">
+            {/* <div className="bg-gray-800 text-white p-5 rounded-2xl shadow-lg border-t-4 border-yellow-500">
               <div className="flex justify-between items-center border-b border-gray-700 pb-3 mb-3 ">
                 <h3 className="text-xs font-bold uppercase tracking-widest">
                   Final Status
@@ -594,6 +607,81 @@ const SalesReturnStatement = () => {
                   <span className="font-black uppercase text-[10px] self-center">
                     {totalDue >= 0 ? "Payable" : "Credit"}
                   </span>
+                  <span className="text-2xl font-black text-yellow-400 font-mono tracking-tighter">
+                    ৳{Number(totalDue).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div> */}
+
+            <div className="bg-gray-800 text-white p-5 rounded-2xl shadow-lg border-t-4 border-yellow-500">
+              <div className="flex justify-between items-center border-b border-gray-700 pb-3 mb-3 ">
+                <h3 className="text-xs font-bold uppercase tracking-widest">
+                  Final Status
+                </h3>
+                <span className="bg-yellow-500 text-gray-900 text-[9px] px-2 py-0.5 rounded font-black">
+                  2026
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                {/* Amount Summary */}
+                <div className="flex justify-between text-xs font-medium">
+                  <span className="text-gray-400 tracking-tight">
+                    Net Returnable:
+                  </span>
+                  <span className="font-mono">
+                    ৳{Number(totalAmount).toLocaleString()}
+                  </span>
+                </div>
+
+                <div className="flex justify-between text-xs font-medium text-green-400">
+                  <span className="text-gray-400 tracking-tight">
+                    Total Settled:
+                  </span>
+                  <span className="font-mono">
+                    - ৳{Number(totalPaid).toLocaleString()}
+                  </span>
+                </div>
+
+                {/* Quantity Summary */}
+                <div className="border-t border-gray-700 pt-3 mt-3 space-y-2">
+                  <div className="flex justify-between text-xs font-medium">
+                    <span className="text-gray-400 tracking-tight">
+                      Returned Qty:
+                    </span>
+                    <span className="font-mono text-red-400">
+                      {Number(totalReturnQuantity).toLocaleString("en-BD")}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between text-xs font-medium">
+                    <span className="text-gray-400 tracking-tight">
+                      Exchanged Qty:
+                    </span>
+                    <span className="font-mono text-green-400">
+                      {Number(totalExchangeQuantity).toLocaleString("en-BD")}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between text-xs font-medium">
+                    <span className="text-gray-400 tracking-tight">
+                      Pending Qty:
+                    </span>
+                    <span className="font-mono text-yellow-400">
+                      {Number(
+                        totalReturnQuantity - totalExchangeQuantity,
+                      ).toLocaleString("en-BD")}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Final Due */}
+                <div className="flex justify-between border-t border-gray-700 pt-3 mt-3">
+                  <span className="font-black uppercase text-[10px] self-center">
+                    {totalDue >= 0 ? "Payable" : "Credit"}
+                  </span>
+
                   <span className="text-2xl font-black text-yellow-400 font-mono tracking-tighter">
                     ৳{Number(totalDue).toLocaleString()}
                   </span>

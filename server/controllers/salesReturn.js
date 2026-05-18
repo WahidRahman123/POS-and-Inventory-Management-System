@@ -426,20 +426,76 @@ module.exports.salesReturnStatement = async (req, res) => {
         $match: nameSearchQuery,
       },
       {
-        $group: {
-          _id: null,
-          totalAmount: { $sum: { $multiply: ["$totalReturnValue", 10000] } },
-          totalPaid: { $sum: { $multiply: ["$paid", 10000] } },
-          totalDue: { $sum: { $multiply: ["$due", 10000] } },
+        $facet: {
+          amountDetails: [
+            {
+              $group: {
+                _id: null,
+                totalAmount: {
+                  $sum: { $multiply: ["$totalReturnValue", 10000] },
+                },
+                totalPaid: { $sum: { $multiply: ["$paid", 10000] } },
+                totalDue: { $sum: { $multiply: ["$due", 10000] } },
+              },
+            },
+          ],
+
+          quantityProductDetails: [
+            {
+              $unwind: "$products",
+            },
+            {
+              $group: {
+                _id: null,
+                totalReturnQuantity: {
+                  $sum: "$products.returnQuantity",
+                },
+                totalReturnQuantityInKg: {
+                  $sum: "$products.returnQtyInKg",
+                },
+              },
+            },
+          ],
+
+          quantityExchangeProductDetails: [
+            {
+              $unwind: "$exchangeProducts",
+            },
+            {
+              $group: {
+                _id: null,
+                totalExchangeQuantity: {
+                  $sum: "$exchangeProducts.quantity",
+                },
+              },
+            },
+          ],
         },
       },
     ]);
 
+    const totalReturnQuantity = result[0].quantityProductDetails.length > 0 ? result[0].quantityProductDetails[0].totalReturnQuantity : 0;
+
+    const totalReturnQuantityInKg = result[0].quantityProductDetails.length > 0 ? result[0].quantityProductDetails[0].totalReturnQuantityInKg : 0;
+
+    const totalExchangeQuantity = result[0].quantityExchangeProductDetails.length > 0 ? result[0].quantityExchangeProductDetails[0].totalExchangeQuantity : 0;
+
+    const remainingQuantity = totalReturnQuantity - totalExchangeQuantity;
+
     res.status(201).json({
       transactions,
-      totalAmount: result.length > 0 ? result[0].totalAmount / 10000 : 0,
-      totalPaid: result.length > 0 ? result[0].totalPaid / 10000 : 0,
-      totalDue: result.length > 0 ? result[0].totalDue / 10000 : 0,
+      // totalAmount: result.length > 0 ? result[0].totalAmount / 10000 : 0,
+      // totalPaid: result.length > 0 ? result[0].totalPaid / 10000 : 0,
+      // totalDue: result.length > 0 ? result[0].totalDue / 10000 : 0,
+
+      totalAmount: result[0].amountDetails.length > 0 ? result[0].amountDetails[0].totalAmount / 10000 : 0,
+      totalPaid: result[0].amountDetails.length > 0 ? result[0].amountDetails[0].totalPaid / 10000 : 0,
+      totalDue: result[0].amountDetails.length > 0 ? result[0].amountDetails[0].totalDue / 10000 : 0,
+
+      totalReturnQuantity,
+      totalReturnQuantityInKg,
+      totalExchangeQuantity,
+      remainingQuantity
     });
   } catch (error) {
     console.error(error);

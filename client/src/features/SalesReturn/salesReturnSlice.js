@@ -12,7 +12,11 @@ const initialState = {
   totalAmount: null,
   totalPaid: null,
   totalDue: null,
-  
+  totalReturnQuantity: null,
+  totalReturnQuantityInKg: null,
+  totalExchangeQuantity: null,
+  remainingQuantity: null,
+
   page: 1,
   pages: null,
   toggle: false,
@@ -337,35 +341,34 @@ const salesReturnSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(
-        fetchSalesReturnsForCustomerName.fulfilled,
-        (state, action) => {
-          state.loading = false;
-          // state.page = action.payload.page;
-          // state.pages = action.payload.pages;
-          state.transactions = action.payload.transactions;
-          state.totalAmount = action.payload.totalAmount;
-          state.totalPaid = action.payload.totalPaid;
-          state.totalDue = action.payload.totalDue;
-        },
-      )
-      .addCase(
-        fetchSalesReturnsForCustomerName.rejected,
-        (state, action) => {
-          state.loading = false;
-          state.error = action.error;
-          toast.error(action.payload, {
-            position: "bottom-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "colored",
-          });
-        },
-      )
+      .addCase(fetchSalesReturnsForCustomerName.fulfilled, (state, action) => {
+        state.loading = false;
+        // state.page = action.payload.page;
+        // state.pages = action.payload.pages;
+        state.transactions = action.payload.transactions;
+        state.totalAmount = action.payload.totalAmount;
+        state.totalPaid = action.payload.totalPaid;
+        state.totalDue = action.payload.totalDue;
+
+        state.totalReturnQuantity = action.payload.totalReturnQuantity;
+        state.totalReturnQuantityInKg = action.payload.totalReturnQuantityInKg;
+        state.totalExchangeQuantity = action.payload.totalExchangeQuantity;
+        state.remainingQuantity = action.payload.remainingQuantity;
+      })
+      .addCase(fetchSalesReturnsForCustomerName.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+        toast.error(action.payload, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
       .addCase(fetchSalesReturnById.pending, (state, action) => {
         state.loading = true;
         state.error = null;

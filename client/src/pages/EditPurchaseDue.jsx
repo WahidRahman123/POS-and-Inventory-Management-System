@@ -24,12 +24,14 @@ const EditPurchaseDue = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setAid("Run");
-    let amount;
-    if (new Decimal(due).greaterThan(new Decimal(purchaseSearchedById.due))) {
-      amount = Number(new Decimal(purchaseSearchedById.due).toFixed(4));
-    } else {
-      amount = Number(new Decimal(due).toFixed(4));
-    }
+    // let amount;
+    let amount = Number(new Decimal(due).toFixed(4));
+    // if (new Decimal(due).greaterThan(new Decimal(purchaseSearchedById.due))) {
+    //   amount = Number(new Decimal(purchaseSearchedById.due).toFixed(4));
+    // } else {
+    //   amount = Number(new Decimal(due).toFixed(4));
+    // }
+
     try {
       await dispatch(
         addPayment({
@@ -104,7 +106,7 @@ const EditPurchaseDue = () => {
               type="number"
               value={due}
               onChange={(e) => setDue(e.target.value)}
-              min={0}
+              // min={0}
               placeholder="Add Payment"
               step="any"
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"

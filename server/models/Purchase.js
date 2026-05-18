@@ -78,17 +78,17 @@ const purchaseSchema = new mongoose.Schema({
   totalAmount: {
     type: Number,
     required: true,
-    min: 0,
+    // min: 0,
   },
   paid: {
     type: Number,
     required: true,
-    min: 0,
+    // min: 0,
   },
   due: {
     type: Number,
     required: true,
-    min: 0,
+    // min: 0,
   },
   createdAt: {
     type: Date,

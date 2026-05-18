@@ -209,9 +209,9 @@ const Purchase = () => {
 
     const newProducts = products.map(({ id, ...rest }) => rest);
 
-    const newpPaid = new Decimal(Number(paid)).greaterThan(totalAmount)
-      ? totalAmount
-      : new Decimal(Number(paid));
+    // const newpPaid = new Decimal(Number(paid)).greaterThan(totalAmount)
+    //   ? totalAmount
+    //   : new Decimal(Number(paid));
 
     const purchaseData = {
       companyMemo: formData.memo,
@@ -225,8 +225,10 @@ const Purchase = () => {
       userId: user._id,
       products: newProducts,
       totalAmount: Number(totalAmount.toFixed(4)),
-      paid: Number(newpPaid.toFixed(4)),
-      due: due.lessThan(new Decimal(0)) ? 0 : Number(due.toFixed(4)),
+      // paid: Number(newpPaid.toFixed(4)),
+      paid: Number(paid),
+      // due: due.lessThan(new Decimal(0)) ? 0 : Number(due.toFixed(4)),
+      due: Number(due.toFixed(4)),
 
       unchangedPaid: Number(paid),
       unchangedDue: Number(due.toFixed(4)),
@@ -919,12 +921,14 @@ const Purchase = () => {
                             <div className="flex flex-wrap gap-1">
                               <Link
                                 onClick={(e) => e.stopPropagation()}
-                                to={
-                                  purchase.due > 0
-                                    ? `/purchase-report/${purchase._id}/edit-due`
-                                    : "#"
-                                }
-                                className={`text-xs text-white px-2 py-1 rounded ${purchase.due > 0 ? "bg-green-600 hover:bg-green-700 cursor-pointer" : "bg-green-50 cursor-not-allowed"}`}
+                                to={`/purchase-report/${purchase._id}/edit-due`}
+                                // to={
+                                //   purchase.due > 0
+                                //     ? `/purchase-report/${purchase._id}/edit-due`
+                                //     : "#"
+                                // }
+                                className={`text-xs text-white px-2 py-1 rounded bg-green-600 hover:bg-green-700 cursor-pointer`}
+                                // className={`text-xs text-white px-2 py-1 rounded ${purchase.due > 0 ? "bg-green-600 hover:bg-green-700 cursor-pointer" : "bg-green-50 cursor-not-allowed"}`}
                               >
                                 Add Payment
                               </Link>
