@@ -5,8 +5,8 @@ import { Link } from "react-router-dom";
 import CountUp from "react-countup";
 
 /* Row Item */
-const Row = ({ label, value, suffix = "" }) => (
-  <div className="flex justify-between text-xs sm:text-sm mt-2 text-white/90">
+const Row = ({ label, value, suffix = "" , textColor = "text-white"}) => (
+  <div className={`flex justify-between text-xs sm:text-sm mt-2 ${textColor}/90`}>
     <span>{label}</span>
     <span className="font-medium">
       <CountUp
@@ -26,15 +26,16 @@ const DashboardCard = ({
   children,
   to = "#",
   color,
+  textColor = "text-white"
 }) => (
   <Link to={to} className="h-full">
     <div
-      className={`${color} text-white rounded-2xl p-4 sm:p-5 lg:p-6 
+      className={`${color} ${textColor} rounded-2xl p-4 sm:p-5 lg:p-6 
       shadow-sm hover:shadow-lg hover:scale-[1.02] transition 
       h-full flex flex-col`}
     >
       {/* Title */}
-      <h2 className="text-sm sm:text-base font-medium text-white/80">
+      <h2 className={`text-sm sm:text-base font-medium ${textColor}/80`}>
         {title}
       </h2>
 
@@ -151,6 +152,8 @@ const Dashboard = () => {
           color="bg-green-600"
           to="/sales-report"
         >
+          <Row label="Cash" value={dashboardResult.salesCash} suffix=" ৳" />
+          <Row label="Exchange" value={dashboardResult.salesExchange} suffix=" ৳" />
           <Row label="Due" value={dashboardResult.salesDue} suffix=" ৳" />
           <Row label="Profit" value={dashboardResult.salesProfit} suffix=" ৳" />
         </DashboardCard>
@@ -224,6 +227,21 @@ const Dashboard = () => {
             value={dashboardResult.totalDueForCSR}
             suffix=" ৳"
           />
+        </DashboardCard>
+
+        {/* TODAY'S SALES */}
+        <DashboardCard
+          title="Todays's Sales"
+          value={dashboardResult.salesTotalToday}
+          suffix=" ৳"
+          color="bg-yellow-500"
+          textColor="text-black"
+          to="/sales-report"
+        >
+          <Row label="Cash" value={dashboardResult.salesCashToday} suffix=" ৳" textColor="text-black"/>
+          <Row label="Exchange" value={dashboardResult.salesExchangeToday} suffix=" ৳" textColor="text-black"/>
+          <Row label="Due" value={dashboardResult.salesDueToday} suffix=" ৳" textColor="text-black"/>
+          <Row label="Profit" value={dashboardResult.salesProfitToday} suffix=" ৳" textColor="text-black"/>
         </DashboardCard>
       </div>
     </div>

@@ -77,6 +77,11 @@ const CompanySalesReturnTransaction = require("../models/CompanySalesReturnTrans
 // };
 module.exports.index = async (req, res) => {
   try {
+    let start = new Date();
+    start.setHours(0, 0, 0, 0);
+    let end = new Date();
+    end.setHours(23, 59, 59, 999);
+
     const [
       mainStock,
       sales,
@@ -110,6 +115,8 @@ module.exports.index = async (req, res) => {
 
                   saleTotal: { $sum: { $multiply: ["$total", 10000] } },
                   saleDue: { $sum: { $multiply: ["$due", 10000] } },
+                  totalCash: { $sum: { $multiply: ["$cash", 10000] } },
+                  totalExchange: { $sum: { $multiply: ["$exchange", 10000] } },
                 },
               },
             ],
@@ -126,6 +133,21 @@ module.exports.index = async (req, res) => {
                   },
                 },
               },
+            ],
+
+            todaysSaleDetails: [
+              {
+                $match: { createdAt: { $gte: start, $lte: end } }
+              },
+              {
+                $group: {
+                  _id: null,
+                  saleTotalToday: { $sum: { $multiply: ["$total", 10000] } },
+                  saleDueToday: { $sum: { $multiply: ["$due", 10000] } },
+                  totalCashToday: { $sum: { $multiply: ["$cash", 10000] } },
+                  totalExchangeToday: { $sum: { $multiply: ["$exchange", 10000] } },
+                }
+              }
             ],
           },
         },
@@ -309,7 +331,7 @@ module.exports.index = async (req, res) => {
             $sum: "$totalAmountQty",
           },
           totalPaidQty: {
-            $sum: "$paidQty" ,
+            $sum: "$paidQty",
           },
           totalDueQty: {
             $sum: "$dueQty",
@@ -394,10 +416,42 @@ module.exports.index = async (req, res) => {
         sales[0].salesDetails.length > 0
           ? sales[0].salesDetails[0].saleDue / 10000
           : 0,
+      salesCash:
+        sales[0].salesDetails.length > 0
+          ? sales[0].salesDetails[0].totalCash / 10000
+          : 0,
+      salesExchange:
+        sales[0].salesDetails.length > 0
+          ? sales[0].salesDetails[0].totalExchange / 10000
+          : 0,
       salesProfit:
         sales[0].salesDetails.length > 0
           ? (sales[0].salesDetails[0].saleTotal -
               sales[0].salesDetails[0].saleDue) /
+            10000
+          : 0,
+
+      //* Today Sales Report
+      salesTotalToday:
+        sales[0].todaysSaleDetails.length > 0
+          ? sales[0].todaysSaleDetails[0].saleTotalToday / 10000
+          : 0,
+      salesDueToday:
+        sales[0].todaysSaleDetails.length > 0
+          ? sales[0].todaysSaleDetails[0].saleDueToday / 10000
+          : 0,
+      salesCashToday:
+        sales[0].todaysSaleDetails.length > 0
+          ? sales[0].todaysSaleDetails[0].totalCashToday / 10000
+          : 0,
+      salesExchangeToday:
+        sales[0].todaysSaleDetails.length > 0
+          ? sales[0].todaysSaleDetails[0].totalExchangeToday / 10000
+          : 0,
+      salesProfitToday:
+        sales[0].todaysSaleDetails.length > 0
+          ? (sales[0].todaysSaleDetails[0].saleTotalToday -
+              sales[0].todaysSaleDetails[0].saleDueToday) /
             10000
           : 0,
 
@@ -434,24 +488,23 @@ module.exports.index = async (req, res) => {
           : 0,
 
       totalAmountQtyForCSR: companySalesReturnForDashboard[0]
-      ? companySalesReturnForDashboard[0].totalAmountQty
-      : 0,
+        ? companySalesReturnForDashboard[0].totalAmountQty
+        : 0,
       totalPaidQtyForCSR: companySalesReturnForDashboard[0]
-      ? companySalesReturnForDashboard[0].totalPaidQty
-      : 0,
+        ? companySalesReturnForDashboard[0].totalPaidQty
+        : 0,
       totalDueQtyForCSR: companySalesReturnForDashboard[0]
-      ? companySalesReturnForDashboard[0].totalDueQty
-      : 0,
+        ? companySalesReturnForDashboard[0].totalDueQty
+        : 0,
       totalAmountForCSR: companySalesReturnForDashboard[0]
-      ? companySalesReturnForDashboard[0].totalAmount / 10000
-      : 0,
+        ? companySalesReturnForDashboard[0].totalAmount / 10000
+        : 0,
       totalPaidForCSR: companySalesReturnForDashboard[0]
-      ? companySalesReturnForDashboard[0].totalPaid / 10000
-      : 0,
+        ? companySalesReturnForDashboard[0].totalPaid / 10000
+        : 0,
       totalDueForCSR: companySalesReturnForDashboard[0]
-      ? companySalesReturnForDashboard[0].totalDue / 10000
-      : 0,
-
+        ? companySalesReturnForDashboard[0].totalDue / 10000
+        : 0,
     };
 
     res.status(201).json(result);

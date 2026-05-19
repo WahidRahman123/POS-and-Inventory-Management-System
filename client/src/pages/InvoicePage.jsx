@@ -537,6 +537,7 @@ const InvoicePage = () => {
     paid,
     due,
     remarks,
+    createdAt
   } = location.state;
 
   return (
@@ -589,12 +590,12 @@ const InvoicePage = () => {
               <div className="text-right">
                 <p>
                   <span className="font-semibold">Date:</span>{" "}
-                  {new Date().toLocaleDateString("en-GB", {
+                  {new Date(createdAt).toLocaleDateString("en-GB", {
                     day: "2-digit",
                     month: "short",
                     year: "numeric",
                   })}{" "}
-                  {new Date().toLocaleTimeString("en-US")}
+                  {/* {new Date(createdAt).toLocaleTimeString("en-US")} */}
                 </p>
               </div>
             </div>
