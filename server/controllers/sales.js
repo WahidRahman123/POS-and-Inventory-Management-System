@@ -39,7 +39,6 @@ module.exports.createSales = async (req, res) => {
     const salesData = req.body;
     const {
       exchangeMemoId,
-      exchangeDetails, // ফ্রন্টএন্ড থেকে পাঠানো হবে
       // invoiceNo,
       products,
       total,
@@ -69,6 +68,7 @@ module.exports.createSales = async (req, res) => {
       paidAmount: paid,
       date: new Date(),
       currentDue: due,
+      exchangeMemoId,
     };
     const transaction = new SalesTransaction(transactionDetails);
 
@@ -81,7 +81,6 @@ module.exports.createSales = async (req, res) => {
     transaction.salesId = sale._id;
     // await transaction.save({ session });
     await transaction.save();
-
 
     if (products && products.length > 0) {
       for (let i = 0; i < products.length; i++) {
@@ -105,8 +104,7 @@ module.exports.createSales = async (req, res) => {
     if (exchangeMemoId && salesData.exchange > 0) {
       // const memoData =
       //   await ProductExchange.findById(exchangeMemoId).session(session);
-      const memoData =
-        await ProductExchange.findById(exchangeMemoId);
+      const memoData = await ProductExchange.findById(exchangeMemoId);
 
       if (memoData) {
         const currentBalance = new Decimal(memoData.remainingBalance);
@@ -129,7 +127,6 @@ module.exports.createSales = async (req, res) => {
     res.status(201).json(createdSale);
   } catch (error) {
     // if (session.inTransaction()) {
-    //   // সংশোধিত চেক
     //   await session.abortTransaction();
     // }
     // session.endSession();
@@ -244,7 +241,16 @@ module.exports.addPayment = async (req, res) => {
   // const session = await mongoose.startSession();
   try {
     const { id } = req.params;
-    const { date, amount, unchangedAmount } = req.body;
+    const {
+      date,
+      amount,
+      unchangedAmount,
+      cash,
+      bankPaymentAmount,
+      exchange,
+      exchangeMemoId,
+      exchangeDetails,
+    } = req.body;
 
     // session.startTransaction();
     // const sale = await Sales.findById(id).session(session);
@@ -259,6 +265,8 @@ module.exports.addPayment = async (req, res) => {
       paid,
       products,
       transactionRecords,
+      _id,
+      _v,
       ...transactionDetail
     } = saleObj;
 
@@ -278,6 +286,11 @@ module.exports.addPayment = async (req, res) => {
       date: createCustomDate(date),
       currentDue: sale.due,
       salesId: sale._id,
+      cash,
+      bankPaymentAmount,
+      exchange,
+      exchangeMemoId,
+      exchangeDetails,
       unchangedPaid: Number(new Decimal(unchangedAmount).toFixed(4)),
       unchangedDue: Number(
         new Decimal(due).minus(new Decimal(unchangedAmount)).toFixed(4),
@@ -290,12 +303,30 @@ module.exports.addPayment = async (req, res) => {
     // await sale.save({ session });
     await sale.save();
 
+    if (exchangeMemoId && exchange > 0) {
+      // const memoData =
+      //   await ProductExchange.findById(exchangeMemoId).session(session);
+      const memoData = await ProductExchange.findById(exchangeMemoId);
+
+      if (memoData) {
+        const currentBalance = new Decimal(memoData.remainingBalance);
+        const usedAmount = new Decimal(exchange);
+        let newBalance = Number(currentBalance.minus(usedAmount).toFixed(4));
+
+        if (newBalance < 0) newBalance = 0;
+        memoData.remainingBalance = newBalance;
+        // await memoData.save({ session });
+        await memoData.save();
+      }
+    }
+
     // await session.commitTransaction();
     // session.endSession();
     res.status(200).json({ message: "Payment updated successfully" });
   } catch (error) {
     // await session.abortTransaction();
     // session.endSession();
+    // console.log(error)
     res.status(500).send("Server Error");
   }
 };
@@ -364,7 +395,7 @@ module.exports.salesDueList = async (req, res) => {
     const dueQuery = { due: { $gt: 0 } };
     queries.push(dueQuery);
 
-    if(customerName) {
+    if (customerName) {
       nameQuery = { customerName: { $regex: customerName, $options: "i" } };
       queries.push(nameQuery);
     }
@@ -375,14 +406,12 @@ module.exports.salesDueList = async (req, res) => {
       .limit(limit);
     const total = await Sales.countDocuments({ due: { $gt: 0 } });
 
-    res
-      .status(200)
-      .json({
-        total,
-        page: parseInt(page),
-        pages: Math.ceil(total / limit),
-        sales,
-      });
+    res.status(200).json({
+      total,
+      page: parseInt(page),
+      pages: Math.ceil(total / limit),
+      sales,
+    });
   } catch (error) {
     res.status(500).send("Server Error");
   }

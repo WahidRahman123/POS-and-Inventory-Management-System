@@ -4,26 +4,63 @@ import { useNavigate, useParams } from "react-router-dom";
 import { addPayment, fetchSaleById } from "../features/sales/salesSlice";
 import { FaArrowLeft } from "react-icons/fa";
 import Decimal from "decimal.js";
+import AsyncSelect from "react-select/async";
+import { fetchExchangeByMemo } from "../features/Exchange/exchangeSlice";
 
 const EditDue = () => {
   const { user } = useSelector((state) => state.auth);
   const { saleSearchedById, loading } = useSelector((state) => state.sales);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [due, setDue] = useState(0);
+  // const [due, setDue] = useState(0);
   const [aid, setAid] = useState(null);
   const [date, setDate] = useState("");
   const [dateRestriction, setDateRestriction] = useState("");
   const { id } = useParams();
 
+  //* Exchange options - starts
+  const loadOptions = async (inputValue, callback) => {
+    if (!inputValue) return callback([]);
+    try {
+      const response = await dispatch(fetchExchangeByMemo(inputValue)).unwrap();
+      if (response && Array.isArray(response)) {
+        const options = response.map((item) => ({
+          label: `${item.memo} - ${item.customerName || "No Name"} (Available: ৳${item.remainingBalance})`,
+          value: item.remainingBalance,
+          id: item._id,
+          fullData: item, // এখানে পুরো ডাটা পাস করা হচ্ছে
+        }));
+        callback(options);
+      }
+    } catch (error) {
+      callback([]);
+    }
+  };
+
+  const [cashInput, setCashInput] = useState("");
+  const [bankPaymentAmount, setBankPaymentAmount] = useState("");
+  const [exchangeValue, setExchangeValue] = useState("");
+  const [exchangeMemoId, setExchangeMemoId] = useState(null);
+  const [maxAvailableBalance, setMaxAvailableBalance] = useState(0);
+  const [selectedExchangeData, setSelectedExchangeData] = useState(null); // Full Data Store করার জন্য
+
+  const cashAndExchange = new Decimal(Number(cashInput || 0)).plus(
+    new Decimal(Number(exchangeValue || 0)),
+  );
+  const totalPaidLive = cashAndExchange.plus(
+    new Decimal(Number(bankPaymentAmount || 0)),
+  );
+
+  //* Exchange options - ends
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setAid("Run");
     let amount;
-    if (new Decimal(due).greaterThan(new Decimal(saleSearchedById.due))) {
+    if (totalPaidLive.greaterThan(new Decimal(saleSearchedById.due))) {
       amount = Number(new Decimal(saleSearchedById.due).toFixed(4));
     } else {
-      amount = Number(new Decimal(due).toFixed(4));
+      amount = Number(totalPaidLive.toFixed(4));
     }
     try {
       await dispatch(
@@ -32,7 +69,19 @@ const EditDue = () => {
           info: {
             date,
             amount,
-            unchangedAmount: Number(new Decimal(due).toFixed(4)),
+            cash: Number(cashInput || 0),
+            bankPaymentAmount: Number(bankPaymentAmount),
+            exchange: Number(exchangeValue || 0),
+            exchangeMemoId: exchangeMemoId || null,
+            exchangeDetails: selectedExchangeData
+              ? {
+                  memo: selectedExchangeData.memo,
+                  totalAmount: selectedExchangeData.totalAmount,
+                  remainingBalance: selectedExchangeData.remainingBalance,
+                  products: selectedExchangeData.products,
+                }
+              : null,
+            unchangedAmount: Number(totalPaidLive.toFixed(4)),
           },
         }),
       ).unwrap();
@@ -61,7 +110,7 @@ const EditDue = () => {
 
   useEffect(() => {
     if (saleSearchedById) {
-      setDue(saleSearchedById.due);
+      // setDue(saleSearchedById.due);
       const restrictionDate = new Date(saleSearchedById.createdAt)
         .toISOString()
         .split("T")[0];
@@ -96,7 +145,7 @@ const EditDue = () => {
             />
           </div>
 
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Pay</label>
             <input
               type="number"
@@ -108,6 +157,69 @@ const EditDue = () => {
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
+          </div> */}
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Cash</label>
+            <input
+              type="number"
+              value={cashInput}
+              onChange={(e) => setCashInput(e.target.value)}
+              step="any"
+              className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Bank Payment Amount</label>
+            <input
+              type="number"
+              value={bankPaymentAmount}
+              onChange={(e) => setBankPaymentAmount(e.target.value)}
+              step="any"
+              className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">
+              Exchange Memo Search
+            </label>
+            <AsyncSelect
+              cacheOptions
+              loadOptions={loadOptions}
+              defaultOptions
+              isClearable
+              onChange={(selected) => {
+                if (selected) {
+                  setExchangeValue(selected.value);
+                  setExchangeMemoId(selected.id);
+                  setMaxAvailableBalance(selected.value);
+                  setSelectedExchangeData(selected.fullData); // পুরো ডাটা এখানে সেভ হবে
+                } else {
+                  setExchangeValue("");
+                  setExchangeMemoId(null);
+                  setMaxAvailableBalance(0);
+                  setSelectedExchangeData(null);
+                }
+              }}
+              placeholder="Search Memo (Shows Name)..."
+            />
+            {exchangeMemoId && (
+              <div className="mt-2">
+                <label className="block text-xs font-semibold text-orange-600 mb-1">
+                  Adjust Amount (Max: ৳{maxAvailableBalance})
+                </label>
+                <input
+                  type="number"
+                  value={exchangeValue}
+                  onChange={(e) => setExchangeValue(e.target.value)}
+                  className="block w-full px-3 py-1.5 border border-orange-300 bg-orange-50 rounded-sm text-sm"
+                  min={0}
+                  max={maxAvailableBalance}
+                />
+              </div>
+            )}
           </div>
 
           <button
@@ -155,9 +267,9 @@ const EditDue = () => {
               <span className="w-28 font-medium">Paid</span>
               <span>: {saleSearchedById?.paid}</span>
             </div>
-            <div className="flex">
-              <span className="w-28 font-medium">Due</span>
-              <span>
+            <div className="flex bg-amber-50">
+              <span className="w-28 font-medium text-red-700 text-lg">Due</span>
+              <span className="text-lg">
                 :{" "}
                 <span
                   className={`w-28 ${

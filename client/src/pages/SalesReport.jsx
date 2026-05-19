@@ -1203,7 +1203,7 @@ const SalesReport = () => {
             ) : (
               <tr>
                 <td
-                  colSpan={11}
+                  colSpan={14}
                   className="text-center text-gray-500 py-10 text-lg border"
                 >
                   No Sales Available.

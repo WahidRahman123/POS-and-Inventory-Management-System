@@ -76,7 +76,7 @@ export const fetchExchangeByMemo = createAsyncThunk(
         }
       );
       
-      console.log("Memo Response:", data); 
+      // console.log("Memo Response:", data); 
       return data;
     } catch (error) {
       if (error.response && error.response.status === 401) {

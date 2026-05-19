@@ -113,6 +113,10 @@ const salesSchema = new mongoose.Schema({
     type: Number,
     // required: true,
   },
+  bankPaymentAmount: {
+    type: Number,
+    // required: true,
+  },
   // এক্সচেঞ্জ লজিকের জন্য প্রয়োজনীয় ফিল্ডস
   exchange: {
     type: Number,

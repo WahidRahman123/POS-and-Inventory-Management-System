@@ -7,6 +7,7 @@ const PurchaseReturn = require("../models/PurchaseReturn");
 const SalesReturn = require("../models/SalesReturn");
 const CompanySalesReturn = require("../models/CompanySalesReturn");
 const CompanySalesReturnTransaction = require("../models/CompanySalesReturnTransaction");
+const SalesTransaction = require("../models/SalesTransaction");
 
 // module.exports.index = async (req, res) => {
 //   try {
@@ -90,6 +91,7 @@ module.exports.index = async (req, res) => {
       purchaseReturn,
       salesReturn,
       companySalesReturn,
+      salesTransaction,
     ] = await Promise.all([
       Product.aggregate([
         {
@@ -115,8 +117,9 @@ module.exports.index = async (req, res) => {
 
                   saleTotal: { $sum: { $multiply: ["$total", 10000] } },
                   saleDue: { $sum: { $multiply: ["$due", 10000] } },
-                  totalCash: { $sum: { $multiply: ["$cash", 10000] } },
-                  totalExchange: { $sum: { $multiply: ["$exchange", 10000] } },
+
+                  // totalCash: { $sum: { $multiply: ["$cash", 10000] } },
+                  // totalExchange: { $sum: { $multiply: ["$exchange", 10000] } },
                 },
               },
             ],
@@ -137,17 +140,19 @@ module.exports.index = async (req, res) => {
 
             todaysSaleDetails: [
               {
-                $match: { createdAt: { $gte: start, $lte: end } }
+                $match: { createdAt: { $gte: start, $lte: end } },
               },
               {
                 $group: {
                   _id: null,
                   saleTotalToday: { $sum: { $multiply: ["$total", 10000] } },
                   saleDueToday: { $sum: { $multiply: ["$due", 10000] } },
-                  totalCashToday: { $sum: { $multiply: ["$cash", 10000] } },
-                  totalExchangeToday: { $sum: { $multiply: ["$exchange", 10000] } },
-                }
-              }
+                  // totalCashToday: { $sum: { $multiply: ["$cash", 10000] } },
+                  // totalExchangeToday: {
+                  //   $sum: { $multiply: ["$exchange", 10000] },
+                  // },
+                },
+              },
             ],
           },
         },
@@ -260,6 +265,37 @@ module.exports.index = async (req, res) => {
             productQuantityTotal: {
               $sum: "$quantity",
             },
+          },
+        },
+      ]),
+
+      SalesTransaction.aggregate([
+        {
+          $facet: {
+            allReport: [
+              {
+                $group: {
+                  _id: null,
+                  totalCash: { $sum: { $multiply: ["$cash", 10000] } },
+                  totalExchange: { $sum: { $multiply: ["$exchange", 10000] } },
+                },
+              },
+            ],
+
+            todaysReport: [
+              {
+                $match: { date: { $gte: start, $lte: end } },
+              },
+              {
+                $group: {
+                  _id: null,
+                  totalCashToday: { $sum: { $multiply: ["$cash", 10000] } },
+                  totalExchangeToday: {
+                    $sum: { $multiply: ["$exchange", 10000] },
+                  },
+                },
+              },
+            ],
           },
         },
       ]),
@@ -417,12 +453,12 @@ module.exports.index = async (req, res) => {
           ? sales[0].salesDetails[0].saleDue / 10000
           : 0,
       salesCash:
-        sales[0].salesDetails.length > 0
-          ? sales[0].salesDetails[0].totalCash / 10000
+        salesTransaction[0].allReport.length > 0
+          ? salesTransaction[0].allReport[0].totalCash / 10000
           : 0,
       salesExchange:
-        sales[0].salesDetails.length > 0
-          ? sales[0].salesDetails[0].totalExchange / 10000
+        salesTransaction[0].allReport.length > 0
+          ? salesTransaction[0].allReport[0].totalExchange / 10000
           : 0,
       salesProfit:
         sales[0].salesDetails.length > 0
@@ -441,12 +477,12 @@ module.exports.index = async (req, res) => {
           ? sales[0].todaysSaleDetails[0].saleDueToday / 10000
           : 0,
       salesCashToday:
-        sales[0].todaysSaleDetails.length > 0
-          ? sales[0].todaysSaleDetails[0].totalCashToday / 10000
+        salesTransaction[0].todaysReport.length > 0
+          ? salesTransaction[0].todaysReport[0].totalCashToday / 10000
           : 0,
       salesExchangeToday:
-        sales[0].todaysSaleDetails.length > 0
-          ? sales[0].todaysSaleDetails[0].totalExchangeToday / 10000
+        salesTransaction[0].todaysReport.length > 0
+          ? salesTransaction[0].todaysReport[0].totalExchangeToday / 10000
           : 0,
       salesProfitToday:
         sales[0].todaysSaleDetails.length > 0

@@ -25,6 +25,7 @@ const PointOfSale = () => {
   const [searchValue, setSearchValue] = useState("");
   const [discount, setDiscount] = useState(0);
   const [cashInput, setCashInput] = useState("");
+  const [bankPaymentAmount, setBankPaymentAmount] = useState("");
   const [exchangeValue, setExchangeValue] = useState("");
   const [loanInput, setLoanInput] = useState("");
   const [exchangeMemoId, setExchangeMemoId] = useState(null);
@@ -56,9 +57,10 @@ const PointOfSale = () => {
 
   const subTotal = orderTotal.minus(new Decimal(Number(discount || 0)));
   const totalWithLoan = subTotal.plus(new Decimal(Number(loanInput || 0)));
-  const totalPaidLive = new Decimal(Number(cashInput || 0)).plus(
+  const cashAndExchange = new Decimal(Number(cashInput || 0)).plus(
     new Decimal(Number(exchangeValue || 0)),
   );
+  const totalPaidLive = cashAndExchange.plus(new Decimal(Number(bankPaymentAmount || 0)));
 
   const liveDue = totalWithLoan.minus(totalPaidLive).lessThan(0)
     ? "0.00"
@@ -118,6 +120,7 @@ const PointOfSale = () => {
         loan: Number(loanInput || 0),
         totalCost: Number(totalCost.toFixed(2)),
         cash: Number(cashInput || 0),
+        bankPaymentAmount: Number(bankPaymentAmount),
         exchange: Number(exchangeValue || 0),
         exchangeMemoId: exchangeMemoId || null,
         // ইনভয়েসে দেখানোর জন্য পুরো এক্সচেঞ্জ ডিটেইলস পাঠানো হচ্ছে
@@ -410,6 +413,16 @@ const PointOfSale = () => {
               className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Bank Payment Amount</label>
+            <input
+              type="number"
+              value={bankPaymentAmount}
+              onChange={(e) => setBankPaymentAmount(e.target.value)}
+              step="any"
+              className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
+            />
+          </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">
@@ -480,6 +493,10 @@ const PointOfSale = () => {
             <div className="flex justify-between font-bold">
               <span>Cash</span>
               <span>{new Decimal(Number(cashInput || 0)).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-bold">
+              <span>Bank Amount</span>
+              <span>{new Decimal(Number(bankPaymentAmount || 0)).toFixed(2)}</span>
             </div>
             <div className="flex justify-between font-bold">
               <span>Exchange</span>

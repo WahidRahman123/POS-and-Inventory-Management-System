@@ -47,6 +47,39 @@ const salesTransactionSchema = new mongoose.Schema({
     required: true,
   },
 
+  cash: {
+    type: Number,
+    // required: true,
+  },
+  bankPaymentAmount: {
+    type: Number,
+    // required: true,
+  },
+  exchange: {
+    type: Number,
+    // required: true,
+    default: 0,
+  },
+  exchangeMemoId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "ProductExchange",
+  },
+  exchangeDetails: {
+    memo: String,
+    totalAmount: Number,
+    remainingBalance: Number,
+    products: [
+      {
+        _id: false,
+        productName: String,
+        quantity: Number,
+        qtyInKg: Number,
+        unitPrice: Number,
+        subTotal: Number,
+      },
+    ],
+  },
+
   unchangedPaid: {
     type: Number,
     required: true,
@@ -59,10 +92,7 @@ const salesTransactionSchema = new mongoose.Schema({
   salesId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Sales",
-  }
+  },
 });
 
-module.exports = mongoose.model(
-  "SalesTransaction",
-  salesTransactionSchema,
-);
+module.exports = mongoose.model("SalesTransaction", salesTransactionSchema);
