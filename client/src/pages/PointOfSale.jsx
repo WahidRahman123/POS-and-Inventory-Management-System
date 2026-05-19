@@ -4,10 +4,7 @@ import {
   searchProductsforPOS,
   setProductsBySearchToEmpty,
 } from "../features/product/productSlice";
-import {
-  addSales,
-  setCreatedSalesToNull,
-} from "../features/sales/salesSlice";
+import { addSales, setCreatedSalesToNull } from "../features/sales/salesSlice";
 import { useNavigate } from "react-router-dom";
 import Decimal from "decimal.js";
 import AsyncSelect from "react-select/async";
@@ -21,6 +18,7 @@ const PointOfSale = () => {
   const { createdSales, loading } = useSelector((state) => state.sales);
   const { productsBySearchforPOS } = useSelector((state) => state.product);
   const dispatch = useDispatch();
+  const [customDate, setCustomDate] = useState("");
 
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [cid, setCid] = useState(null);
@@ -28,13 +26,17 @@ const PointOfSale = () => {
   const [discount, setDiscount] = useState(0);
   const [cashInput, setCashInput] = useState("");
   const [exchangeValue, setExchangeValue] = useState("");
-  const [loanInput, setLoanInput] = useState(""); 
+  const [loanInput, setLoanInput] = useState("");
   const [exchangeMemoId, setExchangeMemoId] = useState(null);
   const [maxAvailableBalance, setMaxAvailableBalance] = useState(0);
   const [selectedExchangeData, setSelectedExchangeData] = useState(null); // Full Data Store করার জন্য
   const [remarks, setRemarks] = useState("");
   const [customer, setCustomer] = useState({
-    customerId: "", customerName: "", address: "", customerEmail: "", customerPhone: "",
+    customerId: "",
+    customerName: "",
+    address: "",
+    customerEmail: "",
+    customerPhone: "",
   });
 
   useEffect(() => {
@@ -44,13 +46,19 @@ const PointOfSale = () => {
   // Calculations
   const orderTotal = selectedProducts.reduce(
     (acc, product) =>
-      acc.plus(new Decimal(Number(product.qty || 0)).mul(new Decimal(Number(product.newSellPrice || 0)))),
-    new Decimal(0)
+      acc.plus(
+        new Decimal(Number(product.qty || 0)).mul(
+          new Decimal(Number(product.newSellPrice || 0)),
+        ),
+      ),
+    new Decimal(0),
   );
 
   const subTotal = orderTotal.minus(new Decimal(Number(discount || 0)));
   const totalWithLoan = subTotal.plus(new Decimal(Number(loanInput || 0)));
-  const totalPaidLive = new Decimal(Number(cashInput || 0)).plus(new Decimal(Number(exchangeValue || 0)));
+  const totalPaidLive = new Decimal(Number(cashInput || 0)).plus(
+    new Decimal(Number(exchangeValue || 0)),
+  );
 
   const liveDue = totalWithLoan.minus(totalPaidLive).lessThan(0)
     ? "0.00"
@@ -58,8 +66,12 @@ const PointOfSale = () => {
 
   const totalCost = selectedProducts.reduce(
     (acc, product) =>
-      acc.plus(new Decimal(Number(product.qty || 0)).mul(new Decimal(Number(product.costPrice || 0)))),
-    new Decimal(0)
+      acc.plus(
+        new Decimal(Number(product.qty || 0)).mul(
+          new Decimal(Number(product.costPrice || 0)),
+        ),
+      ),
+    new Decimal(0),
   );
 
   const handleSubmit = async (e) => {
@@ -70,7 +82,9 @@ const PointOfSale = () => {
     }
 
     if (exchangeMemoId && Number(exchangeValue) > maxAvailableBalance) {
-      return alert(`Insufficient Balance! Available balance is ${maxAvailableBalance}`);
+      return alert(
+        `Insufficient Balance! Available balance is ${maxAvailableBalance}`,
+      );
     }
 
     try {
@@ -82,7 +96,11 @@ const PointOfSale = () => {
         sellPrice: Number(p.newSellPrice),
         costPrice: Number(p.costPrice),
         quantity: Number(p.qty),
-        subTotal: Number(new Decimal(p.newSellPrice || 0).mul(new Decimal(p.qty || 0)).toFixed(2)),
+        subTotal: Number(
+          new Decimal(p.newSellPrice || 0)
+            .mul(new Decimal(p.qty || 0))
+            .toFixed(2),
+        ),
       }));
 
       const payload = {
@@ -103,16 +121,25 @@ const PointOfSale = () => {
         exchange: Number(exchangeValue || 0),
         exchangeMemoId: exchangeMemoId || null,
         // ইনভয়েসে দেখানোর জন্য পুরো এক্সচেঞ্জ ডিটেইলস পাঠানো হচ্ছে
-        exchangeDetails: selectedExchangeData ? {
-          memo: selectedExchangeData.memo,
-          totalAmount: selectedExchangeData.totalAmount,
-          remainingBalance: selectedExchangeData.remainingBalance,
-          products: selectedExchangeData.products
-        } : null,
+        exchangeDetails: selectedExchangeData
+          ? {
+              memo: selectedExchangeData.memo,
+              totalAmount: selectedExchangeData.totalAmount,
+              remainingBalance: selectedExchangeData.remainingBalance,
+              products: selectedExchangeData.products,
+            }
+          : null,
         due: Number(liveDue),
-        paid: Number(totalPaidLive.greaterThan(totalWithLoan) ? totalWithLoan.toFixed(2) : totalPaidLive.toFixed(2)),
+        paid: Number(
+          totalPaidLive.greaterThan(totalWithLoan)
+            ? totalWithLoan.toFixed(2)
+            : totalPaidLive.toFixed(2),
+        ),
         unchangedPaid: Number(totalPaidLive.toFixed(2)),
         unchangedDue: Number(liveDue),
+
+        createdAt: customDate ? customDate : new Date(),
+        issuedAt: new Date(),
       };
 
       await dispatch(addSales(payload)).unwrap();
@@ -137,10 +164,13 @@ const PointOfSale = () => {
         }));
         callback(options);
       }
-    } catch (error) { callback([]); }
+    } catch (error) {
+      callback([]);
+    }
   };
 
-  const handleDeleteProduct = (pid) => setSelectedProducts((prev) => prev.filter((p) => p._id !== pid));
+  const handleDeleteProduct = (pid) =>
+    setSelectedProducts((prev) => prev.filter((p) => p._id !== pid));
 
   const handleSearchOnChange = (e) => {
     setSearchValue(e.target.value);
@@ -151,9 +181,14 @@ const PointOfSale = () => {
   const handleSearchOnClick = (pid) => {
     let productToAdd = productsBySearchforPOS.find((p) => p._id === pid);
     if (productToAdd) {
-      const foundProduct = selectedProducts.find((p) => p._id === productToAdd._id);
+      const foundProduct = selectedProducts.find(
+        (p) => p._id === productToAdd._id,
+      );
       if (!foundProduct) {
-        setSelectedProducts([...selectedProducts, { ...productToAdd, qty: 1, newSellPrice: productToAdd.sellPrice }]);
+        setSelectedProducts([
+          ...selectedProducts,
+          { ...productToAdd, qty: 1, newSellPrice: productToAdd.sellPrice },
+        ]);
       }
     }
     dispatch(setProductsBySearchToEmpty());
@@ -163,7 +198,11 @@ const PointOfSale = () => {
   useEffect(() => {
     if (createdSales) {
       // ইনভয়েসে যাওয়ার সময় state এ ডাটা পাঠানো
-      const data = { ...createdSales, due: Number(liveDue), paid: Number(totalPaidLive.toFixed(2)) };
+      const data = {
+        ...createdSales,
+        due: Number(liveDue),
+        paid: Number(totalPaidLive.toFixed(2)),
+      };
       dispatch(setCreatedSalesToNull());
       navigate("/invoice", { state: data });
     }
@@ -188,14 +227,38 @@ const PointOfSale = () => {
 
         <div className="grid grid-cols-2 gap-x-6 mb-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Search Product</label>
-            <input type="search" value={searchValue} onChange={handleSearchOnChange} placeholder="Search Products..." className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm" />
-            <div className={`${productsBySearchforPOS.length > 0 ? "shadow-md px-4 py-2 rounded max-h-50 overflow-y-scroll" : ""}`}>
+            <label className="block text-sm font-medium mb-1">
+              Search Product
+            </label>
+            <input
+              type="search"
+              value={searchValue}
+              onChange={handleSearchOnChange}
+              placeholder="Search Products..."
+              className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
+            />
+            <div
+              className={`${productsBySearchforPOS.length > 0 ? "shadow-md px-4 py-2 rounded max-h-50 overflow-y-scroll" : ""}`}
+            >
               {productsBySearchforPOS.map((product, index) => (
-                <div onClick={() => handleSearchOnClick(product._id)} key={index} className="px-2 py-1 border-b border-gray-300 cursor-pointer hover:bg-gray-100 text-gray-800 text-sm">
+                <div
+                  onClick={() => handleSearchOnClick(product._id)}
+                  key={index}
+                  className="px-2 py-1 border-b border-gray-300 cursor-pointer hover:bg-gray-100 text-gray-800 text-sm"
+                >
                   {product.name}
                 </div>
               ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Enter Custom Date
+            </label>
+            <div className="flex gap-1.5">
+              <input type="date" value={customDate} onChange={(e) => setCustomDate(e.target.value)} className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
+              <button type="button" onClick={() => setCustomDate("")} className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm cursor-pointer hover:bg-blue-600">Clear</button>
             </div>
           </div>
         </div>
@@ -203,66 +266,160 @@ const PointOfSale = () => {
         <table className="min-w-full border border-gray-300 mb-4">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-3 py-1.5 text-xs font-semibold text-gray-700 border-b text-center">#</th>
-              <th className="px-3 py-1.5 text-xs font-semibold text-gray-700 border-b text-left">Product Name</th>
-              <th className="px-3 py-1.5 text-xs font-semibold text-gray-700 border-b text-center">Sale Price</th>
-              <th className="px-3 py-1.5 text-xs font-semibold text-gray-700 border-b text-center">Available</th>
-              <th className="px-3 py-1.5 text-xs font-semibold text-gray-700 border-b text-center">Quantity</th>
-              <th className="px-3 py-1.5 text-xs font-semibold text-gray-700 border-b text-center">ItemTotal</th>
-              <th className="px-3 py-1.5 text-xs font-semibold text-gray-700 border-b text-center">Actions</th>
+              <th className="px-3 py-1.5 text-xs font-semibold text-gray-700 border-b text-center">
+                #
+              </th>
+              <th className="px-3 py-1.5 text-xs font-semibold text-gray-700 border-b text-left">
+                Product Name
+              </th>
+              <th className="px-3 py-1.5 text-xs font-semibold text-gray-700 border-b text-center">
+                Sale Price
+              </th>
+              <th className="px-3 py-1.5 text-xs font-semibold text-gray-700 border-b text-center">
+                Available
+              </th>
+              <th className="px-3 py-1.5 text-xs font-semibold text-gray-700 border-b text-center">
+                Quantity
+              </th>
+              <th className="px-3 py-1.5 text-xs font-semibold text-gray-700 border-b text-center">
+                ItemTotal
+              </th>
+              <th className="px-3 py-1.5 text-xs font-semibold text-gray-700 border-b text-center">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
             {selectedProducts.length > 0 ? (
               selectedProducts.map((product, index) => (
                 <tr key={index}>
-                  <td className="px-3 py-1.5 text-sm border-b text-center">{index + 1}</td>
-                  <td className="px-3 py-1.5 text-sm border-b text-left">{product.name}</td>
                   <td className="px-3 py-1.5 text-sm border-b text-center">
-                    <input type="number" value={product.newSellPrice} step="any" className="w-[100px] border rounded px-2"
-                      onChange={(e) => setSelectedProducts(prev => prev.map((p, i) => i === index ? { ...p, newSellPrice: e.target.value } : p))} />
+                    {index + 1}
                   </td>
-                  <td className="px-3 py-1.5 text-sm border-b text-center">{product.quantity}</td>
-                  <td className="px-3 py-1.5 text-sm border-b text-center">
-                    <input type="number" value={product.qty} className="w-[60px] border rounded px-2"
-                      onChange={(e) => setSelectedProducts(prev => prev.map((p, i) => i === index ? { ...p, qty: e.target.value } : p))} />
+                  <td className="px-3 py-1.5 text-sm border-b text-left">
+                    {product.name}
                   </td>
                   <td className="px-3 py-1.5 text-sm border-b text-center">
-                    ৳ {new Decimal(Number(product.newSellPrice || 0)).mul(new Decimal(Number(product.qty || 0))).toFixed(2)}
+                    <input
+                      type="number"
+                      value={product.newSellPrice}
+                      step="any"
+                      className="w-[100px] border rounded px-2"
+                      onChange={(e) =>
+                        setSelectedProducts((prev) =>
+                          prev.map((p, i) =>
+                            i === index
+                              ? { ...p, newSellPrice: e.target.value }
+                              : p,
+                          ),
+                        )
+                      }
+                    />
+                  </td>
+                  <td className="px-3 py-1.5 text-sm border-b text-center">
+                    {product.quantity}
+                  </td>
+                  <td className="px-3 py-1.5 text-sm border-b text-center">
+                    <input
+                      type="number"
+                      value={product.qty}
+                      className="w-[60px] border rounded px-2"
+                      onChange={(e) =>
+                        setSelectedProducts((prev) =>
+                          prev.map((p, i) =>
+                            i === index ? { ...p, qty: e.target.value } : p,
+                          ),
+                        )
+                      }
+                    />
+                  </td>
+                  <td className="px-3 py-1.5 text-sm border-b text-center">
+                    ৳{" "}
+                    {new Decimal(Number(product.newSellPrice || 0))
+                      .mul(new Decimal(Number(product.qty || 0)))
+                      .toFixed(2)}
                   </td>
                   <td className="p-2 text-center border-b">
-                    <button type="button" onClick={() => handleDeleteProduct(product._id)} className="text-xs bg-red-500 text-white px-2 py-1 rounded">Delete</button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteProduct(product._id)}
+                      className="text-xs bg-red-500 text-white px-2 py-1 rounded"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))
-            ) : ( <tr><td colSpan={7} className="text-center font-bold px-6 py-3 text-gray-500 text-sm">No Orders Yet</td></tr> )}
+            ) : (
+              <tr>
+                <td
+                  colSpan={7}
+                  className="text-center font-bold px-6 py-3 text-gray-500 text-sm"
+                >
+                  No Orders Yet
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
 
         <div className="flex justify-end mb-4">
           <div className="w-64 space-y-0.5 text-sm">
-            <div className="flex justify-between"><span>OrderTotal</span><span>{orderTotal.toFixed(2)}</span></div>
+            <div className="flex justify-between">
+              <span>OrderTotal</span>
+              <span>{orderTotal.toFixed(2)}</span>
+            </div>
             <div className="flex justify-between">
               <span>Order Discount</span>
-              <input type="number" value={discount} step="any" onChange={(e) => setDiscount(e.target.value)} className="w-[80px] border rounded border-gray-400 px-1 py-0.5" />
+              <input
+                type="number"
+                value={discount}
+                step="any"
+                onChange={(e) => setDiscount(e.target.value)}
+                className="w-[80px] border rounded border-gray-400 px-1 py-0.5"
+              />
             </div>
-            <div className="flex justify-between font-bold"><span>Sub Total</span><span>{subTotal.toFixed(2)}</span></div>
+            <div className="flex justify-between font-bold">
+              <span>Sub Total</span>
+              <span>{subTotal.toFixed(2)}</span>
+            </div>
           </div>
         </div>
 
         <div className="flex flex-col gap-4 max-w-[50%] mb-4">
           <div>
-            <label className="block text-sm font-bold text-red-600 mb-1">Give Loan</label>
-            <input type="number" value={loanInput} onChange={(e) => setLoanInput(e.target.value)} step="any" className="block w-full px-3 py-1.5 border border-red-300 rounded-sm text-sm" placeholder="0.00" />
+            <label className="block text-sm font-bold text-red-600 mb-1">
+              Give Loan
+            </label>
+            <input
+              type="number"
+              value={loanInput}
+              onChange={(e) => setLoanInput(e.target.value)}
+              step="any"
+              className="block w-full px-3 py-1.5 border border-red-300 rounded-sm text-sm"
+              placeholder="0.00"
+            />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Cash</label>
-            <input type="number" value={cashInput} onChange={(e) => setCashInput(e.target.value)} step="any" className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm" />
+            <input
+              type="number"
+              value={cashInput}
+              onChange={(e) => setCashInput(e.target.value)}
+              step="any"
+              className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
+            />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Exchange Memo Search</label>
-            <AsyncSelect cacheOptions loadOptions={loadOptions} defaultOptions isClearable
+            <label className="block text-sm font-medium mb-1">
+              Exchange Memo Search
+            </label>
+            <AsyncSelect
+              cacheOptions
+              loadOptions={loadOptions}
+              defaultOptions
+              isClearable
               onChange={(selected) => {
                 if (selected) {
                   setExchangeValue(selected.value);
@@ -297,23 +454,53 @@ const PointOfSale = () => {
 
           <div>
             <label className="block text-sm font-medium mb-1">Remarks</label>
-            <textarea value={remarks} onChange={(e) => setRemarks(e.target.value)} className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm" rows={2} />
+            <textarea
+              value={remarks}
+              onChange={(e) => setRemarks(e.target.value)}
+              className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
+              rows={2}
+            />
           </div>
         </div>
 
         <div className="flex justify-end mt-4">
           <div className="w-64 space-y-0.5 text-sm">
-            <div className="flex justify-between font-bold"><span>Product Total</span><span>{subTotal.toFixed(2)}</span></div>
-            <div className="flex justify-between font-bold text-red-600"><span>Loan</span><span>{new Decimal(Number(loanInput || 0)).toFixed(2)}</span></div>
-            <div className="flex justify-between font-bold"><span>Total</span><span>{totalWithLoan.toFixed(2)}</span></div>
-            <div className="flex justify-between font-bold"><span>Cash</span><span>{new Decimal(Number(cashInput || 0)).toFixed(2)}</span></div>
-            <div className="flex justify-between font-bold"><span>Exchange</span><span>{new Decimal(Number(exchangeValue || 0)).toFixed(2)}</span></div>
-            <div className="flex justify-between font-bold"><span>Total Paid</span><span>{totalPaidLive.toFixed(2)}</span></div>
-            <div className="flex justify-between font-bold border-t border-gray-300 pt-1"><span>Due</span><span>{liveDue}</span></div>
+            <div className="flex justify-between font-bold">
+              <span>Product Total</span>
+              <span>{subTotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-bold text-red-600">
+              <span>Loan</span>
+              <span>{new Decimal(Number(loanInput || 0)).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-bold">
+              <span>Total</span>
+              <span>{totalWithLoan.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-bold">
+              <span>Cash</span>
+              <span>{new Decimal(Number(cashInput || 0)).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-bold">
+              <span>Exchange</span>
+              <span>{new Decimal(Number(exchangeValue || 0)).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-bold">
+              <span>Total Paid</span>
+              <span>{totalPaidLive.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-bold border-t border-gray-300 pt-1">
+              <span>Due</span>
+              <span>{liveDue}</span>
+            </div>
           </div>
         </div>
 
-        <button type="submit" disabled={loading && cid} className={`mt-4 w-full text-white font-bold py-2 rounded-sm ${loading && cid ? "bg-blue-500" : "bg-blue-600 hover:bg-blue-700"}`}>
+        <button
+          type="submit"
+          disabled={loading && cid}
+          className={`mt-4 w-full text-white font-bold py-2 rounded-sm ${loading && cid ? "bg-blue-500" : "bg-blue-600 hover:bg-blue-700"}`}
+        >
           {loading && cid ? "Paying..." : `Pay`}
         </button>
       </form>

@@ -55,7 +55,7 @@ const CustomerStatement = () => {
           {/* Top Actions & Back Button (Hidden during print) */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden">
             <button
-              onClick={() => navigate("/sales-report")}
+              onClick={() => navigate(-1)}
               className="flex items-center gap-2 cursor-pointer text-blue-600 hover:text-blue-800 font-bold text-sm transition-all group"
             >
               <FaArrowLeft className="group-hover:-translate-x-1" />

@@ -990,6 +990,18 @@ const SalesReport = () => {
               >
                 Loan
               </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Cash
+              </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Exchange
+              </th>
 
               <th
                 rowSpan={2}
@@ -1117,6 +1129,18 @@ const SalesReport = () => {
                           className="border px-2 py-1 sm:px-4 sm:py-2"
                         >
                           {sale.loan || 0}
+                        </td>
+                        <td
+                          rowSpan={rowspan}
+                          className="border px-2 py-1 sm:px-4 sm:py-2"
+                        >
+                          {sale.cash}
+                        </td>
+                        <td
+                          rowSpan={rowspan}
+                          className="border px-2 py-1 sm:px-4 sm:py-2"
+                        >
+                          {sale.exchange}
                         </td>
 
                         <td

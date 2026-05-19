@@ -308,6 +308,7 @@ const SalesDueList = () => {
 
   const { salesOfDues, page, pages } = useSelector((state) => state.sales);
 
+  const [customerName, setCustomerName] = useState("");
   // Pagination
   const [currentPage, setCurrentPage] = useState(page);
   const [sortOrder, setSortOrder] = useState(-1);
@@ -325,12 +326,13 @@ const SalesDueList = () => {
     if (user && user.role === "admin") {
       dispatch(
         fetchSalesDueList({
+          customerName,
           page: currentPage,
-          order: sortOrder
+          order: sortOrder,
         }),
       );
     }
-  }, [dispatch, user, currentPage, sortOrder]);
+  }, [dispatch, user, currentPage, sortOrder, customerName]);
 
   if (user && user.role !== "admin") return null;
 
@@ -359,6 +361,15 @@ const SalesDueList = () => {
             <option value="-1">Newest First</option>
           </select>
         </div>
+        <div>
+          <input
+          type="search"
+          placeholder="Customer Name Search"
+          value={customerName}
+          onChange={(e) => setCustomerName(e.target.value)}
+          className="border border-gray-300 rounded px-4 py-2 w-full sm:w-auto"
+        />
+        </div>
       </div>
 
       {/* Table */}
@@ -366,42 +377,104 @@ const SalesDueList = () => {
         <table className="min-w-full text-xs sm:text-sm border-collapse">
           <thead className="bg-gray-300">
             <tr>
-              <th rowSpan={2} className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Date</th>
-              <th rowSpan={2} className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Customer Name</th>
-              <th colSpan={3} className="border px-2 py-1 sm:px-4 sm:py-2 text-center">Products</th>
-              <th rowSpan={2} className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Discount</th>
-              <th rowSpan={2} className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Total</th>
-              <th rowSpan={2} className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Paid</th>
-              <th rowSpan={2} className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Due</th>
-              <th rowSpan={2} className="border px-2 py-1 sm:px-4 sm:py-2 text-center">Action</th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Date
+              </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Customer Name
+              </th>
+              <th
+                colSpan={3}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-center"
+              >
+                Products
+              </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Discount
+              </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Total
+              </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Paid
+              </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Due
+              </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-center"
+              >
+                Action
+              </th>
             </tr>
             <tr>
-              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-center">Name</th>
-              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Price</th>
-              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">Qty</th>
+              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-center">
+                Name
+              </th>
+              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+                Price
+              </th>
+              <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+                Qty
+              </th>
             </tr>
           </thead>
           <tbody>
             {salesOfDues.length > 0 ? (
               salesOfDues.map((sale, saleIndex) => {
                 // Handle cases where products might be empty (e.g. POS sales)
-                const productsToDisplay = sale.products.length > 0 ? sale.products : [{}];
+                const productsToDisplay =
+                  sale.products.length > 0 ? sale.products : [{}];
                 const rowspan = productsToDisplay.length;
                 const isEven = saleIndex % 2 === 0;
 
                 return productsToDisplay.map((product, pIndex) => (
                   <tr
+                    onClick={(e) => {
+                      if (e.target.tagName !== "TD") return;
+
+                      navigate("/customer-statement", {
+                        state: sale,
+                      });
+                    }}
                     key={`${saleIndex}-${pIndex}`}
-                    className={isEven ? "bg-white" : "bg-gray-50"}
+                    className={isEven ? "bg-white cursor-pointer" : "bg-gray-50 cursor-pointer"}
                   >
                     {pIndex === 0 && (
                       <>
-                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">
+                        <td
+                          rowSpan={rowspan}
+                          className="border px-2 py-1 sm:px-4 sm:py-2"
+                        >
                           {new Date(sale.createdAt)
-                            .toLocaleDateString("en-GB", { timeZone: "Asia/Dhaka" })
+                            .toLocaleDateString("en-GB", {
+                              timeZone: "Asia/Dhaka",
+                            })
                             .replaceAll("/", "-")}
                         </td>
-                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">
+                        <td
+                          rowSpan={rowspan}
+                          className="border px-2 py-1 sm:px-4 sm:py-2"
+                        >
                           {sale.customerName}
                         </td>
                       </>
@@ -419,13 +492,22 @@ const SalesDueList = () => {
 
                     {pIndex === 0 && (
                       <>
-                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">
+                        <td
+                          rowSpan={rowspan}
+                          className="border px-2 py-1 sm:px-4 sm:py-2"
+                        >
                           {sale.discount || 0}
                         </td>
-                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">
+                        <td
+                          rowSpan={rowspan}
+                          className="border px-2 py-1 sm:px-4 sm:py-2"
+                        >
                           {sale.total}
                         </td>
-                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">
+                        <td
+                          rowSpan={rowspan}
+                          className="border px-2 py-1 sm:px-4 sm:py-2"
+                        >
                           {sale.paid}
                         </td>
                         <td
@@ -436,7 +518,10 @@ const SalesDueList = () => {
                         >
                           {sale.due}
                         </td>
-                        <td rowSpan={rowspan} className="border px-2 py-1 sm:px-4 sm:py-2">
+                        <td
+                          rowSpan={rowspan}
+                          className="border px-2 py-1 sm:px-4 sm:py-2"
+                        >
                           <div className="flex flex-wrap gap-1">
                             <Link
                               to={`/sales-report/${sale._id}/edit-due`}

@@ -45,6 +45,8 @@ module.exports.createSales = async (req, res) => {
       total,
       due,
       paid,
+      createdAt,
+      issuedAt,
       ...transactionDetail
     } = salesData;
 
@@ -353,11 +355,21 @@ module.exports.salesByCustomerName = async (req, res) => {
 // ৯. ডিউ লিস্ট
 module.exports.salesDueList = async (req, res) => {
   try {
-    const { page = 1, order = -1 } = req.query;
+    const { page = 1, order = -1, customerName = "" } = req.query;
     const limit = 15;
     const skip = (parseInt(page) - 1) * limit;
 
-    const sales = await Sales.find({ due: { $gt: 0 } })
+    const queries = [];
+    let nameQuery;
+    const dueQuery = { due: { $gt: 0 } };
+    queries.push(dueQuery);
+
+    if(customerName) {
+      nameQuery = { customerName: { $regex: customerName, $options: "i" } };
+      queries.push(nameQuery);
+    }
+
+    const sales = await Sales.find({ $and: queries })
       .sort({ createdAt: parseInt(order) })
       .skip(skip)
       .limit(limit);
