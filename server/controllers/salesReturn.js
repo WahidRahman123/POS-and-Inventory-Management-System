@@ -457,28 +457,43 @@ module.exports.salesReturnStatement = async (req, res) => {
             },
           ],
 
-          quantityExchangeProductDetails: [
-            {
-              $unwind: "$exchangeProducts",
-            },
-            {
-              $group: {
-                _id: null,
-                totalExchangeQuantity: {
-                  $sum: "$exchangeProducts.quantity",
-                },
-              },
-            },
-          ],
+          // quantityExchangeProductDetails: [],
         },
       },
     ]);
 
-    const totalReturnQuantity = result[0].quantityProductDetails.length > 0 ? result[0].quantityProductDetails[0].totalReturnQuantity : 0;
+    const quantityExchangeProductDetails =
+      await SalesReturnTransaction.aggregate([
+        {
+          $match: nameSearchQuery,
+        },
+        {
+          $unwind: "$exchangeProducts",
+        },
+        {
+          $group: {
+            _id: null,
+            totalExchangeQuantity: {
+              $sum: "$exchangeProducts.quantity",
+            },
+          },
+        },
+      ]);
 
-    const totalReturnQuantityInKg = result[0].quantityProductDetails.length > 0 ? result[0].quantityProductDetails[0].totalReturnQuantityInKg : 0;
 
-    const totalExchangeQuantity = result[0].quantityExchangeProductDetails.length > 0 ? result[0].quantityExchangeProductDetails[0].totalExchangeQuantity : 0;
+    const totalReturnQuantity =
+      result[0].quantityProductDetails.length > 0
+        ? result[0].quantityProductDetails[0].totalReturnQuantity
+        : 0;
+
+    const totalReturnQuantityInKg =
+      result[0].quantityProductDetails.length > 0
+        ? result[0].quantityProductDetails[0].totalReturnQuantityInKg
+        : 0;
+
+    const totalExchangeQuantity = quantityExchangeProductDetails[0]
+      ? quantityExchangeProductDetails[0].totalExchangeQuantity
+      : 0;
 
     const remainingQuantity = totalReturnQuantity - totalExchangeQuantity;
 
@@ -488,14 +503,23 @@ module.exports.salesReturnStatement = async (req, res) => {
       // totalPaid: result.length > 0 ? result[0].totalPaid / 10000 : 0,
       // totalDue: result.length > 0 ? result[0].totalDue / 10000 : 0,
 
-      totalAmount: result[0].amountDetails.length > 0 ? result[0].amountDetails[0].totalAmount / 10000 : 0,
-      totalPaid: result[0].amountDetails.length > 0 ? result[0].amountDetails[0].totalPaid / 10000 : 0,
-      totalDue: result[0].amountDetails.length > 0 ? result[0].amountDetails[0].totalDue / 10000 : 0,
+      totalAmount:
+        result[0].amountDetails.length > 0
+          ? result[0].amountDetails[0].totalAmount / 10000
+          : 0,
+      totalPaid:
+        result[0].amountDetails.length > 0
+          ? result[0].amountDetails[0].totalPaid / 10000
+          : 0,
+      totalDue:
+        result[0].amountDetails.length > 0
+          ? result[0].amountDetails[0].totalDue / 10000
+          : 0,
 
       totalReturnQuantity,
       totalReturnQuantityInKg,
       totalExchangeQuantity,
-      remainingQuantity
+      remainingQuantity,
     });
   } catch (error) {
     console.error(error);

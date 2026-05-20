@@ -2751,7 +2751,7 @@ const SalesReturn = () => {
                     </div>
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">
-                        Sale Qty
+                        Available Return Qty
                       </label>
                       <input
                         type="number"

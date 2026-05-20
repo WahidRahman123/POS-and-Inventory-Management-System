@@ -5,8 +5,10 @@ import { Link } from "react-router-dom";
 import CountUp from "react-countup";
 
 /* Row Item */
-const Row = ({ label, value, suffix = "" , textColor = "text-white"}) => (
-  <div className={`flex justify-between text-xs sm:text-sm mt-2 ${textColor}/90`}>
+const Row = ({ label, value, suffix = "", textColor = "text-white" }) => (
+  <div
+    className={`flex justify-between text-xs sm:text-sm mt-2 ${textColor}/90`}
+  >
     <span>{label}</span>
     <span className="font-medium">
       <CountUp
@@ -26,7 +28,7 @@ const DashboardCard = ({
   children,
   to = "#",
   color,
-  textColor = "text-white"
+  textColor = "text-white",
 }) => (
   <Link to={to} className="h-full">
     <div
@@ -153,7 +155,16 @@ const Dashboard = () => {
           to="/sales-report"
         >
           <Row label="Cash" value={dashboardResult.salesCash} suffix=" ৳" />
-          <Row label="Exchange" value={dashboardResult.salesExchange} suffix=" ৳" />
+          <Row
+            label="Exchange"
+            value={dashboardResult.salesExchange}
+            suffix=" ৳"
+          />
+          <Row
+            label="Bank Amount"
+            value={dashboardResult.salesBankPaymentAmount}
+            suffix=" ৳"
+          />
           <Row label="Due" value={dashboardResult.salesDue} suffix=" ৳" />
           <Row label="Profit" value={dashboardResult.salesProfit} suffix=" ৳" />
         </DashboardCard>
@@ -161,10 +172,26 @@ const Dashboard = () => {
         {/* STOCK */}
         <DashboardCard
           title="Main Stock"
-          value={dashboardResult.quantityDetails.mainQuantity}
+          value={dashboardResult.totalProductCostPrice}
           color="bg-orange-500"
+          suffix=" ৳"
           to="/product"
         >
+          {/* <Row
+            label="Total Cost Price"
+            value={dashboardResult.totalProductCostPrice}
+            suffix=" ৳"
+          /> */}
+          <Row
+            label="Total Sale Price"
+            value={dashboardResult.totalProductSalePrice}
+            suffix=" ৳"
+          />
+          <Row
+            label="Main Stock"
+            value={dashboardResult.quantityDetails.mainQuantity}
+            suffix=" Pcs"
+          />
           <div className="text-xs text-white/80 mt-2">
             Current Available Quantity
           </div>
@@ -172,15 +199,15 @@ const Dashboard = () => {
 
         <DashboardCard
           title="Total Sales Return"
-          value={dashboardResult.totalSentItemsForSalesReturn}
-          suffix=" Pcs"
+          value={dashboardResult.totalAmountForSalesReturn}
+          suffix=" ৳"
           color="bg-indigo-600"
           to="/sales-return"
         >
           <Row
-            label="Customer Receivable"
-            value={dashboardResult.totalAmountForSalesReturn}
-            suffix=" ৳"
+            label="Total Qty"
+            value={dashboardResult.totalSentItemsForSalesReturn}
+            suffix=" Pcs"
           />
           <Row
             label="Total Given"
@@ -197,11 +224,16 @@ const Dashboard = () => {
 
         <DashboardCard
           title="Total Company Sales Return"
-          value={dashboardResult.totalAmountQtyForCSR}
-          suffix=" Pcs"
+          value={dashboardResult.totalAmountForCSR}
+          suffix=" ৳"
           color="bg-red-600"
           to="/company-sales-return"
         >
+          <Row
+            label="Total Qty"
+            value={dashboardResult.totalAmountQtyForCSR}
+            suffix=" Pcs"
+          />
           <Row
             label="Total Given"
             value={dashboardResult.totalPaidQtyForCSR}
@@ -212,11 +244,11 @@ const Dashboard = () => {
             value={dashboardResult.totalDueQtyForCSR}
             suffix=" Pcs"
           />
-          <Row
+          {/* <Row
             label="Amount Receivable"
             value={dashboardResult.totalAmountForCSR}
             suffix=" ৳"
-          />
+          /> */}
           <Row
             label="Total Received"
             value={dashboardResult.totalPaidForCSR}
@@ -238,10 +270,80 @@ const Dashboard = () => {
           textColor="text-black"
           to="/sales-report"
         >
-          <Row label="Cash" value={dashboardResult.salesCashToday} suffix=" ৳" textColor="text-black"/>
-          <Row label="Exchange" value={dashboardResult.salesExchangeToday} suffix=" ৳" textColor="text-black"/>
-          <Row label="Due" value={dashboardResult.salesDueToday} suffix=" ৳" textColor="text-black"/>
-          <Row label="Profit" value={dashboardResult.salesProfitToday} suffix=" ৳" textColor="text-black"/>
+          <Row
+            label="Cash"
+            value={dashboardResult.salesCashToday}
+            suffix=" ৳"
+            textColor="text-black"
+          />
+          <Row
+            label="Exchange"
+            value={dashboardResult.salesExchangeToday}
+            suffix=" ৳"
+            textColor="text-black"
+          />
+          <Row
+            label="Bank Amount"
+            value={dashboardResult.salesBankPaymentAmountToday}
+            suffix=" ৳"
+            textColor="text-black"
+          />
+          <Row
+            label="Due"
+            value={dashboardResult.salesDueToday}
+            suffix=" ৳"
+            textColor="text-black"
+          />
+          <Row
+            label="Profit"
+            value={dashboardResult.salesProfitToday}
+            suffix=" ৳"
+            textColor="text-black"
+          />
+        </DashboardCard>
+
+        {/* TOTAL DUE */}
+        <DashboardCard
+          title="Total Due"
+          value={dashboardResult.salesDue}
+          suffix=" ৳"
+          color="
+    bg-gradient-to-br 
+    from-rose-600 
+    via-red-600 
+    to-red-700
+    shadow-red-300/40
+  "
+          textColor="text-white"
+          to="/sales-report/due-list"
+        >
+          <div className="flex items-center justify-between mt-2">
+            <div>
+              <div className="text-xs text-white/80">Pending Collection</div>
+
+              <div className="text-sm font-medium mt-1 text-white/90">
+                Customers Due Amount
+              </div>
+            </div>
+
+            {/* Icon */}
+            <div className="bg-white/15 p-2 rounded-xl backdrop-blur-sm">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-6 h-6 text-white"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 8v4m0 4h.01M10.29 3.86l-7.5 13A1 1 0 003.67 18h16.66a1 1 0 00.87-1.5l-7.5-13a1 1 0 00-1.74 0z"
+                />
+              </svg>
+            </div>
+          </div>
         </DashboardCard>
       </div>
     </div>

@@ -404,7 +404,7 @@ module.exports.salesDueList = async (req, res) => {
       .sort({ createdAt: parseInt(order) })
       .skip(skip)
       .limit(limit);
-    const total = await Sales.countDocuments({ due: { $gt: 0 } });
+    const total = await Sales.countDocuments({ $and: queries });
 
     res.status(200).json({
       total,
