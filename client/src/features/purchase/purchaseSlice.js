@@ -102,9 +102,38 @@ export const addPayment = createAsyncThunk(
   }
 );
 
+export const addPaymentForAdvance = createAsyncThunk(
+  "purchase/addPaymentForAdvance",
+  async (purchase, ThunkAPI) => {
+    try {
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URI}/api/purchase/${
+          purchase.id
+        }/paymentforadvance`,
+        purchase.info,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
+      );
+
+      return { message: "Adjustment Successful!" };
+    } catch (error) {
+      const message = "Adjustment Failed!";
+      return ThunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 const purchaseSlice = createSlice({
   name: "purchase",
   initialState,
+  reducers: {
+      setPurchaseSearchedByIdToNull: (state) => {
+        state.purchaseSearchedById = null;
+      },
+    },
   extraReducers: (builder) => {
     builder
       .addCase(fetchPurchases.pending, (state, action) => {
@@ -215,9 +244,40 @@ const purchaseSlice = createSlice({
           progress: undefined,
           theme: "colored",
         });
-      });
+      })
+      .addCase(addPaymentForAdvance.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addPaymentForAdvance.fulfilled, (state, action) => {
+        state.loading = false;
+        toast.success(action.payload.message, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
+      .addCase(addPaymentForAdvance.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+        toast.error(action.payload, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
   },
 });
 
-// export const { setCreatedSalesToNull } = purchaseSlice.actions; //! Baki ase
+export const { setPurchaseSearchedByIdToNull } = purchaseSlice.actions; //! Baki ase
 export default purchaseSlice.reducer;

@@ -196,8 +196,8 @@ module.exports.createSalesReturn = async (req, res) => {
       if (product.returnQuantity > 0) {
         const productFound = await Product.findById(product.productId);
         if (productFound) {
-          productFound.returnStock =
-            (productFound.returnStock || 0) + product.returnQuantity;
+          productFound.returnStockOfPurchase =
+            (productFound.returnStockOfPurchase || 0) + product.returnQuantity;
           await productFound.save();
         }
       }

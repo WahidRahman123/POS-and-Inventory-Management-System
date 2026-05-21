@@ -21,6 +21,11 @@ router.post('/', protect, purchases.createPurchase);
 // @access Private
 router.post('/:id/payment', protect, purchases.addPayment);
 
+//* @route POST /api/purchase/:id/paymentforadvance
+// @desc search sales between dates
+// @access Private
+router.post('/:id/paymentforadvance', protect, purchases.paymentForAdvance);
+
 //* @route GET /api/purchase/:id
 // @desc fetch specific sale
 // @access Private

@@ -1090,16 +1090,16 @@ const Purchase = () => {
                             <div className="flex flex-wrap gap-1">
                               <Link
                                 onClick={(e) => e.stopPropagation()}
-                                to={`/purchase-report/${purchase._id}/edit-due`}
-                                // to={
-                                //   purchase.due > 0
-                                //     ? `/purchase-report/${purchase._id}/edit-due`
-                                //     : "#"
-                                // }
-                                className={`text-xs text-white px-2 py-1 rounded bg-green-600 hover:bg-green-700 cursor-pointer`}
+                                // to={`/purchase-report/${purchase._id}/edit-due`}
+                                to={
+                                  purchase.due !== 0 ? purchase.purchaseType === "normal"
+                                    ? `/purchase-report/${purchase._id}/edit-due`
+                                    : `/purchase/${purchase._id}/adjust-advance-payment` : "#"
+                                }
+                                className={`text-xs text-white px-2 py-1 rounded  ${purchase.due !== 0 ? purchase.purchaseType === "normal" ? "cursor-pointer bg-green-600 hover:bg-green-700" : "cursor-pointer bg-amber-400 hover:bg-amber-500" : "bg-gray-400 cursor-not-allowed"} `}
                                 // className={`text-xs text-white px-2 py-1 rounded ${purchase.due > 0 ? "bg-green-600 hover:bg-green-700 cursor-pointer" : "bg-green-50 cursor-not-allowed"}`}
                               >
-                                Add Payment
+                                {purchase.purchaseType === "advance" ? "Adjust Advance" : "Add Payment"}
                               </Link>
                               <Link
                                 to="/invoice-purchase"

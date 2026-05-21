@@ -5,6 +5,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import {
   addPayment,
   fetchPurchaseById,
+  setPurchaseSearchedByIdToNull,
 } from "../features/purchase/purchaseSlice";
 import Decimal from "decimal.js";
 
@@ -88,6 +89,10 @@ const EditPurchaseDue = () => {
     if (purchaseSearchedById?.due === 0) {
       navigate("/purchase");
     }
+    // if (purchaseSearchedById?.purchaseType === "advance") {
+    //         dispatch(setPurchaseSearchedByIdToNull()); //? Ekhane next time page visit e first value auto normal theke remove kore nicchi zate next e glitch na hoi
+    //       navigate("/purchase");
+    //     }
   }, [purchaseSearchedById]);
 
   if (!user) return null;

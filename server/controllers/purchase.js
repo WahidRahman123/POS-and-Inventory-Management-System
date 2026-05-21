@@ -304,3 +304,120 @@ module.exports.addPayment = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+module.exports.paymentForAdvance = async (req, res) => {
+  // const session = await mongoose.startSession();
+
+  const { id } = req.params;
+  const { date, productDetails, productTotal } = req.body;
+
+  try {
+    // session.startTransaction();
+    // const purchase = await Purchase.findById(id).session(session);
+    const purchase = await Purchase.findById(id);
+
+    if (purchase) {
+      const {
+        createdAt,
+        issuedAt,
+        products,
+        transactionRecords,
+        totalAmount,
+        paid,
+        due,
+        companyMemo,
+        _id,
+        ...transactionDetail
+      } = purchase.toObject();
+
+      //* purchase Edit
+      productDetails.forEach((newItem) => {
+        const existingProduct = purchase.products.find(
+          (item) => item.productId.toString() === newItem.productId.toString(),
+        );
+
+        if (existingProduct) {
+          existingProduct.quantity += newItem.quantity;
+
+          existingProduct.unitPrice = newItem.unitPrice;
+
+          existingProduct.subTotal =
+            existingProduct.quantity * existingProduct.unitPrice;
+        } else {
+          purchase.products.push(newItem);
+        }
+      });
+
+      purchase.totalAmount = Number(
+        new Decimal(productTotal).plus(new Decimal(purchase.totalAmount)).toFixed(4),
+      );
+      
+      purchase.due = Number(
+        new Decimal(purchase.totalAmount).minus(new Decimal(purchase.paid)).toFixed(4),
+      );
+
+      const unchangedPaid = 0;
+      const unchangedDue = purchase.due;
+
+      const refMemo = "REF-" + companyMemo;
+      const paidAmount = 0;
+
+      const amountToBePaid = 0;
+      const currentDue = purchase.due;
+      const adjustmentDetails = productDetails;
+
+      // transaction creation
+      const transaction = new PurchaseTransaction({
+        ...transactionDetail,
+        refMemo,
+        amountToBePaid,
+        paidAmount,
+        date: createCustomDate(date),
+        currentDue,
+        purchaseId: purchase._id,
+        unchangedPaid,
+        unchangedDue,
+        adjustmentDetails
+      });
+      // await transaction.save({ session });
+      await transaction.save();
+
+      purchase.transactionRecords.push(transaction._id);
+      // await purchase.save({ session });
+      await purchase.save();
+
+      if (productDetails && productDetails.length > 0) {
+        for (let i = 0; i < productDetails.length; i++) {
+          const { productId, productName, quantity, unitPrice } = productDetails[i];
+          // const product = await Product.findOne({ name: productName }).session(
+          //   session,
+          // );
+          const product = await Product.findById(productId);
+
+          if (!product) {
+            throw new Error(`Product not found: ${productName}`);
+          }
+
+          product.quantity = product.quantity + quantity;
+          product.costPrice = unitPrice;
+          // await product.save({ session });
+          await product.save();
+        }
+      }
+
+      // Commit
+      // await session.commitTransaction();
+      // session.endSession();
+
+      res.status(201).json({ message: "Advance adjusts successfully" });
+    } else {
+      res.status(404).json({ message: "Purchase not found!" });
+    }
+  } catch (error) {
+    // await session.abortTransaction();
+    // session.endSession();
+
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};

@@ -167,6 +167,18 @@ module.exports.createPurchaseReturn = async (req, res) => {
       await purchaseFound.save();
     }
 
+    //* Add returned products to return stock
+    for (const product of purchaseReturns.products) {
+      if (product.returnQuantity > 0) {
+        const productFound = await Product.findById(product.productId);
+        if (productFound) {
+          productFound.returnStock =
+            (productFound.returnStock || 0) + product.returnQuantity;
+          await productFound.save();
+        }
+      }
+    }
+
     // Commit
     // await session.commitTransaction();
     // session.endSession();
@@ -321,8 +333,8 @@ module.exports.purchaseReturnStatement = async (req, res) => {
     const mainSearch = { $and: searchQuery };
 
     const transactions = await PurchaseReturnTransaction.find(mainSearch)
-    .sort({ date: -1 })
-    .populate("purchaseReturnId");
+      .sort({ date: -1 })
+      .populate("purchaseReturnId");
 
     const result = await PurchaseReturn.aggregate([
       {
@@ -361,7 +373,8 @@ module.exports.purchaseByInvoice = async (req, res) => {
       })
       .lean();
 
-    if (!purchase) return res.status(409).json({ message: "Invalid Invoice No!" });
+    if (!purchase)
+      return res.status(409).json({ message: "Invalid Invoice No!" });
 
     //* Map to store returned quantities
     const returnedMap = {};
@@ -407,7 +420,8 @@ module.exports.purchaseReturnById = async (req, res) => {
     const { id } = req.params;
     const purchaseReturn = await PurchaseReturn.findById(id);
 
-    if (!purchaseReturn) return res.status(409).json({ message: "Invalid ID!" });
+    if (!purchaseReturn)
+      return res.status(409).json({ message: "Invalid ID!" });
 
     res.status(201).json(purchaseReturn);
   } catch (error) {

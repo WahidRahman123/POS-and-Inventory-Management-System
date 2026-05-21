@@ -27,6 +27,14 @@ const productSchema = new mongoose.Schema(
       ref: "Category",
       required: true,
     },
+    // returnStockOfSale: {
+    //   type: Number,
+    //   min: 0,
+    // },
+    // returnStockOfPurchase: {
+    //   type: Number,
+    //   min: 0,
+    // }
   },
   { timestamps: true, toJSON: { virtuals: true } }
 );
