@@ -1,5 +1,6 @@
 const { default: mongoose } = require("mongoose");
 const Purchase = require("../models/Purchase");
+const Product = require("../models/Product");
 const Decimal = require("decimal.js");
 const PurchaseTransaction = require("../models/PurchaseTransaction");
 const { createCustomDate } = require("../utils/createCustomDate");
@@ -86,6 +87,7 @@ module.exports.createPurchase = async (req, res) => {
   try {
     const purchases = req.body;
     // const { memo } = purchases;
+    const { purchaseType } = purchases;
     const {
       createdAt,
       issuedAt,
@@ -97,46 +99,109 @@ module.exports.createPurchase = async (req, res) => {
       ...transactionDetail
     } = purchases;
 
+    // console.log(products);
+
     // session.startTransaction();
 
-    //* Generate the memo
-    // const count = await getNextSequenceForOther("Purchase", session);
-    const count = await getNextSequenceForOther("Purchase");
-    if (!count) {
-      throw new Error("Failed to generate sequence");
+    if (purchaseType === "normal") {
+      //* Generate the memo
+      // const count = await getNextSequenceForOther("Purchase", session);
+      const count = await getNextSequenceForOther("Purchase");
+      if (!count) {
+        throw new Error("Failed to generate sequence");
+      }
+      const memo = "P-" + count.seq;
+
+      //* Transaction Creation
+      const transactionDetails = {
+        ...transactionDetail,
+        refMemo: companyMemo,
+        amountToBePaid: totalAmount,
+        paidAmount: paid,
+        date: createdAt,
+        currentDue: due,
+      };
+      const transaction = new PurchaseTransaction(transactionDetails);
+
+      //* Purchase creation
+      const purchase = new Purchase({
+        ...purchases,
+        memo,
+        transactionRecords: [transaction._id],
+      });
+
+      transaction.purchaseId = purchase._id;
+      // await transaction.save({ session });
+      await transaction.save();
+
+      // const createdPurchase = await purchase.save({ session });
+      const createdPurchase = await purchase.save();
+
+      if (products && products.length > 0) {
+        for (let i = 0; i < products.length; i++) {
+          const { productId, productName, quantity, unitPrice } = products[i];
+          // const product = await Product.findOne({ name: productName }).session(
+          //   session,
+          // );
+          const product = await Product.findById(productId);
+
+          if (!product) {
+            throw new Error(`Product not found: ${productName}`);
+          }
+
+          product.quantity = product.quantity + quantity;
+          product.costPrice = unitPrice;
+          // await product.save({ session });
+          await product.save();
+        }
+      }
+
+      // Commit
+      // await session.commitTransaction();
+      // session.endSession();
+
+      res.status(201).json(createdPurchase);
+    } else if (purchaseType === "advance") {
+      //* Generate the memo
+      // const count = await getNextSequenceForOther("Purchase", session);
+      const count = await getNextSequenceForOther("Purchase");
+      if (!count) {
+        throw new Error("Failed to generate sequence");
+      }
+      const memo = "PA-" + count.seq;
+
+      //* Transaction Creation
+      const transactionDetails = {
+        ...transactionDetail,
+        refMemo: memo, //! companyMemo replace kore memo use korchi!
+        amountToBePaid: totalAmount,
+        paidAmount: paid,
+        date: createdAt,
+        currentDue: due,
+      };
+      const transaction = new PurchaseTransaction(transactionDetails);
+
+      //* Purchase creation
+      const purchase = new Purchase({
+        ...purchases,
+        memo,
+        companyMemo: memo,
+        transactionRecords: [transaction._id],
+      });
+
+      transaction.purchaseId = purchase._id;
+      // await transaction.save({ session });
+      await transaction.save();
+
+      // const createdPurchase = await purchase.save({ session });
+      const createdPurchase = await purchase.save();
+
+      // Commit
+      // await session.commitTransaction();
+      // session.endSession();
+
+      res.status(201).json(createdPurchase);
     }
-    const memo = "P-" + count.seq;
-
-    //* Transaction Creation
-    const transactionDetails = {
-      ...transactionDetail,
-      refMemo: companyMemo,
-      amountToBePaid: totalAmount,
-      paidAmount: paid,
-      date: createdAt,
-      currentDue: due,
-    };
-    const transaction = new PurchaseTransaction(transactionDetails);
-
-    //* Purchase creation
-    const purchase = new Purchase({
-      ...purchases,
-      memo,
-      transactionRecords: [transaction._id],
-    });
-
-    transaction.purchaseId = purchase._id;
-    // await transaction.save({ session });
-    await transaction.save();
-
-    // const createdPurchase = await purchase.save({ session });
-    const createdPurchase = await purchase.save();
-
-    // Commit
-    // await session.commitTransaction();
-    // session.endSession();
-
-    res.status(201).json(createdPurchase);
   } catch (error) {
     // await session.abortTransaction();
     // session.endSession();
@@ -162,7 +227,7 @@ module.exports.addPayment = async (req, res) => {
   // const session = await mongoose.startSession();
 
   const { id } = req.params;
-  const { date, amount, unchangedAmount } = req.body;
+  const { date, amount, unchangedAmount, cash, bankPaymentAmount } = req.body;
 
   try {
     // session.startTransaction();
@@ -211,6 +276,8 @@ module.exports.addPayment = async (req, res) => {
         date: createCustomDate(date),
         currentDue,
         purchaseId: purchase._id,
+        cash,
+        bankPaymentAmount,
         unchangedPaid,
         unchangedDue,
       });

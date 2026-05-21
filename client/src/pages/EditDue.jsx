@@ -55,6 +55,7 @@ const EditDue = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if(Number(totalPaidLive) === 0) return alert("Please enter a valid payment amount");
     setAid("Run");
     let amount;
     if (totalPaidLive.greaterThan(new Decimal(saleSearchedById.due))) {
@@ -166,6 +167,7 @@ const EditDue = () => {
               value={cashInput}
               onChange={(e) => setCashInput(e.target.value)}
               step="any"
+              min={0}
               className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
             />
           </div>
@@ -177,6 +179,7 @@ const EditDue = () => {
               value={bankPaymentAmount}
               onChange={(e) => setBankPaymentAmount(e.target.value)}
               step="any"
+              min={0}
               className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
             />
           </div>

@@ -27,7 +27,7 @@ const purchaseTransactionSchema = new mongoose.Schema({
   },
   refMemo: {
     type: String,
-    required: true,
+    // required: true,
   },
   amountToBePaid: {
     //* amountToBePaid = previous due
@@ -47,7 +47,14 @@ const purchaseTransactionSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-
+  cash: {
+    type: Number,
+    // required: true,
+  },
+  bankPaymentAmount: {
+    type: Number,
+    // required: true,
+  },
   unchangedPaid: {
     type: Number,
     required: true,
@@ -57,10 +64,53 @@ const purchaseTransactionSchema = new mongoose.Schema({
     required: true,
   },
 
+  purchaseType: {
+    type: String,
+    enum: ["normal", "advance"],
+    required: true,
+  },
+  advancePaymentAmount: {
+    type: Number,
+    required: true,
+    // min: 0,
+  },
+  adjustmentDetails: [
+    {
+      _id: false,
+
+      productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+      productName: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      quantity: {
+        type: Number,
+        required: true,
+        min: 1,
+      },
+      qtyInKg: {
+        type: Number,
+        // required: true,
+      },
+      unitPrice: {
+        type: Number,
+        required: true,
+      },
+      subTotal: {
+        type: Number,
+        required: true,
+      },
+    },
+  ],
+
   purchaseId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Purchase",
-  }
+  },
 });
 
 module.exports = mongoose.model(

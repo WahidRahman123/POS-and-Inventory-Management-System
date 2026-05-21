@@ -155,6 +155,26 @@ module.exports.searchProductForPOS = async (req, res) => {
   }
 };
 
+module.exports.searchProductForPurchase = async (req, res) => {
+  try {
+    const query = req.query.q;
+
+    const product = await Product.find({
+      name: { $regex: query, $options: "i" },
+      // quantity: { $gt: 0 },
+    }).populate("category");
+
+    if (product) {
+      res.status(200).json(product);
+    } else {
+      res.status(404).json({ message: "Product not found" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};
+
 module.exports.quantityOfProduct = async (req, res) => {
   try {
     const { id } = req.params;

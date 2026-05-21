@@ -17,6 +17,7 @@ const initialState = {
   lqpages: null,
   productsBySearch: [],
   productsBySearchforPOS: [],
+  productsBySearchforPurchase: [],
   lowQuantityProducts: [],
   count: 0,
   deleteToggle: true,
@@ -77,6 +78,30 @@ export const searchProductsforPOS = createAsyncThunk(
     try {
       const { data } = await axios.get(
         `${import.meta.env.VITE_BACKEND_URI}/api/products/searchforpos`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+          params: {
+            q: query,
+          },
+        }
+      );
+
+      return data;
+    } catch (error) {
+      const message = "Product Fetching Failed!";
+      return ThunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+export const searchProductsforPurchase = createAsyncThunk(
+  "product/searchProductsforPurchase",
+  async (query, ThunkAPI) => {
+    try {
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URI}/api/products/searchforpurchase`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -319,6 +344,29 @@ const productSlice = createSlice({
         state.productsBySearchforPOS = action.payload;
       })
       .addCase(searchProductsforPOS.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+        toast.error(action.payload, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
+      .addCase(searchProductsforPurchase.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(searchProductsforPurchase.fulfilled, (state, action) => {
+        state.loading = false;
+        // state.products = action.payload;
+        state.productsBySearchforPurchase = action.payload;
+      })
+      .addCase(searchProductsforPurchase.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error;
         toast.error(action.payload, {

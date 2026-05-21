@@ -1,10 +1,11 @@
 import { useEffect, useRef } from "react";
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { batch, useDispatch, useSelector } from "react-redux";
 import { addSupplier } from "../features/supplier/supplierSlice";
 // productSlice থেকে প্রয়োজনীয় অ্যাকশন ইম্পোর্ট করা হলো
 import {
   searchProductsforPOS,
+  searchProductsforPurchase,
   setProductsBySearchToEmpty,
 } from "../features/product/productSlice";
 
@@ -24,17 +25,15 @@ const Purchase = () => {
   const { loading: supplierAddLoading } = useSelector(
     (state) => state.supplier,
   );
-  // প্রোডাক্ট সার্চ রেজাল্ট স্টোর থেকে আনা হলো
-  const { productsBySearchforPOS } = useSelector((state) => state.product);
+  const { productsBySearchforPurchase } = useSelector((state) => state.product);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     date: "",
-    // memo: "",
+    memo: "",
   });
 
-  // এই স্টেটটি ট্র্যাক করবে বর্তমানে কোন রো (row) তে প্রোডাক্ট সার্চ করা হচ্ছে
   const [activeSearchRow, setActiveSearchRow] = useState(null);
 
   //* For Date
@@ -79,6 +78,11 @@ const Purchase = () => {
   //* For Supllier Addition - end
 
   const [addLoading, setAddLoading] = useState(false);
+
+  const [purchaseType, setPurchaseType] = useState("normal");
+  const [advancePaymentAmount, setAdvancePaymentAmount] = useState("");
+  const [cashInput, setCashInput] = useState("");
+  const [bankPaymentAmount, setBankPaymentAmount] = useState("");
 
   //* Supplier Search Handling Section
   const [name, setName] = useState("");
@@ -135,6 +139,7 @@ const Purchase = () => {
   const [products, setProducts] = useState([
     {
       id: 1,
+      productId: "",
       productName: "",
       quantity: "",
       unitPrice: "",
@@ -142,21 +147,20 @@ const Purchase = () => {
     },
   ]);
 
-  // প্রোডাক্ট সার্চ করার ফাংশন
   const handleProductSearchChange = (id, value) => {
     handleProductChange(id, "productName", value);
     if (value) {
       setActiveSearchRow(id);
-      dispatch(searchProductsforPOS(value));
+      dispatch(searchProductsforPurchase(value));
     } else {
       setActiveSearchRow(null);
       dispatch(setProductsBySearchToEmpty());
     }
   };
 
-  // সার্চ রেজাল্ট থেকে প্রোডাক্ট সিলেক্ট করার ফাংশন
-  const handleSelectProductFromSearch = (id, productName) => {
-    handleProductChange(id, "productName", productName);
+  const handleSelectProductFromSearch = (id, product) => {
+    handleProductChange(id, "productName", product.productName);
+    handleProductChange(id, "productId", product.productId);
     dispatch(setProductsBySearchToEmpty());
     setActiveSearchRow(null);
   };
@@ -176,6 +180,7 @@ const Purchase = () => {
       ...products,
       {
         id: newId,
+        productId: "",
         productName: "",
         quantity: "",
         unitPrice: "",
@@ -200,21 +205,58 @@ const Purchase = () => {
     (acc, p) => acc.plus(new Decimal(Number(p.subTotal || 0))),
     new Decimal(0),
   );
-  const [paid, setPaid] = useState("");
-  const due = totalAmount.minus(new Decimal(Number(paid || 0)));
+  // const [paid, setPaid] = useState("");
+  const paid = new Decimal(Number(cashInput)).plus(
+    new Decimal(Number(bankPaymentAmount)),
+  );
+  const due = totalAmount.minus(paid);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (supplier.supplierId === "") return alert("Select a supplier!");
 
-    const newProducts = products.map(({ id, ...rest }) => rest);
+    // const newProducts = products.map(({ id, ...rest }) => rest);
+    const newProducts = products.map(({ id, ...rest }) => ({
+      ...rest,
+      quantity: Number(rest.quantity),
+      unitPrice: Number(rest.unitPrice),
+    }));
 
-    // const newpPaid = new Decimal(Number(paid)).greaterThan(totalAmount)
-    //   ? totalAmount
-    //   : new Decimal(Number(paid));
+    let payload;
+
+    if (purchaseType === "normal") {
+      payload = {
+        companyMemo: formData.memo,
+        purchaseType: "normal",
+        products: newProducts,
+        totalAmount: Number(totalAmount.toFixed(4)),
+        paid: Number(paid.toFixed(4)),
+        due: Number(due.toFixed(4)),
+        cash: Number(cashInput),
+        bankPaymentAmount: Number(bankPaymentAmount),
+        unchangedPaid: Number(paid.toFixed(4)),
+        unchangedDue: Number(due.toFixed(4)),
+        adjustmentDetails: [],
+        advancePaymentAmount: 0,
+      };
+    } else if (purchaseType === "advance") {
+      payload = {
+        companyMemo: "",
+        purchaseType: "advance",
+        products: [],
+        totalAmount: 0,
+        paid: Number(advancePaymentAmount),
+        due: -Number(advancePaymentAmount),
+        cash: 0,
+        bankPaymentAmount: 0,
+        unchangedPaid: Number(advancePaymentAmount),
+        unchangedDue: -Number(advancePaymentAmount),
+        adjustmentDetails: [],
+        advancePaymentAmount: Number(advancePaymentAmount),
+      };
+    }
 
     const purchaseData = {
-      companyMemo: formData.memo,
       createdAt: formData.date,
       issuedAt: new Date(),
       supplierId: supplier.supplierId,
@@ -223,15 +265,7 @@ const Purchase = () => {
       supplierEmail: supplier.supplierEmail,
       supplierPhone: supplier.supplierPhone,
       userId: user._id,
-      products: newProducts,
-      totalAmount: Number(totalAmount.toFixed(4)),
-      // paid: Number(newpPaid.toFixed(4)),
-      paid: Number(paid),
-      // due: due.lessThan(new Decimal(0)) ? 0 : Number(due.toFixed(4)),
-      due: Number(due.toFixed(4)),
-
-      unchangedPaid: Number(paid),
-      unchangedDue: Number(due.toFixed(4)),
+      ...payload,
     };
 
     try {
@@ -239,18 +273,22 @@ const Purchase = () => {
       await dispatch(addPurchase(purchaseData)).unwrap();
       setFormData({
         date: "",
-        memo: ""
+        memo: "",
       });
       setProducts([
         {
           id: 1,
+          productId: "",
           productName: "",
           quantity: "",
           unitPrice: "",
           subTotal: "",
         },
       ]);
-      setPaid("");
+      // setPaid("");
+      setCashInput("");
+      setBankPaymentAmount("");
+      setAdvancePaymentAmount("");
       setDisable(false);
       setName("");
       setSupplier({
@@ -447,188 +485,299 @@ const Purchase = () => {
                 required
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Enter Memo
+            {purchaseType === "normal" && (
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Enter Memo
+                </label>
+                <input
+                  type="text"
+                  placeholder="Memo"
+                  value={formData.memo}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, memo: e.target.value }))
+                  }
+                  className="w-full px-4 py-2 border border-gray-400 rounded-md"
+                  required={purchaseType === "normal"}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Purchase Type */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div
+              onClick={() => setPurchaseType("normal")}
+              className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                purchaseType === "normal"
+                  ? "border-green-500 bg-green-50 shadow-sm"
+                  : "border-gray-200 bg-gray-50 hover:border-green-300"
+              }`}
+            >
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="radio"
+                  checked={purchaseType === "normal"}
+                  onChange={() => setPurchaseType("normal")}
+                  className="w-4 h-4 mt-1 text-green-600"
+                />
+
+                <div>
+                  <p className="font-semibold text-gray-800">Normal Purchase</p>
+
+                  <p className="text-sm text-gray-500 mt-1">
+                    Purchase products immediately from supplier
+                  </p>
+                </div>
               </label>
-              <input
-                type="text"
-                placeholder="Memo"
-                value={formData.memo}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, memo: e.target.value }))
-                }
-                className="w-full px-4 py-2 border border-gray-400 rounded-md"
-                required
-              />
+            </div>
+
+            <div
+              onClick={() => setPurchaseType("advance")}
+              className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                purchaseType === "advance"
+                  ? "border-blue-500 bg-blue-50 shadow-sm"
+                  : "border-gray-200 bg-gray-50 hover:border-blue-300"
+              }`}
+            >
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="radio"
+                  checked={purchaseType === "advance"}
+                  onChange={() => setPurchaseType("advance")}
+                  className="w-4 h-4 mt-1 text-blue-600"
+                />
+
+                <div>
+                  <p className="font-semibold text-gray-800">Advance Payment</p>
+
+                  <p className="text-sm text-gray-500 mt-1">
+                    Pay supplier now and receive products later
+                  </p>
+                </div>
+              </label>
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={handleAddProduct}
-            className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-sm font-medium mb-2 cursor-pointer"
-          >
-            + Add Product
-          </button>
-
-          {/* Products Section */}
-          <div className="bg-gray-50 rounded-lg p-4 mb-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">
-              Products
-            </h3>
-            {products.map((product) => (
-              <div
-                key={product.id}
-                className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3 items-end"
+          {purchaseType === "normal" && (
+            <>
+              <button
+                type="button"
+                onClick={handleAddProduct}
+                className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-sm font-medium mb-2 cursor-pointer"
               >
-                <div className="md:col-span-2 relative">
-                  <label className="block text-xs text-gray-600 mb-1">
-                    Product Name
-                  </label>
-                  <input
-                    type="text"
-                    value={product.productName}
-                    onChange={(e) =>
-                      handleProductSearchChange(product.id, e.target.value)
-                    }
-                    placeholder="Product Name"
-                    className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
-                    required
-                  />
-                  {/* প্রোডাক্ট সার্চ রেজাল্ট ড্রপডাউন */}
-                  {activeSearchRow === product.id &&
-                    productsBySearchforPOS.length > 0 && (
-                      <div className="absolute z-50 w-full bg-white shadow-xl border border-gray-300 rounded mt-1 max-h-60 overflow-y-auto">
-                        {productsBySearchforPOS.map((p, i) => (
-                          <div
-                            key={i}
-                            onClick={() =>
-                              handleSelectProductFromSearch(product.id, p.name)
-                            }
-                            className="px-3 py-2 border-b border-gray-100 cursor-pointer hover:bg-blue-50 text-gray-800 text-sm"
-                          >
-                            {p.name}
+                + Add Product
+              </button>
+
+              {/* Products Section */}
+              <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                  Products
+                </h3>
+                {products.map((product) => (
+                  <div
+                    key={product.id}
+                    className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3 items-end"
+                  >
+                    <div className="md:col-span-2 relative">
+                      <label className="block text-xs text-gray-600 mb-1">
+                        Product Name
+                      </label>
+                      <input
+                        type="text"
+                        value={product.productName}
+                        onChange={(e) =>
+                          handleProductSearchChange(product.id, e.target.value)
+                        }
+                        placeholder="Product Name"
+                        className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
+                        required={purchaseType === "normal"}
+                      />
+                      {/* প্রোডাক্ট সার্চ রেজাল্ট ড্রপডাউন */}
+                      {activeSearchRow === product.id &&
+                        productsBySearchforPurchase.length > 0 && (
+                          <div className="absolute z-50 w-full bg-white shadow-xl border border-gray-300 rounded mt-1 max-h-60 overflow-y-auto">
+                            {productsBySearchforPurchase.map((p, i) => (
+                              <div
+                                key={i}
+                                onClick={() =>
+                                  handleSelectProductFromSearch(product.id, {
+                                    productName: p.name,
+                                    productId: p._id,
+                                  })
+                                }
+                                className="px-3 py-2 border-b border-gray-100 cursor-pointer hover:bg-blue-50 text-gray-800 text-sm"
+                              >
+                                {p.name}
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        )}
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">
+                        Quantity
+                      </label>
+                      <input
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        value={product.quantity}
+                        onChange={(e) => {
+                          const qty = e.target.value;
+                          handleProductChange(product.id, "quantity", qty);
+                          const sub = new Decimal(Number(qty || 0)).mul(
+                            new Decimal(Number(product.unitPrice || 0)),
+                          );
+                          handleProductChange(
+                            product.id,
+                            "subTotal",
+                            Number(sub.toFixed(4)),
+                          );
+                        }}
+                        placeholder="Qty"
+                        min={0}
+                        className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
+                        required={purchaseType === "normal"}
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <label className="block text-xs text-gray-600 mb-1">
+                          Unit Price
+                        </label>
+                        <input
+                          type="number"
+                          onWheel={(e) => e.target.blur()}
+                          value={product.unitPrice}
+                          onChange={(e) => {
+                            const price = e.target.value;
+                            handleProductChange(product.id, "unitPrice", price);
+                            const sub = new Decimal(Number(price || 0)).mul(
+                              new Decimal(Number(product.quantity || 0)),
+                            );
+                            handleProductChange(
+                              product.id,
+                              "subTotal",
+                              Number(sub.toFixed(4)),
+                            );
+                          }}
+                          placeholder="Unit Price"
+                          step="any"
+                          min={0}
+                          className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
+                          required={purchaseType === "normal"}
+                        />
                       </div>
-                    )}
+                      {products.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveProduct(product.id)}
+                          className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                <div className="border-t border-gray-400 pt-3 mt-3">
+                  <div className="flex justify-end gap-6 text-sm">
+                    <span className="text-gray-600">
+                      Total Qty: <strong>{totalQty.toFixed(0)}</strong>
+                    </span>
+                    <span className="text-gray-800 font-semibold">
+                      Products Total: ৳ {totalAmount.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">
-                    Quantity
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Total Amount
                   </label>
                   <input
                     type="number"
-                    onWheel={(e) => e.target.blur()}
-                    value={product.quantity}
-                    onChange={(e) => {
-                      const qty = e.target.value;
-                      handleProductChange(product.id, "quantity", qty);
-                      const sub = new Decimal(Number(qty || 0)).mul(
-                        new Decimal(Number(product.unitPrice || 0)),
-                      );
-                      handleProductChange(
-                        product.id,
-                        "subTotal",
-                        Number(sub.toFixed(4)),
-                      );
-                    }}
-                    placeholder="Qty"
-                    min={0}
-                    className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
-                    required
+                    value={totalAmount.toFixed(2)}
+                    disabled
+                    className="w-full px-4 py-2 border border-gray-400 rounded-md bg-gray-100 font-semibold"
                   />
                 </div>
-                <div className="flex gap-2">
-                  <div className="flex-1">
-                    <label className="block text-xs text-gray-600 mb-1">
-                      Unit Price
-                    </label>
-                    <input
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      value={product.unitPrice}
-                      onChange={(e) => {
-                        const price = e.target.value;
-                        handleProductChange(product.id, "unitPrice", price);
-                        const sub = new Decimal(Number(price || 0)).mul(
-                          new Decimal(Number(product.quantity || 0)),
-                        );
-                        handleProductChange(
-                          product.id,
-                          "subTotal",
-                          Number(sub.toFixed(4)),
-                        );
-                      }}
-                      placeholder="Unit Price"
-                      step="any"
-                      min={0}
-                      className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
-                      required
-                    />
-                  </div>
-                  {products.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveProduct(product.id)}
-                      className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
-                    >
-                      ×
-                    </button>
-                  )}
+                {/* <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Paid
+                  </label>
+                  <input
+                    type="number"
+                    value={paid}
+                    onChange={(e) => setPaid(e.target.value)}
+                    min={0}
+                    placeholder="Enter Amount"
+                    className="w-full px-4 py-2 border border-gray-400 rounded-md font-semibold"
+                  />
+                </div> */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Cash
+                  </label>
+                  <input
+                    type="number"
+                    value={cashInput}
+                    onChange={(e) => setCashInput(e.target.value)}
+                    min={0}
+                    placeholder="Enter Amount"
+                    className="w-full px-4 py-2 border border-gray-400 rounded-md font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Bank Payment Amount
+                  </label>
+                  <input
+                    type="number"
+                    value={bankPaymentAmount}
+                    onChange={(e) => setBankPaymentAmount(e.target.value)}
+                    min={0}
+                    placeholder="Enter Amount"
+                    className="w-full px-4 py-2 border border-gray-400 rounded-md font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Due
+                  </label>
+                  <input
+                    type="number"
+                    value={due.toFixed(2)}
+                    disabled
+                    className="w-full px-4 py-2 border border-gray-400 rounded-md bg-gray-300 font-semibold"
+                  />
                 </div>
               </div>
-            ))}
-            <div className="border-t border-gray-400 pt-3 mt-3">
-              <div className="flex justify-end gap-6 text-sm">
-                <span className="text-gray-600">
-                  Total Qty: <strong>{totalQty.toFixed(0)}</strong>
-                </span>
-                <span className="text-gray-800 font-semibold">
-                  Products Total: ৳ {totalAmount.toFixed(2)}
-                </span>
-              </div>
-            </div>
-          </div>
+            </>
+          )}
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Total Amount
-              </label>
-              <input
-                type="number"
-                value={totalAmount.toFixed(2)}
-                disabled
-                className="w-full px-4 py-2 border border-gray-400 rounded-md bg-gray-100 font-semibold"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Paid
-              </label>
-              <input
-                type="number"
-                value={paid}
-                onChange={(e) => setPaid(e.target.value)}
-                min={0}
-                placeholder="Enter Amount"
-                className="w-full px-4 py-2 border border-gray-400 rounded-md font-semibold"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Due
-              </label>
-              <input
-                type="number"
-                value={due.toFixed(2)}
-                disabled
-                className="w-full px-4 py-2 border border-gray-400 rounded-md bg-gray-300 font-semibold"
-              />
-            </div>
-          </div>
+          {purchaseType === "advance" && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Enter advance payment amount
+                  </label>
+                  <input
+                    type="number"
+                    value={advancePaymentAmount}
+                    onChange={(e) => setAdvancePaymentAmount(e.target.value)}
+                    min={0}
+                    placeholder="Enter Amount"
+                    className="w-full px-4 py-2 border border-gray-400 rounded-md font-semibold"
+                    required={purchaseType === "advance"}
+                  />
+                </div>
+              </div>
+            </>
+          )}
 
           <button
             type="submit"
@@ -793,6 +942,12 @@ const Purchase = () => {
                   Supplier
                 </th>
                 <th
+                  className="border border-gray-400 px-4 py-3 text-left font-semibold"
+                  rowSpan={2}
+                >
+                  Purchase Type
+                </th>
+                <th
                   className="border border-gray-400 px-4 py-3 text-center font-semibold"
                   colSpan={3}
                 >
@@ -838,9 +993,17 @@ const Purchase = () => {
             <tbody>
               {purchases.length > 0 ? (
                 purchases.map((purchase, index) => {
-                  const rowspan = purchase.products.length;
+                  // const rowspan = purchase.products.length;
+                  // const isEven = index % 2 === 0;
+                  // return purchase.products.map((product, pIndex) => (
+
+                  const productsToDisplay =
+                    purchase.products.length > 0 ? purchase.products : [{}];
+
+                  const rowspan = productsToDisplay.length;
                   const isEven = index % 2 === 0;
-                  return purchase.products.map((product, pIndex) => (
+
+                  return productsToDisplay.map((product, pIndex) => (
                     <tr
                       onClick={(e) => {
                         if (e.target.tagName !== "TD") return;
@@ -867,9 +1030,9 @@ const Purchase = () => {
                           </td>
                           <td
                             rowSpan={rowspan}
-                            className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2"
+                            className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${!purchase.companyMemo ? "text-center font-semibold": ""}`}
                           >
-                            {purchase.companyMemo || "--" }
+                            {purchase.companyMemo || "--"}
                           </td>
                           <td
                             rowSpan={rowspan}
@@ -877,22 +1040,28 @@ const Purchase = () => {
                           >
                             {purchase.supplierName}
                           </td>
+                          <td
+                            rowSpan={rowspan}
+                            className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${purchase.purchaseType === "normal" ? "text-center font-semibold" : ""}`}
+                          >
+                            {purchase.purchaseType === "advance" ? "Advance Payment" : "--"}
+                          </td>
                         </>
                       )}
                       <td
-                        className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${pIndex !== purchase.products.length - 1 ? "border-b-gray-200" : ""}`}
+                        className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${purchase.products.length > 0 && pIndex !== purchase.products.length - 1 ? "border-b-gray-200" : ""}`}
                       >
-                        {product.productName}
+                        {product.productName || "N/A"}
                       </td>
                       <td
-                        className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${pIndex !== purchase.products.length - 1 ? "border-b-gray-200" : ""}`}
+                        className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${purchase.products.length > 0 && pIndex !== purchase.products.length - 1 ? "border-b-gray-200" : ""}`}
                       >
-                        {product.quantity}
+                        {product.quantity || 0}
                       </td>
                       <td
-                        className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${pIndex !== purchase.products.length - 1 ? "border-b-gray-200" : ""}`}
+                        className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${purchase.products.length > 0 && pIndex !== purchase.products.length - 1 ? "border-b-gray-200" : ""}`}
                       >
-                        {product.unitPrice}
+                        {product.unitPrice || 0}
                       </td>
                       {pIndex === 0 && (
                         <>

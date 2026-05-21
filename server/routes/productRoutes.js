@@ -25,6 +25,11 @@ router.get('/search', protect, products.searchProduct);
 // @access private
 router.get('/searchforpos', protect, products.searchProductForPOS);
 
+//* @route GET /api/products/searchforpurchase
+// @desc search products for POS System
+// @access private
+router.get('/searchforpurchase', protect, products.searchProductForPurchase);
+
 //? Product Quantity Related
 //* @route GET /api/products/product-low-quantity-check
 // @desc search products

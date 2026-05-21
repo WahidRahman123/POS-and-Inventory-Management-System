@@ -8,7 +8,7 @@ const purchaseSchema = new mongoose.Schema({
   },
   companyMemo: {
     type: String,
-    required: true,
+    // required: true,
     trim: true,
   },
   supplierId: {
@@ -38,7 +38,11 @@ const purchaseSchema = new mongoose.Schema({
   products: [
     {
       _id: false,
-      
+
+      productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
       productName: {
         type: String,
         required: true,
@@ -90,6 +94,25 @@ const purchaseSchema = new mongoose.Schema({
     required: true,
     // min: 0,
   },
+  cash: {
+    type: Number,
+    // required: true,
+  },
+  bankPaymentAmount: {
+    type: Number,
+    // required: true,
+  },
+  purchaseType: {
+    type: String,
+    enum: ["normal", "advance"],
+    required: true,
+  },
+  advancePaymentAmount: {
+    type: Number,
+    required: true,
+    // min: 0,
+  },
+
   createdAt: {
     type: Date,
     required: true,

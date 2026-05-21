@@ -15,17 +15,25 @@ const EditPurchaseDue = () => {
   );
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [due, setDue] = useState(0);
+  // const [due, setDue] = useState(0);
+  const [cashInput, setCashInput] = useState("");
+  const [bankPaymentAmount, setBankPaymentAmount] = useState("");
   const [aid, setAid] = useState(null);
   const [date, setDate] = useState("");
   const [dateRestriction, setDateRestriction] = useState("");
   const { id } = useParams();
 
+  const totalPaidLive = new Decimal(Number(cashInput || 0)).plus(
+    new Decimal(Number(bankPaymentAmount || 0)),
+  );
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (Number(totalPaidLive) === 0)
+      return alert("Please enter a valid payment amount");
     setAid("Run");
     // let amount;
-    let amount = Number(new Decimal(due).toFixed(4));
+    let amount = Number(totalPaidLive.toFixed(4));
     // if (new Decimal(due).greaterThan(new Decimal(purchaseSearchedById.due))) {
     //   amount = Number(new Decimal(purchaseSearchedById.due).toFixed(4));
     // } else {
@@ -39,7 +47,9 @@ const EditPurchaseDue = () => {
           info: {
             date,
             amount,
-            unchangedAmount: Number(new Decimal(due).toFixed(4)),
+            cash: Number(cashInput || 0),
+            bankPaymentAmount: Number(bankPaymentAmount),
+            unchangedAmount: Number(totalPaidLive.toFixed(4)),
           },
         }),
       ).unwrap();
@@ -65,7 +75,7 @@ const EditPurchaseDue = () => {
 
   useEffect(() => {
     if (purchaseSearchedById) {
-      setDue(purchaseSearchedById.due);
+      // setDue(purchaseSearchedById.due);
       const restrictionDate = new Date(purchaseSearchedById.createdAt)
         .toISOString()
         .split("T")[0];
@@ -100,7 +110,7 @@ const EditPurchaseDue = () => {
             />
           </div>
 
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Pay</label>
             <input
               type="number"
@@ -111,6 +121,31 @@ const EditPurchaseDue = () => {
               step="any"
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
+            />
+          </div> */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Cash</label>
+            <input
+              type="number"
+              value={cashInput}
+              min={0}
+              onChange={(e) => setCashInput(e.target.value)}
+              step="any"
+              className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">
+              Bank Payment Amount
+            </label>
+            <input
+              type="number"
+              value={bankPaymentAmount}
+              min={0}
+              onChange={(e) => setBankPaymentAmount(e.target.value)}
+              step="any"
+              className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
             />
           </div>
 
@@ -167,8 +202,8 @@ const EditPurchaseDue = () => {
               <span>: {purchaseSearchedById?.paid}</span>
             </div>
             <div className="flex">
-              <span className="w-28 font-medium">Due</span>
-              <span>
+              <span className="w-28 font-medium text-red-700 text-lg">Due</span>
+              <span className="text-lg">
                 :{" "}
                 <span
                   className={`w-28 ${
