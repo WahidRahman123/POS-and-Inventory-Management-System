@@ -78,30 +78,56 @@ export const addPurchase = createAsyncThunk(
   }
 );
 
+// export const addPayment = createAsyncThunk(
+//   "purchase/addPayment",
+//   async (purchase, ThunkAPI) => {
+//     try {
+//       const { data } = await axios.post(
+//         `${import.meta.env.VITE_BACKEND_URI}/api/purchase/${
+//           purchase.id
+//         }/payment`,
+//         purchase.info,
+//         {
+//           headers: {
+//             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+//           },
+//         }
+//       );
+
+//       return { message: "Payment Successful!" };
+//     } catch (error) {
+//       const message = "Payment Failed!";
+//       return ThunkAPI.rejectWithValue(message);
+//     }
+//   }
+// );
 export const addPayment = createAsyncThunk(
   "purchase/addPayment",
-  async (purchase, ThunkAPI) => {
+  async (payload, ThunkAPI) => {
     try {
-      const { data } = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URI}/api/purchase/${
-          purchase.id
-        }/payment`,
-        purchase.info,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-          },
-        }
-      );
+      let url;
+
+      if (payload.isSupplierLevel) {
+        // Supplier Level Due Payment
+        url = `${import.meta.env.VITE_BACKEND_URI}/api/purchase/supplier-payment`;
+      } else {
+        // Individual Purchase Due Payment
+        url = `${import.meta.env.VITE_BACKEND_URI}/api/purchase/${payload.id}/payment`;
+      }
+
+      const { data } = await axios.post(url, payload, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+        },
+      });
 
       return { message: "Payment Successful!" };
     } catch (error) {
-      const message = "Payment Failed!";
+      const message = error.response?.data?.message || "Payment Failed!";
       return ThunkAPI.rejectWithValue(message);
     }
   }
 );
-
 export const addPaymentForAdvance = createAsyncThunk(
   "purchase/addPaymentForAdvance",
   async (purchase, ThunkAPI) => {

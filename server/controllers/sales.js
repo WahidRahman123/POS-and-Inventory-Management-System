@@ -384,27 +384,80 @@ module.exports.salesByCustomerName = async (req, res) => {
 };
 
 // ৯. ডিউ লিস্ট
+// module.exports.salesDueList = async (req, res) => {
+//   try {
+//     const { page = 1, order = -1, customerName = "" } = req.query;
+//     const limit = 15;
+//     const skip = (parseInt(page) - 1) * limit;
+
+//     const queries = [];
+//     let nameQuery;
+//     const dueQuery = { due: { $gt: 0 } };
+//     queries.push(dueQuery);
+
+//     if (customerName) {
+//       nameQuery = { customerName: { $regex: customerName, $options: "i" } };
+//       queries.push(nameQuery);
+//     }
+
+//     const sales = await Sales.find({ $and: queries })
+//       .sort({ createdAt: parseInt(order) })
+//       .skip(skip)
+//       .limit(limit);
+//     const total = await Sales.countDocuments({ $and: queries });
+
+//     res.status(200).json({
+//       total,
+//       page: parseInt(page),
+//       pages: Math.ceil(total / limit),
+//       sales,
+//     });
+//   } catch (error) {
+//     res.status(500).send("Server Error");
+//   }
+// };
+
+// ৯. Sales Due List (Customer wise total due)
 module.exports.salesDueList = async (req, res) => {
   try {
     const { page = 1, order = -1, customerName = "" } = req.query;
-    const limit = 15;
+    const limit = 20;
     const skip = (parseInt(page) - 1) * limit;
 
-    const queries = [];
-    let nameQuery;
-    const dueQuery = { due: { $gt: 0 } };
-    queries.push(dueQuery);
+    const matchQuery = { due: { $gt: 0 } };
 
     if (customerName) {
-      nameQuery = { customerName: { $regex: customerName, $options: "i" } };
-      queries.push(nameQuery);
+      matchQuery.customerName = { $regex: customerName, $options: "i" };
     }
 
-    const sales = await Sales.find({ $and: queries })
-      .sort({ createdAt: parseInt(order) })
-      .skip(skip)
-      .limit(limit);
-    const total = await Sales.countDocuments({ $and: queries });
+    const sales = await Sales.aggregate([
+      { $match: matchQuery },
+      {
+        $group: {
+          _id: "$customerName",
+          customerName: { $first: "$customerName" },
+          customerPhone: { $first: "$customerPhone" },
+          customerEmail: { $first: "$customerEmail" },
+          totalDue: { $sum: "$due" },
+          lastSaleDate: { $max: "$createdAt" },
+        },
+      },
+      { $sort: { totalDue: parseInt(order) } },
+      { $skip: skip },
+      { $limit: limit },
+    ]);
+
+    const totalCount = await Sales.aggregate([
+      { $match: matchQuery },
+      {
+        $group: {
+          _id: "$customerName",
+        },
+      },
+      { $count: "total" },
+    ]);
+
+    const total = totalCount[0] ? totalCount[0].total : 0;
 
     res.status(200).json({
       total,
@@ -413,10 +466,10 @@ module.exports.salesDueList = async (req, res) => {
       sales,
     });
   } catch (error) {
+    console.error("Sales Due List Error:", error);
     res.status(500).send("Server Error");
   }
 };
-
 // হেল্পার ফাংশন
 async function getSalesAndTotal(start, end, order) {
   const sales = await Sales.find({

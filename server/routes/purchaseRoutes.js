@@ -31,4 +31,6 @@ router.post('/:id/paymentforadvance', protect, purchases.paymentForAdvance);
 // @access Private
 router.get('/:id', protect, purchases.searchById);
 
+router.post('/supplier-payment', protect, purchases.supplierDuePayment);
+
 module.exports = router;

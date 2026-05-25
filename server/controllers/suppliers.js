@@ -32,10 +32,24 @@ module.exports.index = async (req, res) => {
   }
 };
 
+// module.exports.supplierForPurchase = async (req, res) => {
+//   try {
+//     const {q} = req.query;
+//     const suppliers = await Supplier.find({ name: { $regex: q, $options: "i" } });
+
+//     res.status(201).json(suppliers);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Server Error");
+//   }
+// };
+
 module.exports.supplierForPurchase = async (req, res) => {
   try {
-    const {q} = req.query;
-    const suppliers = await Supplier.find({ name: { $regex: q, $options: "i" } });
+    const { q } = req.query;
+    const suppliers = await Supplier.find({ 
+      name: { $regex: q, $options: "i" } 
+    }).select("name phone address email advanceBalance");   // advanceBalance নিয়ে আসবে
 
     res.status(201).json(suppliers);
   } catch (error) {
@@ -104,85 +118,140 @@ module.exports.deleteSupplier = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
-
 module.exports.purchaseBySupplierName = async (req, res) => {
   try {
-    const { page = 1, dateSearch = "", supplierName="" } = req.query;
+    const { dateSearch = "", supplierName = "" } = req.query;
 
-    let searchQuery = [];
-    let nameSearchQuery = { supplierName };
-    searchQuery.push(nameSearchQuery);
+    if (!supplierName) {
+      return res.status(400).json({ message: "Supplier name is required" });
+    }
 
-    let dateSearchQuery;
-    // For date search:
+    let dateQuery = {};
     if (dateSearch) {
       const startOfDay = new Date(dateSearch);
       startOfDay.setHours(0, 0, 0, 0);
-
       const endOfDay = new Date(dateSearch);
       endOfDay.setHours(23, 59, 59, 999);
-
-      dateSearchQuery = {
-        // createdAt: { $gte: startOfDay, $lte: endOfDay },
-        date: { $gte: startOfDay, $lte: endOfDay },
-      };
-      searchQuery.push(dateSearchQuery);
+      dateQuery = { date: { $gte: startOfDay, $lte: endOfDay } };
     }
 
-    const mainSearch = { $and: searchQuery };
+    // Get ALL transactions
+    const transactions = await PurchaseTransaction.find({
+      supplierName,
+      ...dateQuery
+    }).sort({ date: -1 }).populate("purchaseId");
 
-    // const limit = 10;
+    let totalPurchase = 0;   // Total Debit (Normal Purchase)
+    let totalPaid = 0;       // Total Credit (Advance + Due Payment)
 
-    // Pagination
-    // const skip = (parseInt(page) - 1) * limit;
-
-    const transactions = await PurchaseTransaction.find(mainSearch)
-      .sort({ date: -1 }).populate("purchaseId")
-      // .skip(skip)
-      // .limit(limit);
-    
-    // const purchases = await PurchaseTransaction.aggregate([
-    //   {
-    //     $match: mainSearch
-    //   },
-    //   {
-    //     $unwind: "$transactionRecords"
-    //   },
-    //   {
-    //     $sort: { "transactionRecords.date" : -1 }
-    //   }
-    // ]);
-
-    // Count total Customer
-    // const total = await Purchase.countDocuments(mainSearch);
-
-    const result = await Purchase.aggregate([
-      {
-        $match: nameSearchQuery
-      },
-      {
-        $group: {
-          _id: null,
-          totalAmount: {$sum: { $multiply: ['$totalAmount', 10000] }},
-          totalPaid: {$sum: { $multiply: ['$paid', 10000] }},
-          totalDue: {$sum: { $multiply: ['$due', 10000] }}
-        }
+    transactions.forEach(t => {
+      if (t.purchaseType === "advance" || t.refMemo?.startsWith("REF-DUE")) {
+        totalPaid += Number(t.paidAmount || 0);
+      } else {
+        totalPurchase += Number(t.amountToBePaid || 0);
+        totalPaid += Number(t.paidAmount || 0);
       }
-    ]);
+    });
 
-    // console.log(purchases)
+    // Calculate logical balance from transactions (most accurate)
+    const calculatedBalance = totalPaid - totalPurchase;
+
+    // Also get supplier balance for reference
+    const supplier = await Supplier.findOne({ name: supplierName });
+    const supplierBalance = supplier ? Number(supplier.balance || 0) : 0;
 
     res.status(201).json({
-      // total,
-      // page: parseInt(page),
-      // pages: Math.ceil(total / limit),
       transactions,
-      totalAmount: result.length > 0 ? result[0].totalAmount / 10000 : 0,
-      totalPaid: result.length > 0 ? result[0].totalPaid / 10000 : 0,
-      totalDue: result.length > 0 ? result[0].totalDue / 10000 : 0,
+      totalAmount: totalPurchase,
+      totalPaid: totalPaid,
+      totalDue: calculatedBalance,        // ← Transaction থেকে হিসাব
+      supplierBalance: supplierBalance    // Extra for debugging
     });
+
   } catch (error) {
-    console.error(error);
+    console.error("purchaseBySupplierName Error:", error);
     res.status(500).send("Server Error");
   }
 };
+
+// module.exports.purchaseBySupplierName = async (req, res) => {
+//   try {
+//     const { page = 1, dateSearch = "", supplierName="" } = req.query;
+
+//     let searchQuery = [];
+//     let nameSearchQuery = { supplierName };
+//     searchQuery.push(nameSearchQuery);
+
+//     let dateSearchQuery;
+//     // For date search:
+//     if (dateSearch) {
+//       const startOfDay = new Date(dateSearch);
+//       startOfDay.setHours(0, 0, 0, 0);
+
+//       const endOfDay = new Date(dateSearch);
+//       endOfDay.setHours(23, 59, 59, 999);
+
+//       dateSearchQuery = {
+//         // createdAt: { $gte: startOfDay, $lte: endOfDay },
+//         date: { $gte: startOfDay, $lte: endOfDay },
+//       };
+//       searchQuery.push(dateSearchQuery);
+//     }
+
+//     const mainSearch = { $and: searchQuery };
+
+//     // const limit = 10;
+
+//     // Pagination
+//     // const skip = (parseInt(page) - 1) * limit;
+
+//     const transactions = await PurchaseTransaction.find(mainSearch)
+//       .sort({ date: -1 }).populate("purchaseId")
+//       // .skip(skip)
+//       // .limit(limit);
+    
+//     // const purchases = await PurchaseTransaction.aggregate([
+//     //   {
+//     //     $match: mainSearch
+//     //   },
+//     //   {
+//     //     $unwind: "$transactionRecords"
+//     //   },
+//     //   {
+//     //     $sort: { "transactionRecords.date" : -1 }
+//     //   }
+//     // ]);
+
+//     // Count total Customer
+//     // const total = await Purchase.countDocuments(mainSearch);
+
+//     const result = await Purchase.aggregate([
+//       {
+//         $match: nameSearchQuery
+//       },
+//       {
+//         $group: {
+//           _id: null,
+//           totalAmount: {$sum: { $multiply: ['$totalAmount', 10000] }},
+//           totalPaid: {$sum: { $multiply: ['$paid', 10000] }},
+//           totalDue: {$sum: { $multiply: ['$due', 10000] }}
+//         }
+//       }
+//     ]);
+
+//     // console.log(purchases)
+
+//     res.status(201).json({
+//       // total,
+//       // page: parseInt(page),
+//       // pages: Math.ceil(total / limit),
+//       transactions,
+//       totalAmount: result.length > 0 ? result[0].totalAmount / 10000 : 0,
+//       totalPaid: result.length > 0 ? result[0].totalPaid / 10000 : 0,
+//       totalDue: result.length > 0 ? result[0].totalDue / 10000 : 0,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Server Error");
+//   }
+// };

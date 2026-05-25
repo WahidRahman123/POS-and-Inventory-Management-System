@@ -170,18 +170,18 @@ const Dashboard = () => {
         </DashboardCard>
 
         {/* STOCK */}
-        <DashboardCard
+        {/* <DashboardCard
           title="Main Stock"
           value={dashboardResult.totalProductCostPrice}
           color="bg-orange-500"
           suffix=" ৳"
           to="/product"
         >
-          {/* <Row
+          <Row
             label="Total Cost Price"
             value={dashboardResult.totalProductCostPrice}
             suffix=" ৳"
-          /> */}
+          />
           <Row
             label="Total Sale Price"
             value={dashboardResult.totalProductSalePrice}
@@ -195,8 +195,29 @@ const Dashboard = () => {
           <div className="text-xs text-white/80 mt-2">
             Current Available Quantity
           </div>
+        </DashboardCard> */}
+        {/* STOCK */}
+       <DashboardCard
+          title="Main Stock"
+          value={dashboardResult.totalStockValue || 0}
+          color="bg-orange-500"
+          suffix=" ৳"
+          to="/product"
+        >
+          {/* <Row
+            label="Total Sale Price"
+            value={dashboardResult.totalProductSalePrice || 0}
+            suffix=" ৳"
+          /> */}
+          <Row
+            label="Main Stock"
+            value={dashboardResult.quantityDetails?.mainQuantity || 0}
+            suffix=" Pcs"
+          />
+          <div className="text-xs text-white/80 mt-2">
+            This is the Current Available Quantity and its Total value.
+          </div>
         </DashboardCard>
-
         <DashboardCard
           title="Total Sales Return"
           value={dashboardResult.totalAmountForSalesReturn}

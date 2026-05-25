@@ -17,6 +17,15 @@ const supplierSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    // ================== নতুন ফিল্ড ==================
+  advanceBalance: {
+    type: Number,
+    default: 0
+  },
+  balance: {
+    type: Number,
+    default: 0
+  },
     
 }, { timestamps: true })
 

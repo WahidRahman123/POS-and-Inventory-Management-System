@@ -76,6 +76,7 @@ function App() {
           <Route path="/product/low-stock" element={<LowQuantityProductsPage />} />
           <Route path="/purchase" element={<Purchase />} />
           <Route path="/purchase-report/:id/edit-due" element={<EditPurchaseDue />} />
+          <Route path="/purchase-report/due-payment" element={<EditPurchaseDue />} />
           <Route path="/purchase/:id/adjust-advance-payment" element={<PurchaseAdvanceSettlement />} />
           <Route path="/point-of-sale" element={<PointOfSale />} />
           {/* for admin */}

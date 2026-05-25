@@ -71,7 +71,8 @@ const purchaseTransactionSchema = new mongoose.Schema({
   },
   advancePaymentAmount: {
     type: Number,
-    required: true,
+    default: 0,
+    //required: true,
     // min: 0,
   },
   adjustmentDetails: [
