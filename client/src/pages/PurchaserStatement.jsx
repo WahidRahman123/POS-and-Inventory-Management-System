@@ -644,7 +644,7 @@ import Decimal from 'decimal.js';
 
 const PurchaserStatement = () => {
   const { user } = useSelector((state) => state.auth);
-  const { transactions = [], totalAmount = 0, totalPaid = 0, totalDue = 0 } = useSelector((state) => state.sstatement);
+  const { transactions = [], totalAmount = 0, totalPaid = 0, totalDue = 0, supplierBalance = 0 } = useSelector((state) => state.sstatement);
   
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -673,7 +673,7 @@ const PurchaserStatement = () => {
 
   if (!user || !state) return <div className="text-center mt-20 text-gray-500">No Supplier Selected</div>;
 
-  const currentBalance = Number(totalDue);
+  const currentBalance = Number(supplierBalance);
   const shouldShowPayDue = currentBalance < 0;
 
   let runningBalance = new Decimal(0);
@@ -779,18 +779,26 @@ const PurchaserStatement = () => {
                     <td className="px-6 py-4">{new Date(t.date).toLocaleDateString('en-GB')}</td>
                     <td className="px-6 py-4 font-medium">{t.refMemo}</td>
                     <td className="px-6 py-4">
-                      {isAdvance ? "Advance Payment" : 
-                       isDuePayment ? "Due Payment" : 
-                       t.purchaseId?.products?.map(p => p.productName).join(", ") || "Purchase Items"}
+                      {/* {isAdvance ?  : 
+                       isDuePayment ? "" : 
+                        || "Purchase Items"} */}
+
+                       {t.purchaseType === "normal" ? t.purchaseId?.products?.map(p => p.productName).join(", ") : ""}
+
+                       {t.purchaseType === "advance" ? "Advance Payment" : ""}
+
+                       {t.purchaseType === "due" ? "Due Payment" : ""}
+
+
                     </td>
                     <td className="px-6 py-4 text-right text-red-600 font-medium">
-                      {debit ? `৳${debit.toLocaleString()}` : ""}
+                      {t.transactionType === "debit" ? `৳${t.amount.toLocaleString()}` : ""}
                     </td>
                     <td className="px-6 py-4 text-right text-green-600 font-medium">
-                      {credit ? `৳${credit.toLocaleString()}` : ""}
+                      {t.transactionType === "credit" ? `৳${t.amount.toLocaleString()}` : ""}
                     </td>
                     <td className="px-6 py-4 text-right font-bold">
-                      ৳{runningBalance.toFixed(2)}
+                      ৳{t.currentBalance.toLocaleString()}
                     </td>
                     <td className="px-6 py-4 text-center print:hidden">
                       <Link

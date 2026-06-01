@@ -7,6 +7,7 @@ const initialState = {
   totalAmount: null,
   totalPaid: null,
   totalDue: null,
+  supplierBalance: null,
   page: 1,
   pages: null,
   loading: false,
@@ -53,6 +54,7 @@ const sStatementSlice = createSlice({
         state.totalAmount = action.payload.totalAmount;
         state.totalPaid = action.payload.totalPaid;
         state.totalDue = action.payload.totalDue;
+        state.supplierBalance = action.payload.supplierBalance;
       })
       .addCase(fetchPurchasesForSupplierName.rejected, (state, action) => {
         state.loading = false;

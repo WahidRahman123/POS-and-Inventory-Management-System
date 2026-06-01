@@ -397,6 +397,7 @@ const EditPurchaseDue = () => {
   const [bankPaymentAmount, setBankPaymentAmount] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [loading, setLoading] = useState(false);
+  const [remarks, setRemarks] = useState("");
 
   const data = location.state || {};
   const isSupplierLevel = data.isSupplierLevel === true;
@@ -423,6 +424,7 @@ const EditPurchaseDue = () => {
         amount: Number(totalPaidLive.toFixed(4)),
         date,
         cash: Number(cashInput || 0),
+        remarks,
         bankPaymentAmount: Number(bankPaymentAmount || 0),
         unchangedAmount: Number(totalPaidLive.toFixed(4)),
       };
@@ -527,6 +529,15 @@ const EditPurchaseDue = () => {
                 className="w-full border border-gray-300 rounded-md px-4 py-2" 
               />
             </div>
+          </div>
+          <div className="w-full mb-6">
+            <label className="block text-sm mb-1">Remarks</label>
+              <textarea
+              value={remarks}
+              onChange={(e) => setRemarks(e.target.value)}
+              className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
+              rows={2}
+            />
           </div>
 
           <button

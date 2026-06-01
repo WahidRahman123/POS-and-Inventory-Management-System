@@ -98,18 +98,25 @@ module.exports.createPurchase = async (req, res) => {
       address,
       supplierEmail,
       supplierPhone,
+      transactionType,
       userId,
     } = req.body;
 
     // Get Supplier's Current Balance BEFORE this transaction
     const supplier = await Supplier.findById(supplierId);
-    if (!supplier) return res.status(404).json({ message: "Supplier not found" });
+    if (!supplier)
+      return res.status(404).json({ message: "Supplier not found" });
 
-    const previousBalance = new Decimal(supplier.balance || 0);
+    const previousBalance = new Decimal(supplier.totalBalance || 0);
 
     // Generate Memo
-    const count = await getNextSequenceForOther("Purchase");
-    const memo = purchaseType === "advance" ? `PA-${count.seq}` : `P-${count.seq}`;
+    const count =
+      purchaseType === "normal"
+        ? await getNextSequenceForOther("PurchaseNormal")
+        : await getNextSequenceForOther("PurchaseAdvance");
+
+    const memo =
+      purchaseType === "advance" ? `PA-${count.seq}` : `P-${count.seq}`;
 
     const purchase = new Purchase({
       supplierId,
@@ -132,6 +139,7 @@ module.exports.createPurchase = async (req, res) => {
 
     // Calculate New Balance
     let newBalance = previousBalance;
+    const amountToBePaid = supplier.totalBalance;
 
     if (purchaseType === "advance") {
       newBalance = previousBalance.plus(paid);
@@ -142,14 +150,14 @@ module.exports.createPurchase = async (req, res) => {
       for (let item of products) {
         await Product.findByIdAndUpdate(item.productId, {
           $inc: { quantity: item.quantity },
-          costPrice: item.unitPrice
+          costPrice: item.unitPrice,
         });
       }
     }
 
     // Update Supplier
-    supplier.balance = Number(newBalance.toFixed(4));
-    await supplier.save();
+    supplier.totalBalance = Number(newBalance.toFixed(4));
+    const currentBalance = supplier.totalBalance;
 
     // Transaction
     const transaction = new PurchaseTransaction({
@@ -160,12 +168,15 @@ module.exports.createPurchase = async (req, res) => {
       supplierPhone,
       userId,
       refMemo: memo,
-      amountToBePaid: Number(totalAmount),
-      paidAmount: Number(paid),
+      amountToBePaid,
+      amount: purchaseType === "advance" ? Number(paid): Number(totalAmount),
+      paidAmount: purchaseType === "advance" ? Number(paid): 0,
       currentDue: Number(due),
+      currentBalance,
       date: createdAt || new Date(),
       purchaseId: purchase._id,
       purchaseType,
+      transactionType,
       advancePaymentAmount: Number(advancePaymentAmount),
       unchangedPaid: Number(paid),
       unchangedDue: Number(due),
@@ -174,6 +185,7 @@ module.exports.createPurchase = async (req, res) => {
     purchase.transactionRecords = [transaction._id];
 
     await transaction.save();
+    await supplier.save();
     const createdPurchase = await purchase.save();
 
     // Important: Send balance data for Invoice
@@ -182,7 +194,6 @@ module.exports.createPurchase = async (req, res) => {
       previousBalance: Number(previousBalance.toFixed(2)),
       currentBalance: Number(newBalance.toFixed(2)),
     });
-
   } catch (error) {
     console.error("Create Purchase Error:", error);
     res.status(500).json({ message: error.message || "Server Error" });
@@ -612,7 +623,16 @@ module.exports.searchById = async (req, res) => {
 
 module.exports.addPayment = async (req, res) => {
   try {
-    const { id, supplierId, isSupplierLevel, amount, date, cash, bankPaymentAmount, unchangedAmount } = req.body;
+    const {
+      id,
+      supplierId,
+      isSupplierLevel,
+      amount,
+      date,
+      cash,
+      bankPaymentAmount,
+      unchangedAmount,
+    } = req.body;
 
     let purchase;
 
@@ -620,7 +640,9 @@ module.exports.addPayment = async (req, res) => {
       // Supplier Level Due Payment
       purchase = await Purchase.findOne({ supplierId: supplierId });
       if (!purchase) {
-        return res.status(404).json({ message: "No purchase found for this supplier" });
+        return res
+          .status(404)
+          .json({ message: "No purchase found for this supplier" });
       }
     } else {
       // Individual Purchase Due Payment
@@ -634,8 +656,12 @@ module.exports.addPayment = async (req, res) => {
     const previousDue = Number(purchase.due);
 
     // Update Purchase
-    purchase.paid = Number(new Decimal(purchase.paid).plus(paidAmount).toFixed(4));
-    purchase.due = Number(new Decimal(previousDue).minus(paidAmount).toFixed(4));
+    purchase.paid = Number(
+      new Decimal(purchase.paid).plus(paidAmount).toFixed(4),
+    );
+    purchase.due = Number(
+      new Decimal(previousDue).minus(paidAmount).toFixed(4),
+    );
 
     // Create Transaction
     const transaction = new PurchaseTransaction({
@@ -664,7 +690,6 @@ module.exports.addPayment = async (req, res) => {
     await purchase.save();
 
     res.status(201).json({ message: "Payment updated successfully" });
-
   } catch (error) {
     console.error("Add Payment Error:", error);
     res.status(500).json({ message: error.message || "Server Error" });
@@ -715,11 +740,15 @@ module.exports.paymentForAdvance = async (req, res) => {
       });
 
       purchase.totalAmount = Number(
-        new Decimal(productTotal).plus(new Decimal(purchase.totalAmount)).toFixed(4),
+        new Decimal(productTotal)
+          .plus(new Decimal(purchase.totalAmount))
+          .toFixed(4),
       );
 
       purchase.due = Number(
-        new Decimal(purchase.totalAmount).minus(new Decimal(purchase.paid)).toFixed(4),
+        new Decimal(purchase.totalAmount)
+          .minus(new Decimal(purchase.paid))
+          .toFixed(4),
       );
 
       const unchangedPaid = 0;
@@ -743,7 +772,7 @@ module.exports.paymentForAdvance = async (req, res) => {
         purchaseId: purchase._id,
         unchangedPaid,
         unchangedDue,
-        adjustmentDetails
+        adjustmentDetails,
       });
       // await transaction.save({ session });
       await transaction.save();
@@ -754,7 +783,8 @@ module.exports.paymentForAdvance = async (req, res) => {
 
       if (productDetails && productDetails.length > 0) {
         for (let i = 0; i < productDetails.length; i++) {
-          const { productId, productName, quantity, unitPrice } = productDetails[i];
+          const { productId, productName, quantity, unitPrice } =
+            productDetails[i];
           // const product = await Product.findOne({ name: productName }).session(
           //   session,
           // );
@@ -957,24 +987,39 @@ module.exports.paymentForAdvance = async (req, res) => {
 // supplierDuePayment ফাংশনের ভিতরে এই অংশটা আপডেট করো
 module.exports.supplierDuePayment = async (req, res) => {
   try {
-    const { supplierId, amount, date, cash = 0, bankPaymentAmount = 0 } = req.body;
+    const {
+      supplierId,
+      amount,
+      date,
+      cash = 0,
+      remarks,
+      bankPaymentAmount = 0,
+    } = req.body;
+
+    console.log(amount);
 
     if (!supplierId || Number(amount) <= 0) {
-      return res.status(400).json({ message: "Supplier ID and valid amount required" });
+      return res
+        .status(400)
+        .json({ message: "Supplier ID and valid amount required" });
     }
 
     const supplier = await Supplier.findById(supplierId);
-    if (!supplier) return res.status(404).json({ message: "Supplier not found" });
+    if (!supplier)
+      return res.status(404).json({ message: "Supplier not found" });
 
     const paidAmount = Number(amount);
-    const previousBalance = new Decimal(supplier.balance || 0);
+    const previousBalance = new Decimal(supplier.totalBalance);
+    const amountToBePaid = supplier.totalBalance;
 
     // Supplier Balance Update
-    supplier.balance = Number(previousBalance.minus(paidAmount).toFixed(4));
+    supplier.totalBalance = Number(previousBalance.plus(paidAmount).toFixed(4));
+
+    const currentBalance = supplier.totalBalance;
     await supplier.save();
 
     // Generate Independent Memo for Due Payment
-    const count = await getNextSequenceForOther("DuePayment");  // নতুন সিকোয়েন্স
+    const count = await getNextSequenceForOther("PurchaseDue"); // নতুন সিকোয়েন্স
     const memo = `DUE-PAY-${count.seq}`;
 
     const transaction = new PurchaseTransaction({
@@ -984,28 +1029,31 @@ module.exports.supplierDuePayment = async (req, res) => {
       supplierEmail: supplier.email || "",
       supplierPhone: supplier.phone,
       userId: req.user?.id || null,
-      refMemo: memo,                                      // ← এখন স্বাধীন
-      amountToBePaid: 0,
-      paidAmount: paidAmount,
-      currentDue: Number(supplier.balance),
+      refMemo: memo, // ← এখন স্বাধীন
+      amountToBePaid: Number(amountToBePaid),
+      paidAmount,
+      remarks,
+      amount: Number(amount),
+      currentDue: currentBalance,
+      currentBalance,
       date: date || new Date(),
       cash: Number(cash),
       bankPaymentAmount: Number(bankPaymentAmount),
       unchangedPaid: paidAmount,
       unchangedDue: Number(previousBalance),
-      purchaseType: "normal",
+      purchaseType: "due",
+      transactionType: "credit",
       advancePaymentAmount: 0,
-      purchaseId: null,  // Due payment এ কোনো specific purchase এর সাথে যুক্ত না
+      purchaseId: null, // Due payment এ কোনো specific purchase এর সাথে যুক্ত না
     });
 
     await transaction.save();
 
-    res.status(201).json({ 
+    res.status(201).json({
       message: "Supplier Due Payment recorded successfully",
-      currentBalance: supplier.balance,
-      memo: memo
+      currentBalance: supplier.totalBalance,
+      memo: memo,
     });
-
   } catch (error) {
     console.error("Supplier Due Payment Error:", error);
     res.status(500).json({ message: error.message || "Server Error" });
@@ -1018,14 +1066,14 @@ module.exports.getSupplierDueList = async (req, res) => {
     const { supplierName = "", order = -1 } = req.query;
 
     let query = {};
-    
+
     // লাইভ সার্চ ফিল্টার
     if (supplierName) {
       query.name = { $regex: supplierName, $options: "i" };
     }
 
     // 💡 আপনার প্রোজেক্টের আসল Supplier কালেকশন থেকে ডাটা রিড করা
-    const suppliers = await Supplier.find(query).lean();
+    const suppliers = await Supplier.find(query).sort({ totalBalance: Number(order) });
 
     // ডাটা কনসোল লগ দিয়ে চেক করা (ডিবাগিং এর জন্য, ডাটা না আসলে টার্মিনালে দেখতে পারবেন)
     // console.log("Total Suppliers Found in DB:", suppliers.length);
@@ -1035,30 +1083,31 @@ module.exports.getSupplierDueList = async (req, res) => {
       supplierId: supplier._id,
       supplierName: supplier.name || "Unknown Supplier",
       supplierPhone: supplier.phone || "N/A",
-      overallBalance: typeof supplier.balance !== 'undefined' ? supplier.balance : 0, 
-      balance: supplier.balance || 0, 
+      address: supplier.address || "",
+      overallBalance:
+        typeof supplier.balance !== "undefined" ? supplier.balance : 0,
+      totalBalance: supplier.totalBalance || 0,
     }));
 
     // সর্টিং লজিক
-    supplierBalances.sort((a, b) => {
-      if (order === -1) {
-        return b.overallBalance - a.overallBalance;
-      } else {
-        return a.overallBalance - b.overallBalance;
-      }
-    });
+    // supplierBalances.sort((a, b) => {
+    //   if (order === -1) {
+    //     return b.overallBalance - a.overallBalance;
+    //   } else {
+    //     return a.overallBalance - b.overallBalance;
+    //   }
+    // });
 
     // সাকসেস রেসপন্স পাঠানো
     return res.status(200).json({
       success: true,
       supplierBalances,
     });
-
   } catch (error) {
     console.error("Error in getSupplierDueList:", error);
-    return res.status(500).json({ 
-      message: "Supplier Balance List Fetching Failed!", 
-      error: error.message 
+    return res.status(500).json({
+      message: "Supplier Balance List Fetching Failed!",
+      error: error.message,
     });
   }
 };

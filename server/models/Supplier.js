@@ -26,6 +26,12 @@ const supplierSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+
+  //* Main Balance
+  totalBalance: {
+    type: Number,
+    default: 0
+  },
     
 }, { timestamps: true })
 

@@ -104,7 +104,7 @@ const purchaseSchema = new mongoose.Schema({
   },
   purchaseType: {
     type: String,
-    enum: ["normal", "advance"],
+    enum: ["normal", "advance", "due"],
     required: true,
   },
   advancePaymentAmount: {

@@ -1590,7 +1590,6 @@
 //         </form>
 //       </div>
 
-
 //       {/* Purchase Report Table */}
 //       <div className="max-w-6xl mx-auto bg-white shadow-md rounded-lg p-4 sm:p-6">
 //         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
@@ -1700,9 +1699,6 @@
 //         </div>
 
 //       </div>
-
-
-
 
 //       <div className="overflow-x-auto">
 
@@ -2514,14 +2510,19 @@ import axios from "axios";
 
 const Purchase = () => {
   const { user } = useSelector((state) => state.auth);
-  const { purchases, toggle, page, pages } = useSelector((state) => state.purchase);
+  const { purchases, toggle, page, pages } = useSelector(
+    (state) => state.purchase,
+  );
   const { productsBySearchforPurchase } = useSelector((state) => state.product);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation(); // location অবজেক্ট নেওয়া হলো রিডাইরেকশনের ডেটা ধরার জন্য
 
-  const [formData, setFormData] = useState({ date: new Date().toISOString().split("T")[0], memo: "" });
+  const [formData, setFormData] = useState({
+    date: new Date().toISOString().split("T")[0],
+    memo: "",
+  });
   const [purchaseType, setPurchaseType] = useState("normal");
   const [advancePaymentAmount, setAdvancePaymentAmount] = useState("");
 
@@ -2542,7 +2543,14 @@ const Purchase = () => {
 
   // Products
   const [products, setProducts] = useState([
-    { id: 1, productId: "", productName: "", quantity: "", unitPrice: "", subTotal: "" },
+    {
+      id: 1,
+      productId: "",
+      productName: "",
+      quantity: "",
+      unitPrice: "",
+      subTotal: "",
+    },
   ]);
 
   const [addLoading, setAddLoading] = useState(false);
@@ -2550,7 +2558,10 @@ const Purchase = () => {
 
   // Supplier Add Form
   const [supplierToAdd, setSupplierToAdd] = useState({
-    name: "", phone: "", email: "", address: ""
+    name: "",
+    phone: "",
+    email: "",
+    address: "",
   });
   const [aid, setAid] = useState(null);
 
@@ -2561,7 +2572,10 @@ const Purchase = () => {
   const [nameSearch, setNameSearch] = useState("");
   const [dateMode, setDateMode] = useState("single");
   const [dateSearch, setDateSearch] = useState("");
-  const [rangeDateSearch, setRangeDateSearch] = useState({ dateSearchStart: "", dateSearchEnd: "" });
+  const [rangeDateSearch, setRangeDateSearch] = useState({
+    dateSearchStart: "",
+    dateSearchEnd: "",
+  });
 
   // ================== Handle Redirected Advance Data ==================
   useEffect(() => {
@@ -2579,7 +2593,7 @@ const Purchase = () => {
         advanceBalance: redirectedData.advanceBalance || 0,
       });
       setDisable(true); // ইনপুট ফিল্ড লক করে দেওয়া হলো
-      
+
       // রিডাইরেক্ট স্টেট ক্লিন করা যাতে রিফ্রেশ করলে আবার না আসে
       window.history.replaceState({}, document.title);
     }
@@ -2611,9 +2625,11 @@ const Purchase = () => {
       const { data } = await axios.get(
         `${import.meta.env.VITE_BACKEND_URI}/api/supplier/purchase`,
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem("userToken")}` },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
           params: { q: query },
-        }
+        },
       );
       setData(data);
     } else {
@@ -2631,6 +2647,7 @@ const Purchase = () => {
       supplierEmail: supplierData.email || "",
       supplierPhone: supplierData.phone || "",
       advanceBalance: supplierData.advanceBalance || 0,
+      totalBalance: supplierData.totalBalance || 0,
     });
     setDisable(true);
   };
@@ -2656,13 +2673,24 @@ const Purchase = () => {
 
   const handleProductChange = (id, field, value) => {
     setProducts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, [field]: value } : p))
+      prev.map((p) => (p.id === id ? { ...p, [field]: value } : p)),
     );
   };
 
   const handleAddProduct = () => {
-    const newId = products.length > 0 ? Math.max(...products.map((p) => p.id)) + 1 : 1;
-    setProducts([...products, { id: newId, productId: "", productName: "", quantity: "", unitPrice: "", subTotal: "" }]);
+    const newId =
+      products.length > 0 ? Math.max(...products.map((p) => p.id)) + 1 : 1;
+    setProducts([
+      ...products,
+      {
+        id: newId,
+        productId: "",
+        productName: "",
+        quantity: "",
+        unitPrice: "",
+        subTotal: "",
+      },
+    ]);
   };
 
   const handleRemoveProduct = (id) => {
@@ -2672,93 +2700,129 @@ const Purchase = () => {
   };
 
   // ================== Calculations ==================
-  const totalAmount = products.reduce(
-    (acc, p) => acc.plus(new Decimal(Number(p.subTotal || 0))),
-    new Decimal(0)
-  );
+  const totalAmount =
+    purchaseType === "normal"
+      ? products.reduce(
+          (acc, p) => acc.plus(new Decimal(Number(p.subTotal || 0))),
+          new Decimal(0),
+        )
+      : new Decimal(0);
 
-  const availableAdvance = new Decimal(supplier.advanceBalance || 0);
-  const advanceUsed = Decimal.min(availableAdvance, totalAmount);
-  const finalDue = totalAmount.minus(availableAdvance).greaterThan(0)
-    ? totalAmount.minus(availableAdvance)
-    : new Decimal(0);
+  const paid = purchaseType === "normal" ? new Decimal(0) : Number(advancePaymentAmount);
+  const due = totalAmount.minus(paid);
+
+  // const availableAdvance = new Decimal(supplier.advanceBalance || 0);
+  // const advanceUsed = Decimal.min(availableAdvance, totalAmount);
+  // const finalDue = totalAmount.minus(availableAdvance).greaterThan(0)
+  //   ? totalAmount.minus(availableAdvance)
+  //   : new Decimal(0);
 
   // ================== Submit Handler ==================
   // ================== Submit Handler ==================
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!supplier.supplierId) return alert("Please select a supplier!");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!supplier.supplierId) return alert("Please select a supplier!");
 
-  // নিশ্চিত করা হচ্ছে যে address যেন ফাঁকা বা বাদ না পড়ে
-  if (!supplier.address || supplier.address.trim() === "") {
-    return alert("Supplier address is missing! Please re-select or update the supplier.");
-  }
+    // নিশ্চিত করা হচ্ছে যে address যেন ফাঁকা বা বাদ না পড়ে
+    if (!supplier.address || supplier.address.trim() === "") {
+      return alert(
+        "Supplier address is missing! Please re-select or update the supplier.",
+      );
+    }
 
-  if (purchaseType === "normal" && totalAmount.equals(0)) {
-    return alert("Please add at least one product!");
-  }
+    if (purchaseType === "normal" && totalAmount.equals(0)) {
+      return alert("Please add at least one product!");
+    }
 
-  const newProducts = products.map(({ id, ...rest }) => ({
-    ...rest,
-    quantity: Number(rest.quantity || 0),
-    unitPrice: Number(rest.unitPrice || 0),
-  }));
+    const newProducts = products.map(({ id, ...rest }) => ({
+      ...rest,
+      quantity: Number(rest.quantity || 0),
+      unitPrice: Number(rest.unitPrice || 0),
+    }));
 
-  let payload = {};
+    let payload = {};
 
-  if (purchaseType === "normal") {
-    payload = {
-      purchaseType: "normal",
-      products: newProducts,
-      totalAmount: Number(totalAmount.toFixed(4)),
-      paid: Number(advanceUsed.toFixed(4)),
-      due: Number(finalDue.toFixed(4)),
-      advanceUsed: Number(advanceUsed.toFixed(4)),
-      advanceBalanceAfter: Number(availableAdvance.minus(advanceUsed).toFixed(4)),
-      companyMemo: formData.memo,
+    if (purchaseType === "normal") {
+      payload = {
+        transactionType: "debit",
+        purchaseType: "normal",
+        products: newProducts,
+        totalAmount: Number(totalAmount.toFixed(4)),
+        companyMemo: formData.memo,
+        paid: Number(paid.toFixed(4)),
+        due: Number(due.toFixed(4)),
+        cash: 0,
+        bankPaymentAmount: 0,
+        unchangedPaid: Number(paid.toFixed(4)),
+        unchangedDue: Number(due.toFixed(4)),
+        adjustmentDetails: [],
+        advancePaymentAmount: 0,
+      };
+    } else {
+      payload = {
+        transactionType: "credit",
+        companyMemo: "",
+        purchaseType: "advance",
+        products: [],
+        totalAmount: 0,
+        paid: Number(advancePaymentAmount),
+        due: -Number(advancePaymentAmount),
+        cash: 0,
+        bankPaymentAmount: 0,
+        unchangedPaid: Number(advancePaymentAmount),
+        unchangedDue: -Number(advancePaymentAmount),
+        adjustmentDetails: [],
+        advancePaymentAmount: Number(advancePaymentAmount),
+      };
+    }
+
+    const purchaseData = {
+      createdAt: formData.date,
+      supplierId: supplier.supplierId,
+      supplierName: supplier.supplierName,
+      address: supplier.address, // এখান থেকে address ব্যাকএন্ডে যাচ্ছে
+      supplierEmail: supplier.supplierEmail || "",
+      supplierPhone: supplier.supplierPhone,
+      userId: user._id,
+      ...payload,
     };
-  } else {
-    payload = {
-      purchaseType: "advance",
-      products: [],
-      totalAmount: 0,
-      paid: Number(advancePaymentAmount),
-      due: -Number(advancePaymentAmount),
-      advancePaymentAmount: Number(advancePaymentAmount),
-      companyMemo: formData.memo || "Advance Payment", // ব্যাকএন্ডে মেমো রিকোয়ার্ড থাকলে সেফগার্ড
-    };
-  }
 
-  const purchaseData = {
-    createdAt: formData.date,
-    supplierId: supplier.supplierId,
-    supplierName: supplier.supplierName,
-    address: supplier.address, // এখান থেকে address ব্যাকএন্ডে যাচ্ছে
-    supplierEmail: supplier.supplierEmail || "",
-    supplierPhone: supplier.supplierPhone,
-    userId: user._id,
-    ...payload,
+    try {
+      setAddLoading(true);
+      await dispatch(addPurchase(purchaseData)).unwrap();
+      alert("Purchase added successfully! 🎉");
+
+      // Reset Form
+      setFormData({ date: new Date().toISOString().split("T")[0], memo: "" });
+      setProducts([
+        {
+          id: 1,
+          productId: "",
+          productName: "",
+          quantity: "",
+          unitPrice: "",
+          subTotal: "",
+        },
+      ]);
+      setAdvancePaymentAmount("");
+      setDisable(false);
+      setName("");
+      setSupplier({
+        supplierId: "",
+        supplierName: "",
+        address: "",
+        supplierEmail: "",
+        supplierPhone: "",
+        advanceBalance: 0,
+        totalBalance: 0,
+      });
+    } catch (error) {
+      console.error(error);
+      alert(error || "Failed to add purchase!");
+    } finally {
+      setAddLoading(false);
+    }
   };
-
-  try {
-    setAddLoading(true);
-    await dispatch(addPurchase(purchaseData)).unwrap();
-    alert("Purchase added successfully! 🎉");
-
-    // Reset Form
-    setFormData({ date: new Date().toISOString().split("T")[0], memo: "" });
-    setProducts([{ id: 1, productId: "", productName: "", quantity: "", unitPrice: "", subTotal: "" }]);
-    setAdvancePaymentAmount("");
-    setDisable(false);
-    setName("");
-    setSupplier({ supplierId: "", supplierName: "", address: "", supplierEmail: "", supplierPhone: "", advanceBalance: 0 });
-  } catch (error) {
-    console.error(error);
-    alert(error || "Failed to add purchase!");
-  } finally {
-    setAddLoading(false);
-  }
-};
 
   // ================== Report Fetch ==================
   useEffect(() => {
@@ -2767,15 +2831,27 @@ const handleSubmit = async (e) => {
       if (dateMode === "single") {
         dispatch(fetchPurchases({ ...commonParams, dateMode, dateSearch }));
       } else {
-        dispatch(fetchPurchases({
-          ...commonParams,
-          dateMode,
-          dateSearchStart: rangeDateSearch.dateSearchStart,
-          dateSearchEnd: rangeDateSearch.dateSearchEnd,
-        }));
+        dispatch(
+          fetchPurchases({
+            ...commonParams,
+            dateMode,
+            dateSearchStart: rangeDateSearch.dateSearchStart,
+            dateSearchEnd: rangeDateSearch.dateSearchEnd,
+          }),
+        );
       }
     }
-  }, [dispatch, user, toggle, filterToggler, sortOrder, currentPage, dateMode, dateSearch, rangeDateSearch]);
+  }, [
+    dispatch,
+    user,
+    toggle,
+    filterToggler,
+    sortOrder,
+    currentPage,
+    dateMode,
+    dateSearch,
+    rangeDateSearch,
+  ]);
 
   useEffect(() => {
     if (!user) navigate("/login");
@@ -2789,13 +2865,50 @@ const handleSubmit = async (e) => {
 
       {/* Supplier Add Form */}
       <div className="max-w-4xl mx-auto bg-white shadow-md rounded-xl p-5 sm:p-6 mb-8">
-        <form className="grid grid-cols-1 sm:grid-cols-2 gap-4" onSubmit={handleAddSupplier}>
-          <input type="text" placeholder="Supplier Name" name="name" value={supplierToAdd.name} onChange={handleOnChange} className="border border-gray-300 rounded-lg px-4 py-3" required />
-          <input type="tel" placeholder="Phone" name="phone" value={supplierToAdd.phone} onChange={handleOnChange} className="border border-gray-300 rounded-lg px-4 py-3" required />
-          <input type="email" placeholder="Email" name="email" value={supplierToAdd.email} onChange={handleOnChange} className="border border-gray-300 rounded-lg px-4 py-3" />
-          <input type="text" placeholder="Address" name="address" value={supplierToAdd.address} onChange={handleOnChange} className="border border-gray-300 rounded-lg px-4 py-3" required />
+        <form
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+          onSubmit={handleAddSupplier}
+        >
+          <input
+            type="text"
+            placeholder="Supplier Name"
+            name="name"
+            value={supplierToAdd.name}
+            onChange={handleOnChange}
+            className="border border-gray-300 rounded-lg px-4 py-3"
+            required
+          />
+          <input
+            type="tel"
+            placeholder="Phone"
+            name="phone"
+            value={supplierToAdd.phone}
+            onChange={handleOnChange}
+            className="border border-gray-300 rounded-lg px-4 py-3"
+            required
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            name="email"
+            value={supplierToAdd.email}
+            onChange={handleOnChange}
+            className="border border-gray-300 rounded-lg px-4 py-3"
+          />
+          <input
+            type="text"
+            placeholder="Address"
+            name="address"
+            value={supplierToAdd.address}
+            onChange={handleOnChange}
+            className="border border-gray-300 rounded-lg px-4 py-3"
+            required
+          />
           <div className="sm:col-span-2 flex justify-end">
-            <button disabled={aid} className={`text-white px-6 py-3 rounded-lg font-medium ${aid ? "bg-blue-400" : "bg-blue-600 hover:bg-blue-700"}`}>
+            <button
+              disabled={aid}
+              className={`text-white px-6 py-3 rounded-lg font-medium ${aid ? "bg-blue-400" : "bg-blue-600 hover:bg-blue-700"}`}
+            >
               {aid ? "Adding..." : "Add Supplier"}
             </button>
           </div>
@@ -2808,7 +2921,9 @@ const handleSubmit = async (e) => {
           {/* Supplier Selection */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="relative">
-              <label className="block text-sm font-medium mb-1">Supplier Name</label>
+              <label className="block text-sm font-medium mb-1">
+                Supplier Name
+              </label>
               <div className="flex">
                 <input
                   type="search"
@@ -2826,7 +2941,15 @@ const handleSubmit = async (e) => {
                   onClick={() => {
                     setDisable(false);
                     setName("");
-                    setSupplier({ supplierId: "", supplierName: "", address: "", supplierEmail: "", supplierPhone: "", advanceBalance: 0 });
+                    setSupplier({
+                      supplierId: "",
+                      supplierName: "",
+                      address: "",
+                      supplierEmail: "",
+                      supplierPhone: "",
+                      advanceBalance: 0,
+                      totalBalance: 0,
+                    });
                   }}
                 >
                   Change
@@ -2836,7 +2959,11 @@ const handleSubmit = async (e) => {
               {data && data.length > 0 && (
                 <div className="absolute z-20 w-full bg-white shadow-xl border border-gray-200 mt-1 max-h-60 overflow-y-auto rounded-lg">
                   {data.map((d, i) => (
-                    <div key={i} className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-none" onClick={() => handleSupplierOnClick(d)}>
+                    <div
+                      key={i}
+                      className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-none"
+                      onClick={() => handleSupplierOnClick(d)}
+                    >
                       <div className="font-medium">{d.name}</div>
                       <div className="text-sm text-gray-500">{d.address}</div>
                     </div>
@@ -2846,14 +2973,21 @@ const handleSubmit = async (e) => {
 
               {supplier.advanceBalance > 0 && (
                 <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-green-700 font-semibold">Available Advance: ৳ {supplier.advanceBalance}</p>
+                  <p className="text-green-700 font-semibold">
+                    Available Advance: ৳ {supplier.advanceBalance}
+                  </p>
                 </div>
               )}
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1">Address</label>
-              <input type="text" value={supplier.address} disabled className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-gray-100" />
+              <input
+                type="text"
+                value={supplier.address}
+                disabled
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-gray-100"
+              />
             </div>
           </div>
 
@@ -2861,87 +2995,208 @@ const handleSubmit = async (e) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <label className="block text-sm font-medium mb-1">Date</label>
-              <input type="date" value={formData.date} onChange={(e) => setFormData((prev) => ({ ...prev, date: e.target.value }))} className="w-full px-4 py-3 border border-gray-300 rounded-lg" required />
+              <input
+                type="date"
+                value={formData.date}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, date: e.target.value }))
+                }
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                required
+              />
             </div>
             {purchaseType === "normal" && (
               <div>
-                <label className="block text-sm font-medium mb-1">Memo Or Chalan No </label>
-                <input type="text" placeholder="Memo or Chalan No" value={formData.memo} onChange={(e) => setFormData((prev) => ({ ...prev, memo: e.target.value }))} className="w-full px-4 py-3 border border-gray-300 rounded-lg" />
+                <label className="block text-sm font-medium mb-1">
+                  Memo Or Chalan No{" "}
+                </label>
+                <input
+                  type="text"
+                  placeholder="Memo or Chalan No"
+                  value={formData.memo}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, memo: e.target.value }))
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                />
               </div>
             )}
           </div>
 
           {/* Purchase Type Selection */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div onClick={() => setPurchaseType("normal")} className={`p-4 rounded-xl border-2 cursor-pointer ${purchaseType === "normal" ? "border-green-500 bg-green-50" : "border-gray-200"}`}>
-              <input type="radio" checked={purchaseType === "normal"} readOnly className="mr-2" />
+            <div
+              onClick={() => setPurchaseType("normal")}
+              className={`p-4 rounded-xl border-2 cursor-pointer ${purchaseType === "normal" ? "border-green-500 bg-green-50" : "border-gray-200"}`}
+            >
+              <input
+                type="radio"
+                checked={purchaseType === "normal"}
+                readOnly
+                className="mr-2"
+              />
               <span className="font-semibold">Normal Purchase</span>
             </div>
-            <div onClick={() => setPurchaseType("advance")} className={`p-4 rounded-xl border-2 cursor-pointer ${purchaseType === "advance" ? "border-blue-500 bg-blue-50" : "border-gray-200"}`}>
-              <input type="radio" checked={purchaseType === "advance"} readOnly className="mr-2" />
+            <div
+              onClick={() => setPurchaseType("advance")}
+              className={`p-4 rounded-xl border-2 cursor-pointer ${purchaseType === "advance" ? "border-blue-500 bg-blue-50" : "border-gray-200"}`}
+            >
+              <input
+                type="radio"
+                checked={purchaseType === "advance"}
+                readOnly
+                className="mr-2"
+              />
               <span className="font-semibold">Advance Payment</span>
             </div>
           </div>
 
           {purchaseType === "normal" && (
             <>
-              <button type="button" onClick={handleAddProduct} className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-sm font-medium mb-2">+ Add Product</button>
+              <button
+                type="button"
+                onClick={handleAddProduct}
+                className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-sm font-medium mb-2"
+              >
+                + Add Product
+              </button>
 
               <div className="bg-gray-50 rounded-lg p-4 mb-4">
                 {products.map((product) => (
-                  <div key={product.id} className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3 items-end">
+                  <div
+                    key={product.id}
+                    className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3 items-end"
+                  >
                     <div className="md:col-span-2 relative">
-                      <label className="block text-xs text-gray-600 mb-1">Product Name</label>
-                      <input type="text" value={product.productName} onChange={(e) => handleProductSearchChange(product.id, e.target.value)} className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm" required />
-                      {activeSearchRow === product.id && productsBySearchforPurchase.length > 0 && (
-                        <div className="absolute z-50 w-full bg-white shadow-xl border border-gray-300 rounded mt-1 max-h-60 overflow-y-auto">
-                          {productsBySearchforPurchase.map((p, i) => (
-                            <div key={i} onClick={() => handleSelectProductFromSearch(product.id, { productName: p.name, productId: p._id })} className="px-3 py-2 border-b border-gray-100 cursor-pointer hover:bg-blue-50">
-                              {p.name}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      <label className="block text-xs text-gray-600 mb-1">
+                        Product Name
+                      </label>
+                      <input
+                        type="text"
+                        value={product.productName}
+                        onChange={(e) =>
+                          handleProductSearchChange(product.id, e.target.value)
+                        }
+                        className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
+                        required
+                      />
+                      {activeSearchRow === product.id &&
+                        productsBySearchforPurchase.length > 0 && (
+                          <div className="absolute z-50 w-full bg-white shadow-xl border border-gray-300 rounded mt-1 max-h-60 overflow-y-auto">
+                            {productsBySearchforPurchase.map((p, i) => (
+                              <div
+                                key={i}
+                                onClick={() =>
+                                  handleSelectProductFromSearch(product.id, {
+                                    productName: p.name,
+                                    productId: p._id,
+                                  })
+                                }
+                                className="px-3 py-2 border-b border-gray-100 cursor-pointer hover:bg-blue-50"
+                              >
+                                {p.name}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                     </div>
 
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">Quantity</label>
-                      <input type="number" value={product.quantity} onChange={(e) => {
-                        handleProductChange(product.id, "quantity", e.target.value);
-                        const sub = new Decimal(Number(e.target.value || 0)).mul(new Decimal(Number(product.unitPrice || 0)));
-                        handleProductChange(product.id, "subTotal", Number(sub.toFixed(4)));
-                      }} className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm" />
+                      <label className="block text-xs text-gray-600 mb-1">
+                        Quantity
+                      </label>
+                      <input
+                        type="number"
+                        value={product.quantity}
+                        onChange={(e) => {
+                          handleProductChange(
+                            product.id,
+                            "quantity",
+                            e.target.value,
+                          );
+                          const sub = new Decimal(
+                            Number(e.target.value || 0),
+                          ).mul(new Decimal(Number(product.unitPrice || 0)));
+                          handleProductChange(
+                            product.id,
+                            "subTotal",
+                            Number(sub.toFixed(4)),
+                          );
+                        }}
+                        className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
+                      />
                     </div>
 
                     <div className="flex gap-2">
                       <div className="flex-1">
-                        <label className="block text-xs text-gray-600 mb-1">Unit Price</label>
-                        <input type="number" value={product.unitPrice} onChange={(e) => {
-                          handleProductChange(product.id, "unitPrice", e.target.value);
-                          const sub = new Decimal(Number(e.target.value || 0)).mul(new Decimal(Number(product.quantity || 0)));
-                          handleProductChange(product.id, "subTotal", Number(sub.toFixed(4)));
-                        }} className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm" />
+                        <label className="block text-xs text-gray-600 mb-1">
+                          Unit Price
+                        </label>
+                        <input
+                          type="number"
+                          value={product.unitPrice}
+                          onChange={(e) => {
+                            handleProductChange(
+                              product.id,
+                              "unitPrice",
+                              e.target.value,
+                            );
+                            const sub = new Decimal(
+                              Number(e.target.value || 0),
+                            ).mul(new Decimal(Number(product.quantity || 0)));
+                            handleProductChange(
+                              product.id,
+                              "subTotal",
+                              Number(sub.toFixed(4)),
+                            );
+                          }}
+                          className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
+                        />
                       </div>
                       {products.length > 1 && (
-                        <button type="button" onClick={() => handleRemoveProduct(product.id)} className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm mt-6">×</button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveProduct(product.id)}
+                          className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm mt-6"
+                        >
+                          ×
+                        </button>
                       )}
                     </div>
                   </div>
                 ))}
-                <div className="text-right font-semibold">Total Amount: ৳ {totalAmount.toFixed(2)}</div>
+                <div className="text-right font-semibold">
+                  Total Amount: ৳ {totalAmount.toFixed(2)}
+                </div>
               </div>
             </>
           )}
 
           {purchaseType === "advance" && (
             <div className="mb-6">
-              <label className="block text-sm font-medium mb-1">Advance Payment Amount</label>
-              <input type="number" value={advancePaymentAmount} onChange={(e) => setAdvancePaymentAmount(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-md text-lg" required />
+              <label className="block text-sm font-medium mb-1">
+                Advance Payment Amount
+              </label>
+              <input
+                type="number"
+                value={advancePaymentAmount}
+                onChange={(e) => setAdvancePaymentAmount(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md text-lg"
+                required
+              />
             </div>
           )}
 
-          <button type="submit" disabled={addLoading} className="w-full bg-blue-600 text-white py-3 rounded-md text-lg font-medium">
-            {addLoading ? "Processing..." : purchaseType === "normal" ? "Add Purchase" : "Add Advance Payment"}
+          <button
+            type="submit"
+            disabled={addLoading}
+            className="w-full bg-blue-600 text-white py-3 rounded-md text-lg font-medium"
+          >
+            {addLoading
+              ? "Processing..."
+              : purchaseType === "normal"
+                ? "Add Purchase"
+                : "Add Advance Payment"}
           </button>
         </form>
       </div>
@@ -2958,26 +3213,78 @@ const handleSubmit = async (e) => {
           <table className="min-w-full text-xs sm:text-sm border-collapse">
             <thead>
               <tr className="bg-gray-200">
-                <th className="border border-gray-400 px-4 py-3 text-left font-semibold" rowSpan={2}>Date</th>
-                <th className="border border-gray-400 px-4 py-3 text-left font-semibold" rowSpan={2}>Company Memo</th>
-                <th className="border border-gray-400 px-4 py-3 text-left font-semibold" rowSpan={2}>Supplier</th>
-                <th className="border border-gray-400 px-4 py-3 text-left font-semibold" rowSpan={2}>Purchase Type</th>
-                <th className="border border-gray-400 px-4 py-3 text-center font-semibold" colSpan={3}>Products</th>
-                <th className="border border-gray-400 px-4 py-3 text-left font-semibold" rowSpan={2}>Total</th>
-                <th className="border border-gray-400 px-4 py-3 text-left font-semibold" rowSpan={2}>Paid</th>
-                <th className="border border-gray-400 px-4 py-3 text-left font-semibold" rowSpan={2}>Due</th>
-                <th className="border border-gray-400 px-4 py-3 text-left font-semibold" rowSpan={2}>Action</th>
+                <th
+                  className="border border-gray-400 px-4 py-3 text-left font-semibold"
+                  rowSpan={2}
+                >
+                  Date
+                </th>
+                <th
+                  className="border border-gray-400 px-4 py-3 text-left font-semibold"
+                  rowSpan={2}
+                >
+                  Company Memo
+                </th>
+                <th
+                  className="border border-gray-400 px-4 py-3 text-left font-semibold"
+                  rowSpan={2}
+                >
+                  Supplier
+                </th>
+                <th
+                  className="border border-gray-400 px-4 py-3 text-left font-semibold"
+                  rowSpan={2}
+                >
+                  Purchase Type
+                </th>
+                <th
+                  className="border border-gray-400 px-4 py-3 text-center font-semibold"
+                  colSpan={3}
+                >
+                  Products
+                </th>
+                <th
+                  className="border border-gray-400 px-4 py-3 text-left font-semibold"
+                  rowSpan={2}
+                >
+                  Total
+                </th>
+                <th
+                  className="border border-gray-400 px-4 py-3 text-left font-semibold"
+                  rowSpan={2}
+                >
+                  Paid
+                </th>
+                <th
+                  className="border border-gray-400 px-4 py-3 text-left font-semibold"
+                  rowSpan={2}
+                >
+                  Due
+                </th>
+                <th
+                  className="border border-gray-400 px-4 py-3 text-left font-semibold"
+                  rowSpan={2}
+                >
+                  Action
+                </th>
               </tr>
               <tr className="bg-gray-200">
-                <th className="border border-gray-400 px-4 py-3 text-left font-semibold">Product Names</th>
-                <th className="border border-gray-400 px-4 py-3 text-left font-semibold">Qty</th>
-                <th className="border border-gray-400 px-4 py-3 text-left font-semibold">Unit Price</th>
+                <th className="border border-gray-400 px-4 py-3 text-left font-semibold">
+                  Product Names
+                </th>
+                <th className="border border-gray-400 px-4 py-3 text-left font-semibold">
+                  Qty
+                </th>
+                <th className="border border-gray-400 px-4 py-3 text-left font-semibold">
+                  Unit Price
+                </th>
               </tr>
             </thead>
             <tbody>
               {purchases.length > 0 ? (
                 purchases.map((purchase, index) => {
-                  const productsToDisplay = purchase.products.length > 0 ? purchase.products : [{}];
+                  const productsToDisplay =
+                    purchase.products.length > 0 ? purchase.products : [{}];
                   const rowspan = productsToDisplay.length;
                   const isEven = index % 2 === 0;
 
@@ -2988,36 +3295,88 @@ const handleSubmit = async (e) => {
                         navigate("/purchaser-statement", { state: purchase });
                       }}
                       key={`${index}-${pIndex}`}
-                      className={isEven ? "bg-white cursor-pointer" : "bg-gray-50 cursor-pointer"}
+                      className={
+                        isEven
+                          ? "bg-white cursor-pointer"
+                          : "bg-gray-50 cursor-pointer"
+                      }
                     >
                       {pIndex === 0 && (
                         <>
-                          <td rowSpan={rowspan} className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2">
-                            {new Date(purchase.createdAt).toLocaleDateString("en-GB", { timeZone: "Asia/Dhaka" }).replaceAll("/", "-")}
+                          <td
+                            rowSpan={rowspan}
+                            className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            {new Date(purchase.createdAt)
+                              .toLocaleDateString("en-GB", {
+                                timeZone: "Asia/Dhaka",
+                              })
+                              .replaceAll("/", "-")}
                           </td>
-                          <td rowSpan={rowspan} className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${!purchase.companyMemo ? "text-center font-semibold" : ""}`}>
+                          <td
+                            rowSpan={rowspan}
+                            className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${!purchase.companyMemo ? "text-center font-semibold" : ""}`}
+                          >
                             {purchase.companyMemo || "--"}
                           </td>
-                          <td rowSpan={rowspan} className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2">
+                          <td
+                            rowSpan={rowspan}
+                            className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2"
+                          >
                             {purchase.supplierName}
                           </td>
-                          <td rowSpan={rowspan} className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${purchase.purchaseType === "normal" ? "text-center font-semibold" : ""}`}>
-                            {purchase.purchaseType === "advance" ? "Advance Payment" : "--"}
+                          <td
+                            rowSpan={rowspan}
+                            className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${purchase.purchaseType === "normal" ? "text-center font-semibold" : ""}`}
+                          >
+                            {purchase.purchaseType === "advance"
+                              ? "Advance Payment"
+                              : "--"}
                           </td>
                         </>
                       )}
-                      <td className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2">{product.productName || "N/A"}</td>
-                      <td className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2">{product.quantity || 0}</td>
-                      <td className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2">{product.unitPrice || 0}</td>
+                      <td className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2">
+                        {product.productName || "N/A"}
+                      </td>
+                      <td className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2">
+                        {product.quantity || 0}
+                      </td>
+                      <td className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2">
+                        {product.unitPrice || 0}
+                      </td>
                       {pIndex === 0 && (
                         <>
-                          <td rowSpan={rowspan} className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2">{purchase.totalAmount}</td>
-                          <td rowSpan={rowspan} className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2">{purchase.paid}</td>
-                          <td rowSpan={rowspan} className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${purchase?.due > 0 ? "text-red-500 font-bold" : ""}`}>{purchase.due}</td>
-                          <td rowSpan={rowspan} className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2">
+                          <td
+                            rowSpan={rowspan}
+                            className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            {purchase.totalAmount}
+                          </td>
+                          <td
+                            rowSpan={rowspan}
+                            className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2"
+                          >
+                            {purchase.paid}
+                          </td>
+                          <td
+                            rowSpan={rowspan}
+                            className={`border border-gray-400 px-2 py-1 sm:px-4 sm:py-2 ${purchase?.due > 0 ? "text-red-500 font-bold" : ""}`}
+                          >
+                            {purchase.due}
+                          </td>
+                          <td
+                            rowSpan={rowspan}
+                            className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2"
+                          >
                             <div className="flex flex-wrap gap-1">
                               {/* Print Button */}
-                              <Link to="/invoice-purchase" state={purchase} className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 cursor-pointer">Print</Link>
+                              <Link
+                                to="/invoice-purchase"
+                                state={purchase}
+                                className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 cursor-pointer"
+                              >
+                                Print
+                              </Link>
                             </div>
                           </td>
                         </>
@@ -3027,7 +3386,12 @@ const handleSubmit = async (e) => {
                 })
               ) : (
                 <tr>
-                  <td colSpan={11} className="text-center text-gray-500 py-10 text-lg border border-gray-400">No Purchase Available.</td>
+                  <td
+                    colSpan={11}
+                    className="text-center text-gray-500 py-10 text-lg border border-gray-400"
+                  >
+                    No Purchase Available.
+                  </td>
                 </tr>
               )}
             </tbody>

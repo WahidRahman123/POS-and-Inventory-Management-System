@@ -47,9 +47,9 @@ module.exports.index = async (req, res) => {
 module.exports.supplierForPurchase = async (req, res) => {
   try {
     const { q } = req.query;
-    const suppliers = await Supplier.find({ 
-      name: { $regex: q, $options: "i" } 
-    }).select("name phone address email advanceBalance");   // advanceBalance নিয়ে আসবে
+    const suppliers = await Supplier.find({
+      name: { $regex: q, $options: "i" },
+    }).select("name phone address email advanceBalance"); // advanceBalance নিয়ে আসবে
 
     res.status(201).json(suppliers);
   } catch (error) {
@@ -66,7 +66,7 @@ module.exports.createSupplier = async (req, res) => {
       name,
       phone,
       email,
-      address
+      address,
     });
 
     await supplier.save();
@@ -79,30 +79,29 @@ module.exports.createSupplier = async (req, res) => {
 };
 
 module.exports.updateSupplier = async (req, res) => {
-    const { id } = req.params;
-    const { name, phone, email, address } = req.body;
+  const { id } = req.params;
+  const { name, phone, email, address } = req.body;
 
-    try {
-        const supplier = await Supplier.findById(id);
+  try {
+    const supplier = await Supplier.findById(id);
 
-        if(supplier) {
-            supplier.name = name || supplier.name;
-            supplier.phone = phone || supplier.phone;
-            supplier.email = email || supplier.email;
-            supplier.address = address || supplier.address;
+    if (supplier) {
+      supplier.name = name || supplier.name;
+      supplier.phone = phone || supplier.phone;
+      supplier.email = email || supplier.email;
+      supplier.address = address || supplier.address;
 
-            await supplier.save();
+      await supplier.save();
 
-            res.status(201).json({message: 'Supplier updated successfully'});
-
-        } else {
-            res.status(404).json({message: "Supplier not found"});
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Server Error');
+      res.status(201).json({ message: "Supplier updated successfully" });
+    } else {
+      res.status(404).json({ message: "Supplier not found" });
     }
-}
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};
 
 module.exports.deleteSupplier = async (req, res) => {
   try {
@@ -138,36 +137,54 @@ module.exports.purchaseBySupplierName = async (req, res) => {
     // Get ALL transactions
     const transactions = await PurchaseTransaction.find({
       supplierName,
-      ...dateQuery
-    }).sort({ date: -1 }).populate("purchaseId");
+      ...dateQuery,
+    })
+      .sort({ date: -1 })
+      .populate("purchaseId");
 
-    let totalPurchase = 0;   // Total Debit (Normal Purchase)
-    let totalPaid = 0;       // Total Credit (Advance + Due Payment)
+    const purchaseResult = await Purchase.aggregate([
+      {
+        $match: { supplierName }
+      },
+      {
+        $group: {
+          _id: null,
+          totalAmount: {
+            $sum: { $multiply: ["$totalAmount", 10000] },
+          }
+        },
+      },
+    ]);
 
-    transactions.forEach(t => {
-      if (t.purchaseType === "advance" || t.refMemo?.startsWith("REF-DUE")) {
-        totalPaid += Number(t.paidAmount || 0);
-      } else {
-        totalPurchase += Number(t.amountToBePaid || 0);
-        totalPaid += Number(t.paidAmount || 0);
-      }
-    });
+    const transactionResult = await PurchaseTransaction.aggregate([
+      {
+        $match: { supplierName }
+      },
+      {
+        $group: {
+          _id: null,
+          totalPaid: {
+            $sum: { $multiply: ["$paidAmount", 10000] },
+          }
+        },
+      },
+    ]);
 
     // Calculate logical balance from transactions (most accurate)
-    const calculatedBalance = totalPaid - totalPurchase;
+    // const calculatedBalance = totalPaid - totalPurchase;
 
     // Also get supplier balance for reference
     const supplier = await Supplier.findOne({ name: supplierName });
-    const supplierBalance = supplier ? Number(supplier.balance || 0) : 0;
+    // console.log(supplier)
+    const supplierBalance = supplier ? Number(supplier.totalBalance) : 0;
 
     res.status(201).json({
       transactions,
-      totalAmount: totalPurchase,
-      totalPaid: totalPaid,
-      totalDue: calculatedBalance,        // ← Transaction থেকে হিসাব
-      supplierBalance: supplierBalance    // Extra for debugging
+      totalAmount: purchaseResult[0] ? purchaseResult[0].totalAmount / 10000 : 0,
+      totalPaid: transactionResult[0] ? transactionResult[0].totalPaid / 10000 : 0,
+      totalDue: this.totalAmount - this.totalPaid, // ← Transaction থেকে হিসাব
+      supplierBalance, // Extra for debugging
     });
-
   } catch (error) {
     console.error("purchaseBySupplierName Error:", error);
     res.status(500).send("Server Error");
@@ -209,7 +226,7 @@ module.exports.purchaseBySupplierName = async (req, res) => {
 //       .sort({ date: -1 }).populate("purchaseId")
 //       // .skip(skip)
 //       // .limit(limit);
-    
+
 //     // const purchases = await PurchaseTransaction.aggregate([
 //     //   {
 //     //     $match: mainSearch

@@ -34,6 +34,10 @@ const purchaseTransactionSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  amount: { //* eta holo main value zeta debit credit field er jonno lagbe
+    type: Number,
+    required: true,
+  },
   paidAmount: {
     type: Number,
     required: true,
@@ -42,10 +46,20 @@ const purchaseTransactionSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+  currentBalance: {
+    //* Current Due
+    type: Number,
+    // required: true,
+  },
+  transactionType: {
+    type: String,
+    enum: ["debit", "credit"],
+    required: true,
+  },
   currentDue: {
     //* Current Due
     type: Number,
-    required: true,
+    // required: true,
   },
   cash: {
     type: Number,
@@ -66,7 +80,7 @@ const purchaseTransactionSchema = new mongoose.Schema({
 
   purchaseType: {
     type: String,
-    enum: ["normal", "advance"],
+    enum: ["normal", "advance", "due"],
     required: true,
   },
   advancePaymentAmount: {
@@ -75,6 +89,9 @@ const purchaseTransactionSchema = new mongoose.Schema({
     //required: true,
     // min: 0,
   },
+  remarks: {
+    type: String
+  }, 
   adjustmentDetails: [
     {
       _id: false,
