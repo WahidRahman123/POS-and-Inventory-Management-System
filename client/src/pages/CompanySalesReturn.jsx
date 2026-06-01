@@ -252,15 +252,15 @@ const CompanySalesReturn = () => {
       prev.map((product) =>
         product.id === id
           ? {
-              ...product,
-              productId: productData.productId,
-              productName: productData.productName,
-              quantity: productData.tempReturnQuantity,
-              qtyInKg: productData.tempReturnQtyInKg,
+            ...product,
+            productId: productData.productId,
+            productName: productData.productName,
+            quantity: productData.tempReturnQuantity,
+            qtyInKg: productData.tempReturnQtyInKg,
 
-              tempQuantity: productData.tempReturnQuantity,
-              tempQtyInKg: productData.tempReturnQtyInKg,
-            }
+            tempQuantity: productData.tempReturnQuantity,
+            tempQtyInKg: productData.tempReturnQtyInKg,
+          }
           : product,
       ),
     );
@@ -354,20 +354,23 @@ const CompanySalesReturn = () => {
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* --- Section 1: Financial Summary (Updated to reflect Cash flow) --- */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white p-5 shadow-sm border-b-4 border-blue-600 rounded-sm cursor-pointer" onClick={() => navigate("/sales-return")}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          {/* === SALES RETURN STOCK CARD (FIXED) === */}
+          <div
+            className="bg-white p-5 shadow-sm border-b-4 border-blue-600 rounded-sm cursor-pointer hover:shadow-md transition"
+            onClick={() => navigate("/sales-return")}
+          >
             <div className="flex items-center gap-3 mb-2 text-blue-600">
               <FaBox size={20} />
               <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">
-                Sales Return Stock
+                SALES RETURN STOCK
               </p>
             </div>
-            <p className="text-2xl font-black text-gray-800">
-              {salesReturnReportData
-                ? salesReturnReportData.totalSentItems
-                : "--"}{" "}
-              <span className="text-xs">Pcs</span>
+            <p className="text-3xl font-black text-gray-800">
+              {salesReturnReportData?.availableStock || 0}
+              <span className="text-base font-normal text-gray-500 ml-1">Pcs</span>
             </p>
+            <p className="text-xs text-gray-500 mt-1">Available in Warehouse</p>
           </div>
 
           {/* <div className="bg-white p-5 shadow-sm border-b-4 border-orange-500 rounded-sm">
@@ -383,7 +386,7 @@ const CompanySalesReturn = () => {
             </p>
           </div> */}
 
-          <div className="bg-gray-900 p-5 shadow-sm border-b-4 border-green-600 rounded-sm">
+          {/* <div className="bg-gray-900 p-5 shadow-sm border-b-4 border-green-600 rounded-sm">
             <div className="flex items-center gap-3 mb-2 text-green-500">
               <FaMoneyBillWave size={20} />
               <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
@@ -394,7 +397,7 @@ const CompanySalesReturn = () => {
               ৳{" "}
               {salesReturnReportData ? salesReturnReportData.totalAmount : "--"}
             </p>
-          </div>
+          </div> */}
 
           <div className="bg-white p-5 shadow-sm border-b-4 border-red-600 rounded-sm">
             <div className="flex items-center gap-3 mb-2 text-red-500">

@@ -592,6 +592,179 @@
 // };
 
 
+// import React, { useEffect, useState, useRef } from "react";
+// import { useDispatch, useSelector } from "react-redux";
+// import { fetchSalesDueList } from "../features/sales/salesSlice";
+// import { useNavigate } from "react-router-dom";
+// import { useReactToPrint } from "react-to-print";
+// import { FaPrint, FaArrowLeft } from "react-icons/fa";
+
+// const SalesDueList = () => {
+//   const { user } = useSelector((state) => state.auth);
+//   const navigate = useNavigate();
+//   const dispatch = useDispatch();
+
+//   const { salesOfDues, page, pages, loading } = useSelector((state) => state.sales);
+
+//   const [customerName, setCustomerName] = useState("");
+//   const [currentPage, setCurrentPage] = useState(page || 1);
+//   const [sortOrder, setSortOrder] = useState(-1);
+
+//   // Print Reference
+//   const printRef = useRef(null);
+
+//   const reactToPrintFn = useReactToPrint({
+//     contentRef: printRef,
+//     documentTitle: `Sales-Due-List-${new Date().toISOString().slice(0, 10)}`,
+//   });
+
+//   useEffect(() => {
+//     if (!user) navigate("/login");
+//     if (user && user.role !== "admin") navigate("/");
+//   }, [user, navigate]);
+
+//   useEffect(() => {
+//     if (user && user.role === "admin") {
+//       dispatch(
+//         fetchSalesDueList({
+//           customerName,
+//           page: currentPage,
+//           order: sortOrder,
+//         }),
+//       );
+//     }
+//   }, [dispatch, user, currentPage, sortOrder, customerName]);
+
+//   if (user && user.role !== "admin") return null;
+
+//   return (
+//     <div className="p-3 sm:p-4 md:p-6 bg-white min-h-screen">
+//       <div className="flex justify-between items-center mb-4">
+//         <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Sales Due List</h1>
+//         <div className="flex items-center gap-3">
+//           <button
+//             onClick={reactToPrintFn}
+//             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+//           >
+//             <FaPrint /> Print Due List
+//           </button>
+//           <button
+//             onClick={() => navigate(-1)}
+//             className="flex items-center gap-2 text-sm px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-800 hover:text-white transition duration-200 cursor-pointer"
+//           >
+//             <FaArrowLeft /> Back
+//           </button>
+//         </div>
+//       </div>
+
+//       <div className="flex flex-col sm:flex-row gap-3 mb-4">
+//         <input
+//           type="text"
+//           placeholder="Search by Customer Name..."
+//           value={customerName}
+//           onChange={(e) => setCustomerName(e.target.value)}
+//           className="border border-gray-300 rounded px-4 py-2.5 w-full sm:w-80 focus:outline-none focus:ring-2 focus:ring-blue-500"
+//         />
+
+//         <select
+//           value={sortOrder}
+//           onChange={(e) => setSortOrder(Number(e.target.value))}
+//           className="border border-gray-300 bg-white rounded px-4 py-2.5 text-sm"
+//         >
+//           <option value="-1">Highest Due First</option>
+//           <option value="1">Lowest Due First</option>
+//         </select>
+//       </div>
+
+//       {/* Printable Content */}
+//       <div ref={printRef}>
+//         <div className="overflow-x-auto">
+//           <table className="min-w-full border-collapse text-sm">
+//             <thead className="bg-gray-800 text-white">
+//               <tr>
+//                 <th className="px-6 py-4 text-left">Customer Name</th>
+//                 <th className="px-6 py-4 text-left">Mobile Number</th>
+//                 <th className="px-6 py-4 text-right">Total Due Balance</th>
+//                 <th className="px-6 py-4 text-center">Action</th>
+//               </tr>
+//             </thead>
+//             <tbody className="divide-y divide-gray-200">
+//               {salesOfDues && salesOfDues.length > 0 ? (
+//                 salesOfDues.map((customer, index) => (
+//                   <tr
+//                     key={index}
+//                     className="hover:bg-gray-50 cursor-pointer"
+//                     onClick={() =>
+//                       navigate("/customer-statement", {
+//                         state: {
+//                           customerName: customer.customerName,
+//                           customerPhone: customer.customerPhone,
+//                         },
+//                       })
+//                     }
+//                   >
+//                     <td className="px-6 py-4 font-medium">{customer.customerName}</td>
+//                     <td className="px-6 py-4">{customer.customerPhone || "N/A"}</td>
+//                     <td className="px-6 py-4 text-right font-bold text-red-600">
+//                       ৳ {Number(customer.totalDue || 0).toLocaleString("en-BD")}
+//                     </td>
+//                     <td className="px-6 py-4 text-center">
+//                       <button
+//                         onClick={(e) => {
+//                           e.stopPropagation();
+//                           navigate("/customer-statement", {
+//                             state: {
+//                               customerName: customer.customerName,
+//                               customerPhone: customer.customerPhone,
+//                             },
+//                           });
+//                         }}
+//                         className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-1.5 rounded font-medium"
+//                       >
+//                         View Statement
+//                       </button>
+//                     </td>
+//                   </tr>
+//                 ))
+//               ) : (
+//                 <tr>
+//                   <td colSpan={4} className="text-center py-12 text-gray-500">
+//                     No due records found.
+//                   </td>
+//                 </tr>
+//               )}
+//             </tbody>
+//           </table>
+//         </div>
+//       </div>
+
+//       {pages > 1 && (
+//         <div className="flex justify-center items-center mt-6 gap-3">
+//           <button
+//             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+//             disabled={currentPage === 1}
+//             className="px-4 py-2 border rounded disabled:opacity-50"
+//           >
+//             Previous
+//           </button>
+//           <span className="font-medium">
+//             Page {currentPage} of {pages}
+//           </span>
+//           <button
+//             onClick={() => setCurrentPage((p) => Math.min(p + 1, pages))}
+//             disabled={currentPage === pages}
+//             className="px-4 py-2 border rounded disabled:opacity-50"
+//           >
+//             Next
+//           </button>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default SalesDueList;
+
 import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchSalesDueList } from "../features/sales/salesSlice";
@@ -604,10 +777,10 @@ const SalesDueList = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { salesOfDues, page, pages, loading } = useSelector((state) => state.sales);
+  // পেজিনেশনের page এবং pages ভেরিয়েবলগুলো স্টেট থেকে বাদ দেওয়া হয়েছে
+  const { salesOfDues, loading } = useSelector((state) => state.sales);
 
   const [customerName, setCustomerName] = useState("");
-  const [currentPage, setCurrentPage] = useState(page || 1);
   const [sortOrder, setSortOrder] = useState(-1);
 
   // Print Reference
@@ -628,12 +801,17 @@ const SalesDueList = () => {
       dispatch(
         fetchSalesDueList({
           customerName,
-          page: currentPage,
           order: sortOrder,
+          // ব্যাকএন্ডে পেজ লিমিট বা পেজ নম্বর পাঠানোর দরকার নেই, সব ডেটা একসাথে আসবে
         }),
       );
     }
-  }, [dispatch, user, currentPage, sortOrder, customerName]);
+  }, [dispatch, user, sortOrder, customerName]);
+
+  // ম্যাজিক পার্ট: যেহেতু সব রেকর্ড একসাথে আসছে, তাই এই reduce-ই এখন নিখুঁত গ্র্যান্ড টোটাল দেখাবে
+  const grandTotalDue = salesOfDues && salesOfDues.length > 0
+    ? salesOfDues.reduce((sum, customer) => sum + Number(customer.totalDue || 0), 0)
+    : 0;
 
   if (user && user.role !== "admin") return null;
 
@@ -657,23 +835,35 @@ const SalesDueList = () => {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <input
-          type="text"
-          placeholder="Search by Customer Name..."
-          value={customerName}
-          onChange={(e) => setCustomerName(e.target.value)}
-          className="border border-gray-300 rounded px-4 py-2.5 w-full sm:w-80 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 justify-between">
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <input
+            type="text"
+            placeholder="Search by Customer Name..."
+            value={customerName}
+            onChange={(e) => setCustomerName(e.target.value)}
+            className="border border-gray-300 rounded px-4 py-2.5 w-full sm:w-80 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
 
-        <select
-          value={sortOrder}
-          onChange={(e) => setSortOrder(Number(e.target.value))}
-          className="border border-gray-300 bg-white rounded px-4 py-2.5 text-sm"
-        >
-          <option value="-1">Highest Due First</option>
-          <option value="1">Lowest Due First</option>
-        </select>
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(Number(e.target.value))}
+            className="border border-gray-300 bg-white rounded px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="-1">Highest Due First</option>
+            <option value="1">Lowest Due First</option>
+          </select>
+        </div>
+
+        {/* সর্ট অর্ডার ফিল্ডের পাশে অল-রেকর্ডস গ্র্যান্ড টোটাল */}
+        <div className="bg-red-50 border border-red-200 rounded-xl px-5 py-2.5 flex items-center justify-between sm:justify-start gap-4 shadow-sm w-full sm:w-auto self-stretch sm:self-center">
+          <span className="text-xs sm:text-sm font-semibold text-red-700 uppercase tracking-wider">
+            Total Customers Due:
+          </span>
+          <span className="text-base sm:text-lg font-black text-red-600 animate-pulse">
+            ৳ {grandTotalDue.toLocaleString("en-BD")}
+          </span>
+        </div>
       </div>
 
       {/* Printable Content */}
@@ -737,28 +927,8 @@ const SalesDueList = () => {
           </table>
         </div>
       </div>
-
-      {pages > 1 && (
-        <div className="flex justify-center items-center mt-6 gap-3">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 border rounded disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="font-medium">
-            Page {currentPage} of {pages}
-          </span>
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(p + 1, pages))}
-            disabled={currentPage === pages}
-            className="px-4 py-2 border rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      
+      {/* নিচে থাকা সেই আগের পেজিনেশনের Previous/Next বাটন সেকশনটি সম্পূর্ণ ডিলিট করা হয়েছে */}
     </div>
   );
 };

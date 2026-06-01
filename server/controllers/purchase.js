@@ -1011,3 +1011,54 @@ module.exports.supplierDuePayment = async (req, res) => {
     res.status(500).json({ message: error.message || "Server Error" });
   }
 };
+
+// Get Supplier Overall Balance List for Purchase Dashboard
+module.exports.getSupplierDueList = async (req, res) => {
+  try {
+    const { supplierName = "", order = -1 } = req.query;
+
+    let query = {};
+    
+    // লাইভ সার্চ ফিল্টার
+    if (supplierName) {
+      query.name = { $regex: supplierName, $options: "i" };
+    }
+
+    // 💡 আপনার প্রোজেক্টের আসল Supplier কালেকশন থেকে ডাটা রিড করা
+    const suppliers = await Supplier.find(query).lean();
+
+    // ডাটা কনসোল লগ দিয়ে চেক করা (ডিবাগিং এর জন্য, ডাটা না আসলে টার্মিনালে দেখতে পারবেন)
+    // console.log("Total Suppliers Found in DB:", suppliers.length);
+
+    // ম্যাপ করার সময় কোনো ফিল্ড ফাকা থাকলে বা ডিফাইন না থাকলে ডিফোল্ট ভ্যালু সেট করা
+    let supplierBalances = suppliers.map((supplier) => ({
+      supplierId: supplier._id,
+      supplierName: supplier.name || "Unknown Supplier",
+      supplierPhone: supplier.phone || "N/A",
+      overallBalance: typeof supplier.balance !== 'undefined' ? supplier.balance : 0, 
+      balance: supplier.balance || 0, 
+    }));
+
+    // সর্টিং লজিক
+    supplierBalances.sort((a, b) => {
+      if (order === -1) {
+        return b.overallBalance - a.overallBalance;
+      } else {
+        return a.overallBalance - b.overallBalance;
+      }
+    });
+
+    // সাকসেস রেসপন্স পাঠানো
+    return res.status(200).json({
+      success: true,
+      supplierBalances,
+    });
+
+  } catch (error) {
+    console.error("Error in getSupplierDueList:", error);
+    return res.status(500).json({ 
+      message: "Supplier Balance List Fetching Failed!", 
+      error: error.message 
+    });
+  }
+};

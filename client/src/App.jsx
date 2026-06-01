@@ -46,6 +46,7 @@ import CompanySalesReturn from "./pages/CompanySalesReturn";
 import CompanySalesReturnStatement from "./pages/CompanySalesReturnStatement";
 import EditCompanySalesReturnDue from "./pages/EditCompanySalesReturnDue";
 import PurchaseAdvanceSettlement from "./pages/PurchaseAdvanceSettlement";
+import PurchaseSupplierDueList from "./pages/PurchaseSupplierDueList";
 
 
 function App() {
@@ -77,6 +78,7 @@ function App() {
           <Route path="/purchase" element={<Purchase />} />
           <Route path="/purchase-report/:id/edit-due" element={<EditPurchaseDue />} />
           <Route path="/purchase-report/due-payment" element={<EditPurchaseDue />} />
+          <Route path="/purchase/supplier-balance-list" element={<PurchaseSupplierDueList />} />
           <Route path="/purchase/:id/adjust-advance-payment" element={<PurchaseAdvanceSettlement />} />
           <Route path="/point-of-sale" element={<PointOfSale />} />
           {/* for admin */}

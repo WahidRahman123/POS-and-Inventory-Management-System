@@ -221,7 +221,7 @@ const SalesReturnStatement = () => {
                             <td className="px-4 py-4 text-gray-700 font-medium print:hidden">
                               <span>
                                 {isPayment
-                                  ? `Payment against Memo-${transaction.salesReturnId.memo}`
+                                  ? `Payment against Memo-${transaction.salesReturnId?.memo}`
                                   : transaction.salesReturnId?.products
                                       ?.map((p) => p.productName)
                                       .join(", ") || "Sales Items"}
@@ -558,6 +558,14 @@ const SalesReturnStatement = () => {
                 <p className="text-xl font-black text-red-500">
                   ৳{Number(totalAmount).toLocaleString()}
                 </p>
+                <div className="text-xl font-black text-orange-600">
+                    <span className="text-gray-400 tracking-tight">
+                      Return Qty:
+                    </span>
+                    <span className="font-mono text-red-600">
+                       {Number(totalReturnQuantity).toLocaleString("en-BD")}
+                    </span>
+                  </div>
               </div>
               <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-center">
                 <p className="text-[10px] text-gray-500 uppercase font-bold">
@@ -566,6 +574,14 @@ const SalesReturnStatement = () => {
                 <p className="text-xl font-black text-green-600">
                   ৳{Number(totalPaid).toLocaleString()}
                 </p>
+                 <div className="text-xl font-black text-orange-600">
+                    <span className="text-gray-400 tracking-tight">
+                      Adjusted Qty:
+                    </span>
+                    <span className="font-mono text-green-600">
+                       {Number(totalExchangeQuantity).toLocaleString("en-BD")}
+                    </span>
+                  </div>
               </div>
               <div className="bg-white p-4 rounded-xl border border-blue-200 shadow-sm flex flex-col justify-center">
                 <p className="text-[10px] text-gray-500 uppercase font-bold">
@@ -574,6 +590,16 @@ const SalesReturnStatement = () => {
                 <p className="text-xl font-black text-orange-600">
                   ৳{Number(totalDue).toLocaleString()}
                 </p>
+                <div className="text-xl font-black text-orange-600">
+                    <span className="text-gray-400 tracking-tight">
+                      Pending Qty:
+                    </span>
+                    <span className="font-mono text-red-600">
+                      {Number(
+                        totalReturnQuantity - totalExchangeQuantity,
+                      ).toLocaleString("en-BD")}
+                    </span>
+                  </div>
               </div>
             </div>
 

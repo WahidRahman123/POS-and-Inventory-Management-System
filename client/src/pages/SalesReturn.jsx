@@ -67,7 +67,6 @@ const SalesReturn = () => {
     if (!saleSearchedByInvoice) return;
 
     try {
-      const now = new Date();
       const newOriginalProducts = originalSaleProducts.map((p) => ({
         productId: p.productId,
         productName: p.productName,
@@ -138,7 +137,7 @@ const SalesReturn = () => {
         paymentMethod: returnType === "cash" ? cashDetails.paymentMethod : "",
         note: returnType === "cash" ? cashDetails.note : "",
         createdAt: data.date,
-        issuedAt: now,
+        issuedAt: new Date(),
       };
 
       await dispatch(addSalesReturn(salesReturnData)).unwrap();

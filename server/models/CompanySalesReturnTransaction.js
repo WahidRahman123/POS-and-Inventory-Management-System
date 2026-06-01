@@ -39,6 +39,10 @@ const companySalesReturnTransactionSchema = new mongoose.Schema({
         type: Number,
         min: 0,
       },
+      unitPrice: {    // <--- এটি নতুন যোগ করা হয়েছে টাকার হিসেব ট্র্যাকিং এর জন্য
+        type: Number,
+        default: 0,
+      },
     },
   ],
 

@@ -15,6 +15,7 @@ import purchaseReturnReducer from '../features/PurchaseReturn/purchaseReturnSlic
 import salesReturnReducer from '../features/SalesReturn/salesReturnSlice';
 import companyProductReturnReducer from '../features/CompanyProductReturn/companyProductReturnSlice'
 import companySalesReturnReducer from '../features/CompanySalesReturn/companySalesReturnSlice'
+import expenseReducer from '../features/expense/expenseSlice';
 
 export const store = configureStore({
     reducer: {
@@ -33,6 +34,7 @@ export const store = configureStore({
         purchaseReturn: purchaseReturnReducer,
         salesReturn: salesReturnReducer,
         companyProductReturn: companyProductReturnReducer,
-        companySalesReturn: companySalesReturnReducer
+        companySalesReturn: companySalesReturnReducer,
+        expense: expenseReducer,
     }
 })
