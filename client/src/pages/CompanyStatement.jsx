@@ -135,7 +135,10 @@ const CompanyStatement = () => {
                     Current Receivable
                   </p>
                   <p className="text-lg font-black text-blue-600 font-mono tracking-tighter">
-                    ৳ {totalDue?.toLocaleString("en-BD", { minimumFractionDigits: 2 })}
+                    ৳{" "}
+                    {totalDue?.toLocaleString("en-BD", {
+                      minimumFractionDigits: 2,
+                    })}
                   </p>
                 </div>
               </div>
@@ -200,15 +203,26 @@ const CompanyStatement = () => {
                               >
                                 {isPayment
                                   ? "CASH RECEIVED FROM COMPANY"
-                                  : transaction.companyProductReturnId
-                                      ?.productName}
+                                  : transaction.companyProductReturnId?.products.map(
+                                      (p, i) => (
+                                        <div key={i} className="mb-1">
+                                          <div>{p.productName}</div>
+                                          <div className="text-[9px] text-gray-400 font-black uppercase tracking-tighter">
+                                            Qty:{" "}
+                                            {
+                                              p.quantity
+                                            }
+                                          </div>
+                                          <div className="text-[9px] text-gray-400 font-black uppercase tracking-tighter">
+                                            wgt:{" "}
+                                            {
+                                              p.qtyInKg
+                                            }
+                                          </div>
+                                        </div>
+                                      ),
+                                    )}
                               </span>
-                              {!isPayment && (
-                                <div className="text-[9px] text-gray-400 font-black uppercase tracking-tighter">
-                                  Qty:{" "}
-                                  {transaction.companyProductReturnId.quantity}
-                                </div>
-                              )}
                             </td>
                             <td className="px-6 py-4 text-right font-black">
                               {`৳ ${transaction.amountToBePaid.toLocaleString()}`}
@@ -229,10 +243,12 @@ const CompanyStatement = () => {
                                   >
                                     Pay
                                   </Link>
-                                ) : !isPayment && (
-                                  <button className="text-green-600 font-black text-[10px] uppercase hover:underline flex items-center gap-1">
-                                    Received
-                                  </button>
+                                ) : (
+                                  !isPayment && (
+                                    <button className="text-green-600 font-black text-[10px] uppercase hover:underline flex items-center gap-1">
+                                      Received
+                                    </button>
+                                  )
                                 )}
                                 <button
                                   title="View Details"
@@ -272,7 +288,10 @@ const CompanyStatement = () => {
                       Total Sent Claim:
                     </span>
                     <span className="font-mono font-black">
-                      ৳ {totalAmount?.toLocaleString("en-BD", { minimumFractionDigits: 2 })}
+                      ৳{" "}
+                      {totalAmount?.toLocaleString("en-BD", {
+                        minimumFractionDigits: 2,
+                      })}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm text-green-400">
@@ -280,7 +299,10 @@ const CompanyStatement = () => {
                       Total Cash Received:
                     </span>
                     <span className="font-mono font-black">
-                      - ৳ {totalPaid?.toLocaleString("en-BD", { minimumFractionDigits: 2 })}
+                      - ৳{" "}
+                      {totalPaid?.toLocaleString("en-BD", {
+                        minimumFractionDigits: 2,
+                      })}
                     </span>
                   </div>
                   <div className="flex justify-between border-t border-gray-800 pt-4 items-center">
@@ -288,7 +310,10 @@ const CompanyStatement = () => {
                       Net Receivable
                     </span>
                     <span className="text-2xl font-black text-blue-400 font-mono tracking-tighter">
-                      ৳ {totalDue?.toLocaleString("en-BD", { minimumFractionDigits: 2 })}
+                      ৳{" "}
+                      {totalDue?.toLocaleString("en-BD", {
+                        minimumFractionDigits: 2,
+                      })}
                     </span>
                   </div>
                 </div>

@@ -39,4 +39,9 @@ router.get('/search/memo', protect, ProductExchange.searchByMemo);
 router.get('/', protect, ProductExchange.index);
 router.post('/', protect, ProductExchange.createProductExchange);
 
+//* @route get /api/product-exchange/search-by-product-name
+// @desc sales product exchange stock searched by product name
+// @access Private
+router.get('/search-by-product-name', protect, ProductExchange.productExchangeStockSearchedByProductName);
+
 module.exports = router;

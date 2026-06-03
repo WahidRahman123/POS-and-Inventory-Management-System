@@ -5,6 +5,7 @@ const CompanyProductReturnTransaction = require("../models/CompanyProductReturnT
 const { createCustomDate } = require("../utils/createCustomDate");
 const { getNextSequenceForOther } = require("../utils/getNextSequenceForOther");
 const ProductExchange = require("../models/ProductExchange");
+const ProductExchangeStockManagement = require("../models/ProductExchangeStockManagement");
 
 module.exports.index = async (req, res) => {
   try {
@@ -57,12 +58,12 @@ module.exports.createCompanyProductReturn = async (req, res) => {
     const {
       createdAt,
       issuedAt,
-      // products,
-      productName,
-      quantity,
-      qtyInKg,
-      unitPrice,
-      subTotal,
+      products,
+      // productName,
+      // quantity,
+      // qtyInKg,
+      // unitPrice,
+      // subTotal,
       totalAmount,
       paid,
       due,
@@ -77,9 +78,7 @@ module.exports.createCompanyProductReturn = async (req, res) => {
     //   "CompanyProductReturn",
     //   session,
     // );
-    const count = await getNextSequenceForOther(
-      "CompanyProductReturn"
-    );
+    const count = await getNextSequenceForOther("CompanyProductReturn");
     if (!count) {
       throw new Error("Failed to generate sequence");
     }
@@ -116,6 +115,16 @@ module.exports.createCompanyProductReturn = async (req, res) => {
     // await session.commitTransaction();
     // session.endSession();
 
+    for (const product of products) {
+      const productExchangeStockSearchData =
+        await ProductExchangeStockManagement.findOne({
+          productId: product.productId,
+        });
+      productExchangeStockSearchData.tempQuantity -= product.quantity;
+      productExchangeStockSearchData.tempQtyInKg -= product.qtyInKg;
+      await productExchangeStockSearchData.save();
+    }
+
     res.status(201).json(createdCompanyProductReturn);
   } catch (error) {
     // await session.abortTransaction();
@@ -151,8 +160,7 @@ module.exports.addPayment = async (req, res) => {
     // session.startTransaction();
     // const companyProductReturn =
     //   await CompanyProductReturn.findById(id).session(session);
-    const companyProductReturn =
-      await CompanyProductReturn.findById(id);
+    const companyProductReturn = await CompanyProductReturn.findById(id);
 
     if (companyProductReturn) {
       const {
@@ -312,12 +320,26 @@ module.exports.productExchangeReport = async (req, res) => {
       },
     ]);
 
-    const companyData = await CompanyProductReturn.find();
+    const companyData = await CompanyProductReturn.aggregate([
+      {
+        $unwind: "$products",
+      },
+      {
+        $group: {
+          _id: null,
+          companySentItems: { $sum: "$products.quantity" },
+          companyWeight: { $sum: "$products.qtyInKg" },
+        },
+      },
+    ]);
 
-    const totalCompanySentItems = companyData && companyData.length ? companyData.reduce((acc, p) => acc + p.quantity, 0) : 0;
+    const totalCompanySentItems = companyData[0]
+      ? companyData[0].companySentItems
+      : 0;
 
-    const totalCompanyWeight = companyData && companyData.length ? companyData.reduce((acc, p) => acc + p.qtyInKg, 0) : 0;
-
+    const totalCompanyWeight = companyData[0]
+      ? companyData[0].companyWeight
+      : 0;
 
     const result = await CompanyProductReturn.aggregate([
       {
@@ -327,7 +349,6 @@ module.exports.productExchangeReport = async (req, res) => {
         },
       },
     ]);
-
 
     res.status(201).json({
       totalSentItems:

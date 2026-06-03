@@ -31,28 +31,37 @@ const companyProductReturnSchema = new mongoose.Schema({
     ref: "User",
   },
 
-  productName: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  quantity: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-  qtyInKg: {
-    type: Number,
-    required: true,
-  },
-  unitPrice: {
-    type: Number,
-    required: true,
-  },
-  subTotal: {
-    type: Number,
-    required: true,
-  },
+  products: [
+    {
+      _id: false,
+      productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ScrapProduct",
+      },
+      productName: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      quantity: {
+        type: Number,
+        required: true,
+        min: 0,
+      },
+      qtyInKg: {
+        type: Number,
+        required: true,
+      },
+      unitPrice: {
+        type: Number,
+        required: true,
+      },
+      subTotal: {
+        type: Number,
+        required: true,
+      },
+    },
+  ],
   transactionRecords: [
     {
       type: mongoose.Schema.Types.ObjectId,

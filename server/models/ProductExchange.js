@@ -34,7 +34,7 @@ const productExchangeSchema = new mongoose.Schema({
       _id: false,
       productId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
+        ref: "ScrapProduct",
       },
       productName: {
         type: String,

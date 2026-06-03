@@ -203,3 +203,20 @@ module.exports.searchByMemo = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+module.exports.productExchangeStockSearchedByProductName = async (req, res) => {
+  try {
+    const { productName } = req.query;
+    const productExchangeStock = await ProductExchangeStockManagement.find({
+      $and: [
+        { productName: { $regex: productName, $options: "i" } },
+        { tempQuantity: { $gt: 0 } },
+      ],
+    });
+
+    res.status(201).json(productExchangeStock);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};

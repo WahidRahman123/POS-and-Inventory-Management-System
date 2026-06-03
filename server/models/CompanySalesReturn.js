@@ -160,7 +160,8 @@ const companySalesReturnSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    dueAmount: { // <--- টাকার নিখুঁত অবশিষ্টাংশ ট্র্যাকিং ফিল্ড
+    dueAmount: {
+      // <--- টাকার নিখুঁত অবশিষ্টাংশ ট্র্যাকিং ফিল্ড
       type: Number,
       default: 0,
     },
@@ -170,7 +171,10 @@ const companySalesReturnSchema = new mongoose.Schema(
     },
     products: [
       {
-        productId: { type: String },
+        productId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+        },
         productName: { type: String },
         quantity: { type: Number },
         qtyInKg: { type: Number },
@@ -186,7 +190,7 @@ const companySalesReturnSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("CompanySalesReturn", companySalesReturnSchema);
