@@ -8,6 +8,9 @@ const ProductExchange = require("../models/ProductExchange");
 const ProductExchangeStockManagement = require("../models/ProductExchangeStockManagement");
 const ScrapProductSell = require("../models/ScrapProductSell");
 const ScrapProductSellTransaction = require("../models/ScrapProductSellTransaction");
+const Sales = require("../models/Sales");
+const SalesTransaction = require("../models/SalesTransaction");
+const { getNextSequenceForSale } = require("../utils/getNextSequenceForSale");
 
 module.exports.index = async (req, res) => {
   try {
@@ -127,6 +130,54 @@ module.exports.createScrapProductSell = async (req, res) => {
       await productExchangeStockSearchData.save();
     }
 
+    //* Sale creation
+    const {
+      _id,
+      memo: scrapMemo,
+      products: scrapProducts,
+      transactionRecords,
+      totalAmount: scrapTotalAmount,
+      createdAt: scrapCreatedAt,
+      issuedAt: scrapIssuedAt,
+      ...rest
+    } = createdScrapProductSell.toObject();
+
+    const saleCount = await getNextSequenceForSale();
+
+    if (!saleCount) {
+      throw new Error("Sequence generation failed");
+    }
+    const chars = saleCount.seqChars?.join("");
+    const invoiceNo = ("s" + chars + "-" + saleCount.seq).toUpperCase();
+
+    const createdSale = await Sales({
+      ...rest,
+      invoiceNo,
+      createdAt: scrapCreatedAt,
+      issuedAt: scrapIssuedAt,
+      total: scrapTotalAmount,
+    });
+    createdSale.scrapProductSellId.push(_id);
+
+    //* Sale transaction creation
+    const saleTransaction = await SalesTransaction({
+      ...rest,
+      refMemo: createdSale.invoiceNo,
+      amountToBePaid: Number(scrapTotalAmount),
+      paidAmount: Number(createdScrapProductSell.paid),
+      currentDue: Number(createdScrapProductSell.due),
+      date: scrapCreatedAt,
+      unchangedPaid: Number(createdScrapProductSell.paid),
+      unchangedDue: Number(createdScrapProductSell.due),
+      salesId: createdSale._id
+    });
+
+    await createdSale.save();
+    await saleTransaction.save();
+
+    createdScrapProductSell.salesId = createdSale._id;
+    await createdScrapProductSell.save();
+    
     res.status(201).json(createdScrapProductSell);
   } catch (error) {
     // await session.abortTransaction();
@@ -213,7 +264,7 @@ module.exports.addPayment = async (req, res) => {
         unchangedPaid,
         unchangedDue,
         cash,
-        bankPaymentAmount
+        bankPaymentAmount,
       });
       // await transaction.save({ session });
       await transaction.save();

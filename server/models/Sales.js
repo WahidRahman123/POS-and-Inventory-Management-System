@@ -82,6 +82,12 @@ const salesSchema = new mongoose.Schema({
       ref: "SalesTransaction",
     },
   ],
+  scrapProductSellId: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ScrapProductSell",
+    },
+  ],
   totalWithoutDiscount: {
     type: Number,
     // required: true,

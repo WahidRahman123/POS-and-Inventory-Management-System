@@ -118,6 +118,7 @@ function App() {
           <Route path="/product-exchange-statement" element={<ProductExchangeStatement />} />
 
           <Route path="/exchange-product-sell" element={<ScrapProductSale />} />
+          <Route path="/exchange-product-sell-statement" element={<ScrapProductSale />} />
                    
         </Route>
       </Routes>

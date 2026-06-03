@@ -101,9 +101,10 @@ const scrapProductSellSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+  salesId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Sales",
+  },
 });
 
-module.exports = mongoose.model(
-  "ScrapProductSell",
-  scrapProductSellSchema,
-);
+module.exports = mongoose.model("ScrapProductSell", scrapProductSellSchema);

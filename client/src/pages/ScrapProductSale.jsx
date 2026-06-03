@@ -26,21 +26,23 @@ import {
   setProductExchangeStockByProductNameToEmpty,
 } from "../features/ProductExchangeStock/productExchangeStockSlice";
 import { customerFetch } from "../utils/POS/customerFetch";
+import {
+  addScrapProductSell,
+  fetchScrapProductSell,
+} from "../features/ScrapProductSell/scrapProductSellSlice";
 
 const ScrapProductSale = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const {
-    companyProductReturns,
-    productExchangeReportData,
-    addLoading,
-    toggle,
-    page,
-    pages,
-  } = useSelector((state) => state.companyProductReturn);
+  const { companyProductReturns, productExchangeReportData } = useSelector(
+    (state) => state.companyProductReturn,
+  );
   const { productExchangeStockSearchedByProductName } = useSelector(
     (state) => state.productExchangeStock,
+  );
+  const { ScrapProductSells, toggle, addLoading, page, pages } = useSelector(
+    (state) => state.ScrapProductSell,
   );
 
   const [currentPage, setCurrentPage] = useState(page);
@@ -134,7 +136,7 @@ const ScrapProductSale = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!supplier) return alert("Select a Company!");
+    if (customer.customerId === "") return alert("Select a customer!");
 
     const newProducts = products.map(
       ({ id, tempQuantity, tempQtyInKg, ...rest }) => ({
@@ -148,11 +150,11 @@ const ScrapProductSale = () => {
     const returnData = {
       createdAt: formData.date,
       issuedAt: new Date(),
-      supplierId: supplier._id,
-      supplierName: supplier.name,
-      address: supplier.address,
-      supplierEmail: supplier.email,
-      supplierPhone: supplier.phone,
+      customerId: customer.customerId,
+      customerName: customer.customerName,
+      address: customer.address,
+      customerEmail: customer.customerEmail,
+      customerPhone: customer.customerPhone,
       userId: user._id,
 
       // productName: formData.productName,
@@ -164,15 +166,18 @@ const ScrapProductSale = () => {
       products: newProducts,
 
       totalAmount: Number(totalAmount.toFixed(4)),
-      paid: 0,
-      due: Number(totalAmount.toFixed(4)),
+      paid: Number(paid.toFixed(4)),
+      due: Number(due.toFixed(4)),
 
-      unchangedPaid: 0,
-      unchangedDue: Number(totalAmount.toFixed(4)),
+      cash: Number(cashInput),
+      bankPaymentAmount: Number(bankPaymentAmount),
+
+      unchangedPaid: Number(paid.toFixed(4)),
+      unchangedDue: Number(due.toFixed(4)),
     };
 
     try {
-      await dispatch(addCompanyProductReturn(returnData)).unwrap();
+      await dispatch(addScrapProductSell(returnData)).unwrap();
       setFormData({
         date: "",
         // productName: "",
@@ -194,7 +199,18 @@ const ScrapProductSale = () => {
           subTotal: "",
         },
       ]);
-      setSupplier("");
+      setDisable(false);
+      setName("");
+      setCustomer({
+        customerId: "",
+        customerName: "",
+        address: "",
+        customerEmail: "",
+        customerPhone: "",
+      });
+      setData(null);
+      setCashInput("");
+      setBankPaymentAmount("");
     } catch (error) {
       console.log("Failed!");
     }
@@ -316,7 +332,7 @@ const ScrapProductSale = () => {
   useEffect(() => {
     if (user) {
       dispatch(
-        fetchCompanyProductReturns({
+        fetchScrapProductSell({
           memoSearch,
           page: currentPage,
         }),
@@ -432,7 +448,7 @@ const ScrapProductSale = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 gap-x-6 mb-4">
+              <div className="flex flex-col justify-between gap-1">
                 <div className="relative">
                   <label className="block text-sm font-medium mb-1">
                     Customer Name
@@ -727,7 +743,6 @@ const ScrapProductSale = () => {
                       onChange={(e) => setCashInput(e.target.value)}
                       placeholder="Cash Amount"
                       className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm outline-none focus:border-blue-500"
-                      required
                     />
                   </div>
 
@@ -744,7 +759,6 @@ const ScrapProductSale = () => {
                       onChange={(e) => setBankPaymentAmount(e.target.value)}
                       placeholder="Bank Payment Amount"
                       className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm outline-none focus:border-blue-500"
-                      required
                     />
                   </div>
                 </div>
@@ -810,27 +824,29 @@ const ScrapProductSale = () => {
               </tr>
             </thead>
             <tbody className="text-xs">
-              {companyProductReturns.length > 0 ? (
-                companyProductReturns.map((productReturn, index) => (
+              {ScrapProductSells.length > 0 ? (
+                ScrapProductSells.map((scrapProductSell, index) => (
                   <tr
                     key={index}
                     className="border-b hover:bg-blue-50 transition-colors cursor-pointer group"
                     onClick={() =>
-                      navigate("/company-statement", { state: productReturn })
+                      navigate("/exchange-product-sell-statement", {
+                        state: scrapProductSell,
+                      })
                     }
                   >
                     <td className="p-4 font-bold text-gray-400 italic font-mono">
-                      {new Date(productReturn.createdAt)
+                      {new Date(scrapProductSell.createdAt)
                         .toLocaleDateString("en-GB", {
                           timeZone: "Asia/Dhaka",
                         })
                         .replaceAll("/", "-")}
                     </td>
                     <td className="p-4 text-gray-500 uppercase font-black">
-                      {productReturn.memo}
+                      {scrapProductSell.memo}
                     </td>
                     <td className="p-4 font-black text-blue-600 group-hover:underline uppercase tracking-tighter">
-                      {productReturn.supplierName}
+                      {scrapProductSell.customerName}
                     </td>
                     {/* <td className="p-4 font-semibold text-gray-600 uppercase">
                       {productReturn.productName}
@@ -847,7 +863,7 @@ const ScrapProductSale = () => {
                         </thead>
 
                         <tbody>
-                          {productReturn.products?.map((product, i) => (
+                          {scrapProductSell.products?.map((product, i) => (
                             <tr key={i} className="text-gray-700 font-bold">
                               <td className="py-1 pr-2">
                                 {product.productName}
@@ -873,17 +889,17 @@ const ScrapProductSale = () => {
                       {`${productReturn.quantity} Pcs | ${productReturn.qtyInKg} Kg`}
                     </td> */}
                     <td className="p-4 text-right font-black text-gray-800 tracking-tighter text-sm">
-                      ৳ {productReturn.totalAmount}
+                      ৳ {scrapProductSell.totalAmount}
                     </td>
                     <td className="p-4 text-center">
-                      {productReturn.due > 0 ? (
+                      {scrapProductSell.due > 0 ? (
                         <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded-full">
                           <FaExclamationCircle
                             size={10}
                             className="animate-pulse"
                           />
                           <span className="text-[9px] font-black uppercase tracking-tighter italic">
-                            ৳ {productReturn.due} Pending
+                            ৳ {scrapProductSell.due} Pending
                           </span>
                         </div>
                       ) : (
