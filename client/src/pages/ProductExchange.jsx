@@ -29,7 +29,7 @@ const ProductExchange = () => {
     (state) => state.companyProductReturn,
   );
 
-  const [activeTab, setActiveTab] = useState("product-exchange");
+  // const [activeTab, setActiveTab] = useState("product-exchange");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [addLoading, setAddLoading] = useState(false);
@@ -349,53 +349,44 @@ const ProductExchange = () => {
         </div>
       </div>
 
-      {/* Entry Form Container UI Wrapper */}
-      <div className="bg-white rounded-xl shadow-lg p-6 mb-8 max-w-6xl mx-auto">
-        {/* Tabs */}
-        <div className="flex border-b mb-6">
-          <button
-            type="button"
-            onClick={() => setActiveTab("product-exchange")}
-            className={`px-6 py-3 font-semibold transition-all ${
-              activeTab === "product-exchange"
-                ? "border-b-2 border-blue-600 text-blue-600"
-                : "text-gray-500"
-            }`}
-          >
-            Product Exchange
-          </button>
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8 max-w-5xl mx-auto">
+          <div className="mb-5 p-4 border-l-4 border-amber-500 bg-amber-50 rounded-r-md">
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-semibold text-amber-800">
+                ♻️ Add Scrap Products
+              </label>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab("product-exchange-sell")}
-            className={`px-6 py-3 font-semibold transition-all ${
-              activeTab === "product-exchange-sell"
-                ? "border-b-2 border-green-600 text-green-600"
-                : "text-gray-500"
-            }`}
-          >
-            Exchange Product Sell
-          </button>
-        </div>
-
-        {/* Tab 1 */}
-        {activeTab === "product-exchange" && (
-          <div className="animate-fadeIn">
-            <div className="mb-5">
-              <h3 className="text-xl font-bold text-blue-600">
-                Product Exchange Portion
-              </h3>
-              <p className="text-sm text-gray-500">
-                Exchange product entry information.
-              </p>
+              <span className="text-[10px] font-bold px-2 py-1 bg-amber-200 text-amber-800 rounded-full">
+                SCRAP
+              </span>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-6 mb-8 max-w-5xl mx-auto">
-              {/* <div>
+            <form className="flex gap-2" onSubmit={handleScrapProductSubmit}>
+              <input
+                type="text"
+                value={scrapProductName}
+                onChange={(e) => setScrapProductName(e.target.value)}
+                placeholder="Enter Scrap Product Name"
+                className="flex-1 px-3 py-2 border border-gray-400 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
+              />
+
+              <button
+                type="submit"
+                className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-md cursor-pointer disabled:bg-amber-300 disabled:cursor-not-allowed"
+                disabled={createLoading}
+              >
+                {createLoading ? "Adding..." : "Add Scrap"}
+              </button>
+            </form>
+          </div>
+
+          <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-2 gap-x-6 mb-4">
+              <div className="relative">
                 <label className="block text-sm font-medium mb-1">
-                  Add Scrap Products
+                  Customer Name
                 </label>
-                <form>
+                <div className="flex">
                   <input
                     type="search"
                     value={name}
@@ -406,380 +397,232 @@ const ProductExchange = () => {
                     disabled={disable}
                   />
                   <button
-                    type="submit"
+                    type="button"
                     disabled={!disable}
                     className="bg-red-500 hover:bg-red-600 cursor-pointer ml-2 px-2 py-1 font-bold text-white rounded disabled:bg-red-300 disabled:cursor-not-allowed"
+                    onClick={() => {
+                      setDisable(false);
+                      setName("");
+                      setCustomer({
+                        customerId: "",
+                        customerName: "",
+                        address: "",
+                        customerEmail: "",
+                        customerPhone: "",
+                      });
+                      setData(null);
+                    }}
                   >
                     Change
                   </button>
-                </form>
-              </div> */}
-
-              <div className="mb-5 p-4 border-l-4 border-amber-500 bg-amber-50 rounded-r-md">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-semibold text-amber-800">
-                    ♻️ Add Scrap Products
-                  </label>
-
-                  <span className="text-[10px] font-bold px-2 py-1 bg-amber-200 text-amber-800 rounded-full">
-                    SCRAP
-                  </span>
                 </div>
-
-                <form
-                  className="flex gap-2"
-                  onSubmit={handleScrapProductSubmit}
-                >
-                  <input
-                    type="text"
-                    value={scrapProductName}
-                    onChange={(e) => setScrapProductName(e.target.value)}
-                    placeholder="Enter Scrap Product Name"
-                    className="flex-1 px-3 py-2 border border-gray-400 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
-                  />
-
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-md cursor-pointer disabled:bg-amber-300 disabled:cursor-not-allowed"
-                    disabled={createLoading}
-                  >
-                    {createLoading ? "Adding..." : "Add Scrap"}
-                  </button>
-                </form>
+                {data && (
+                  <div className="w-[85%] max-h-40 shadow-md overflow-y-auto bg-white absolute z-10 border border-gray-200">
+                    <table className="w-full">
+                      <tbody>
+                        {data.map((d, i) => (
+                          <tr
+                            key={i}
+                            className="p-2 cursor-pointer border-b border-gray-200 hover:bg-gray-100 text-gray-800"
+                            onClick={() => handleCustomerOnClick(d)}
+                          >
+                            <td className="p-2">{d.name}</td>
+                            <td className="text-right p-2 text-xs text-gray-500">
+                              {d.address}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Address
+                </label>
+                <input
+                  type="text"
+                  value={customer.address}
+                  placeholder="Address"
+                  disabled
+                  className="block w-full px-3 py-1.5 border border-gray-400 rounded-sm text-sm bg-gray-200 text-gray-700"
+                />
+              </div>
+            </div>
 
-              <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-2 gap-x-6 mb-4">
-                  <div className="relative">
-                    <label className="block text-sm font-medium mb-1">
-                      Customer Name
-                    </label>
-                    <div className="flex">
-                      <input
-                        type="search"
-                        value={name}
-                        onChange={handleCustomerNameOnChange}
-                        ref={customerNameRef}
-                        placeholder="Customer Name"
-                        className="block w-[85%] px-3 py-1.5 border border-gray-400 rounded-sm text-sm disabled:bg-gray-300"
-                        disabled={disable}
-                      />
-                      <button
-                        type="button"
-                        disabled={!disable}
-                        className="bg-red-500 hover:bg-red-600 cursor-pointer ml-2 px-2 py-1 font-bold text-white rounded disabled:bg-red-300 disabled:cursor-not-allowed"
-                        onClick={() => {
-                          setDisable(false);
-                          setName("");
-                          setCustomer({
-                            customerId: "",
-                            customerName: "",
-                            address: "",
-                            customerEmail: "",
-                            customerPhone: "",
-                          });
-                          setData(null);
-                        }}
-                      >
-                        Change
-                      </button>
-                    </div>
-                    {data && (
-                      <div className="w-[85%] max-h-40 shadow-md overflow-y-auto bg-white absolute z-10 border border-gray-200">
-                        <table className="w-full">
-                          <tbody>
-                            {data.map((d, i) => (
-                              <tr
-                                key={i}
-                                className="p-2 cursor-pointer border-b border-gray-200 hover:bg-gray-100 text-gray-800"
-                                onClick={() => handleCustomerOnClick(d)}
-                              >
-                                <td className="p-2">{d.name}</td>
-                                <td className="text-right p-2 text-xs text-gray-500">
-                                  {d.address}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">
-                      Address
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Pick A Date
+                </label>
+                <input
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      date: e.target.value,
+                    }))
+                  }
+                  className="w-full px-4 py-2 border border-gray-400 rounded-md"
+                  required
+                />
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleAddProduct}
+              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 mb-4 cursor-pointer"
+            >
+              + Add Product
+            </button>
+
+            <div className="bg-gray-50 rounded-lg p-4 mb-4">
+              {products.map((product) => (
+                <div
+                  key={product.id}
+                  className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-3 items-end border-b pb-2 md:border-0"
+                >
+                  <div className="md:col-span-2 relative">
+                    <label className="block text-xs text-gray-600 mb-1">
+                      Product Name
                     </label>
                     <input
-                      type="text"
-                      value={customer.address}
-                      placeholder="Address"
-                      disabled
-                      className="block w-full px-3 py-1.5 border border-gray-400 rounded-sm text-sm bg-gray-200 text-gray-700"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">
-                      Pick A Date
-                    </label>
-                    <input
-                      type="date"
-                      value={formData.date}
+                      type="search"
+                      value={product.productName}
+                      // onChange={(e) =>
+                      //   handleProductChange(
+                      //     product.id,
+                      //     "productName",
+                      //     e.target.value,
+                      //   )
+                      // }
                       onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          date: e.target.value,
-                        }))
+                        handleProductSearchChange(product.id, e.target.value)
                       }
-                      className="w-full px-4 py-2 border border-gray-400 rounded-md"
+                      className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
+                      required
+                    />
+                    {activeSearchRow === product.id &&
+                      scrapProducts.length > 0 && (
+                        <div className="absolute z-50 w-full bg-white shadow-xl border border-gray-300 rounded mt-1 max-h-60 overflow-y-auto">
+                          {scrapProducts.map((p, i) => (
+                            <div
+                              key={i}
+                              onClick={() =>
+                                handleSelectProductFromSearch(product.id, {
+                                  productName: p.productName,
+                                  productId: p._id,
+                                })
+                              }
+                              className="px-3 py-2 border-b border-gray-100 cursor-pointer hover:bg-blue-50"
+                            >
+                              {p.productName}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">
+                      Quantity
+                    </label>
+                    <input
+                      type="number"
+                      value={product.quantity}
+                      onChange={(e) =>
+                        handleProductChange(
+                          product.id,
+                          "quantity",
+                          e.target.value,
+                        )
+                      }
+                      className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
                       required
                     />
                   </div>
-                </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">
+                      Qty (kg)
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={product.qtyInKg}
+                      onChange={(e) => {
+                        const kg = e.target.value;
+                        handleProductChange(product.id, "qtyInKg", kg);
+                        const sub = new Decimal(Number(kg) || 0).mul(
+                          new Decimal(Number(product.unitPrice) || 0),
+                        );
+                        handleProductChange(
+                          product.id,
+                          "subTotal",
+                          Number(sub.toFixed(4)),
+                        );
+                      }}
+                      className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
+                      required
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <label className="block text-xs text-gray-600 mb-1">
+                        Unit Price
+                      </label>
+                      <input
+                        type="number"
+                        step="any"
+                        value={product.unitPrice}
+                        onChange={(e) => {
+                          const price = e.target.value;
+                          handleProductChange(product.id, "unitPrice", price);
 
-                <button
-                  type="button"
-                  onClick={handleAddProduct}
-                  className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 mb-4 cursor-pointer"
-                >
-                  + Add Product
-                </button>
-
-                <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                  {products.map((product) => (
-                    <div
-                      key={product.id}
-                      className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-3 items-end border-b pb-2 md:border-0"
-                    >
-                      <div className="md:col-span-2 relative">
-                        <label className="block text-xs text-gray-600 mb-1">
-                          Product Name
-                        </label>
-                        <input
-                          type="search"
-                          value={product.productName}
-                          // onChange={(e) =>
-                          //   handleProductChange(
-                          //     product.id,
-                          //     "productName",
-                          //     e.target.value,
-                          //   )
-                          // }
-                          onChange={(e) =>
-                            handleProductSearchChange(
-                              product.id,
-                              e.target.value,
-                            )
-                          }
-                          className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
-                          required
-                        />
-                        {activeSearchRow === product.id &&
-                          scrapProducts.length > 0 && (
-                            <div className="absolute z-50 w-full bg-white shadow-xl border border-gray-300 rounded mt-1 max-h-60 overflow-y-auto">
-                              {scrapProducts.map((p, i) => (
-                                <div
-                                  key={i}
-                                  onClick={() =>
-                                    handleSelectProductFromSearch(product.id, {
-                                      productName: p.productName,
-                                      productId: p._id,
-                                    })
-                                  }
-                                  className="px-3 py-2 border-b border-gray-100 cursor-pointer hover:bg-blue-50"
-                                >
-                                  {p.productName}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">
-                          Quantity
-                        </label>
-                        <input
-                          type="number"
-                          value={product.quantity}
-                          onChange={(e) =>
-                            handleProductChange(
-                              product.id,
-                              "quantity",
-                              e.target.value,
-                            )
-                          }
-                          className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">
-                          Qty (kg)
-                        </label>
-                        <input
-                          type="number"
-                          step="any"
-                          value={product.qtyInKg}
-                          onChange={(e) => {
-                            const kg = e.target.value;
-                            handleProductChange(product.id, "qtyInKg", kg);
-                            const sub = new Decimal(Number(kg) || 0).mul(
-                              new Decimal(Number(product.unitPrice) || 0),
-                            );
-                            handleProductChange(
-                              product.id,
-                              "subTotal",
-                              Number(sub.toFixed(4)),
-                            );
-                          }}
-                          className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
-                          required
-                        />
-                      </div>
-                      <div className="flex gap-2">
-                        <div className="flex-1">
-                          <label className="block text-xs text-gray-600 mb-1">
-                            Unit Price
-                          </label>
-                          <input
-                            type="number"
-                            step="any"
-                            value={product.unitPrice}
-                            onChange={(e) => {
-                              const price = e.target.value;
-                              handleProductChange(
-                                product.id,
-                                "unitPrice",
-                                price,
-                              );
-
-                              const sub = new Decimal(Number(price) || 0).mul(
-                                new Decimal(Number(product.qtyInKg) || 0),
-                              );
-                              handleProductChange(
-                                product.id,
-                                "subTotal",
-                                Number(sub.toFixed(4)),
-                              );
-                            }}
-                            className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
-                            required
-                          />
-                        </div>
-                        {products.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveProduct(product.id)}
-                            className="px-3 py-2 bg-red-500 text-white rounded-md mt-6"
-                          >
-                            ×
-                          </button>
-                        )}
-                      </div>
+                          const sub = new Decimal(Number(price) || 0).mul(
+                            new Decimal(Number(product.qtyInKg) || 0),
+                          );
+                          handleProductChange(
+                            product.id,
+                            "subTotal",
+                            Number(sub.toFixed(4)),
+                          );
+                        }}
+                        className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
+                        required
+                      />
                     </div>
-                  ))}
-                  <div className="border-t border-gray-400 pt-3 mt-3 flex justify-end gap-6 text-sm font-semibold">
-                    <span>Total Qty: {totalQty.toFixed(0)}</span>
-                    <span>Total Kg: {totalQtyInKg.toFixed(2)}</span>
-                    <span className="text-blue-700 font-bold">
-                      Total: ৳ {totalAmount.toFixed(2)}
-                    </span>
+                    {products.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveProduct(product.id)}
+                        className="px-3 py-2 bg-red-500 text-white rounded-md mt-6"
+                      >
+                        ×
+                      </button>
+                    )}
                   </div>
                 </div>
-
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 disabled:bg-gray-400 cursor-pointer"
-                  disabled={addLoading}
-                >
-                  {addLoading ? "Adding..." : "Add Exchange"}
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Tab 2 */}
-        {activeTab === "product-exchange-sell" && (
-          <div className="animate-fadeIn">
-            <div className="mb-5">
-              <h3 className="text-xl font-bold text-green-600">
-                Product Return Form
-              </h3>
-              <p className="text-sm text-gray-500">
-                Return product information.
-              </p>
-            </div>
-
-            <form>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Customer Name
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full border rounded-lg px-4 py-2"
-                    placeholder="Customer Name"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Return Date
-                  </label>
-                  <input
-                    type="date"
-                    className="w-full border rounded-lg px-4 py-2"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Product Name
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full border rounded-lg px-4 py-2"
-                    placeholder="Product Name"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Return Quantity
-                  </label>
-                  <input
-                    type="number"
-                    className="w-full border rounded-lg px-4 py-2"
-                    placeholder="Quantity"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-1">
-                    Remarks
-                  </label>
-                  <textarea
-                    rows={3}
-                    className="w-full border rounded-lg px-4 py-2"
-                    placeholder="Write remarks..."
-                  />
-                </div>
+              ))}
+              <div className="border-t border-gray-400 pt-3 mt-3 flex justify-end gap-6 text-sm font-semibold">
+                <span>Total Qty: {totalQty.toFixed(0)}</span>
+                <span>Total Kg: {totalQtyInKg.toFixed(2)}</span>
+                <span className="text-blue-700 font-bold">
+                  Total: ৳ {totalAmount.toFixed(2)}
+                </span>
               </div>
+            </div>
 
-              <button
-                type="submit"
-                className="mt-5 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              >
-                Submit Return
-              </button>
-            </form>
-          </div>
-        )}
-      </div>
+            <button
+              type="submit"
+              className="px-6 py-2 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 disabled:bg-gray-400 cursor-pointer"
+              disabled={addLoading}
+            >
+              {addLoading ? "Adding..." : "Add Exchange"}
+            </button>
+          </form>
+        </div>
 
       {/* Data Summary Report History Section Container */}
       <div className="bg-white rounded-lg shadow-md p-6 max-w-5xl mx-auto">

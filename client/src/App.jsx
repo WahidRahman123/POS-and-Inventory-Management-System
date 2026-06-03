@@ -47,6 +47,7 @@ import CompanySalesReturnStatement from "./pages/CompanySalesReturnStatement";
 import EditCompanySalesReturnDue from "./pages/EditCompanySalesReturnDue";
 import PurchaseAdvanceSettlement from "./pages/PurchaseAdvanceSettlement";
 import PurchaseSupplierDueList from "./pages/PurchaseSupplierDueList";
+import ScrapProductSale from "./pages/ScrapProductSale";
 
 
 function App() {
@@ -115,6 +116,8 @@ function App() {
           <Route path="/sales-return/:id/edit-due" element={<EditSRCashDue />}/>
 
           <Route path="/product-exchange-statement" element={<ProductExchangeStatement />} />
+
+          <Route path="/exchange-product-sell" element={<ScrapProductSale />} />
                    
         </Route>
       </Routes>

@@ -734,7 +734,7 @@ const PurchaserStatement = () => {
                 ৳{currentBalance.toLocaleString('en-BD', { minimumFractionDigits: 2 })}
               </p>
               <p className="text-sm mt-1 text-gray-600">
-                {currentBalance < 0 ? "(You owe supplier)" : "(Supplier owes you)"}
+                {currentBalance < 0 ? "(সাপ্লায়ার আমার কাছে পায়)" : "(আমি সাপ্লায়ারের কাছে পাই)"}
               </p>
             </div>
           </div>
@@ -821,7 +821,7 @@ const PurchaserStatement = () => {
               <h3 className="uppercase text-sm mb-6 border-b border-gray-700 pb-3">Account Summary</h3>
               <div className="space-y-4 text-lg">
                 <div className="flex justify-between"><span>Total Purchase:</span> <span>৳{Number(totalAmount).toLocaleString()}</span></div>
-                <div className="flex justify-between text-green-400"><span>Total Received:</span> <span>৳{Number(totalPaid).toLocaleString()}</span></div>
+                <div className="flex justify-between text-green-400"><span>Total Given:</span> <span>৳{Number(totalPaid).toLocaleString()}</span></div>
                 <div className="flex justify-between border-t border-gray-700 pt-4 text-2xl font-bold">
                   <span>Balance:</span>
                   <span className={currentBalance < 0 ? "text-red-400" : "text-green-400"}>
