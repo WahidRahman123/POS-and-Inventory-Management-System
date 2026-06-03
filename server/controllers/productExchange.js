@@ -2,6 +2,7 @@ const Decimal = require("decimal.js");
 const ProductExchange = require("../models/ProductExchange");
 const { getNextSequenceForOther } = require("../utils/getNextSequenceForOther");
 const { default: mongoose } = require("mongoose");
+const ProductExchangeStockManagement = require("../models/ProductExchangeStockManagement");
 
 // List of all exchanges with pagination and search
 module.exports.index = async (req, res) => {
@@ -90,6 +91,39 @@ module.exports.createProductExchange = async (req, res) => {
 
     // const createdExchange = await exchange.save({ session });
     const createdExchange = await exchange.save();
+
+    //* ProductExchangeStockManagement creation or updation
+    for (const product of exchanges.products) {
+      const productExchangeStock = await ProductExchangeStockManagement.findOne({
+        productId: product.productId,
+      });
+
+      if (productExchangeStock) {
+        productExchangeStock.quantity += product.quantity;
+        productExchangeStock.tempQuantity += product.quantity;
+
+        productExchangeStock.qtyInKg += product.qtyInKg;
+        productExchangeStock.tempQtyInKg += product.qtyInKg;
+
+        productExchangeStock.unitPrice += product.unitPrice;
+        productExchangeStock.tempUnitPrice += product.unitPrice;
+
+        productExchangeStock.productExchangeRef.push(exchange._id);
+        await productExchangeStock.save();
+      } else {
+        const newProducts = {
+          ...product,
+          tempQuantity: product.quantity,
+          tempQtyInKg: product.qtyInKg,
+          tempUnitPrice: product.unitPrice,
+        };
+        const productExchangeStock = new ProductExchangeStockManagement(newProducts);
+
+        productExchangeStock.productExchangeRef.push(exchange._id);
+
+        await productExchangeStock.save();
+      }
+    }
 
     // Commit
     // await session.commitTransaction();
