@@ -32,6 +32,10 @@ const productExchangeSchema = new mongoose.Schema({
   products: [
     {
       _id: false,
+      productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
       productName: {
         type: String,
         required: true,

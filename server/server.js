@@ -22,6 +22,7 @@ const salesReturnRoutes = require("./routes/salesReturnRoutes");
 const CompanyProductReturnRoutes = require("./routes/companyProductReturnRoutes");
 const CompanySalesReturnRoutes = require("./routes/companySalesReturnRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
+const scrapProductRoutes = require("./routes/scrapProductRoutes");
 
 const app = express();
 app.use(express.json());
@@ -68,6 +69,7 @@ app.use("/api/sales-return", salesReturnRoutes);
 app.use("/api/company-product-return", CompanyProductReturnRoutes);
 app.use("/api/company-sales-return", CompanySalesReturnRoutes);
 app.use("/api/expense", expenseRoutes);
+app.use("/api/scrap-product", scrapProductRoutes);
 
 app.listen(port, () => {
   console.log(`LISTENING TO THE PORT ${port}`);

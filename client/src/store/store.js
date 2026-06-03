@@ -16,6 +16,7 @@ import salesReturnReducer from '../features/SalesReturn/salesReturnSlice';
 import companyProductReturnReducer from '../features/CompanyProductReturn/companyProductReturnSlice'
 import companySalesReturnReducer from '../features/CompanySalesReturn/companySalesReturnSlice'
 import expenseReducer from '../features/expense/expenseSlice';
+import scrapProductReducer from '../features/ScrapProduct/scrapProductSlice';
 
 export const store = configureStore({
     reducer: {
@@ -36,5 +37,6 @@ export const store = configureStore({
         companyProductReturn: companyProductReturnReducer,
         companySalesReturn: companySalesReturnReducer,
         expense: expenseReducer,
+        scrapproduct: scrapProductReducer
     }
 })
