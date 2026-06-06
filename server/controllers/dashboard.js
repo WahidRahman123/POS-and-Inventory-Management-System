@@ -614,15 +614,15 @@
 //         {
 //           $group: {
 //             _id: null,
-//             totalStockValue: { 
-//               $sum: { $multiply: ["$quantity", "$costPrice"] } 
+//             totalStockValue: {
+//               $sum: { $multiply: ["$quantity", "$costPrice"] }
 //             },
 //             totalQuantity: { $sum: "$quantity" },
-//             totalSalePrice: { 
-//               $sum: { $multiply: ["$quantity", "$sellPrice"] } 
+//             totalSalePrice: {
+//               $sum: { $multiply: ["$quantity", "$sellPrice"] }
 //             },
-//             totalCostPrice: { 
-//               $sum: { $multiply: ["$quantity", "$costPrice"] } 
+//             totalCostPrice: {
+//               $sum: { $multiply: ["$quantity", "$costPrice"] }
 //             }
 //           },
 //         },
@@ -1062,7 +1062,7 @@
 // const SalesTransaction = require("../models/SalesTransaction");
 // const SalesReturnStockManagement = require("../models/SalesReturnStockManagement");
 // // তোমার দেওয়া নতুন ট্রানজেকশন মডেলটি এখানে ইমপোর্ট করা হলো
-// const SalesReturnTransaction = require("../models/SalesReturnTransaction"); 
+// const SalesReturnTransaction = require("../models/SalesReturnTransaction");
 
 // module.exports.index = async (req, res) => {
 //   try {
@@ -1086,15 +1086,15 @@
 //         {
 //           $group: {
 //             _id: null,
-//             totalStockValue: { 
-//               $sum: { $multiply: ["$quantity", "$costPrice"] } 
+//             totalStockValue: {
+//               $sum: { $multiply: ["$quantity", "$costPrice"] }
 //             },
 //             totalQuantity: { $sum: "$quantity" },
-//             totalSalePrice: { 
-//               $sum: { $multiply: ["$quantity", "$sellPrice"] } 
+//             totalSalePrice: {
+//               $sum: { $multiply: ["$quantity", "$sellPrice"] }
 //             },
-//             totalCostPrice: { 
-//               $sum: { $multiply: ["$quantity", "$costPrice"] } 
+//             totalCostPrice: {
+//               $sum: { $multiply: ["$quantity", "$costPrice"] }
 //             }
 //           }
 //         }
@@ -1351,11 +1351,11 @@
 //     // ৬ নম্বর কার্ডের ফিক্সড লজিক: SalesReturnTransaction থেকে কাস্টমারকে দেওয়া মাল গণনা
 //     // =========================================================================
 //     const customerExchangeQtyDetails = await SalesReturnTransaction.aggregate([
-//       { 
-//         $match: { returnType: "product" } 
+//       {
+//         $match: { returnType: "product" }
 //       },
-//       { 
-//         $unwind: { path: "$exchangeProducts", preserveNullAndEmptyArrays: true } 
+//       {
+//         $unwind: { path: "$exchangeProducts", preserveNullAndEmptyArrays: true }
 //       },
 //       {
 //         $group: {
@@ -1390,7 +1390,7 @@
 //     const companySaleReturnQuantity = companySalesReturn[0] ? companySalesReturn[0].productQuantityTotal : 0;
 //     const purchaseReturnQuantity = purchaseReturn[0] ? purchaseReturn[0].productQuantityTotal : 0;
 //     const salesReturnQuantity = salesReturn[0] ? salesReturn[0].productQuantityTotal : 0;
-//     const salesQuantity = 0; 
+//     const salesQuantity = 0;
 
 //     const quantityDetails = {
 //       mainQuantity,
@@ -1465,7 +1465,7 @@
 // const CompanySalesReturnTransaction = require("../models/CompanySalesReturnTransaction");
 // const SalesTransaction = require("../models/SalesTransaction");
 // const SalesReturnStockManagement = require("../models/SalesReturnStockManagement");
-// const SalesReturnTransaction = require("../models/SalesReturnTransaction"); 
+// const SalesReturnTransaction = require("../models/SalesReturnTransaction");
 
 // module.exports.index = async (req, res) => {
 //   try {
@@ -1673,7 +1673,7 @@
 //         $group: {
 //           _id: null,
 //           currentQty: { $sum: "$tempReturnQuantity" },
-//           currentValueFlat: { $sum: { $multiply: ["$tempReturnQuantity", "$returnPrice"] } } 
+//           currentValueFlat: { $sum: { $multiply: ["$tempReturnQuantity", "$returnPrice"] } }
 //         }
 //       }
 //     ]);
@@ -1696,9 +1696,9 @@
 //       {
 //         $group: {
 //           _id: null,
-//           totalAmountQty: { $sum: "$totalAmountQty" }, 
-//           totalPaidQty: { $sum: "$paidQty" },         
-//           totalDueQty: { $sum: "$dueQty" },           
+//           totalAmountQty: { $sum: "$totalAmountQty" },
+//           totalPaidQty: { $sum: "$paidQty" },
+//           totalDueQty: { $sum: "$dueQty" },
 //           totalAmountRaw: { $sum: { $multiply: ["$totalAmount", 10000] } },
 //           totalPaidRaw: { $sum: { $multiply: ["$paid", 10000] } },
 //           totalDueRaw: { $sum: { $multiply: ["$due", 10000] } }
@@ -1719,7 +1719,7 @@
 //     const companySaleReturnQuantity = companySalesReturn[0] ? companySalesReturn[0].productQuantityTotal : 0;
 //     const purchaseReturnQuantity = purchaseReturn[0] ? purchaseReturn[0].productQuantityTotal : 0;
 //     const salesReturnQuantity = salesReturn[0] ? salesReturn[0].productQuantityTotal : 0;
-//     const salesQuantity = 0; 
+//     const salesQuantity = 0;
 
 //     const quantityDetails = {
 //       mainQuantity,
@@ -1766,18 +1766,18 @@
 
 //       // ৫ নম্বর কার্ডের ডাটা
 //       cardFiveQty: cardFiveQty,
-//       cardFiveAmount: cardFiveAmount, 
+//       cardFiveAmount: cardFiveAmount,
 //       cardSixGivenQty: cardSixGivenQty,
 
 //       // ৭ নম্বর কার্ডের ডাটা (কোম্পানি রিটার্ন মডিউল - লাইভ ফিক্স)
-//       totalAmountQtyForCSR: companyTotalAmountQty, 
-//       totalPaidQtyForCSR: companyTotalPaidQty,     
-//       totalDueQtyForCSR: companyTotalDueQty,       
+//       totalAmountQtyForCSR: companyTotalAmountQty,
+//       totalPaidQtyForCSR: companyTotalPaidQty,
+//       totalDueQtyForCSR: companyTotalDueQty,
 
 //       // গুরুত্বপূর্ণ ফিক্স: ফ্রন্টএন্ডের মেইন বড় টেক্সট অবজেক্টে এখন 'টোটাল কত টাকার মাল পাঠানো হয়েছে' তা যাবে।
 //       totalPaidForCSR: companyTotalAmountValue,    // ফ্রন্টএন্ডের বড় টেক্সট ম্যাপ করা ফিল্ডে Total Amount পাঠানো হলো
 //       totalReceivedValueForCSR: companyTotalPaidValue, // কোম্পানি থেকে যদি ক্যাশ/মাল রিসিভ হয় (ঐচ্ছিক ব্যবহারের জন্য)
-//       totalDueForCSR: companyTotalDueValue         
+//       totalDueForCSR: companyTotalDueValue
 //     };
 
 //     res.status(201).json(result);
@@ -1798,7 +1798,7 @@
 // const CompanySalesReturnTransaction = require("../models/CompanySalesReturnTransaction");
 // const SalesTransaction = require("../models/SalesTransaction");
 // const SalesReturnStockManagement = require("../models/SalesReturnStockManagement");
-// const SalesReturnTransaction = require("../models/SalesReturnTransaction"); 
+// const SalesReturnTransaction = require("../models/SalesReturnTransaction");
 
 // module.exports.index = async (req, res) => {
 //   try {
@@ -2016,7 +2016,7 @@
 //         $group: {
 //           _id: null,
 //           currentQty: { $sum: "$tempReturnQuantity" },
-//           currentValueFlat: { $sum: { $multiply: ["$tempReturnQuantity", "$returnPrice"] } } 
+//           currentValueFlat: { $sum: { $multiply: ["$tempReturnQuantity", "$returnPrice"] } }
 //         }
 //       }
 //     ]);
@@ -2037,9 +2037,9 @@
 //       {
 //         $group: {
 //           _id: null,
-//           totalAmountQty: { $sum: "$totalAmountQty" }, 
-//           totalPaidQty: { $sum: "$paidQty" },         
-//           totalDueQty: { $sum: "$dueQty" },           
+//           totalAmountQty: { $sum: "$totalAmountQty" },
+//           totalPaidQty: { $sum: "$paidQty" },
+//           totalDueQty: { $sum: "$dueQty" },
 //           totalAmountRaw: { $sum: { $multiply: ["$totalAmount", 10000] } },
 //           totalPaidRaw: { $sum: { $multiply: ["$paid", 10000] } },
 //           totalDueRaw: { $sum: { $multiply: ["$due", 10000] } }
@@ -2059,7 +2059,7 @@
 //     const companySaleReturnQuantity = companySalesReturn[0] ? companySalesReturn[0].productQuantityTotal : 0;
 //     const purchaseReturnQuantity = purchaseReturn[0] ? purchaseReturn[0].productQuantityTotal : 0;
 //     const salesReturnQuantity = salesReturn[0] ? salesReturn[0].productQuantityTotal : 0;
-//     const salesQuantity = 0; 
+//     const salesQuantity = 0;
 
 //     const quantityDetails = {
 //       mainQuantity,
@@ -2109,15 +2109,15 @@
 //       totalDueForSalesReturn: salesReturnForNewData && salesReturnForNewData[0].totalAmount.length > 0 ? salesReturnForNewData[0].totalAmount[0].totalDue / 10000 : 0,
 
 //       cardFiveQty: cardFiveQty,
-//       cardFiveAmount: cardFiveAmount, 
+//       cardFiveAmount: cardFiveAmount,
 //       cardSixGivenQty: cardSixGivenQty,
 
-//       totalAmountQtyForCSR: companyTotalAmountQty, 
-//       totalPaidQtyForCSR: companyTotalPaidQty,     
-//       totalDueQtyForCSR: companyTotalDueQty,       
+//       totalAmountQtyForCSR: companyTotalAmountQty,
+//       totalPaidQtyForCSR: companyTotalPaidQty,
+//       totalDueQtyForCSR: companyTotalDueQty,
 //       totalDueForCSR: companyTotalDueValue,
-//       totalPaidForCSR: companyTotalAmountValue,      
-//       totalAmountForCSR: companyTotalAmountValue,    
+//       totalPaidForCSR: companyTotalAmountValue,
+//       totalAmountForCSR: companyTotalAmountValue,
 //       totalReceivedValueForCSR: companyTotalPaidValue
 //     };
 
@@ -2141,6 +2141,7 @@ const SalesTransaction = require("../models/SalesTransaction");
 const SalesReturnStockManagement = require("../models/SalesReturnStockManagement");
 const SalesReturnTransaction = require("../models/SalesReturnTransaction");
 const Expense = require("../models/Expense"); // <--- এক্সপেন্স মডেলটি এখানে ইম্পোর্ট করুন
+const Supplier = require("../models/Supplier");
 
 module.exports.index = async (req, res) => {
   try {
@@ -2160,19 +2161,25 @@ module.exports.index = async (req, res) => {
       salesReturn,
       companySalesReturn,
       salesTransaction,
-      todaysExpenseArray // <--- ১. প্রোমিস অল এর ভেতর এক্সপেন্স এগ্রিগেশন যুক্ত করা হলো
+      todaysExpenseArray, // <--- ১. প্রোমিস অল এর ভেতর এক্সপেন্স এগ্রিগেশন যুক্ত করা হলো
     ] = await Promise.all([
       // ================== MAIN STOCK ==================
       Product.aggregate([
         {
           $group: {
             _id: null,
-            totalStockValue: { $sum: { $multiply: ["$quantity", "$costPrice"] } },
+            totalStockValue: {
+              $sum: { $multiply: ["$quantity", "$costPrice"] },
+            },
             totalQuantity: { $sum: "$quantity" },
-            totalSalePrice: { $sum: { $multiply: ["$quantity", "$sellPrice"] } },
-            totalCostPrice: { $sum: { $multiply: ["$quantity", "$costPrice"] } }
-          }
-        }
+            totalSalePrice: {
+              $sum: { $multiply: ["$quantity", "$sellPrice"] },
+            },
+            totalCostPrice: {
+              $sum: { $multiply: ["$quantity", "$costPrice"] },
+            },
+          },
+        },
       ]),
 
       // ================== SALES ==================
@@ -2184,12 +2191,14 @@ module.exports.index = async (req, res) => {
                 $group: {
                   _id: null,
                   totalSell: { $sum: { $multiply: ["$paid", 10000] } },
-                  totalCostInSale: { $sum: { $multiply: ["$totalCost", 10000] } },
+                  totalCostInSale: {
+                    $sum: { $multiply: ["$totalCost", 10000] },
+                  },
                   numberOfSales: { $sum: 1 },
                   saleTotal: { $sum: { $multiply: ["$total", 10000] } },
-                  saleDue: { $sum: { $multiply: ["$due", 10000] } }
-                }
-              }
+                  saleDue: { $sum: { $multiply: ["$due", 10000] } },
+                },
+              },
             ],
             todaysSaleDetails: [
               { $match: { createdAt: { $gte: start, $lte: end } } },
@@ -2197,22 +2206,29 @@ module.exports.index = async (req, res) => {
                 $group: {
                   _id: null,
                   saleTotalToday: { $sum: { $multiply: ["$total", 10000] } },
-                  saleDueToday: { $sum: { $multiply: ["$due", 10000] } }
-                }
-              }
+                  saleDueToday: { $sum: { $multiply: ["$due", 10000] } },
+                },
+              },
             ],
             todaysSaleQuantityDetails: [
               { $match: { createdAt: { $gte: start, $lte: end } } },
-              { $unwind: { path: "$products", preserveNullAndEmptyArrays: true } },
+              {
+                $unwind: {
+                  path: "$products",
+                  preserveNullAndEmptyArrays: true,
+                },
+              },
               {
                 $group: {
                   _id: null,
-                  totalQtyToday: { $sum: { $ifNull: ["$products.quantity", 0] } }
-                }
-              }
-            ]
-          }
-        }
+                  totalQtyToday: {
+                    $sum: { $ifNull: ["$products.quantity", 0] },
+                  },
+                },
+              },
+            ],
+          },
+        },
       ]),
 
       // ================== PRODUCT EXCHANGE ==================
@@ -2223,10 +2239,14 @@ module.exports.index = async (req, res) => {
               {
                 $group: {
                   _id: null,
-                  exchangeTotal: { $sum: { $multiply: ["$totalAmount", 10000] } },
-                  exchangeRemaining: { $sum: { $multiply: ["$remainingBalance", 10000] } }
-                }
-              }
+                  exchangeTotal: {
+                    $sum: { $multiply: ["$totalAmount", 10000] },
+                  },
+                  exchangeRemaining: {
+                    $sum: { $multiply: ["$remainingBalance", 10000] },
+                  },
+                },
+              },
             ],
             quantityDetails: [
               { $unwind: "$products" },
@@ -2234,12 +2254,12 @@ module.exports.index = async (req, res) => {
                 $group: {
                   _id: null,
                   productQuantityTotal: { $sum: "$products.quantity" },
-                  productQuantityInKgTotal: { $sum: "$products.qtyInKg" }
-                }
-              }
-            ]
-          }
-        }
+                  productQuantityInKgTotal: { $sum: "$products.qtyInKg" },
+                },
+              },
+            ],
+          },
+        },
       ]),
 
       // ================== PURCHASE ==================
@@ -2251,39 +2271,51 @@ module.exports.index = async (req, res) => {
                 $group: {
                   _id: null,
                   totalSupplierCost: { $sum: { $multiply: ["$paid", 10000] } },
-                  purchaseTotal: { $sum: { $multiply: ["$totalAmount", 10000] } },
-                  purchaseDue: { $sum: { $multiply: ["$due", 10000] } }
-                }
-              }
+                  purchaseTotal: {
+                    $sum: { $multiply: ["$totalAmount", 10000] },
+                  },
+                  purchaseDue: { $sum: { $multiply: ["$due", 10000] } },
+                },
+              },
             ],
             quantityDetails: [
               { $unwind: "$products" },
               {
                 $group: {
                   _id: null,
-                  productQuantityTotal: { $sum: "$products.quantity" }
-                }
-              }
-            ]
-          }
-        }
+                  productQuantityTotal: { $sum: "$products.quantity" },
+                },
+              },
+            ],
+          },
+        },
       ]),
 
       // ================== PURCHASE RETURN ==================
       PurchaseReturn.aggregate([
         { $unwind: "$products" },
-        { $group: { _id: null, productQuantityTotal: { $sum: "$products.returnQuantity" } } }
+        {
+          $group: {
+            _id: null,
+            productQuantityTotal: { $sum: "$products.returnQuantity" },
+          },
+        },
       ]),
 
       // ================== SALES RETURN ==================
       SalesReturn.aggregate([
         { $unwind: "$products" },
-        { $group: { _id: null, productQuantityTotal: { $sum: "$products.returnQuantity" } } }
+        {
+          $group: {
+            _id: null,
+            productQuantityTotal: { $sum: "$products.returnQuantity" },
+          },
+        },
       ]),
 
       // ================== COMPANY SALES RETURN ==================
       CompanySalesReturn.aggregate([
-        { $group: { _id: null, productQuantityTotal: { $sum: "$quantity" } } }
+        { $group: { _id: null, productQuantityTotal: { $sum: "$quantity" } } },
       ]),
 
       // ================== SALES TRANSACTION ==================
@@ -2296,9 +2328,11 @@ module.exports.index = async (req, res) => {
                   _id: null,
                   totalCash: { $sum: { $multiply: ["$cash", 10000] } },
                   totalExchange: { $sum: { $multiply: ["$exchange", 10000] } },
-                  totalBankPaymentAmount: { $sum: { $multiply: ["$bankPaymentAmount", 10000] } }
-                }
-              }
+                  totalBankPaymentAmount: {
+                    $sum: { $multiply: ["$bankPaymentAmount", 10000] },
+                  },
+                },
+              },
             ],
             todaysReport: [
               { $match: { date: { $gte: start, $lte: end } } },
@@ -2306,13 +2340,17 @@ module.exports.index = async (req, res) => {
                 $group: {
                   _id: null,
                   totalCashToday: { $sum: { $multiply: ["$cash", 10000] } },
-                  totalExchangeToday: { $sum: { $multiply: ["$exchange", 10000] } },
-                  totalBankPaymentAmountToday: { $sum: { $multiply: ["$bankPaymentAmount", 10000] } }
-                }
-              }
-            ]
-          }
-        }
+                  totalExchangeToday: {
+                    $sum: { $multiply: ["$exchange", 10000] },
+                  },
+                  totalBankPaymentAmountToday: {
+                    $sum: { $multiply: ["$bankPaymentAmount", 10000] },
+                  },
+                },
+              },
+            ],
+          },
+        },
       ]),
 
       // ================== TODAY'S EXPENSES AGGREGATION ==================
@@ -2320,16 +2358,16 @@ module.exports.index = async (req, res) => {
       Expense.aggregate([
         {
           $match: {
-            date: { $gte: start, $lte: end }
-          }
+            date: { $gte: start, $lte: end },
+          },
         },
         {
           $group: {
             _id: null,
-            totalExpenseToday: { $sum: "$amount" } // <--- আপনার মডেল অনুযায়ী 'amount' ফিক্স করা হলো
-          }
-        }
-      ])
+            totalExpenseToday: { $sum: "$amount" }, // <--- আপনার মডেল অনুযায়ী 'amount' ফিক্স করা হলো
+          },
+        },
+      ]),
     ]);
 
     //* For Sales Return Data - starts
@@ -2342,43 +2380,69 @@ module.exports.index = async (req, res) => {
               $group: {
                 _id: null,
                 totalSentItems: { $sum: "$products.returnQuantity" },
-                totalWeight: { $sum: "$products.returnQtyInKg" }
-              }
-            }
+                totalWeight: { $sum: "$products.returnQtyInKg" },
+              },
+            },
           ],
           totalAmount: [
             {
               $group: {
                 _id: null,
-                totalAmount: { $sum: { $multiply: ["$totalReturnValue", 10000] } },
+                totalAmount: {
+                  $sum: { $multiply: ["$totalReturnValue", 10000] },
+                },
                 totalPaid: { $sum: { $multiply: ["$paid", 10000] } },
-                totalDue: { $sum: { $multiply: ["$due", 10000] } }
-              }
-            }
-          ]
-        }
-      }
+                totalDue: { $sum: { $multiply: ["$due", 10000] } },
+              },
+            },
+          ],
+        },
+      },
     ]);
 
-    const transactionData = await CompanySalesReturnTransaction.aggregate([
-      { $group: { _id: null, transactiontotalSentItems: { $sum: "$paidAmount" } } }
-    ]);
-
-    const transactionSentItems = transactionData[0]?.transactiontotalSentItems || 0;
-    const companyData = await CompanySalesReturn.find();
-    const totalCompanyWeight = companyData && companyData.length ? companyData.reduce((acc, p) => acc + p.qtyInKg, 0) : 0;
-    //* For Sales Return Data - ends
-
-    // ৫ নম্বর কার্ড: দোকানের বর্তমান রিটার্ন স্টক
-    const currentReturnStockDetails = await SalesReturnStockManagement.aggregate([
+    //* Supplier Due calculation:
+    const supplierDetails = await Supplier.aggregate([
       {
         $group: {
           _id: null,
-          currentQty: { $sum: "$tempReturnQuantity" },
-          currentValueFlat: { $sum: { $multiply: ["$tempReturnQuantity", "$returnPrice"] } }
-        }
-      }
+          totalDue: { $sum: { $multiply: ["$totalBalance", 10000] } },
+        },
+      },
     ]);
+
+    // console.log(supplierDetails)
+
+    const transactionData = await CompanySalesReturnTransaction.aggregate([
+      {
+        $group: {
+          _id: null,
+          transactiontotalSentItems: { $sum: "$paidAmount" },
+        },
+      },
+    ]);
+
+    const transactionSentItems =
+      transactionData[0]?.transactiontotalSentItems || 0;
+    const companyData = await CompanySalesReturn.find();
+    const totalCompanyWeight =
+      companyData && companyData.length
+        ? companyData.reduce((acc, p) => acc + p.qtyInKg, 0)
+        : 0;
+    //* For Sales Return Data - ends
+
+    // ৫ নম্বর কার্ড: দোকানের বর্তমান রিটার্ন স্টক
+    const currentReturnStockDetails =
+      await SalesReturnStockManagement.aggregate([
+        {
+          $group: {
+            _id: null,
+            currentQty: { $sum: "$tempReturnQuantity" },
+            currentValueFlat: {
+              $sum: { $multiply: ["$tempReturnQuantity", "$returnPrice"] },
+            },
+          },
+        },
+      ]);
 
     const cardFiveQty = currentReturnStockDetails[0]?.currentQty || 0;
     const cardFiveAmount = currentReturnStockDetails[0]?.currentValueFlat || 0;
@@ -2386,8 +2450,20 @@ module.exports.index = async (req, res) => {
     // ৬ নম্বর কার্ডের জন্য কাস্টমার এক্সচেঞ্জ প্রোডাক্ট কোয়ান্টিটি কাউন্ট
     const customerExchangeQtyDetails = await SalesReturnTransaction.aggregate([
       { $match: { returnType: "product" } },
-      { $unwind: { path: "$exchangeProducts", preserveNullAndEmptyArrays: true } },
-      { $group: { _id: null, totalGivenQty: { $sum: { $ifNull: ["$exchangeProducts.quantity", 0] } } } }
+      {
+        $unwind: {
+          path: "$exchangeProducts",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalGivenQty: {
+            $sum: { $ifNull: ["$exchangeProducts.quantity", 0] },
+          },
+        },
+      },
     ]);
     const cardSixGivenQty = customerExchangeQtyDetails[0]?.totalGivenQty || 0;
 
@@ -2401,23 +2477,41 @@ module.exports.index = async (req, res) => {
           totalDueQty: { $sum: "$dueQty" },
           totalAmountRaw: { $sum: { $multiply: ["$totalAmount", 10000] } },
           totalPaidRaw: { $sum: { $multiply: ["$paid", 10000] } },
-          totalDueRaw: { $sum: { $multiply: ["$due", 10000] } }
-        }
-      }
+          totalDueRaw: { $sum: { $multiply: ["$due", 10000] } },
+        },
+      },
     ]);
 
-    const companyTotalAmountQty = companySalesReturnForDashboard[0] ? companySalesReturnForDashboard[0].totalAmountQty : 0;
-    const companyTotalPaidQty = companySalesReturnForDashboard[0] ? companySalesReturnForDashboard[0].totalPaidQty : 0;
-    const companyTotalDueQty = companySalesReturnForDashboard[0] ? companySalesReturnForDashboard[0].totalDueQty : 0;
+    const companyTotalAmountQty = companySalesReturnForDashboard[0]
+      ? companySalesReturnForDashboard[0].totalAmountQty
+      : 0;
+    const companyTotalPaidQty = companySalesReturnForDashboard[0]
+      ? companySalesReturnForDashboard[0].totalPaidQty
+      : 0;
+    const companyTotalDueQty = companySalesReturnForDashboard[0]
+      ? companySalesReturnForDashboard[0].totalDueQty
+      : 0;
 
-    const companyTotalAmountValue = companySalesReturnForDashboard[0] ? (companySalesReturnForDashboard[0].totalAmountRaw / 10000) : 0;
-    const companyTotalPaidValue = companySalesReturnForDashboard[0] ? (companySalesReturnForDashboard[0].totalPaidRaw / 10000) : 0;
-    const companyTotalDueValue = companySalesReturnForDashboard[0] ? (companySalesReturnForDashboard[0].totalDueRaw / 10000) : 0;
+    const companyTotalAmountValue = companySalesReturnForDashboard[0]
+      ? companySalesReturnForDashboard[0].totalAmountRaw / 10000
+      : 0;
+    const companyTotalPaidValue = companySalesReturnForDashboard[0]
+      ? companySalesReturnForDashboard[0].totalPaidRaw / 10000
+      : 0;
+    const companyTotalDueValue = companySalesReturnForDashboard[0]
+      ? companySalesReturnForDashboard[0].totalDueRaw / 10000
+      : 0;
 
     const mainQuantity = mainStock[0] ? mainStock[0].totalQuantity : 0;
-    const companySaleReturnQuantity = companySalesReturn[0] ? companySalesReturn[0].productQuantityTotal : 0;
-    const purchaseReturnQuantity = purchaseReturn[0] ? purchaseReturn[0].productQuantityTotal : 0;
-    const salesReturnQuantity = salesReturn[0] ? salesReturn[0].productQuantityTotal : 0;
+    const companySaleReturnQuantity = companySalesReturn[0]
+      ? companySalesReturn[0].productQuantityTotal
+      : 0;
+    const purchaseReturnQuantity = purchaseReturn[0]
+      ? purchaseReturn[0].productQuantityTotal
+      : 0;
+    const salesReturnQuantity = salesReturn[0]
+      ? salesReturn[0].productQuantityTotal
+      : 0;
     const salesQuantity = 0;
 
     const quantityDetails = {
@@ -2425,52 +2519,131 @@ module.exports.index = async (req, res) => {
       companySaleReturnQuantity,
       purchaseReturnQuantity,
       salesReturnQuantity,
-      salesQuantity
+      salesQuantity,
     };
 
     // আজকের মোট খরচের ভ্যালু অ্যাসাইন
-    const salesExpenseToday = todaysExpenseArray[0] ? todaysExpenseArray[0].totalExpenseToday : 0;
+    const salesExpenseToday = todaysExpenseArray[0]
+      ? todaysExpenseArray[0].totalExpenseToday
+      : 0;
 
     let result = {
-      purchaseTotal: purchase[0].purchaseDetails.length > 0 ? purchase[0].purchaseDetails[0].purchaseTotal / 10000 : 0,
-      purchaseDue: purchase[0].purchaseDetails.length > 0 ? purchase[0].purchaseDetails[0].purchaseDue / 10000 : 0,
-      purchaseTotalQuantity: purchase[0].quantityDetails.length > 0 ? purchase[0].quantityDetails[0].productQuantityTotal : 0,
+      purchaseTotal:
+        purchase[0].purchaseDetails.length > 0
+          ? purchase[0].purchaseDetails[0].purchaseTotal / 10000
+          : 0,
+      //* purchaseDue: purchase[0].purchaseDetails.length > 0 ? purchase[0].purchaseDetails[0].purchaseDue / 10000 : 0,
 
-      exchangeTotalQuantity: productExchange[0].quantityDetails.length > 0 ? productExchange[0].quantityDetails[0].productQuantityTotal : 0,
-      exchangeTotalQuantityInKg: productExchange[0].quantityDetails.length > 0 ? productExchange[0].quantityDetails[0].productQuantityInKgTotal : 0,
-      exchangeTotalPrice: productExchange[0].exchangeDetails.length > 0 ? productExchange[0].exchangeDetails[0].exchangeTotal / 10000 : 0,
-      exchangeTotalRemaining: productExchange[0].exchangeDetails.length > 0 ? productExchange[0].exchangeDetails[0].exchangeRemaining / 10000 : 0,
+      purchaseDue: supplierDetails[0] ? supplierDetails[0].totalDue / 10000 : 0,
+      purchaseTotalQuantity:
+        purchase[0].quantityDetails.length > 0
+          ? purchase[0].quantityDetails[0].productQuantityTotal
+          : 0,
 
-      salesTotal: sales[0].salesDetails.length > 0 ? sales[0].salesDetails[0].saleTotal / 10000 : 0,
-      salesDue: sales[0].salesDetails.length > 0 ? sales[0].salesDetails[0].saleDue / 10000 : 0,
-      salesCash: salesTransaction[0].allReport.length > 0 ? salesTransaction[0].allReport[0].totalCash / 10000 : 0,
-      salesExchange: salesTransaction[0].allReport.length > 0 ? salesTransaction[0].allReport[0].totalExchange / 10000 : 0,
-      salesBankPaymentAmount: salesTransaction[0].allReport.length > 0 ? salesTransaction[0].allReport[0].totalBankPaymentAmount / 10000 : 0,
-      salesProfit: sales[0].salesDetails.length > 0 ? (sales[0].salesDetails[0].saleTotal - sales[0].salesDetails[0].saleDue) / 10000 : 0,
+      exchangeTotalQuantity:
+        productExchange[0].quantityDetails.length > 0
+          ? productExchange[0].quantityDetails[0].productQuantityTotal
+          : 0,
+      exchangeTotalQuantityInKg:
+        productExchange[0].quantityDetails.length > 0
+          ? productExchange[0].quantityDetails[0].productQuantityInKgTotal
+          : 0,
+      exchangeTotalPrice:
+        productExchange[0].exchangeDetails.length > 0
+          ? productExchange[0].exchangeDetails[0].exchangeTotal / 10000
+          : 0,
+      exchangeTotalRemaining:
+        productExchange[0].exchangeDetails.length > 0
+          ? productExchange[0].exchangeDetails[0].exchangeRemaining / 10000
+          : 0,
 
-      salesTotalToday: sales[0].todaysSaleDetails.length > 0 ? sales[0].todaysSaleDetails[0].saleTotalToday / 10000 : 0,
-      salesDueToday: sales[0].todaysSaleDetails.length > 0 ? sales[0].todaysSaleDetails[0].saleDueToday / 10000 : 0,
+      salesTotal:
+        sales[0].salesDetails.length > 0
+          ? sales[0].salesDetails[0].saleTotal / 10000
+          : 0,
+      salesDue:
+        sales[0].salesDetails.length > 0
+          ? sales[0].salesDetails[0].saleDue / 10000
+          : 0,
+      salesCash:
+        salesTransaction[0].allReport.length > 0
+          ? salesTransaction[0].allReport[0].totalCash / 10000
+          : 0,
+      salesExchange:
+        salesTransaction[0].allReport.length > 0
+          ? salesTransaction[0].allReport[0].totalExchange / 10000
+          : 0,
+      salesBankPaymentAmount:
+        salesTransaction[0].allReport.length > 0
+          ? salesTransaction[0].allReport[0].totalBankPaymentAmount / 10000
+          : 0,
+      salesProfit:
+        sales[0].salesDetails.length > 0
+          ? (sales[0].salesDetails[0].saleTotal -
+              sales[0].salesDetails[0].saleDue) /
+            10000
+          : 0,
 
-      salesQtyToday: sales[0].todaysSaleQuantityDetails && sales[0].todaysSaleQuantityDetails.length > 0 ? sales[0].todaysSaleQuantityDetails[0].totalQtyToday : 0,
+      salesTotalToday:
+        sales[0].todaysSaleDetails.length > 0
+          ? sales[0].todaysSaleDetails[0].saleTotalToday / 10000
+          : 0,
+      salesDueToday:
+        sales[0].todaysSaleDetails.length > 0
+          ? sales[0].todaysSaleDetails[0].saleDueToday / 10000
+          : 0,
 
-      salesCashToday: salesTransaction[0].todaysReport.length > 0 ? salesTransaction[0].todaysReport[0].totalCashToday / 10000 : 0,
-      salesExchangeToday: salesTransaction[0].todaysReport.length > 0 ? salesTransaction[0].todaysReport[0].totalExchangeToday / 10000 : 0,
-      salesBankPaymentAmountToday: salesTransaction[0].todaysReport.length > 0 ? salesTransaction[0].todaysReport[0].totalBankPaymentAmountToday / 10000 : 0,
+      salesQtyToday:
+        sales[0].todaysSaleQuantityDetails &&
+        sales[0].todaysSaleQuantityDetails.length > 0
+          ? sales[0].todaysSaleQuantityDetails[0].totalQtyToday
+          : 0,
+
+      salesCashToday:
+        salesTransaction[0].todaysReport.length > 0
+          ? salesTransaction[0].todaysReport[0].totalCashToday / 10000
+          : 0,
+      salesExchangeToday:
+        salesTransaction[0].todaysReport.length > 0
+          ? salesTransaction[0].todaysReport[0].totalExchangeToday / 10000
+          : 0,
+      salesBankPaymentAmountToday:
+        salesTransaction[0].todaysReport.length > 0
+          ? salesTransaction[0].todaysReport[0].totalBankPaymentAmountToday /
+            10000
+          : 0,
 
       // ৩. অবজেক্টে আজকের মোট খরচের ফিল্ডটি পুশ করা হলো
       salesExpenseToday: salesExpenseToday,
 
       totalStockValue: mainStock[0] ? mainStock[0].totalStockValue : 0,
-      totalProductCostPrice: mainStock[0] ? mainStock[0].totalCostPrice / 10000 : 0,
-      totalProductSalePrice: mainStock[0] ? mainStock[0].totalSalePrice / 10000 : 0,
+      totalProductCostPrice: mainStock[0]
+        ? mainStock[0].totalCostPrice / 10000
+        : 0,
+      totalProductSalePrice: mainStock[0]
+        ? mainStock[0].totalSalePrice / 10000
+        : 0,
 
       quantityDetails,
       transactionSentItems,
 
-      totalSentItemsForSalesReturn: salesReturnForNewData && salesReturnForNewData[0].total.length > 0 ? salesReturnForNewData[0].total[0].totalSentItems - transactionSentItems : 0,
-      totalAmountForSalesReturn: salesReturnForNewData && salesReturnForNewData[0].totalAmount.length > 0 ? salesReturnForNewData[0].totalAmount[0].totalAmount / 10000 : 0,
-      totalPaidForSalesReturn: salesReturnForNewData && salesReturnForNewData[0].totalAmount.length > 0 ? salesReturnForNewData[0].totalAmount[0].totalPaid / 10000 : 0,
-      totalDueForSalesReturn: salesReturnForNewData && salesReturnForNewData[0].totalAmount.length > 0 ? salesReturnForNewData[0].totalAmount[0].totalDue / 10000 : 0,
+      totalSentItemsForSalesReturn:
+        salesReturnForNewData && salesReturnForNewData[0].total.length > 0
+          ? salesReturnForNewData[0].total[0].totalSentItems -
+            transactionSentItems
+          : 0,
+      totalAmountForSalesReturn:
+        salesReturnForNewData && salesReturnForNewData[0].totalAmount.length > 0
+          ? salesReturnForNewData[0].totalAmount[0].totalAmount / 10000
+          : 0,
+      totalPaidForSalesReturn:
+        salesReturnForNewData && salesReturnForNewData[0].totalAmount.length > 0
+          ? salesReturnForNewData[0].totalAmount[0].totalPaid / 10000
+          : 0,
+      totalDueForSalesReturn:
+        salesReturnForNewData && salesReturnForNewData[0].totalAmount.length > 0
+          ? salesReturnForNewData[0].totalAmount[0].totalDue / 10000
+          : 0,
 
       cardFiveQty: cardFiveQty,
       cardFiveAmount: cardFiveAmount,
@@ -2482,7 +2655,7 @@ module.exports.index = async (req, res) => {
       totalDueForCSR: companyTotalDueValue,
       totalPaidForCSR: companyTotalAmountValue,
       totalAmountForCSR: companyTotalAmountValue,
-      totalReceivedValueForCSR: companyTotalPaidValue
+      totalReceivedValueForCSR: companyTotalPaidValue,
     };
 
     res.status(201).json(result);

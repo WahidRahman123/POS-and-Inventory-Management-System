@@ -848,7 +848,8 @@ const Dashboard = () => {
   // ক্যালকুলেশন: আজকের প্রকৃত নিট বিক্রি = আজকের মোট বিক্রি - আজকের মোট খরচ
   const todaysTotalSales = dashboardResult.salesTotalToday || 0;
   const todaysTotalExpense = dashboardResult.salesExpenseToday || 0;
-  const netSalesToday = todaysTotalSales - todaysTotalExpense;
+  // const netSalesToday = todaysTotalSales - todaysTotalExpense;
+  const netSalesToday = dashboardResult.salesCashToday + dashboardResult.salesBankPaymentAmountToday + dashboardResult.salesExchangeToday + dashboardResult.salesDueToday;
 
   return (
     <div className="p-3 sm:p-5 lg:p-6 bg-gray-100 min-h-screen">

@@ -222,19 +222,24 @@ const salesSlice = createSlice({
         // state.pages = action.payload.pages;
         if (state.sales.length > 0) {
           const totalSale = state.sales.reduce(
-            (acc, sale) => acc.plus(new Decimal(sale.paid)),
+            (acc, sale) => acc.plus(new Decimal(sale.total)),
             new Decimal(0),
           );
           const totalCost = state.sales.reduce(
             (acc, sale) => acc.plus(new Decimal(sale.totalCost)),
             new Decimal(0),
           );
+          const totalLoan = state.sales.reduce(
+            (acc, sale) => acc.plus(new Decimal(sale.loan)),
+            new Decimal(0),
+          );
+          const totalCostPlusLoan = totalCost.plus(totalLoan);
 
           state.totalSales = totalSale.toFixed(2);
-          state.totalCosts = totalCost.toFixed(2);
-          state.profit = totalSale.minus(totalCost).lessThan(new Decimal(0))
+          state.totalCosts = totalCostPlusLoan.toFixed(2);
+          state.profit = totalSale.minus(totalCostPlusLoan).lessThan(new Decimal(0))
             ? 0
-            : totalSale.minus(totalCost).toFixed(2);
+            : totalSale.minus(totalCostPlusLoan).toFixed(2);
         } else {
           state.totalSales = null;
         }

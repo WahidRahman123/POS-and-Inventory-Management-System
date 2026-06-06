@@ -421,7 +421,7 @@ module.exports.salesByCustomerName = async (req, res) => {
 module.exports.salesDueList = async (req, res) => {
   try {
     const { page = 1, order = -1, customerName = "" } = req.query;
-    const limit = 20;
+    const limit = 1000;
     const skip = (parseInt(page) - 1) * limit;
 
     const matchQuery = { due: { $gt: 0 } };
