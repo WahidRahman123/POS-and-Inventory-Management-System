@@ -60,7 +60,9 @@ const PointOfSale = () => {
   const cashAndExchange = new Decimal(Number(cashInput || 0)).plus(
     new Decimal(Number(exchangeValue || 0)),
   );
-  const totalPaidLive = cashAndExchange.plus(new Decimal(Number(bankPaymentAmount || 0)));
+  const totalPaidLive = cashAndExchange.plus(
+    new Decimal(Number(bankPaymentAmount || 0)),
+  );
 
   const liveDue = totalWithLoan.minus(totalPaidLive).lessThan(0)
     ? "0.00"
@@ -138,6 +140,9 @@ const PointOfSale = () => {
             ? totalWithLoan.toFixed(2)
             : totalPaidLive.toFixed(2),
         ),
+        advanceBalance: totalPaidLive.greaterThan(totalWithLoan)
+          ? Number(totalPaidLive.minus(totalWithLoan).toFixed(2))
+          : 0,
         unchangedPaid: Number(totalPaidLive.toFixed(2)),
         unchangedDue: Number(liveDue),
 
@@ -260,8 +265,19 @@ const PointOfSale = () => {
               Enter Custom Date
             </label>
             <div className="flex gap-1.5">
-              <input type="date" value={customDate} onChange={(e) => setCustomDate(e.target.value)} className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm" />
-              <button type="button" onClick={() => setCustomDate("")} className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm cursor-pointer hover:bg-blue-600">Clear</button>
+              <input
+                type="date"
+                value={customDate}
+                onChange={(e) => setCustomDate(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => setCustomDate("")}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm cursor-pointer hover:bg-blue-600"
+              >
+                Clear
+              </button>
             </div>
           </div>
         </div>
@@ -414,7 +430,9 @@ const PointOfSale = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Bank Payment Amount</label>
+            <label className="block text-sm font-medium mb-1">
+              Bank Payment Amount
+            </label>
             <input
               type="number"
               value={bankPaymentAmount}
@@ -496,7 +514,9 @@ const PointOfSale = () => {
             </div>
             <div className="flex justify-between font-bold">
               <span>Bank Amount</span>
-              <span>{new Decimal(Number(bankPaymentAmount || 0)).toFixed(2)}</span>
+              <span>
+                {new Decimal(Number(bankPaymentAmount || 0)).toFixed(2)}
+              </span>
             </div>
             <div className="flex justify-between font-bold">
               <span>Exchange</span>

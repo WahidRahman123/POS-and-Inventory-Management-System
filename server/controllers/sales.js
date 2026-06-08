@@ -1,5 +1,6 @@
 const Sales = require("../models/Sales");
 const Product = require("../models/Product");
+const Customer = require("../models/Customer");
 const SalesTransaction = require("../models/SalesTransaction");
 const Decimal = require("decimal.js");
 const mongoose = require("mongoose");
@@ -32,7 +33,6 @@ module.exports.index = async (req, res) => {
   }
 };
 
-// ২. নতুন সেলস তৈরি করার মেইন ফাংশন (Updated)
 module.exports.createSales = async (req, res) => {
   // const session = await mongoose.startSession();
   try {
@@ -41,39 +41,72 @@ module.exports.createSales = async (req, res) => {
       exchangeMemoId,
       // invoiceNo,
       products,
-      total,
-      due,
-      paid,
+      total = 0,
+      due = 0,
+      paid = 0,
       createdAt,
       issuedAt,
+      advanceBalance,
       ...transactionDetail
     } = salesData;
+
+    let mainTotal = total;
+    let mainDue = due;
+    let mainPaid = paid;
 
     // session.startTransaction();
 
     // const count = await getNextSequenceForSale(session);
     const count = await getNextSequenceForSale();
-
     if (!count) {
       throw new Error("Sequence generation failed");
     }
     const chars = count.seqChars?.join("");
     const invoiceNo = ("s" + chars + "-" + count.seq).toUpperCase();
 
-    // ১. Transaction Creation
+    //* Customer Advance Payment Handling
+    const customer = await Customer.findById(salesData.customerId);
+    if(customer) {
+      // 1. Adding advanceBalance to the customer's advanceBalance
+      customer.advanceBalance += advanceBalance;
+
+      // 2. advanceBalance adjustment
+      if(customer.advanceBalance > 0) {
+        const need = mainTotal - mainPaid;
+
+        if(need <= customer.advanceBalance) {
+          mainPaid += need;
+          customer.advanceBalance -= need;
+        } else if (need > advanceBalance) {
+          mainPaid += customer.advanceBalance;
+          customer.advanceBalance = 0;
+        }
+      }
+    } else {
+      throw new Error("Customer does not exist!");
+    }
+    mainDue = mainTotal - mainPaid;
+
+    const amountToBePaid = new Decimal(customer.total).plus(new Decimal(mainTotal));
+    const currentDue = amountToBePaid.minus(new Decimal(mainPaid));
+
+    // i. Transaction Creation
     const transactionDetails = {
       ...transactionDetail,
       refMemo: invoiceNo,
-      amountToBePaid: total,
-      paidAmount: paid,
+      amountToBePaid: Number(amountToBePaid.toFixed(4)),
+      paidAmount: mainPaid,
       date: new Date(),
-      currentDue: due,
+      currentDue: Number(currentDue.toFixed(4)),
       exchangeMemoId,
     };
     const transaction = new SalesTransaction(transactionDetails);
 
     const sale = new Sales({
       ...salesData,
+      total: mainTotal,
+      paid: mainPaid,
+      due: mainDue,
       invoiceNo,
       transactionRecords: [transaction._id],
     });
@@ -117,6 +150,17 @@ module.exports.createSales = async (req, res) => {
         await memoData.save();
       }
     }
+
+    //* Customer Update
+    customer.paid += mainPaid;
+    customer.total += mainTotal;
+    customer.due = customer.total - customer.paid;
+    if(customer.due < 0) {
+      customer.advanceBalance += Math.abs(customer.due);
+      customer.due = 0;
+    }
+    customer.salesRecord.push(sale._id);
+    await customer.save();
 
     // const createdSale = await sale.save({ session });
     const createdSale = await sale.save();

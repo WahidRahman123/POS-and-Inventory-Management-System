@@ -830,6 +830,8 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const { dashboardResult, loading } = useSelector((state) => state.dashboard);
 
+  console.log(dashboardResult)
+
   useEffect(() => {
     dispatch(fetchDashboardResult());
   }, [dispatch]);
@@ -849,7 +851,8 @@ const Dashboard = () => {
   const todaysTotalSales = dashboardResult.salesTotalToday || 0;
   const todaysTotalExpense = dashboardResult.salesExpenseToday || 0;
   // const netSalesToday = todaysTotalSales - todaysTotalExpense;
-  const netSalesToday = dashboardResult.salesCashToday + dashboardResult.salesBankPaymentAmountToday + dashboardResult.salesExchangeToday + dashboardResult.salesDueToday;
+  const netProfitToday = dashboardResult.salesProfitToday - dashboardResult.salesExpenseToday;
+
 
   return (
     <div className="p-3 sm:p-5 lg:p-6 bg-gray-100 min-h-screen">
@@ -1068,14 +1071,14 @@ const Dashboard = () => {
 
         {/* TODAY'S SALES & EXPENSES */}
         <DashboardCard
-          title="আজকের প্রকৃত নিট বিক্রি"
-          value={netSalesToday}
+          title="আজকের মোট বিক্রি"
+          value={todaysTotalSales}
           suffix=" ৳"
           color="bg-yellow-500"
           textColor="text-black"
           to="/sales-report"
         >
-          <Row
+          {/* <Row
             label="Total Sales (আজকের মোট বিক্রি)"
             value={todaysTotalSales}
             suffix=" ৳"
@@ -1086,8 +1089,8 @@ const Dashboard = () => {
             value={todaysTotalExpense}
             suffix=" ৳"
             textColor="text-red-700 font-semibold"
-          />
-          <hr className="border-black/20 my-1" />
+          /> */}
+          {/* <hr className="border-black/20 my-1" /> */}
           <Row
             label="Total Sold Qty"
             value={dashboardResult.salesQtyToday || 0}
@@ -1115,6 +1118,24 @@ const Dashboard = () => {
           <Row
             label="Due"
             value={dashboardResult.salesDueToday}
+            suffix=" ৳"
+            textColor="text-black"
+          />
+           <Row
+            label="Profit"
+            value={dashboardResult.salesProfitToday}
+            suffix=" ৳"
+            textColor="text-black"
+          />
+           <Row
+            label="Expense"
+            value={dashboardResult.salesExpenseToday}
+            suffix=" ৳"
+            textColor="text-black"
+          />
+          <Row
+            label="Net Profit"
+            value={netProfitToday}
             suffix=" ৳"
             textColor="text-black"
           />

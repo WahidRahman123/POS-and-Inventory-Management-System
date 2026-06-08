@@ -88,6 +88,10 @@ const salesTransactionSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  remarks: {
+    type: String,
+    trim: true,
+  },
 
   salesId: {
     type: mongoose.Schema.Types.ObjectId,

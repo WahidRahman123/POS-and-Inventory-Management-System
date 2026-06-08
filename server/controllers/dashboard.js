@@ -2145,9 +2145,8 @@ const Supplier = require("../models/Supplier");
 
 module.exports.index = async (req, res) => {
   try {
-    // টাইমজোন ইস্যু ফিক্স করার জন্য ডাইনামিক আজকের ডেট রেঞ্জ (UTC/Local Safe)
     let start = new Date();
-    start.setHours(0 - 6, 0, 0, 0); // বাংলাদেশের রাত ১২:০০ টা (যা UTC-তে কনভার্ট হয়ে কুয়েরি করবে)
+    start.setHours(0 - 6, 0, 0, 0);
 
     let end = new Date();
     end.setHours(23 - 6, 59, 59, 999);
@@ -2161,7 +2160,7 @@ module.exports.index = async (req, res) => {
       salesReturn,
       companySalesReturn,
       salesTransaction,
-      todaysExpenseArray, // <--- ১. প্রোমিস অল এর ভেতর এক্সপেন্স এগ্রিগেশন যুক্ত করা হলো
+      todaysExpenseArray,
     ] = await Promise.all([
       // ================== MAIN STOCK ==================
       Product.aggregate([
@@ -2207,6 +2206,8 @@ module.exports.index = async (req, res) => {
                   _id: null,
                   saleTotalToday: { $sum: { $multiply: ["$total", 10000] } },
                   saleDueToday: { $sum: { $multiply: ["$due", 10000] } },
+                  totalCostToday: { $sum: { $multiply: ["$totalCost", 10000] } },
+                  totalLoanToday: { $sum: { $multiply: ["$loan", 10000] } },
                 },
               },
             ],
@@ -2591,6 +2592,11 @@ module.exports.index = async (req, res) => {
       salesDueToday:
         sales[0].todaysSaleDetails.length > 0
           ? sales[0].todaysSaleDetails[0].saleDueToday / 10000
+          : 0,
+
+      salesProfitToday:
+        sales[0].todaysSaleDetails.length > 0
+          ? ((sales[0].todaysSaleDetails[0].saleTotalToday) - (sales[0].todaysSaleDetails[0].totalCostToday + sales[0].todaysSaleDetails[0].totalLoanToday)) / 10000
           : 0,
 
       salesQtyToday:
