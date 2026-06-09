@@ -591,7 +591,6 @@
 //   );
 // };
 
-
 // import React, { useEffect, useState, useRef } from "react";
 // import { useDispatch, useSelector } from "react-redux";
 // import { fetchSalesDueList } from "../features/sales/salesSlice";
@@ -778,10 +777,15 @@ const SalesDueList = () => {
   const dispatch = useDispatch();
 
   // পেজিনেশনের page এবং pages ভেরিয়েবলগুলো স্টেট থেকে বাদ দেওয়া হয়েছে
-  const { salesOfDues, loading } = useSelector((state) => state.sales);
+  const {
+    salesOfDues,
+    customerPage: page,
+    customerPages: pages,
+  } = useSelector((state) => state.sales);
 
   const [customerName, setCustomerName] = useState("");
   const [sortOrder, setSortOrder] = useState(-1);
+  const [currentPage, setCurrentPage] = useState(page);
 
   // Print Reference
   const printRef = useRef(null);
@@ -802,23 +806,30 @@ const SalesDueList = () => {
         fetchSalesDueList({
           customerName,
           order: sortOrder,
-          // ব্যাকএন্ডে পেজ লিমিট বা পেজ নম্বর পাঠানোর দরকার নেই, সব ডেটা একসাথে আসবে
+          page: currentPage,
         }),
       );
     }
-  }, [dispatch, user, sortOrder, customerName]);
+  }, [dispatch, user, sortOrder, customerName, currentPage]);
 
-  // ম্যাজিক পার্ট: যেহেতু সব রেকর্ড একসাথে আসছে, তাই এই reduce-ই এখন নিখুঁত গ্র্যান্ড টোটাল দেখাবে
-  const grandTotalDue = salesOfDues && salesOfDues.length > 0
-    ? salesOfDues.reduce((sum, customer) => sum + Number(customer.totalDue || 0), 0)
-    : 0;
+  // console.log(salesOfDues);
+
+  const grandTotalDue =
+    salesOfDues && salesOfDues.length > 0
+      ? salesOfDues.reduce(
+          (sum, customer) => sum + Number(customer.due || 0),
+          0,
+        )
+      : 0;
 
   if (user && user.role !== "admin") return null;
 
   return (
     <div className="p-3 sm:p-4 md:p-6 bg-white min-h-screen">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Sales Due List</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+          Sales Due List
+        </h1>
         <div className="flex items-center gap-3">
           <button
             onClick={reactToPrintFn}
@@ -887,32 +898,62 @@ const SalesDueList = () => {
                     onClick={() =>
                       navigate("/customer-statement", {
                         state: {
-                          customerName: customer.customerName,
-                          customerPhone: customer.customerPhone,
+                          customerName: customer.name,
+                          customerPhone: customer.phone,
                         },
                       })
                     }
                   >
-                    <td className="px-6 py-4 font-medium">{customer.customerName}</td>
-                    <td className="px-6 py-4">{customer.customerPhone || "N/A"}</td>
+                    <td className="px-6 py-4 font-medium">{customer.name}</td>
+                    <td className="px-6 py-4">{customer.phone || "N/A"}</td>
                     <td className="px-6 py-4 text-right font-bold text-red-600">
-                      ৳ {Number(customer.totalDue || 0).toLocaleString("en-BD")}
+                      ৳ {Number(customer.due || 0).toLocaleString("en-BD")}
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate("/customer-statement", {
-                            state: {
-                              customerName: customer.customerName,
-                              customerPhone: customer.customerPhone,
-                            },
-                          });
-                        }}
-                        className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-1.5 rounded font-medium"
-                      >
-                        View Statement
-                      </button>
+                      <div className="flex flex-wrap gap-1 justify-center">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const currentDue = customer.due;
+                            const customerId = customer._id;
+                            const customerName = customer.name;
+
+                            navigate("/sales/due-payment", {
+                              state: {
+                                customerName,
+                              },
+                            });
+
+                            // currentDue <= 0
+                            //   ? navigate("")
+                            //   : navigate("/sales/due-payment", {
+                            //       state: {
+                            //         customerName
+                            //       },
+                            //     });
+                          }}
+                          // className={`text-xs text-white px-2 py-1 rounded  ${customer.due <= 0 ? "cursor-not-allowed bg-red-500" : "cursor-pointer bg-red-600 hover:bg-red-700"}`}
+                          // disabled={customer.due <= 0}
+
+                          className={`text-xs text-white px-2 py-1 rounded cursor-pointer bg-red-600 hover:bg-red-700`}
+                        >
+                          Due Payment
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate("/customer-statement", {
+                              state: {
+                                customerName: customer.name,
+                                customerPhone: customer.phone,
+                              },
+                            });
+                          }}
+                          className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1 rounded font-medium"
+                        >
+                          View Statement
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -927,8 +968,31 @@ const SalesDueList = () => {
           </table>
         </div>
       </div>
-      
-      {/* নিচে থাকা সেই আগের পেজিনেশনের Previous/Next বাটন সেকশনটি সম্পূর্ণ ডিলিট করা হয়েছে */}
+
+      {/* Pagination */}
+      {pages ? (
+        <div className="flex justify-center items-center mt-4 gap-2 text-sm">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            disabled={page === 1}
+            className={`${page === 1 ? "" : "cursor-pointer hover:bg-black hover:text-white"} px-2 py-1 border rounded  disabled:opacity-50`}
+          >
+            Prev
+          </button>
+          <span>
+            Page {page} of {pages}
+          </span>
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, pages))}
+            disabled={page === pages}
+            className={`${page === pages ? "" : "cursor-pointer hover:bg-black hover:text-white"}  px-2 py-1 border rounded  disabled:opacity-50`}
+          >
+            Next
+          </button>
+        </div>
+      ) : (
+        ""
+      )}
     </div>
   );
 };

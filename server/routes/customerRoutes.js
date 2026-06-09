@@ -22,6 +22,11 @@ router.get('/pos', protect, customers.customersForPOS);
 // @access Private
 router.post('/', protect, customers.createCustomer);
 
+//* @route GET /api/customer/by-name
+// @desc fetch specific customer searched by name
+// @access Private
+router.get('/by-name', protect, customers.customersByName);
+
 //* @route PUT /api/customer/:id
 // @desc update customer
 // @access Private

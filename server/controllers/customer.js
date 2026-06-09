@@ -41,6 +41,17 @@ module.exports.customersForPOS = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+module.exports.customersByName = async (req, res) => {
+  try {
+    const { customerName } = req.query;
+    const customer = await Customer.findOne({ name: customerName });
+
+    res.status(201).json(customer);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};
 
 module.exports.createCustomer = async (req, res) => {
   const { name, phone, email, address } = req.body;

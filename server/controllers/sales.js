@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const { createCustomDate } = require("../utils/createCustomDate");
 const ProductExchange = require("../models/ProductExchange");
 const { getNextSequenceForSale } = require("../utils/getNextSequenceForSale");
+const { getNextSequenceForOther } = require("../utils/getNextSequenceForOther");
 
 module.exports.index = async (req, res) => {
   try {
@@ -66,15 +67,15 @@ module.exports.createSales = async (req, res) => {
 
     //* Customer Advance Payment Handling
     const customer = await Customer.findById(salesData.customerId);
-    if(customer) {
+    if (customer) {
       // 1. Adding advanceBalance to the customer's advanceBalance
       customer.advanceBalance += advanceBalance;
 
       // 2. advanceBalance adjustment
-      if(customer.advanceBalance > 0) {
+      if (customer.advanceBalance > 0) {
         const need = mainTotal - mainPaid;
 
-        if(need <= customer.advanceBalance) {
+        if (need <= customer.advanceBalance) {
           mainPaid += need;
           customer.advanceBalance -= need;
         } else if (need > advanceBalance) {
@@ -87,7 +88,9 @@ module.exports.createSales = async (req, res) => {
     }
     mainDue = mainTotal - mainPaid;
 
-    const amountToBePaid = new Decimal(customer.total).plus(new Decimal(mainTotal));
+    const amountToBePaid = new Decimal(customer.total).plus(
+      new Decimal(mainTotal),
+    );
     const currentDue = amountToBePaid.minus(new Decimal(mainPaid));
 
     // i. Transaction Creation
@@ -98,6 +101,7 @@ module.exports.createSales = async (req, res) => {
       paidAmount: mainPaid,
       date: new Date(),
       currentDue: Number(currentDue.toFixed(4)),
+      saleTotal: mainTotal,
       exchangeMemoId,
     };
     const transaction = new SalesTransaction(transactionDetails);
@@ -155,7 +159,7 @@ module.exports.createSales = async (req, res) => {
     customer.paid += mainPaid;
     customer.total += mainTotal;
     customer.due = customer.total - customer.paid;
-    if(customer.due < 0) {
+    if (customer.due < 0) {
       customer.advanceBalance += Math.abs(customer.due);
       customer.due = 0;
     }
@@ -284,52 +288,85 @@ module.exports.searchById = async (req, res) => {
 module.exports.addPayment = async (req, res) => {
   // const session = await mongoose.startSession();
   try {
-    const { id } = req.params;
+    // const { id } = req.params;
     const {
       date,
       amount,
+      name,
       unchangedAmount,
       cash,
       bankPaymentAmount,
+      remarks,
       exchange,
       exchangeMemoId,
+      advanceBalance,
       exchangeDetails,
     } = req.body;
+    let mainAmount = amount;
 
     // session.startTransaction();
-    // const sale = await Sales.findById(id).session(session);
-    const sale = await Sales.findById(id);
 
-    if (!sale) return res.status(404).json({ message: "Sale not found" });
+    //* Sales Due Payment
+    const count = await getNextSequenceForOther("SalesDuePayment");
+    const memo = `DUE-PAY-${count.seq}`;
 
-    const saleObj = sale.toObject();
-    const {
-      invoiceNo,
-      due,
-      paid,
-      products,
-      transactionRecords,
-      _id,
-      _v,
-      ...transactionDetail
-    } = saleObj;
+    //* Customer grabbing
+    const customer = await Customer.findOne({ name });
+    console.log(customer);
 
-    const paidAmount = Number(new Decimal(amount).toFixed(4));
-    sale.paid = Number(
-      new Decimal(sale.paid).plus(new Decimal(amount)).toFixed(4),
+    if (customer) {
+      // 1. Adding advanceBalance to the customer's advanceBalance
+      customer.advanceBalance += advanceBalance;
+
+      // 2. advanceBalance adjustment
+      if (customer.advanceBalance > 0) {
+        const need = customer.due - mainAmount;
+
+        if (need <= customer.advanceBalance) {
+          mainAmount += need;
+          customer.advanceBalance -= need;
+        } else if (need > advanceBalance) {
+          mainAmount += customer.advanceBalance;
+          customer.advanceBalance = 0;
+        }
+      }
+    } else {
+      throw new Error("Customer does not exist!");
+    }
+    //* customer calculation
+    customer.paid = Number(
+      new Decimal(customer.paid).plus(new Decimal(mainAmount)).toFixed(4),
     );
-    sale.due = Number(
-      new Decimal(sale.due).minus(new Decimal(amount)).toFixed(4),
+    const amountToBePaid = customer.due;
+
+    customer.due = Number(
+      new Decimal(customer.total).minus(new Decimal(customer.paid)).toFixed(4),
     );
+    if (customer.due < 0) {
+      customer.advanceBalance = Number(
+        new Decimal(customer.advanceBalance)
+          .plus(new Decimal(Math.abs(customer.due)))
+          .toFixed(4),
+      );
+      customer.due = 0;
+    }
+    currentDue = customer.due;
+
+    const paidAmount = Number(new Decimal(mainAmount).toFixed(4));
 
     const transaction = new SalesTransaction({
-      ...transactionDetail,
-      refMemo: "REF-" + invoiceNo,
-      amountToBePaid: due,
+      customerId: customer._id,
+      customerName: customer.name,
+      address: customer.address,
+      customerEmail: customer.email,
+      customerPhone: customer.phone,
+      refMemo: memo,
+      amountToBePaid,
       paidAmount,
+      remarks,
       date: createCustomDate(date),
-      currentDue: sale.due,
-      salesId: sale._id,
+      currentDue,
+      // salesId: sale._id,
       cash,
       bankPaymentAmount,
       exchange,
@@ -337,15 +374,14 @@ module.exports.addPayment = async (req, res) => {
       exchangeDetails,
       unchangedPaid: Number(new Decimal(unchangedAmount).toFixed(4)),
       unchangedDue: Number(
-        new Decimal(due).minus(new Decimal(unchangedAmount)).toFixed(4),
+        new Decimal(customer.due).minus(new Decimal(unchangedAmount)).toFixed(4),
       ),
     });
 
     // await transaction.save({ session });
     await transaction.save();
-    sale.transactionRecords.push(transaction._id);
     // await sale.save({ session });
-    await sale.save();
+    await customer.save();
 
     if (exchangeMemoId && exchange > 0) {
       // const memoData =
@@ -370,7 +406,7 @@ module.exports.addPayment = async (req, res) => {
   } catch (error) {
     // await session.abortTransaction();
     // session.endSession();
-    // console.log(error)
+    console.log(error)
     res.status(500).send("Server Error");
   }
 };
@@ -389,7 +425,8 @@ module.exports.getTotalSaleCount = async (req, res) => {
 module.exports.salesByCustomerName = async (req, res) => {
   try {
     const { dateSearch, customerName } = req.query;
-    let matchQuery = { customerName: customerName };
+    // console.log(customerName)
+    let matchQuery = { customerName };
 
     if (dateSearch) {
       const s = new Date(dateSearch);
@@ -403,23 +440,15 @@ module.exports.salesByCustomerName = async (req, res) => {
       .sort({ date: -1 })
       .populate("salesId");
 
-    const result = await Sales.aggregate([
-      { $match: { customerName: customerName } },
-      {
-        $group: {
-          _id: null,
-          totalAmount: { $sum: "$total" },
-          totalPaid: { $sum: "$paid" },
-          totalDue: { $sum: "$due" },
-        },
-      },
-    ]);
+    const result = await Customer.findOne({ name: customerName });
+
+    // console.log(result)
 
     res.status(200).json({
       transactions,
-      totalAmount: result.length > 0 ? result[0].totalAmount : 0,
-      totalPaid: result.length > 0 ? result[0].totalPaid : 0,
-      totalDue: result.length > 0 ? result[0].totalDue : 0,
+      totalAmount: result.total,
+      totalPaid: result.paid,
+      totalDue: result.due,
     });
   } catch (error) {
     console.error(error);
@@ -461,60 +490,42 @@ module.exports.salesByCustomerName = async (req, res) => {
 //   }
 // };
 
-// ৯. Sales Due List (Customer wise total due)
+// 9. Sales Due List (Customer wise total due)
 module.exports.salesDueList = async (req, res) => {
   try {
-    const { page = 1, order = -1, customerName = "" } = req.query;
-    const limit = 1000;
+    const { page = 1, customerName = "", order = -1 } = req.query;
+    const limit = 15;
+
+    // Search Filter
+    const searchQuery = {
+      name: { $regex: customerName, $options: "i" },
+      due: { $gt: 0 },
+    };
+
+    // Pagination
     const skip = (parseInt(page) - 1) * limit;
 
-    const matchQuery = { due: { $gt: 0 } };
+    const customers = await Customer.find(searchQuery)
+      .sort({ due: parseInt(order) })
+      .skip(skip)
+      .limit(limit);
 
-    if (customerName) {
-      matchQuery.customerName = { $regex: customerName, $options: "i" };
-    }
+    // Count total documents
+    const total = await Customer.countDocuments(searchQuery);
 
-    const sales = await Sales.aggregate([
-      { $match: matchQuery },
-      {
-        $group: {
-          _id: "$customerName",
-          customerName: { $first: "$customerName" },
-          customerPhone: { $first: "$customerPhone" },
-          customerEmail: { $first: "$customerEmail" },
-          totalDue: { $sum: "$due" },
-          lastSaleDate: { $max: "$createdAt" },
-        },
-      },
-      { $sort: { totalDue: parseInt(order) } },
-      { $skip: skip },
-      { $limit: limit },
-    ]);
-
-    const totalCount = await Sales.aggregate([
-      { $match: matchQuery },
-      {
-        $group: {
-          _id: "$customerName",
-        },
-      },
-      { $count: "total" },
-    ]);
-
-    const total = totalCount[0] ? totalCount[0].total : 0;
-
-    res.status(200).json({
+    res.status(201).json({
       total,
       page: parseInt(page),
       pages: Math.ceil(total / limit),
-      sales,
+      customers,
     });
   } catch (error) {
-    console.error("Sales Due List Error:", error);
+    console.error(error);
     res.status(500).send("Server Error");
   }
 };
-// হেল্পার ফাংশন
+
+//* Helper Function
 async function getSalesAndTotal(start, end, order) {
   const sales = await Sales.find({
     createdAt: { $gte: start, $lte: end },

@@ -40,10 +40,10 @@ router.get('/by-name', protect, sales.salesByCustomerName);
 // @access Private
 router.get('/due-list', protect, sales.salesDueList);
 
-//* @route POST /api/sales/:id/payment
+//* @route POST /api/sales/payment
 // @desc search sales between dates
 // @access Private
-router.post('/:id/payment', protect, admin, sales.addPayment);
+router.post('/payment', protect, admin, sales.addPayment);
 
 //* @route GET /api/sales/:id
 // @desc fetch specific sale

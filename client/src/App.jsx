@@ -85,7 +85,7 @@ function App() {
           {/* for admin */}
           <Route path="/sales-report" element={<SalesReport />} />
           <Route path="/sales-report/due-list" element={<SalesDueList />} />
-          <Route path="/sales-report/:id/edit-due" element={<EditDue />} />
+          <Route path="/sales/due-payment" element={<EditDue />} />
           {/* for admin */}
           <Route path="/users" element={<UserManagement />} />
           <Route path="/changepassword" element={<ChangePassword />} />

@@ -11,6 +11,7 @@ const initialState = {
   totalAmount: null,
   totalPaid: null,
   totalDue: null,
+  customerDue: null,
 
   totalSales: null,
   totalCosts: null,
@@ -20,6 +21,8 @@ const initialState = {
   // totalSaleCount: 0,
   page: 1,
   pages: null,
+  customerPage: 1,
+  customerPages: null,
   loading: false,
   error: null,
 };
@@ -138,7 +141,7 @@ export const addPayment = createAsyncThunk(
   async (sale, ThunkAPI) => {
     try {
       const { data } = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URI}/api/sales/${sale.id}/payment`,
+        `${import.meta.env.VITE_BACKEND_URI}/api/sales/payment`,
         sale.info,
         {
           headers: {
@@ -150,6 +153,7 @@ export const addPayment = createAsyncThunk(
       return { message: "Payment updated Successful!" };
     } catch (error) {
       const message = "Payment updated Failed!";
+      // console.log(error);
       return ThunkAPI.rejectWithValue(message);
     }
   },
@@ -434,9 +438,9 @@ const salesSlice = createSlice({
       })
       .addCase(fetchSalesDueList.fulfilled, (state, action) => {
         state.loading = false;
-        state.salesOfDues = action.payload.sales;
-        state.page = action.payload.page;
-        state.pages = action.payload.pages;
+        state.salesOfDues = action.payload.customers;
+        state.customerPage = action.payload.page;
+        state.customerPages = action.payload.pages;
       })
       .addCase(fetchSalesDueList.rejected, (state, action) => {
         state.loading = false;

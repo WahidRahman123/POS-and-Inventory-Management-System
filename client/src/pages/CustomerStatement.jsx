@@ -21,6 +21,7 @@ const CustomerStatement = () => {
 
   const [filterToggler, setFilterToggler] = useState(true);
   const [date, setDate] = useState("");
+  // console.log(state);
 
   // Printing
   const documentTitle = `customer-statement-${new Date()
@@ -75,6 +76,38 @@ const CustomerStatement = () => {
               >
                 <FaFilter size={12} /> Filter
               </button>
+
+              <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const customerName = state.customerName;
+
+                    navigate("/sales/due-payment", {
+                      state: {
+                        customerName
+                      },
+                    });
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-md cursor-pointer transition-colors"
+                >
+                  Pay Due ৳{Math.abs(totalDue).toLocaleString()}
+                </button>
+
+              {/* <button
+                onClick={() =>
+                  navigate("/purchase-report/due-payment", {
+                    state: {
+                      supplierId: state.supplierId,
+                      supplierName: state.supplierName,
+                      totalDue: Math.abs(currentBalance),
+                      isSupplierLevel: true,
+                    },
+                  })
+                }
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-medium"
+              >
+                Pay Due ৳{Math.abs(currentBalance).toLocaleString()}
+              </button> */}
               <button
                 onClick={reactToPrintFn}
                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-md cursor-pointer transition-colors"
@@ -144,9 +177,10 @@ const CustomerStatement = () => {
                       <th className="px-6 py-4 text-left">Date</th>
                       <th className="px-6 py-4 text-left">Ref / Memo</th>
                       <th className="px-6 py-4 text-left">Description</th>
+                      <th className="px-6 py-4 text-left">Sale Total</th>
                       <th className="px-6 py-4 text-right">Bill Amt</th>
                       <th className="px-6 py-4 text-right">Paid Amt</th>
-                      <th className="px-6 py-4 text-right">Due Balance</th>
+                      <th className="px-6 py-4 text-right">Current Balance</th>
                       <th className="px-6 py-4 text-center print:hidden">
                         Action
                       </th>
@@ -199,6 +233,14 @@ const CustomerStatement = () => {
                                       .join(", ") || "Purchase Items"}
                               </span>
                             </td>
+                            <td className="px-6 py-4 text-left font-black">
+                              {transaction.saleTotal
+                                ? `৳ ${transaction.saleTotal.toLocaleString(
+                                    "en-BD",
+                                    { minimumFractionDigits: 2 },
+                                  )}`
+                                : "--"}
+                            </td>
                             <td className="px-6 py-4 text-right font-black">
                               ৳{" "}
                               {transaction.amountToBePaid.toLocaleString(
@@ -227,14 +269,14 @@ const CustomerStatement = () => {
                                 >
                                   Invoice
                                 </Link>
-                                {!isPayment && transaction.salesId?.due > 0 && (
+                                {/* {!isPayment && transaction.salesId?.due > 0 && (
                                   <Link
                                     to={`/sales-report/${transaction.salesId._id}/edit-due`}
                                     className="text-green-600 font-black text-[10px] uppercase underline hover:text-green-800"
                                   >
                                     Pay
                                   </Link>
-                                )}
+                                )} */}
                               </div>
                             </td>
                           </tr>

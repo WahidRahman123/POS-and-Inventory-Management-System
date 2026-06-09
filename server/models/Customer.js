@@ -41,8 +41,18 @@ const customerSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+
+    currentBalance: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true },
 );
+
+customerSchema.pre("save", function (next) {
+  this.currentBalance = this.advanceBalance - this.due;
+  next();
+});
 
 module.exports = mongoose.model("Customer", customerSchema);

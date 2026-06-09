@@ -1,22 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { addPayment, fetchSaleById } from "../features/sales/salesSlice";
 import { FaArrowLeft } from "react-icons/fa";
 import Decimal from "decimal.js";
 import AsyncSelect from "react-select/async";
 import { fetchExchangeByMemo } from "../features/Exchange/exchangeSlice";
+import { fetchCustomerByName } from "../features/customer/customerSlice";
 
 const EditDue = () => {
   const { user } = useSelector((state) => state.auth);
   const { saleSearchedById, loading } = useSelector((state) => state.sales);
+  const { customerByName, loading: customerLoading } = useSelector(
+    (state) => state.customer,
+  );
   const navigate = useNavigate();
   const dispatch = useDispatch();
   // const [due, setDue] = useState(0);
   const [aid, setAid] = useState(null);
   const [date, setDate] = useState("");
-  const [dateRestriction, setDateRestriction] = useState("");
+  // const [dateRestriction, setDateRestriction] = useState("");
   const { id } = useParams();
+  const { state } = useLocation();
 
   //* Exchange options - starts
   const loadOptions = async (inputValue, callback) => {
@@ -43,6 +48,7 @@ const EditDue = () => {
   const [exchangeMemoId, setExchangeMemoId] = useState(null);
   const [maxAvailableBalance, setMaxAvailableBalance] = useState(0);
   const [selectedExchangeData, setSelectedExchangeData] = useState(null); // Full Data Store করার জন্য
+  const [remarks, setRemarks] = useState("");
 
   const cashAndExchange = new Decimal(Number(cashInput || 0)).plus(
     new Decimal(Number(exchangeValue || 0)),
@@ -55,14 +61,21 @@ const EditDue = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if(Number(totalPaidLive) === 0) return alert("Please enter a valid payment amount");
+    if (Number(totalPaidLive) === 0)
+      return alert("Please enter a valid payment amount");
     setAid("Run");
     let amount;
-    if (totalPaidLive.greaterThan(new Decimal(saleSearchedById.due))) {
-      amount = Number(new Decimal(saleSearchedById.due).toFixed(4));
+    let advanceBalance;
+    if (totalPaidLive.greaterThan(new Decimal(customerByName.due))) {
+      amount = Number(new Decimal(customerByName.due).toFixed(4));
+      advanceBalance = Number(
+        totalPaidLive.minus(new Decimal(customerByName.due)).toFixed(4),
+      );
     } else {
       amount = Number(totalPaidLive.toFixed(4));
+      advanceBalance = 0;
     }
+
     try {
       await dispatch(
         addPayment({
@@ -70,8 +83,11 @@ const EditDue = () => {
           info: {
             date,
             amount,
+            name: customerByName.name,
             cash: Number(cashInput || 0),
+            advanceBalance,
             bankPaymentAmount: Number(bankPaymentAmount),
+            remarks,
             exchange: Number(exchangeValue || 0),
             exchangeMemoId: exchangeMemoId || null,
             exchangeDetails: selectedExchangeData
@@ -101,30 +117,33 @@ const EditDue = () => {
     if (user && user.role !== "admin") {
       navigate("/");
     }
-  }, [user, navigate]);
+    if (!state) {
+      navigate("/");
+    }
+  }, [user, navigate, state]);
 
   useEffect(() => {
     if (user && user.role === "admin") {
-      dispatch(fetchSaleById(id));
+      dispatch(fetchCustomerByName({ customerName: state.customerName }));
     }
   }, [dispatch, user]);
 
-  useEffect(() => {
-    if (saleSearchedById) {
-      // setDue(saleSearchedById.due);
-      const restrictionDate = new Date(saleSearchedById.createdAt)
-        .toISOString()
-        .split("T")[0];
-      setDateRestriction(restrictionDate);
-    }
-  }, [saleSearchedById]);
+  // useEffect(() => {
+  //   if (saleSearchedById) {
+  //     // setDue(saleSearchedById.due);
+  //     const restrictionDate = new Date(saleSearchedById.createdAt)
+  //       .toISOString()
+  //       .split("T")[0];
+  //     setDateRestriction(restrictionDate);
+  //   }
+  // }, [saleSearchedById]);
 
   //* Due 0 redirection
-  useEffect(() => {
-    if (saleSearchedById?.due === 0) {
-      navigate("/sales-report");
-    }
-  }, [saleSearchedById]);
+  // useEffect(() => {
+  //   if (saleSearchedById?.due === 0) {
+  //     navigate("/sales-report");
+  //   }
+  // }, [saleSearchedById]);
 
   if (user && user.role !== "admin") return null;
   return (
@@ -139,7 +158,7 @@ const EditDue = () => {
             <input
               type="date"
               value={date}
-              min={dateRestriction}
+              // min={dateRestriction}
               onChange={(e) => setDate(e.target.value)}
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
@@ -173,7 +192,9 @@ const EditDue = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Bank Payment Amount</label>
+            <label className="block text-sm font-medium mb-1">
+              Bank Payment Amount
+            </label>
             <input
               type="number"
               value={bankPaymentAmount}
@@ -223,6 +244,16 @@ const EditDue = () => {
                 />
               </div>
             )}
+
+            <div className="my-4">
+              <label className="block text-sm font-medium mb-1">Remarks</label>
+              <textarea
+                value={remarks}
+                onChange={(e) => setRemarks(e.target.value)}
+                className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
+                rows={2}
+              />
+            </div>
           </div>
 
           <button
@@ -240,48 +271,46 @@ const EditDue = () => {
 
         {/* Right: Item Information */}
         <div className="flex-1 md:border-l md:border-gray-200 md:pl-6 mt-6 md:mt-0">
-          <h2 className="text-lg sm:text-xl font-semibold mb-4">
-            Sale Information
-          </h2>
+          <h2 className="text-lg sm:text-xl font-semibold mb-4">Information</h2>
           <div className="space-y-1 text-sm">
-            <div className="flex">
+            {/* <div className="flex">
               <span className="w-28 font-medium">Sale ID</span>
               <span>: {saleSearchedById?._id}</span>
-            </div>
+            </div> */}
             <div className="flex">
               <span className="w-28 font-medium">Customer Name</span>
-              <span>: {saleSearchedById?.customerName}</span>
+              <span>: {customerByName?.name}</span>
             </div>
-            <div className="flex">
+            {/* <div className="flex">
               <span className="w-28 font-medium">Products</span>
               <ul>
                 {saleSearchedById?.products?.map((p, i) => (
                   <li key={i}>: {p.productName}</li>
                 ))}
               </ul>
-            </div>
+            </div> */}
             <div className="flex">
               <span className="w-28 font-medium">Total</span>
               <span>
-                : <span className="font-bold">{saleSearchedById?.total}</span>
+                : <span className="font-bold">{customerByName?.total}</span>
               </span>
             </div>
             <div className="flex">
               <span className="w-28 font-medium">Paid</span>
-              <span>: {saleSearchedById?.paid}</span>
+              <span>: {customerByName?.paid}</span>
             </div>
             <div className="flex bg-amber-50">
-              <span className="w-28 font-medium text-red-700 text-lg">Due</span>
-              <span className="text-lg">
+              <span>Current Balance</span>
+              <span>
                 :{" "}
                 <span
                   className={`w-28 ${
-                    saleSearchedById?.due > 0
+                    customerByName?.currentBalance < 0
                       ? "text-red-500 font-bold"
                       : "font-medium"
                   }`}
                 >
-                  {saleSearchedById?.due}
+                  {customerByName?.currentBalance}
                 </span>
               </span>
             </div>

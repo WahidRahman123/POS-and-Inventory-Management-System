@@ -31,7 +31,7 @@ const SalesReport = () => {
   const { sales, loading, error, page, pages, totalSales, totalCosts, profit } =
     useSelector((state) => state.sales);
 
-  console.log(sales.length);
+  // console.log(sales.length);
 
   const [sortOrder, setSortOrder] = useState(-1);
 
@@ -395,6 +395,12 @@ const SalesReport = () => {
               >
                 Exchange
               </th>
+              <th
+                rowSpan={2}
+                className="border px-2 py-1 sm:px-4 sm:py-2 text-left"
+              >
+                Bank
+              </th>
 
               <th
                 rowSpan={2}
@@ -535,6 +541,12 @@ const SalesReport = () => {
                         >
                           {sale.exchange}
                         </td>
+                        <td
+                          rowSpan={rowspan}
+                          className="border px-2 py-1 sm:px-4 sm:py-2"
+                        >
+                          {sale.bankPaymentAmount}
+                        </td>
 
                         <td
                           rowSpan={rowspan}
@@ -564,7 +576,7 @@ const SalesReport = () => {
                           className="border px-2 py-1 sm:px-4 sm:py-2"
                         >
                           <div className="flex flex-wrap gap-1">
-                            <Link
+                            {/* <Link
                               to={
                                 sale.due
                                   ? `/sales-report/${sale._id}/edit-due`
@@ -577,7 +589,7 @@ const SalesReport = () => {
                               }`}
                             >
                               Add Payment
-                            </Link>
+                            </Link> */}
 
                             <Link
                               to="/invoice"

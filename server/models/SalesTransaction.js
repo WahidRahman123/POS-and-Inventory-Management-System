@@ -28,6 +28,9 @@ const salesTransactionSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  saleTotal: {
+    type: Number
+  },
   amountToBePaid: {
     //* amountToBePaid = previous due
     type: Number,
