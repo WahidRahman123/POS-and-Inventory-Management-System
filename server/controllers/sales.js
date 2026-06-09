@@ -88,9 +88,15 @@ module.exports.createSales = async (req, res) => {
     }
     mainDue = mainTotal - mainPaid;
 
-    const amountToBePaid = new Decimal(customer.total).plus(
-      new Decimal(mainTotal),
-    );
+    let amountToBePaid;
+
+    if (customer.salesRecord.length === 0) {
+      amountToBePaid = new Decimal(customer.total).plus(
+        new Decimal(mainTotal),
+      );
+    } else {
+      amountToBePaid = customer.due;
+    }
     const currentDue = amountToBePaid.minus(new Decimal(mainPaid));
 
     // i. Transaction Creation
@@ -166,7 +172,6 @@ module.exports.createSales = async (req, res) => {
     transaction.currentBalance = customer.advanceBalance - customer.due;
     await customer.save();
     await transaction.save();
-
 
     // const createdSale = await sale.save({ session });
     const createdSale = await sale.save();
@@ -357,7 +362,6 @@ module.exports.addPayment = async (req, res) => {
     const paidAmount = Number(new Decimal(mainAmount).toFixed(4));
     const currentBalance = customer.advanceBalance - customer.due;
 
-
     const transaction = new SalesTransaction({
       customerId: customer._id,
       customerName: customer.name,
@@ -379,10 +383,11 @@ module.exports.addPayment = async (req, res) => {
       currentBalance,
       unchangedPaid: Number(new Decimal(unchangedAmount).toFixed(4)),
       unchangedDue: Number(
-        new Decimal(customer.due).minus(new Decimal(unchangedAmount)).toFixed(4),
+        new Decimal(customer.due)
+          .minus(new Decimal(unchangedAmount))
+          .toFixed(4),
       ),
     });
-
 
     // await transaction.save({ session });
     await transaction.save();
@@ -412,7 +417,7 @@ module.exports.addPayment = async (req, res) => {
   } catch (error) {
     // await session.abortTransaction();
     // session.endSession();
-    console.log(error)
+    console.log(error);
     res.status(500).send("Server Error");
   }
 };
@@ -456,7 +461,7 @@ module.exports.salesByCustomerName = async (req, res) => {
       totalAmount: result.total,
       totalPaid: result.paid + result.advanceBalance,
       totalDue: result.due,
-      currentBalance: result.currentBalance
+      currentBalance: result.currentBalance,
     });
   } catch (error) {
     console.error(error);

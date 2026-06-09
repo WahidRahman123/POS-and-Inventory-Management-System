@@ -28,6 +28,7 @@ const CustomerSelect = ({ customer, setCustomer, triggerForClearing }) => {
       address: customerData.address,
       customerEmail: customerData.email,
       customerPhone: customerData.phone,
+      currentBalance: customerData.currentBalance
     });
     setDisable(true);
   };
@@ -66,6 +67,7 @@ const CustomerSelect = ({ customer, setCustomer, triggerForClearing }) => {
                   address: "",
                   customerEmail: "",
                   customerPhone: "",
+                  currentBalance: ""
                 });
                 setData(null);
               }}
@@ -106,6 +108,17 @@ const CustomerSelect = ({ customer, setCustomer, triggerForClearing }) => {
             type="text"
             value={customer.address}
             placeholder="Address"
+            disabled
+            className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm bg-gray-200 text-gray-700 select-none"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium my-1.5">Current Balance</label>
+          <input
+            type="text"
+            value={customer.currentBalance}
+            placeholder="Current Balance"
             disabled
             className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm bg-gray-200 text-gray-700 select-none"
             required

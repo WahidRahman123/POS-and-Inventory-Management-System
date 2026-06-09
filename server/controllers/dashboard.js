@@ -2130,6 +2130,7 @@
 
 const Sales = require("../models/Sales");
 const Product = require("../models/Product");
+const Customer = require("../models/Customer");
 const Purchase = require("../models/Purchase");
 const Decimal = require("decimal.js");
 const ProductExchange = require("../models/ProductExchange");
@@ -2206,7 +2207,9 @@ module.exports.index = async (req, res) => {
                   _id: null,
                   saleTotalToday: { $sum: { $multiply: ["$total", 10000] } },
                   saleDueToday: { $sum: { $multiply: ["$due", 10000] } },
-                  totalCostToday: { $sum: { $multiply: ["$totalCost", 10000] } },
+                  totalCostToday: {
+                    $sum: { $multiply: ["$totalCost", 10000] },
+                  },
                   totalLoanToday: { $sum: { $multiply: ["$loan", 10000] } },
                 },
               },
@@ -2346,6 +2349,38 @@ module.exports.index = async (req, res) => {
                   },
                   totalBankPaymentAmountToday: {
                     $sum: { $multiply: ["$bankPaymentAmount", 10000] },
+                  },
+
+                  // SA included/ref starts with SA হলে due sum
+                  totalSalesDueToday: {
+                    $sum: {
+                      $cond: [
+                        {
+                          $regexMatch: {
+                            input: "$refMemo",
+                            regex: /^SA/,
+                          },
+                        },
+                        { $multiply: ["$currentDue", 10000] },
+                        0,
+                      ],
+                    },
+                  },
+
+                  // DUE-PAY included হলে paidAmount sum
+                  totalDuePaidToday: {
+                    $sum: {
+                      $cond: [
+                        {
+                          $regexMatch: {
+                            input: "$refMemo",
+                            regex: /DUE-PAY/,
+                          },
+                        },
+                        { $multiply: ["$paidAmount", 10000] },
+                        0,
+                      ],
+                    },
                   },
                 },
               },
@@ -2596,7 +2631,10 @@ module.exports.index = async (req, res) => {
 
       salesProfitToday:
         sales[0].todaysSaleDetails.length > 0
-          ? ((sales[0].todaysSaleDetails[0].saleTotalToday) - (sales[0].todaysSaleDetails[0].totalCostToday + sales[0].todaysSaleDetails[0].totalLoanToday)) / 10000
+          ? (sales[0].todaysSaleDetails[0].saleTotalToday -
+              (sales[0].todaysSaleDetails[0].totalCostToday +
+                sales[0].todaysSaleDetails[0].totalLoanToday)) /
+            10000
           : 0,
 
       salesQtyToday:
@@ -2617,6 +2655,10 @@ module.exports.index = async (req, res) => {
         salesTransaction[0].todaysReport.length > 0
           ? salesTransaction[0].todaysReport[0].totalBankPaymentAmountToday /
             10000
+          : 0,
+      advanceToday:
+        salesTransaction[0].todaysReport.length > 0
+          ? (salesTransaction[0].todaysReport[0].totalSalesDueToday - salesTransaction[0].todaysReport[0].totalDuePaidToday) / 10000
           : 0,
 
       // ৩. অবজেক্টে আজকের মোট খরচের ফিল্ডটি পুশ করা হলো

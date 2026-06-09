@@ -38,6 +38,7 @@ const PointOfSale = () => {
     address: "",
     customerEmail: "",
     customerPhone: "",
+    currentBalance: ""
   });
 
   useEffect(() => {
@@ -67,6 +68,8 @@ const PointOfSale = () => {
   const liveDue = totalWithLoan.minus(totalPaidLive).lessThan(0)
     ? "0.00"
     : totalWithLoan.minus(totalPaidLive).toFixed(2);
+
+  const dynamicDue = new Decimal(liveDue).minus(new Decimal(Number(customer.currentBalance)));
 
   const totalCost = selectedProducts.reduce(
     (acc, product) =>
@@ -529,6 +532,14 @@ const PointOfSale = () => {
             <div className="flex justify-between font-bold border-t border-gray-300 pt-1">
               <span>Due</span>
               <span>{liveDue}</span>
+            </div>
+            <div className="flex justify-between font-bold border-b border-gray-300 pt-1">
+              <span>Current Balance</span>
+              <span>(-) {new Decimal(Number(customer.currentBalance)).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-bold pt-1">
+              <span>Net Current Due</span>
+              <span>{new Decimal(liveDue).minus(new Decimal(Number(customer.currentBalance))).toFixed(2)}</span>
             </div>
           </div>
         </div>
