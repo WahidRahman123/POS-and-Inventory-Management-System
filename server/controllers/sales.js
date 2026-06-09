@@ -117,7 +117,6 @@ module.exports.createSales = async (req, res) => {
 
     transaction.salesId = sale._id;
     // await transaction.save({ session });
-    await transaction.save();
 
     if (products && products.length > 0) {
       for (let i = 0; i < products.length; i++) {
@@ -164,7 +163,10 @@ module.exports.createSales = async (req, res) => {
       customer.due = 0;
     }
     customer.salesRecord.push(sale._id);
+    transaction.currentBalance = customer.advanceBalance - customer.due;
     await customer.save();
+    await transaction.save();
+
 
     // const createdSale = await sale.save({ session });
     const createdSale = await sale.save();
@@ -353,6 +355,8 @@ module.exports.addPayment = async (req, res) => {
     currentDue = customer.due;
 
     const paidAmount = Number(new Decimal(mainAmount).toFixed(4));
+    const currentBalance = customer.advanceBalance - customer.due;
+
 
     const transaction = new SalesTransaction({
       customerId: customer._id,
@@ -372,11 +376,13 @@ module.exports.addPayment = async (req, res) => {
       exchange,
       exchangeMemoId,
       exchangeDetails,
+      currentBalance,
       unchangedPaid: Number(new Decimal(unchangedAmount).toFixed(4)),
       unchangedDue: Number(
         new Decimal(customer.due).minus(new Decimal(unchangedAmount)).toFixed(4),
       ),
     });
+
 
     // await transaction.save({ session });
     await transaction.save();
@@ -438,7 +444,8 @@ module.exports.salesByCustomerName = async (req, res) => {
 
     const transactions = await SalesTransaction.find(matchQuery)
       .sort({ date: -1 })
-      .populate("salesId");
+      .populate("salesId")
+      .populate("customerId");
 
     const result = await Customer.findOne({ name: customerName });
 
@@ -447,8 +454,9 @@ module.exports.salesByCustomerName = async (req, res) => {
     res.status(200).json({
       transactions,
       totalAmount: result.total,
-      totalPaid: result.paid,
+      totalPaid: result.paid + result.advanceBalance,
       totalDue: result.due,
+      currentBalance: result.currentBalance
     });
   } catch (error) {
     console.error(error);

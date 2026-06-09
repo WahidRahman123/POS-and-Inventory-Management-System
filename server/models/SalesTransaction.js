@@ -29,7 +29,7 @@ const salesTransactionSchema = new mongoose.Schema({
     required: true,
   },
   saleTotal: {
-    type: Number
+    type: Number,
   },
   amountToBePaid: {
     //* amountToBePaid = previous due
@@ -48,6 +48,10 @@ const salesTransactionSchema = new mongoose.Schema({
     //* Current Due
     type: Number,
     required: true,
+  },
+  currentBalance: {
+    type: Number,
+    default: 0,
   },
 
   cash: {

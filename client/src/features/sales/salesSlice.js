@@ -12,6 +12,7 @@ const initialState = {
   totalPaid: null,
   totalDue: null,
   customerDue: null,
+  currentBalance: null,
 
   totalSales: null,
   totalCosts: null,
@@ -413,6 +414,7 @@ const salesSlice = createSlice({
           state.totalAmount = action.payload.totalAmount;
           state.totalPaid = action.payload.totalPaid;
           state.totalDue = action.payload.totalDue;
+          state.currentBalance = action.payload.currentBalance;
         },
       )
       .addCase(

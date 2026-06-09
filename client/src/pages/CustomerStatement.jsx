@@ -9,9 +9,15 @@ import { fetchSalesForCustomer } from "../features/sales/salesSlice";
 
 const CustomerStatement = () => {
   const { user } = useSelector((state) => state.auth);
-  const { transactions, totalAmount, totalPaid, totalDue, page } = useSelector(
-    (state) => state.sales,
-  );
+  const {
+    transactions,
+    totalAmount,
+    totalPaid,
+    totalDue,
+    page,
+    currentBalance,
+  } = useSelector((state) => state.sales);
+  // console.log(transactions)
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -78,20 +84,20 @@ const CustomerStatement = () => {
               </button>
 
               <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const customerName = state.customerName;
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const customerName = state.customerName;
 
-                    navigate("/sales/due-payment", {
-                      state: {
-                        customerName
-                      },
-                    });
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-md cursor-pointer transition-colors"
-                >
-                  Pay Due ৳{Math.abs(totalDue).toLocaleString()}
-                </button>
+                  navigate("/sales/due-payment", {
+                    state: {
+                      customerName,
+                    },
+                  });
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-md cursor-pointer transition-colors"
+              >
+                Pay Due ৳{Math.abs(totalDue).toLocaleString()}
+              </button>
 
               {/* <button
                 onClick={() =>
@@ -154,15 +160,32 @@ const CustomerStatement = () => {
                     {state.customerEmail || "----"}
                   </p>
                 </div>
-                <div className="text-right">
+                {/* <div className="text-right">
                   <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
-                    Net Due Balance
+                    Current Balance
                   </p>
                   <p className="text-lg font-black text-red-600 font-mono">
                     ৳{" "}
-                    {totalDue?.toLocaleString("en-BD", {
+                    {currentBalance?.toLocaleString("en-BD", {
                       minimumFractionDigits: 2,
                     })}
+                  </p>
+                </div> */}
+
+                <div className="text-right">
+                  <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">CURRENT BALANCE</p>
+                  <p
+                    className={`text-xl font-bold ${currentBalance < 0 ? "text-red-600" : "text-green-600"}`}
+                  >
+                    ৳
+                    {currentBalance.toLocaleString("en-BD", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </p>
+                  <p className="text-xs mt-1 text-gray-600">
+                    {currentBalance < 0
+                      ? "(আমি কাস্টমারের কাছে পাই)"
+                      : "(কাস্টমার আমার কাছে পায়)"}
                   </p>
                 </div>
               </div>
@@ -178,7 +201,7 @@ const CustomerStatement = () => {
                       <th className="px-6 py-4 text-left">Ref / Memo</th>
                       <th className="px-6 py-4 text-left">Description</th>
                       <th className="px-6 py-4 text-left">Sale Total</th>
-                      <th className="px-6 py-4 text-right">Bill Amt</th>
+                      {/* <th className="px-6 py-4 text-right">Bill Amt</th> */}
                       <th className="px-6 py-4 text-right">Paid Amt</th>
                       <th className="px-6 py-4 text-right">Current Balance</th>
                       <th className="px-6 py-4 text-center print:hidden">
@@ -241,13 +264,13 @@ const CustomerStatement = () => {
                                   )}`
                                 : "--"}
                             </td>
-                            <td className="px-6 py-4 text-right font-black">
+                            {/* <td className="px-6 py-4 text-right font-black">
                               ৳{" "}
                               {transaction.amountToBePaid.toLocaleString(
                                 "en-BD",
                                 { minimumFractionDigits: 2 },
                               )}
-                            </td>
+                            </td> */}
                             <td className="px-6 py-4 text-right font-black text-green-600">
                               ৳{" "}
                               {transaction.paidAmount.toLocaleString("en-BD", {
@@ -255,10 +278,12 @@ const CustomerStatement = () => {
                               })}
                             </td>
                             <td className="px-6 py-4 text-right font-black text-red-500 font-mono">
-                              ৳{" "}
-                              {transaction.currentDue?.toLocaleString("en-BD", {
-                                minimumFractionDigits: 2,
-                              })}
+                              {transaction.currentBalance?.toLocaleString(
+                                "en-BD",
+                                {
+                                  minimumFractionDigits: 2,
+                                },
+                              )}
                             </td>
                             <td className="px-6 py-4 text-center print:hidden">
                               <div className="flex items-center justify-center gap-3">
@@ -324,11 +349,11 @@ const CustomerStatement = () => {
                   </div>
                   <div className="flex justify-between border-t border-gray-800 pt-4 items-center">
                     <span className="font-black uppercase text-[10px] text-blue-500">
-                      Balance Due
+                      Current Balance
                     </span>
                     <span className="text-2xl font-black text-blue-400 font-mono">
                       ৳{" "}
-                      {totalDue?.toLocaleString("en-BD", {
+                      {currentBalance?.toLocaleString("en-BD", {
                         minimumFractionDigits: 2,
                       })}
                     </span>
