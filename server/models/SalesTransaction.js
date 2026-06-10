@@ -89,11 +89,11 @@ const salesTransactionSchema = new mongoose.Schema({
 
   unchangedPaid: {
     type: Number,
-    required: true,
+    // required: true,
   },
   unchangedDue: {
     type: Number,
-    required: true,
+    // required: true,
   },
   remarks: {
     type: String,

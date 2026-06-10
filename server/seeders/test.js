@@ -2,6 +2,7 @@ const { default: mongoose } = require("mongoose");
 const connectDB = require("../config/db");
 const ScrapProduct = require("../models/ScrapProduct");
 require("dotenv").config();
+const customerData = require("../data/customers.json");
 
 const data = {
   productName: "Test Product 1",

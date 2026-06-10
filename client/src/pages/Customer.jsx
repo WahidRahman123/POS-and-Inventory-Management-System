@@ -157,7 +157,7 @@ const Customer = () => {
               {customers.length ? (
                 customers.map((customer, index) => (
                   <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-3 py-2">{index + 1}</td>
+                    <td className="px-3 py-2">{ (page - 1) * 15 + index + 1 }</td>
                     <td className="px-3 py-2 font-medium">{customer.name}</td>
                     <td className="px-3 py-2">{customer.phone}</td>
                     <td className="px-3 py-2">{customer.email}</td>

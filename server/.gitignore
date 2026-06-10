@@ -23,6 +23,7 @@ pids
 # Build output (if using TypeScript or Babel)
 dist/
 build/
+data/
 
 # Coverage (from testing)
 coverage/

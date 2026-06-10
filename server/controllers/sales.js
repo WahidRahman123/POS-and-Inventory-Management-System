@@ -42,6 +42,7 @@ module.exports.createSales = async (req, res) => {
       exchangeMemoId,
       // invoiceNo,
       products,
+      customerId = "",
       total = 0,
       due = 0,
       paid = 0,
@@ -65,43 +66,51 @@ module.exports.createSales = async (req, res) => {
     const chars = count.seqChars?.join("");
     const invoiceNo = ("s" + chars + "-" + count.seq).toUpperCase();
 
+    let customer = null;
     //* Customer Advance Payment Handling
-    const customer = await Customer.findById(salesData.customerId);
-    if (customer) {
-      // 1. Adding advanceBalance to the customer's advanceBalance
-      customer.advanceBalance += advanceBalance;
 
-      // 2. advanceBalance adjustment
-      if (customer.advanceBalance > 0) {
-        const need = mainTotal - mainPaid;
-
-        if (need <= customer.advanceBalance) {
-          mainPaid += need;
-          customer.advanceBalance -= need;
-        } else if (need > advanceBalance) {
-          mainPaid += customer.advanceBalance;
-          customer.advanceBalance = 0;
-        }
-      }
+    if (!salesData.customerId) {
+      customer = await Customer.findOne({ name: salesData.customerName });
     } else {
-      throw new Error("Customer does not exist!");
+      customer = await Customer.findById(salesData.customerId);
     }
+
+    // if (customer) {
+    //   // 1. Adding advanceBalance to the customer's advanceBalance
+    //   customer.advanceBalance += advanceBalance;
+
+    //   // 2. advanceBalance adjustment
+    //   if (customer.advanceBalance > 0) {
+    //     const need = mainTotal - mainPaid;
+
+    //     if (need <= customer.advanceBalance) {
+    //       mainPaid += need;
+    //       customer.advanceBalance -= need;
+    //     } else if (need > advanceBalance) {
+    //       mainPaid += customer.advanceBalance;
+    //       customer.advanceBalance = 0;
+    //     }
+    //   }
+    // } else {
+    //   throw new Error("Customer does not exist!");
+    // }
     mainDue = mainTotal - mainPaid;
 
     let amountToBePaid;
 
     if (customer.salesRecord.length === 0) {
-      amountToBePaid = new Decimal(customer.total).plus(
-        new Decimal(mainTotal),
-      );
+      amountToBePaid = new Decimal(customer.total).plus(new Decimal(mainTotal));
     } else {
       amountToBePaid = customer.due;
     }
-    const currentDue = (new Decimal(customer.total).plus(new Decimal(mainTotal))).minus(new Decimal(mainPaid).plus(new Decimal(customer.paid)));
+    const currentDue = new Decimal(customer.total)
+      .plus(new Decimal(mainTotal))
+      .minus(new Decimal(mainPaid).plus(new Decimal(customer.paid)));
 
     // i. Transaction Creation
     const transactionDetails = {
       ...transactionDetail,
+      customerId: customer._id,
       refMemo: invoiceNo,
       amountToBePaid: Number(amountToBePaid.toFixed(4)),
       paidAmount: mainPaid,
@@ -114,6 +123,7 @@ module.exports.createSales = async (req, res) => {
 
     const sale = new Sales({
       ...salesData,
+      customerId: customer._id,
       total: mainTotal,
       paid: mainPaid,
       due: mainDue,

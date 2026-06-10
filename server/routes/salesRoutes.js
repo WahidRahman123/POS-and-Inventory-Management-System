@@ -13,7 +13,7 @@ router.get('/', protect, admin, sales.index);
 //* @route POST /api/sales
 // @desc Create sales
 // @access Private
-router.post('/', protect, sales.createSales);
+router.post('/',  protect, sales.createSales);
 
 //* @route GET /api/sales/getTotalSaleCount
 // @desc get the total sale count
