@@ -178,7 +178,7 @@ const CustomerStatement = () => {
                     className={`text-xl font-bold ${currentBalance < 0 ? "text-red-600" : "text-green-600"}`}
                   >
                     ৳
-                    {currentBalance.toLocaleString("en-BD", {
+                    {currentBalance?.toLocaleString("en-BD", {
                       minimumFractionDigits: 2,
                     })}
                   </p>

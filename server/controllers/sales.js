@@ -97,7 +97,7 @@ module.exports.createSales = async (req, res) => {
     } else {
       amountToBePaid = customer.due;
     }
-    const currentDue = amountToBePaid.minus(new Decimal(mainPaid));
+    const currentDue = (new Decimal(customer.total).plus(new Decimal(mainTotal))).minus(new Decimal(mainPaid).plus(new Decimal(customer.paid)));
 
     // i. Transaction Creation
     const transactionDetails = {
@@ -319,7 +319,7 @@ module.exports.addPayment = async (req, res) => {
 
     //* Customer grabbing
     const customer = await Customer.findOne({ name });
-    console.log(customer);
+    // console.log(customer);
 
     if (customer) {
       // 1. Adding advanceBalance to the customer's advanceBalance

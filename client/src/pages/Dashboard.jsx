@@ -1121,6 +1121,12 @@ const Dashboard = () => {
             suffix=" ৳"
             textColor="text-black"
           />
+          <Row
+            label="Today's Advance"
+            value={dashboardResult.salesAdvanceToday}
+            suffix=" ৳"
+            textColor="text-black"
+          />
           {/* <Row
             label="Advance"
             value={dashboardResult.advanceToday}

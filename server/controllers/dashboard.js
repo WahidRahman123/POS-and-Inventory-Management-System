@@ -2147,10 +2147,10 @@ const Supplier = require("../models/Supplier");
 module.exports.index = async (req, res) => {
   try {
     let start = new Date();
-    start.setHours(0 - 6, 0, 0, 0);
+    start.setUTCHours(0, 0, 0, 0);
 
     let end = new Date();
-    end.setHours(23 - 6, 59, 59, 999);
+    end.setUTCHours(23, 59, 59, 999);
 
     const [
       mainStock,
@@ -2446,7 +2446,34 @@ module.exports.index = async (req, res) => {
       },
     ]);
 
-    // console.log(supplierDetails)
+    //* customers all current due
+    const customer = await Customer.aggregate([
+      {
+        $group: {
+          _id: null,
+          customerDueTotal: { $sum: { $multiply: ["$due", 10000] } },
+          customerAdvanceTotal: { $sum: { $multiply: ["$advanceBalance", 10000] } },
+        },
+      },
+    ]);
+
+    //* customers today's current due
+    const customerToday = await Customer.aggregate([
+      {
+        $match: {
+          updatedAt: { $gte: start, $lte: end },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          customerTodayDueTotal: { $sum: { $multiply: ["$due", 10000] } },
+          customerTodayAdvanceTotal: { $sum: { $multiply: ["$advanceBalance", 10000] } },
+        },
+      },
+    ]);
+
+    // console.log(customerTodayDue)
 
     const transactionData = await CompanySalesReturnTransaction.aggregate([
       {
@@ -2597,9 +2624,13 @@ module.exports.index = async (req, res) => {
         sales[0].salesDetails.length > 0
           ? sales[0].salesDetails[0].saleTotal / 10000
           : 0,
+      // salesDue:
+      //   sales[0].salesDetails.length > 0
+      //     ? sales[0].salesDetails[0].saleDue / 10000
+      //     : 0,
       salesDue:
-        sales[0].salesDetails.length > 0
-          ? sales[0].salesDetails[0].saleDue / 10000
+        customer[0]
+          ? customer[0].customerDueTotal / 10000
           : 0,
       salesCash:
         salesTransaction[0].allReport.length > 0
@@ -2625,8 +2656,12 @@ module.exports.index = async (req, res) => {
           ? sales[0].todaysSaleDetails[0].saleTotalToday / 10000
           : 0,
       salesDueToday:
-        sales[0].todaysSaleDetails.length > 0
-          ? sales[0].todaysSaleDetails[0].saleDueToday / 10000
+        customerToday[0]
+          ? customerToday[0].customerTodayDueTotal / 10000
+          : 0,
+      salesAdvanceToday:
+        customerToday[0]
+          ? customerToday[0].customerTodayAdvanceTotal / 10000
           : 0,
 
       salesProfitToday:
@@ -2658,7 +2693,9 @@ module.exports.index = async (req, res) => {
           : 0,
       advanceToday:
         salesTransaction[0].todaysReport.length > 0
-          ? (salesTransaction[0].todaysReport[0].totalSalesDueToday - salesTransaction[0].todaysReport[0].totalDuePaidToday) / 10000
+          ? (salesTransaction[0].todaysReport[0].totalSalesDueToday -
+              salesTransaction[0].todaysReport[0].totalDuePaidToday) /
+            10000
           : 0,
 
       // ৩. অবজেক্টে আজকের মোট খরচের ফিল্ডটি পুশ করা হলো
