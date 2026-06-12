@@ -203,7 +203,9 @@ const CustomerStatement = () => {
                       <th className="px-6 py-4 text-left">Sale Total</th>
                       {/* <th className="px-6 py-4 text-right">Bill Amt</th> */}
                       <th className="px-6 py-4 text-right">Paid Amt</th>
+                      <th className="px-6 py-4 text-right">Adv. Amt</th>
                       <th className="px-6 py-4 text-right">Current Balance</th>
+                      <th className="px-6 py-4 text-right">Remarks</th>
                       <th className="px-6 py-4 text-center print:hidden">
                         Action
                       </th>
@@ -277,6 +279,12 @@ const CustomerStatement = () => {
                                 minimumFractionDigits: 2,
                               })}
                             </td>
+                            <td className="px-6 py-4 text-right font-black text-green-600">
+                              ৳{" "}
+                              {transaction.advanceAmount ? transaction.advanceAmount.toLocaleString("en-BD", {
+                                minimumFractionDigits: 2,
+                              }) : 0}
+                            </td>
                             <td className="px-6 py-4 text-right font-black text-red-500 font-mono">
                               {transaction.currentBalance?.toLocaleString(
                                 "en-BD",
@@ -284,6 +292,9 @@ const CustomerStatement = () => {
                                   minimumFractionDigits: 2,
                                 },
                               )}
+                            </td>
+                            <td className="px-6 py-4 text-right font-black font-mono">
+                              {transaction.remarks}
                             </td>
                             <td className="px-6 py-4 text-center print:hidden">
                               <div className="flex items-center justify-center gap-3">

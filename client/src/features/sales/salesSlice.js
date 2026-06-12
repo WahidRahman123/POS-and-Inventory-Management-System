@@ -196,6 +196,8 @@ export const fetchSalesDueList = createAsyncThunk(
           params: query,
         },
       );
+      // console.log(import.meta.env.VITE_BACKEND_URI)
+
 
       return data;
     } catch (error) {

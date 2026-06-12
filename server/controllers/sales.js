@@ -75,25 +75,26 @@ module.exports.createSales = async (req, res) => {
       customer = await Customer.findById(salesData.customerId);
     }
 
-    // if (customer) {
-    //   // 1. Adding advanceBalance to the customer's advanceBalance
-    //   customer.advanceBalance += advanceBalance;
+    //! seeder use korle comment kore nibo
+    if (customer) {
+      // 1. Adding advanceBalance to the customer's advanceBalance
+      customer.advanceBalance += advanceBalance;
 
-    //   // 2. advanceBalance adjustment
-    //   if (customer.advanceBalance > 0) {
-    //     const need = mainTotal - mainPaid;
+      // 2. advanceBalance adjustment
+      if (customer.advanceBalance > 0) {
+        const need = mainTotal - mainPaid;
 
-    //     if (need <= customer.advanceBalance) {
-    //       mainPaid += need;
-    //       customer.advanceBalance -= need;
-    //     } else if (need > advanceBalance) {
-    //       mainPaid += customer.advanceBalance;
-    //       customer.advanceBalance = 0;
-    //     }
-    //   }
-    // } else {
-    //   throw new Error("Customer does not exist!");
-    // }
+        if (need <= customer.advanceBalance) {
+          mainPaid += need;
+          customer.advanceBalance -= need;
+        } else if (need > advanceBalance) {
+          mainPaid += customer.advanceBalance;
+          customer.advanceBalance = 0;
+        }
+      }
+    } else {
+      throw new Error("Customer does not exist!");
+    }
     mainDue = mainTotal - mainPaid;
 
     let amountToBePaid;
@@ -114,6 +115,7 @@ module.exports.createSales = async (req, res) => {
       refMemo: invoiceNo,
       amountToBePaid: Number(amountToBePaid.toFixed(4)),
       paidAmount: mainPaid,
+      advanceAmount: advanceBalance,
       date: new Date(),
       currentDue: Number(currentDue.toFixed(4)),
       saleTotal: mainTotal,
@@ -128,6 +130,7 @@ module.exports.createSales = async (req, res) => {
       paid: mainPaid,
       due: mainDue,
       invoiceNo,
+      advanceAmount: advanceBalance,
       transactionRecords: [transaction._id],
     });
 
@@ -381,6 +384,7 @@ module.exports.addPayment = async (req, res) => {
       refMemo: memo,
       amountToBePaid,
       paidAmount,
+      advanceAmount: advanceBalance,
       remarks,
       date: createCustomDate(date),
       currentDue,
@@ -522,14 +526,14 @@ module.exports.salesDueList = async (req, res) => {
     // Search Filter
     const searchQuery = {
       name: { $regex: customerName, $options: "i" },
-      due: { $gt: 0 },
+      // due: { $gt: 0 },
     };
 
     // Pagination
     const skip = (parseInt(page) - 1) * limit;
 
     const customers = await Customer.find(searchQuery)
-      .sort({ due: parseInt(order) })
+      // .sort({ currentBalance: parseInt(order) })
       .skip(skip)
       .limit(limit);
 

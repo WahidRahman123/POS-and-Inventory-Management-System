@@ -53,6 +53,10 @@ const salesTransactionSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  advanceAmount: {
+    type: Number,
+    // required: true,
+  },
 
   cash: {
     type: Number,

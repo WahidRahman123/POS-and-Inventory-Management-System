@@ -856,14 +856,14 @@ const SalesDueList = () => {
             className="border border-gray-300 rounded px-4 py-2.5 w-full sm:w-80 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
-          <select
+          {/* <select
             value={sortOrder}
             onChange={(e) => setSortOrder(Number(e.target.value))}
             className="border border-gray-300 bg-white rounded px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="-1">Highest Due First</option>
             <option value="1">Lowest Due First</option>
-          </select>
+          </select> */}
         </div>
 
         {/* সর্ট অর্ডার ফিল্ডের পাশে অল-রেকর্ডস গ্র্যান্ড টোটাল */}
@@ -883,9 +883,10 @@ const SalesDueList = () => {
           <table className="min-w-full border-collapse text-sm">
             <thead className="bg-gray-800 text-white">
               <tr>
+                <th className="px-6 py-4 text-left">#</th>
                 <th className="px-6 py-4 text-left">Customer Name</th>
                 <th className="px-6 py-4 text-left">Mobile Number</th>
-                <th className="px-6 py-4 text-right">Total Due Balance</th>
+                <th className="px-6 py-4 text-right">Current Balance</th>
                 <th className="px-6 py-4 text-center">Action</th>
               </tr>
             </thead>
@@ -904,10 +905,16 @@ const SalesDueList = () => {
                       })
                     }
                   >
+                    <td className="p-2">{(page - 1) * 15 + index + 1}</td>
                     <td className="px-6 py-4 font-medium">{customer.name}</td>
                     <td className="px-6 py-4">{customer.phone || "N/A"}</td>
-                    <td className="px-6 py-4 text-right font-bold text-red-600">
-                      ৳ {Number(customer.due || 0).toLocaleString("en-BD")}
+                    <td
+                      className={`px-6 py-4 text-right font-bold ${customer.currentBalance < 0 && "text-red-600"} ${customer.currentBalance > 0 && "text-green-600"}`}
+                    >
+                      ৳{" "}
+                      {Number(customer.currentBalance || 0).toLocaleString(
+                        "en-BD",
+                      )}
                     </td>
                     <td className="px-6 py-4 text-center">
                       <div className="flex flex-wrap gap-1 justify-center">
@@ -935,23 +942,58 @@ const SalesDueList = () => {
                           // className={`text-xs text-white px-2 py-1 rounded  ${customer.due <= 0 ? "cursor-not-allowed bg-red-500" : "cursor-pointer bg-red-600 hover:bg-red-700"}`}
                           // disabled={customer.due <= 0}
 
-                          className={`text-xs text-white px-2 py-1 rounded cursor-pointer bg-red-600 hover:bg-red-700`}
+                          className={`text-xs text-white px-2 py-1 rounded  ${customer.currentBalance >= 0 ? "cursor-not-allowed bg-red-500" : "cursor-pointer bg-red-600 hover:bg-red-700"}`}
+                          disabled={customer.currentBalance >= 0}
                         >
                           Due Payment
                         </button>
                         <button
                           onClick={(e) => {
+                            // e.stopPropagation();
+                            // navigate("/customer-statement", {
+                            //   state: {
+                            //     customerName: customer.name,
+                            //     customerPhone: customer.phone,
+                            //   },
+                            // });
+
                             e.stopPropagation();
-                            navigate("/customer-statement", {
+                            const currentDue = customer.due;
+                            const customerId = customer._id;
+                            const customerName = customer.name;
+
+                            navigate("/sales/due-payment", {
                               state: {
-                                customerName: customer.name,
-                                customerPhone: customer.phone,
+                                customerName,
                               },
                             });
                           }}
-                          className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1 rounded font-medium"
+                          className="bg-blue-600 cursor-pointer hover:bg-blue-700 text-white text-xs px-2 py-1 rounded font-medium"
                         >
-                          View Statement
+                          Advance Payment
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            // e.stopPropagation();
+                            // navigate("/customer-statement", {
+                            //   state: {
+                            //     customerName: customer.name,
+                            //     customerPhone: customer.phone,
+                            //   },
+                            // });
+
+                            e.stopPropagation();
+                            const currentDue = customer.due;
+                            const customerId = customer._id;
+                            const customerName = customer.name;
+
+                            navigate("/point-of-sale", {
+                              state: customer,
+                            });
+                          }}
+                          className="bg-green-600 cursor-pointer hover:bg-green-700 text-white text-xs px-2 py-1 rounded font-medium"
+                        >
+                          Advance Adjust
                         </button>
                       </div>
                     </td>

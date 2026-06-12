@@ -5,7 +5,7 @@ import {
   setProductsBySearchToEmpty,
 } from "../features/product/productSlice";
 import { addSales, setCreatedSalesToNull } from "../features/sales/salesSlice";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Decimal from "decimal.js";
 import AsyncSelect from "react-select/async";
 import CustomerAddForm from "../components/POS/CustomerAddForm";
@@ -15,10 +15,13 @@ import { fetchExchangeByMemo } from "../features/Exchange/exchangeSlice";
 const PointOfSale = () => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
+  const { state } = useLocation();
   const { createdSales, loading } = useSelector((state) => state.sales);
   const { productsBySearchforPOS } = useSelector((state) => state.product);
   const dispatch = useDispatch();
   const [customDate, setCustomDate] = useState("");
+  
+  const [customerState, setCustomerState] = useState("");
 
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [cid, setCid] = useState(null);
@@ -223,6 +226,12 @@ const PointOfSale = () => {
     dispatch(setProductsBySearchToEmpty());
   }, [dispatch]);
 
+  useEffect(() => {
+    if(state) {
+      setCustomerState(state);
+    }
+  }, [state]);
+
   if (!user) return null;
 
   return (
@@ -234,7 +243,7 @@ const PointOfSale = () => {
       </div>
 
       <form onSubmit={handleSubmit}>
-        <CustomerSelect customer={customer} setCustomer={setCustomer} />
+        <CustomerSelect customer={customer} setCustomer={setCustomer} customerState={customerState}/>
 
         <div className="grid grid-cols-2 gap-x-6 mb-4">
           <div>

@@ -2,7 +2,12 @@ import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import { customerFetch } from "../../utils/POS/customerFetch";
 
-const CustomerSelect = ({ customer, setCustomer, triggerForClearing }) => {
+const CustomerSelect = ({
+  customer,
+  setCustomer,
+  triggerForClearing,
+  customerState,
+}) => {
   const [name, setName] = useState("");
   const customerNameRef = useRef(null);
   const [disable, setDisable] = useState(false);
@@ -28,7 +33,7 @@ const CustomerSelect = ({ customer, setCustomer, triggerForClearing }) => {
       address: customerData.address,
       customerEmail: customerData.email,
       customerPhone: customerData.phone,
-      currentBalance: customerData.currentBalance
+      currentBalance: customerData.currentBalance,
     });
     setDisable(true);
   };
@@ -37,6 +42,22 @@ const CustomerSelect = ({ customer, setCustomer, triggerForClearing }) => {
       customerNameRef.current.focus();
     }
   }, [disable]);
+
+  useEffect(() => {
+    if (customerState) {
+      setData(null);
+      setName(customerState.name);
+      setCustomer({
+        customerId: customerState._id,
+        customerName: customerState.name,
+        address: customerState.address,
+        customerEmail: customerState.email,
+        customerPhone: customerState.phone,
+        currentBalance: customerState.currentBalance,
+      });
+      setDisable(true);
+    }
+  }, [customerState]);
 
   return (
     <>
@@ -67,7 +88,7 @@ const CustomerSelect = ({ customer, setCustomer, triggerForClearing }) => {
                   address: "",
                   customerEmail: "",
                   customerPhone: "",
-                  currentBalance: ""
+                  currentBalance: "",
                 });
                 setData(null);
               }}
@@ -114,7 +135,9 @@ const CustomerSelect = ({ customer, setCustomer, triggerForClearing }) => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium my-1.5">Current Balance</label>
+          <label className="block text-sm font-medium my-1.5">
+            Current Balance
+          </label>
           <input
             type="text"
             value={customer.currentBalance}

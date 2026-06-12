@@ -153,6 +153,10 @@ const salesSchema = new mongoose.Schema({
     type: Number,
     // required: true,
   },
+  advanceAmount: {
+    type: Number,
+    // required: true,
+  },
   createdAt: {
     type: Date,
     required: true,
