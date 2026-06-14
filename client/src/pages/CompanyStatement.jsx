@@ -235,6 +235,16 @@ const CompanyStatement = () => {
                             </td>
                             <td className="px-6 py-4 text-center print:hidden">
                               <div className="flex items-center justify-center gap-3">
+                                <button
+                                  title="View Details"
+                                  className="text-gray-400 hover:text-blue-600"
+                                >
+                                  <FaRegFileAlt size={14} />
+                                </button>
+                              </div>
+                            </td>
+                            {/* <td className="px-6 py-4 text-center print:hidden">
+                              <div className="flex items-center justify-center gap-3">
                                 {!isPayment &&
                                 transaction.companyProductReturnId?.due > 0 ? (
                                   <Link
@@ -257,7 +267,7 @@ const CompanyStatement = () => {
                                   <FaRegFileAlt size={14} />
                                 </button>
                               </div>
-                            </td>
+                            </td> */}
                           </tr>
                         );
                       })

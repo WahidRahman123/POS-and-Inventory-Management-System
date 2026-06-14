@@ -6,6 +6,7 @@ const { createCustomDate } = require("../utils/createCustomDate");
 const { getNextSequenceForOther } = require("../utils/getNextSequenceForOther");
 const ProductExchange = require("../models/ProductExchange");
 const ProductExchangeStockManagement = require("../models/ProductExchangeStockManagement");
+const Supplier = require("../models/Supplier");
 
 module.exports.index = async (req, res) => {
   try {
@@ -50,6 +51,90 @@ module.exports.index = async (req, res) => {
   }
 };
 
+// module.exports.createCompanyProductReturn = async (req, res) => {
+//   // const session = await mongoose.startSession();
+//   try {
+//     const returns = req.body;
+//     // const { memo } = purchases;
+//     const {
+//       createdAt,
+//       issuedAt,
+//       products,
+//       // productName,
+//       // quantity,
+//       // qtyInKg,
+//       // unitPrice,
+//       // subTotal,
+//       totalAmount,
+//       paid,
+//       due,
+//       // memo,
+//       ...transactionDetail
+//     } = returns;
+
+//     // session.startTransaction();
+
+//     //* Generate the memo
+//     // const count = await getNextSequenceForOther(
+//     //   "CompanyProductReturn",
+//     //   session,
+//     // );
+//     const count = await getNextSequenceForOther("CompanyProductReturn");
+//     if (!count) {
+//       throw new Error("Failed to generate sequence");
+//     }
+//     const memo = "CPR-" + count.seq;
+
+//     //* Transaction Creation
+//     const transactionDetails = {
+//       ...transactionDetail,
+//       refMemo: memo,
+//       amountToBePaid: totalAmount,
+//       paidAmount: paid,
+//       date: createdAt,
+//       currentDue: due,
+//     };
+//     const transaction = new CompanyProductReturnTransaction(transactionDetails);
+
+//     //* Company Product Return creation
+//     const companyProductReturn = new CompanyProductReturn({
+//       ...returns,
+//       memo,
+//       transactionRecords: [transaction._id],
+//     });
+
+//     transaction.companyProductReturnId = companyProductReturn._id;
+//     // await transaction.save({ session });
+//     await transaction.save();
+
+//     // const createdCompanyProductReturn = await companyProductReturn.save({
+//     //   session,
+//     // });
+//     const createdCompanyProductReturn = await companyProductReturn.save();
+
+//     // Commit
+//     // await session.commitTransaction();
+//     // session.endSession();
+
+//     for (const product of products) {
+//       const productExchangeStockSearchData =
+//         await ProductExchangeStockManagement.findOne({
+//           productId: product.productId,
+//         });
+//       productExchangeStockSearchData.tempQuantity -= product.quantity;
+//       productExchangeStockSearchData.tempQtyInKg -= product.qtyInKg;
+//       await productExchangeStockSearchData.save();
+//     }
+
+//     res.status(201).json(createdCompanyProductReturn);
+//   } catch (error) {
+//     // await session.abortTransaction();
+//     // session.endSession();
+
+//     console.error(error);
+//     res.status(500).send("Server Error");
+//   }
+// };
 module.exports.createCompanyProductReturn = async (req, res) => {
   // const session = await mongoose.startSession();
   try {
@@ -91,9 +176,17 @@ module.exports.createCompanyProductReturn = async (req, res) => {
       amountToBePaid: totalAmount,
       paidAmount: paid,
       date: createdAt,
-      currentDue: due,
+      companyReturnAmount: due,
+      currentDue: 0,
     };
     const transaction = new CompanyProductReturnTransaction(transactionDetails);
+
+    //* Supplier handle
+    const supplier = await Supplier.findById(returns.supplierId);
+    if(supplier) {
+      supplier.companyReturnBalance += due;
+      supplier.totalBalance += due;
+    }
 
     //* Company Product Return creation
     const companyProductReturn = new CompanyProductReturn({
@@ -105,6 +198,7 @@ module.exports.createCompanyProductReturn = async (req, res) => {
     transaction.companyProductReturnId = companyProductReturn._id;
     // await transaction.save({ session });
     await transaction.save();
+    await supplier.save();
 
     // const createdCompanyProductReturn = await companyProductReturn.save({
     //   session,
@@ -124,6 +218,8 @@ module.exports.createCompanyProductReturn = async (req, res) => {
       productExchangeStockSearchData.tempQtyInKg -= product.qtyInKg;
       await productExchangeStockSearchData.save();
     }
+
+    console.log(transaction)
 
     res.status(201).json(createdCompanyProductReturn);
   } catch (error) {

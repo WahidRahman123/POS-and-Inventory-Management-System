@@ -333,7 +333,7 @@ const CustomerStatement = () => {
                     ) : (
                       <tr>
                         <td
-                          colSpan={7}
+                          colSpan={9}
                           className="text-center text-gray-400 py-12 italic"
                         >
                           No transactions found for this period.

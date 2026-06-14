@@ -38,6 +38,10 @@ const companyProductReturnTransactionSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  companyReturnAmount: {
+    type: Number,
+    default: 0
+  },
   date: {
     type: Date,
     required: true,

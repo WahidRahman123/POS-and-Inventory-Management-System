@@ -645,7 +645,7 @@ const CompanyReturn = () => {
                 <th className="p-4">Product Info</th>
                 {/* <th className="p-4 text-center">Dispatch Qty</th> */}
                 <th className="p-4 text-right">Claim Amount (৳)</th>
-                <th className="p-4 text-center">Payment Status</th>
+                {/* <th className="p-4 text-center">Payment Status</th> */}
               </tr>
             </thead>
             <tbody className="text-xs">
@@ -714,7 +714,7 @@ const CompanyReturn = () => {
                     <td className="p-4 text-right font-black text-gray-800 tracking-tighter text-sm">
                       ৳ {productReturn.totalAmount}
                     </td>
-                    <td className="p-4 text-center">
+                    {/* <td className="p-4 text-center">
                       {productReturn.due > 0 ? (
                         <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded-full">
                           <FaExclamationCircle
@@ -733,7 +733,7 @@ const CompanyReturn = () => {
                           </span>
                         </div>
                       )}
-                    </td>
+                    </td> */}
                   </tr>
                 ))
               ) : (
