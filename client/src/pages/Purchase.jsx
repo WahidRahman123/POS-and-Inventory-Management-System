@@ -2790,7 +2790,7 @@ const Purchase = () => {
     try {
       setAddLoading(true);
       await dispatch(addPurchase(purchaseData)).unwrap();
-      alert("Purchase added successfully! 🎉");
+      // alert("Purchase added successfully! 🎉");
 
       // Reset Form
       setFormData({ date: new Date().toISOString().split("T")[0], memo: "" });

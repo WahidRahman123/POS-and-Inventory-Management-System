@@ -80,7 +80,7 @@ const purchaseTransactionSchema = new mongoose.Schema({
 
   purchaseType: {
     type: String,
-    enum: ["normal", "advance", "due"],
+    enum: ["normal", "advance", "due", "exchangeAdjust"],
     required: true,
   },
   advancePaymentAmount: {
@@ -128,6 +128,11 @@ const purchaseTransactionSchema = new mongoose.Schema({
   purchaseId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Purchase",
+  },
+
+  companyProductReturnId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "CompanyProductReturn",
   },
 });
 

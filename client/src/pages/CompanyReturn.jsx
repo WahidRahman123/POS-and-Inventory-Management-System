@@ -293,7 +293,7 @@ const CompanyReturn = () => {
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* --- Section 1: Financial Summary (Updated to reflect Cash flow) --- */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-white p-5 shadow-sm border-b-4 border-blue-600 rounded-sm">
             <div className="flex items-center gap-3 mb-2 text-blue-600">
               <FaBox size={20} />
@@ -339,7 +339,7 @@ const CompanyReturn = () => {
             </p>
           </div>
 
-          <div className="bg-white p-5 shadow-sm border-b-4 border-red-600 rounded-sm">
+          {/* <div className="bg-white p-5 shadow-sm border-b-4 border-red-600 rounded-sm">
             <div className="flex items-center gap-3 mb-2 text-red-500">
               <FaTruck size={20} />
               <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">
@@ -352,7 +352,7 @@ const CompanyReturn = () => {
                 ? productExchangeReportData.totalDue
                 : "--"}
             </p>
-          </div>
+          </div> */}
         </div>
 
         {/* --- Section 2: Horizontal Entry Form --- */}

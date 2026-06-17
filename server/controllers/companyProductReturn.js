@@ -7,6 +7,8 @@ const { getNextSequenceForOther } = require("../utils/getNextSequenceForOther");
 const ProductExchange = require("../models/ProductExchange");
 const ProductExchangeStockManagement = require("../models/ProductExchangeStockManagement");
 const Supplier = require("../models/Supplier");
+const PurchaseTransaction = require("../models/PurchaseTransaction");
+const ScrapProductSell = require("../models/ScrapProductSell");
 
 module.exports.index = async (req, res) => {
   try {
@@ -181,12 +183,20 @@ module.exports.createCompanyProductReturn = async (req, res) => {
     };
     const transaction = new CompanyProductReturnTransaction(transactionDetails);
 
+    const paidAmountForPurchaseTransaction = due;
+    const amountForPurchaseTransaction = due;
+
     //* Supplier handle
     const supplier = await Supplier.findById(returns.supplierId);
-    if(supplier) {
+    const amountToBePaidForPurchaseTransaction = supplier ? supplier.totalBalance : 0;
+
+    if (supplier) {
       supplier.companyReturnBalance += due;
       supplier.totalBalance += due;
     }
+
+    const currentBalanceForPurchaseTransaction = supplier ? supplier.totalBalance : 0;
+    const currentDueForPurchaseTransaction = supplier ? supplier.totalBalance : 0;
 
     //* Company Product Return creation
     const companyProductReturn = new CompanyProductReturn({
@@ -200,9 +210,53 @@ module.exports.createCompanyProductReturn = async (req, res) => {
     await transaction.save();
     await supplier.save();
 
+    //* purchase transaction creation
+    const countForPurchaseTransaction = await getNextSequenceForOther("CompanyProductReturnForPurchaseTransaction");
+    if (!countForPurchaseTransaction) {
+      throw new Error("Failed to generate sequence");
+    }
+    const memoForPurchaseTransaction = "CPRT-" + countForPurchaseTransaction.seq;
+
+    const purchaseTransaction = new PurchaseTransaction({
+      supplierId: returns.supplierId,
+      supplierName: returns.supplierName,
+      address: returns.address,
+      supplierEmail: returns.supplierEmail,
+      supplierPhone: returns.supplierPhone,
+
+      userId: returns.userId,
+
+      refMemo: memoForPurchaseTransaction,
+
+      amountToBePaid: amountToBePaidForPurchaseTransaction,
+      amount: amountForPurchaseTransaction,
+      paidAmount: paidAmountForPurchaseTransaction,
+
+      date: new Date(),
+
+      currentBalance: currentBalanceForPurchaseTransaction,
+
+      transactionType: "credit",
+
+      currentDue: currentDueForPurchaseTransaction,
+
+      cash: 0,
+      bankPaymentAmount: 0,
+
+      unchangedPaid: due,
+      unchangedDue: 0,
+
+      purchaseType: "exchangeAdjust",
+
+      advancePaymentAmount: 0,
+
+      companyProductReturnId: companyProductReturn._id,
+    })
+
     // const createdCompanyProductReturn = await companyProductReturn.save({
     //   session,
     // });
+    await purchaseTransaction.save();
     const createdCompanyProductReturn = await companyProductReturn.save();
 
     // Commit
@@ -424,7 +478,25 @@ module.exports.productExchangeReport = async (req, res) => {
         $group: {
           _id: null,
           companySentItems: { $sum: "$products.quantity" },
-          companyWeight: { $sum: "$products.qtyInKg" },
+          companyWeight: { $sum: "$products.qtyInKg" }
+        },
+      },
+    ]);
+
+    const companyProductData = await CompanyProductReturn.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: { $multiply: ["$totalAmount", 10000] } },
+        },
+      },
+    ]);
+
+    const scrapProductSell = await ScrapProductSell.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: { $multiply: ["$totalAmount", 10000] } },
         },
       },
     ]);
@@ -436,6 +508,13 @@ module.exports.productExchangeReport = async (req, res) => {
     const totalCompanyWeight = companyData[0]
       ? companyData[0].companyWeight
       : 0;
+
+    const companyTotalAmount = companyProductData[0] ? companyProductData[0].totalAmount : 0;
+    const totalAmountFromProductExchange = productExchange[0].totalAmount[0] ? productExchange[0].totalAmount[0].totalAmount
+      : 0;
+    const totalAmountFromScrapProductSell = scrapProductSell[0] ? scrapProductSell[0].totalAmount : 0;
+
+    const totalAmount = (totalAmountFromProductExchange - totalAmountFromScrapProductSell - companyTotalAmount) / 10000;
 
     const result = await CompanyProductReturn.aggregate([
       {
@@ -455,10 +534,7 @@ module.exports.productExchangeReport = async (req, res) => {
         productExchange[0].total.length > 0
           ? productExchange[0].total[0].totalWeight - totalCompanyWeight
           : 0,
-      totalAmount:
-        productExchange[0].total.length > 0
-          ? productExchange[0].totalAmount[0].totalAmount / 10000
-          : 0,
+      totalAmount,
       totalDue: result.length > 0 ? result[0].totalDue / 10000 : 0,
     });
   } catch (error) {

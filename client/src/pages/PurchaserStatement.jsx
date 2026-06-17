@@ -644,7 +644,7 @@ import Decimal from 'decimal.js';
 
 const PurchaserStatement = () => {
   const { user } = useSelector((state) => state.auth);
-  const { transactions = [], totalAmount = 0, totalPaid = 0, totalDue = 0, supplierBalance = 0 } = useSelector((state) => state.sstatement);
+  const { transactions = [], totalAmount = 0, totalPaid = 0, totalDue = 0, supplierBalance = 0, totalCompanyReturnAmount = 0 } = useSelector((state) => state.sstatement);
   
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -822,6 +822,7 @@ const PurchaserStatement = () => {
               <div className="space-y-4 text-lg">
                 <div className="flex justify-between"><span>Total Purchase:</span> <span>৳{Number(totalAmount).toLocaleString()}</span></div>
                 <div className="flex justify-between text-green-400"><span>Total Given:</span> <span>৳{Number(totalPaid).toLocaleString()}</span></div>
+                {/* <div className="flex justify-between text-green-400"><span>Total Exchange Amount:</span> <span>৳{Number(totalCompanyReturnAmount).toLocaleString()}</span></div> */}
                 <div className="flex justify-between border-t border-gray-700 pt-4 text-2xl font-bold">
                   <span>Balance:</span>
                   <span className={currentBalance < 0 ? "text-red-400" : "text-green-400"}>

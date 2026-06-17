@@ -170,20 +170,22 @@ module.exports.purchaseBySupplierName = async (req, res) => {
       },
     ]);
 
-    // Calculate logical balance from transactions (most accurate)
-    // const calculatedBalance = totalPaid - totalPurchase;
-
-    // Also get supplier balance for reference
     const supplier = await Supplier.findOne({ name: supplierName });
-    // console.log(supplier)
+
+    const totalAmount = purchaseResult[0] ? purchaseResult[0].totalAmount / 10000 : 0;
+    const totalPaid = transactionResult[0] ? transactionResult[0].totalPaid / 10000 : 0;
+    const totalDue = totalAmount - totalPaid;
+
     const supplierBalance = supplier ? Number(supplier.totalBalance) : 0;
+    const totalCompanyReturnAmount = supplier ? Number(supplier.companyReturnBalance) : 0;
 
     res.status(201).json({
       transactions,
-      totalAmount: purchaseResult[0] ? purchaseResult[0].totalAmount / 10000 : 0,
-      totalPaid: transactionResult[0] ? transactionResult[0].totalPaid / 10000 : 0,
-      totalDue: this.totalAmount - this.totalPaid, // ← Transaction থেকে হিসাব
-      supplierBalance, // Extra for debugging
+      totalAmount,
+      totalPaid,
+      totalCompanyReturnAmount,
+      totalDue, 
+      supplierBalance, 
     });
   } catch (error) {
     console.error("purchaseBySupplierName Error:", error);

@@ -32,7 +32,7 @@ const supplierSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  companyReturnBalance: {
+  companyReturnBalance: {   //* Company aaj porjonto koto taka return balance koreche seta rakhchi
     type: Number,
     default: 0
   },
