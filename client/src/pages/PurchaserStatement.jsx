@@ -12,7 +12,7 @@
 // const PurchaserStatement = () => {
 //   const { user } = useSelector((state) => state.auth);
 //   const { transactions, totalAmount, totalPaid, totalDue } = useSelector((state) => state.sstatement);
-  
+
 //   const dispatch = useDispatch();
 //   const navigate = useNavigate();
 //   const { state } = useLocation();
@@ -48,7 +48,7 @@
 //     <div className="min-h-screen bg-slate-50 p-2 sm:p-4 md:p-6 font-sans text-gray-800">
 //       {state ? (
 //         <div className="max-w-6xl mx-auto space-y-4">
-          
+
 //           {/* Top Actions & Back Button (Hidden during print) */}
 //           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden">
 //             <button
@@ -58,7 +58,7 @@
 //               <FaArrowLeft className="group-hover:-translate-x-1" /> 
 //               Back to Purchase List
 //             </button>
-            
+
 //             <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
 //               <input
 //                 type="date"
@@ -134,7 +134,7 @@
 //                     {transactions && transactions.length > 0 ? (
 //                       transactions.map((transaction, idx) => {
 //                         const isPayment = transaction.refMemo?.startsWith("REF-");
-                        
+
 //                         // Data structure for the single invoice page
 //                         const invoiceData = {
 //                             ...transaction.purchaseId, 
@@ -261,7 +261,7 @@
 // const PurchaserStatement = () => {
 //   const { user } = useSelector((state) => state.auth);
 //   const { transactions, totalAmount, totalPaid, totalDue } = useSelector((state) => state.sstatement);
-  
+
 //   const dispatch = useDispatch();
 //   const navigate = useNavigate();
 //   const { state } = useLocation();
@@ -292,12 +292,12 @@
 //     <div className="min-h-screen bg-slate-50 p-2 sm:p-4 md:p-6 font-sans text-gray-800">
 //       {state ? (
 //         <div className="max-w-6xl mx-auto space-y-4">
-          
+
 //           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden">
 //             <button onClick={() => navigate("/purchase")} className="flex items-center gap-2 cursor-pointer text-blue-600 hover:text-blue-800 font-bold text-sm transition-all group">
 //               <FaArrowLeft className="group-hover:-translate-x-1" /> Back to Purchase List
 //             </button>
-            
+
 //             <div className="flex flex-wrap items-center gap-2">
 //               <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="border rounded-lg px-3 py-2 text-sm" />
 //               <button onClick={() => setFilterToggler(!filterToggler)} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
@@ -448,7 +448,7 @@
 // const PurchaserStatement = () => {
 //   const { user } = useSelector((state) => state.auth);
 //   const { transactions, totalAmount, totalPaid, totalDue } = useSelector((state) => state.sstatement);
-  
+
 //   const dispatch = useDispatch();
 //   const navigate = useNavigate();
 //   const { state } = useLocation();
@@ -481,7 +481,7 @@
 //     <div className="min-h-screen bg-slate-50 p-2 sm:p-4 md:p-6 font-sans text-gray-800">
 //       {state ? (
 //         <div className="max-w-6xl mx-auto space-y-4">
-          
+
 //           {/* Top Bar */}
 //           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden">
 //             <button 
@@ -490,7 +490,7 @@
 //             >
 //               ← Back to Purchase List
 //             </button>
-            
+
 //             <div className="flex gap-3">
 //               <input 
 //                 type="date" 
@@ -532,7 +532,7 @@
 //           </div>
 
 //           <div ref={contentRef} className="space-y-6 print:p-5">
-            
+
 //             {/* Supplier Info */}
 //             <div className="bg-white border-l-4 border-blue-600 rounded-xl p-5 shadow-sm">
 //               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -645,7 +645,7 @@ import Decimal from 'decimal.js';
 const PurchaserStatement = () => {
   const { user } = useSelector((state) => state.auth);
   const { transactions = [], totalAmount = 0, totalPaid = 0, totalDue = 0, supplierBalance = 0, totalCompanyReturnAmount = 0 } = useSelector((state) => state.sstatement);
-  
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { state } = useLocation();
@@ -653,9 +653,9 @@ const PurchaserStatement = () => {
   const [date, setDate] = useState("");
   const contentRef = useRef(null);
 
-  const reactToPrintFn = useReactToPrint({ 
-    contentRef, 
-    documentTitle: `Ledger-${state?.supplierName || 'report'}` 
+  const reactToPrintFn = useReactToPrint({
+    contentRef,
+    documentTitle: `Ledger-${state?.supplierName || 'report'}`
   });
 
   useEffect(() => {
@@ -688,16 +688,16 @@ const PurchaserStatement = () => {
 
           <div className="flex gap-3">
             <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="border px-3 py-2 rounded" />
-            
+
             {shouldShowPayDue && (
-              <button 
-                onClick={() => navigate("/purchase-report/due-payment", { 
-                  state: { 
-                    supplierId: state.supplierId, 
+              <button
+                onClick={() => navigate("/purchase-report/due-payment", {
+                  state: {
+                    supplierId: state.supplierId,
                     supplierName: state.supplierName,
                     totalDue: Math.abs(currentBalance),
-                    isSupplierLevel: true 
-                  } 
+                    isSupplierLevel: true
+                  }
                 })}
                 className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-medium"
               >
@@ -783,11 +783,43 @@ const PurchaserStatement = () => {
                        isDuePayment ? "" : 
                         || "Purchase Items"} */}
 
-                       {t.purchaseType === "normal" ? t.purchaseId?.products?.map(p => p.productName).join(", ") : ""}
+                      {t.purchaseType === "normal" ? t.purchaseId?.products?.map(p => p.productName).join(", ") : ""}
 
-                       {t.purchaseType === "advance" ? "Advance Payment" : ""}
+                      {t.purchaseType === "advance" ? "Advance Payment" : ""}
 
-                       {t.purchaseType === "due" ? "Due Payment" : ""}
+                      {t.purchaseType === "due" ? "Due Payment" : ""}
+                      {t.purchaseType === "exchangeAdjust" ? (<table className="w-full text-[10px] uppercase">
+                        <thead>
+                          <tr className="text-gray-400 border-b">
+                            <th className="text-left pb-1">Product</th>
+                            <th className="text-center pb-1">Qty</th>
+                            <th className="text-center pb-1">Weight</th>
+                            <th className="text-right pb-1">Unit</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {t.companyProductReturnId.products?.map((product, i) => (
+                            <tr key={i} className="text-gray-700 font-bold">
+                              <td className="py-1 pr-2">
+                                {product.productName}
+                              </td>
+
+                              <td className="text-center">
+                                {product.quantity}
+                              </td>
+
+                              <td className="text-center">
+                                {product.qtyInKg} Kg
+                              </td>
+
+                              <td className="text-right">
+                                ৳ {product.unitPrice}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>) : ""}
 
 
                     </td>

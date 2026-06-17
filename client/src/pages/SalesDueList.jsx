@@ -918,7 +918,7 @@ const SalesDueList = () => {
                     </td>
                     <td className="px-6 py-4 text-center">
                       <div className="flex flex-wrap gap-1 justify-center">
-                        <button
+                        {/* <button
                           onClick={(e) => {
                             e.stopPropagation();
                             const currentDue = customer.due;
@@ -946,7 +946,7 @@ const SalesDueList = () => {
                           disabled={customer.currentBalance >= 0}
                         >
                           Due Payment
-                        </button>
+                        </button> */}
                         <button
                           onClick={(e) => {
                             // e.stopPropagation();
@@ -968,9 +968,9 @@ const SalesDueList = () => {
                               },
                             });
                           }}
-                          className="bg-blue-600 cursor-pointer hover:bg-blue-700 text-white text-xs px-2 py-1 rounded font-medium"
+                          className="bg-red-600 cursor-pointer hover:bg-red-700 text-white px-2 py-1 rounded font-semibold"
                         >
-                          Advance Payment
+                          নিচ্ছি
                         </button>
                         <button
                           onClick={(e) => {
@@ -991,9 +991,9 @@ const SalesDueList = () => {
                               state: customer,
                             });
                           }}
-                          className="bg-green-600 cursor-pointer hover:bg-green-700 text-white text-xs px-2 py-1 rounded font-medium"
+                          className="bg-green-600 cursor-pointer hover:bg-green-700 text-white px-2 py-1 rounded font-semibold"
                         >
-                          Advance Adjust
+                          দিচ্ছি
                         </button>
                       </div>
                     </td>

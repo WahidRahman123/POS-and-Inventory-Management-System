@@ -140,7 +140,8 @@ module.exports.purchaseBySupplierName = async (req, res) => {
       ...dateQuery,
     })
       .sort({ date: -1 })
-      .populate("purchaseId");
+      .populate("purchaseId")
+      .populate("companyProductReturnId");
 
     const purchaseResult = await Purchase.aggregate([
       {
