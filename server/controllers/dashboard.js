@@ -2143,14 +2143,23 @@ const SalesReturnStockManagement = require("../models/SalesReturnStockManagement
 const SalesReturnTransaction = require("../models/SalesReturnTransaction");
 const Expense = require("../models/Expense"); // <--- এক্সপেন্স মডেলটি এখানে ইম্পোর্ট করুন
 const Supplier = require("../models/Supplier");
+const { combineDateWithCurrentTime } = require('../utils/combineDateWithCurrentTime');
+const dayjs = require('../utils/date.js');
 
 module.exports.index = async (req, res) => {
   try {
-    let start = new Date();
-    start.setUTCHours(0, 0, 0, 0);
+    let start = dayjs()
+      .tz("Asia/Dhaka")
+      .startOf("day")
+      .utc()
+      .toDate();
 
-    let end = new Date();
-    end.setUTCHours(23, 59, 59, 999);
+    let end = dayjs()
+      .tz("Asia/Dhaka")
+      .endOf("day")
+      .utc()
+      .toDate();
+
 
     const [
       mainStock,
@@ -2647,8 +2656,8 @@ module.exports.index = async (req, res) => {
       salesProfit:
         sales[0].salesDetails.length > 0
           ? (sales[0].salesDetails[0].saleTotal -
-              sales[0].salesDetails[0].saleDue) /
-            10000
+            sales[0].salesDetails[0].saleDue) /
+          10000
           : 0,
 
       salesTotalToday:
@@ -2667,14 +2676,14 @@ module.exports.index = async (req, res) => {
       salesProfitToday:
         sales[0].todaysSaleDetails.length > 0
           ? (sales[0].todaysSaleDetails[0].saleTotalToday -
-              (sales[0].todaysSaleDetails[0].totalCostToday +
-                sales[0].todaysSaleDetails[0].totalLoanToday)) /
-            10000
+            (sales[0].todaysSaleDetails[0].totalCostToday +
+              sales[0].todaysSaleDetails[0].totalLoanToday)) /
+          10000
           : 0,
 
       salesQtyToday:
         sales[0].todaysSaleQuantityDetails &&
-        sales[0].todaysSaleQuantityDetails.length > 0
+          sales[0].todaysSaleQuantityDetails.length > 0
           ? sales[0].todaysSaleQuantityDetails[0].totalQtyToday
           : 0,
 
@@ -2689,13 +2698,13 @@ module.exports.index = async (req, res) => {
       salesBankPaymentAmountToday:
         salesTransaction[0].todaysReport.length > 0
           ? salesTransaction[0].todaysReport[0].totalBankPaymentAmountToday /
-            10000
+          10000
           : 0,
       advanceToday:
         salesTransaction[0].todaysReport.length > 0
           ? (salesTransaction[0].todaysReport[0].totalSalesDueToday -
-              salesTransaction[0].todaysReport[0].totalDuePaidToday) /
-            10000
+            salesTransaction[0].todaysReport[0].totalDuePaidToday) /
+          10000
           : 0,
 
       // ৩. অবজেক্টে আজকের মোট খরচের ফিল্ডটি পুশ করা হলো
@@ -2715,7 +2724,7 @@ module.exports.index = async (req, res) => {
       totalSentItemsForSalesReturn:
         salesReturnForNewData && salesReturnForNewData[0].total.length > 0
           ? salesReturnForNewData[0].total[0].totalSentItems -
-            transactionSentItems
+          transactionSentItems
           : 0,
       totalAmountForSalesReturn:
         salesReturnForNewData && salesReturnForNewData[0].totalAmount.length > 0

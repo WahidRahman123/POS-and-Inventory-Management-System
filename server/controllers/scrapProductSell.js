@@ -11,6 +11,8 @@ const ScrapProductSellTransaction = require("../models/ScrapProductSellTransacti
 const Sales = require("../models/Sales");
 const SalesTransaction = require("../models/SalesTransaction");
 const { getNextSequenceForSale } = require("../utils/getNextSequenceForSale");
+const { combineDateWithCurrentTime } = require("../utils/combineDateWithCurrentTime");
+const dayjs = require("../utils/date.js");
 
 module.exports.index = async (req, res) => {
   try {
@@ -76,6 +78,12 @@ module.exports.createScrapProductSell = async (req, res) => {
       ...transactionDetail
     } = returns;
 
+    const utcCreatedAt = combineDateWithCurrentTime(createdAt);
+    const now = dayjs()
+      .tz("Asia/Dhaka")
+      .utc()
+      .toDate();
+
     // session.startTransaction();
 
     //* Generate the memo
@@ -95,7 +103,7 @@ module.exports.createScrapProductSell = async (req, res) => {
       refMemo: memo,
       amountToBePaid: totalAmount,
       paidAmount: paid,
-      date: createdAt,
+      date: utcCreatedAt,
       currentDue: due,
     };
     const transaction = new ScrapProductSellTransaction(transactionDetails);
@@ -104,6 +112,8 @@ module.exports.createScrapProductSell = async (req, res) => {
     const scrapProductSell = new ScrapProductSell({
       ...returns,
       memo,
+      createdAt: utcCreatedAt,
+      issuedAt: now,
       transactionRecords: [transaction._id],
     });
 
@@ -142,6 +152,9 @@ module.exports.createScrapProductSell = async (req, res) => {
       ...rest
     } = createdScrapProductSell.toObject();
 
+    const utcScrapCreatedAt = combineDateWithCurrentTime(scrapCreatedAt);
+    const utcScrapIssuedAt = combineDateWithCurrentTime(scrapIssuedAt);
+
     const saleCount = await getNextSequenceForSale();
 
     if (!saleCount) {
@@ -153,8 +166,8 @@ module.exports.createScrapProductSell = async (req, res) => {
     const createdSale = await Sales({
       ...rest,
       invoiceNo,
-      createdAt: scrapCreatedAt,
-      issuedAt: scrapIssuedAt,
+      createdAt: utcScrapCreatedAt,
+      issuedAt: utcScrapIssuedAt,
       total: scrapTotalAmount,
     });
     createdSale.scrapProductSellId.push(_id);
@@ -166,7 +179,7 @@ module.exports.createScrapProductSell = async (req, res) => {
       amountToBePaid: Number(scrapTotalAmount),
       paidAmount: Number(createdScrapProductSell.paid),
       currentDue: Number(createdScrapProductSell.due),
-      date: scrapCreatedAt,
+      date: utcScrapCreatedAt,
       unchangedPaid: Number(createdScrapProductSell.paid),
       unchangedDue: Number(createdScrapProductSell.due),
       salesId: createdSale._id
@@ -177,7 +190,7 @@ module.exports.createScrapProductSell = async (req, res) => {
 
     createdScrapProductSell.salesId = createdSale._id;
     await createdScrapProductSell.save();
-    
+
     res.status(201).json(createdScrapProductSell);
   } catch (error) {
     // await session.abortTransaction();
@@ -208,6 +221,8 @@ module.exports.addPayment = async (req, res) => {
 
   const { id } = req.params;
   const { date, amount, cash, bankPaymentAmount, unchangedAmount } = req.body;
+
+  const utcDate = combineDateWithCurrentTime(date);
 
   try {
     // session.startTransaction();
@@ -258,7 +273,7 @@ module.exports.addPayment = async (req, res) => {
         refMemo,
         amountToBePaid,
         paidAmount,
-        date: createCustomDate(date),
+        date: utcDate,
         currentDue,
         scrapProductSellId: scrapProductSell._id,
         unchangedPaid,
@@ -301,11 +316,17 @@ module.exports.scrapProductSellStatement = async (req, res) => {
     let dateSearchQuery;
     // For date search:
     if (dateSearch) {
-      const startOfDay = new Date(dateSearch);
-      startOfDay.setHours(0, 0, 0, 0);
+      const startOfDay = dayjs(dateSearch)
+        .tz("Asia/Dhaka")
+        .startOf("day")
+        .utc()
+        .toDate();
 
-      const endOfDay = new Date(dateSearch);
-      endOfDay.setHours(23, 59, 59, 999);
+      const endOfDay = dayjs(dateSearch)
+        .tz("Asia/Dhaka")
+        .endOf("day")
+        .utc()
+        .toDate();
 
       dateSearchQuery = {
         date: { $gte: startOfDay, $lte: endOfDay },

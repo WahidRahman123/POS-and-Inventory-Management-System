@@ -2,6 +2,8 @@ const Purchase = require("../models/Purchase");
 const PurchaseTransaction = require("../models/PurchaseTransaction");
 const Supplier = require("../models/Supplier");
 const Decimal = require("decimal.js");
+const { combineDateWithCurrentTime } = require("../utils/combineDateWithCurrentTime");
+const dayjs = require("../utils/date.js");
 
 module.exports.index = async (req, res) => {
   try {
@@ -127,10 +129,18 @@ module.exports.purchaseBySupplierName = async (req, res) => {
 
     let dateQuery = {};
     if (dateSearch) {
-      const startOfDay = new Date(dateSearch);
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(dateSearch);
-      endOfDay.setHours(23, 59, 59, 999);
+      const startOfDay = dayjs(dateSearch)
+          .tz("Asia/Dhaka")
+          .startOf("day")
+          .utc()
+          .toDate();
+
+        const endOfDay = dayjs(dateSearch)
+          .tz("Asia/Dhaka")
+          .endOf("day")
+          .utc()
+          .toDate();
+
       dateQuery = { date: { $gte: startOfDay, $lte: endOfDay } };
     }
 

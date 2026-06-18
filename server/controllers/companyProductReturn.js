@@ -9,6 +9,8 @@ const ProductExchangeStockManagement = require("../models/ProductExchangeStockMa
 const Supplier = require("../models/Supplier");
 const PurchaseTransaction = require("../models/PurchaseTransaction");
 const ScrapProductSell = require("../models/ScrapProductSell");
+const dayjs = require("../utils/date.js")
+const { combineDateWithCurrentTime } = require("../utils/combineDateWithCurrentTime.js");
 
 module.exports.index = async (req, res) => {
   try {
@@ -158,6 +160,9 @@ module.exports.createCompanyProductReturn = async (req, res) => {
       ...transactionDetail
     } = returns;
 
+
+    const utcCreatedAt = combineDateWithCurrentTime(createdAt);
+
     // session.startTransaction();
 
     //* Generate the memo
@@ -177,7 +182,7 @@ module.exports.createCompanyProductReturn = async (req, res) => {
       refMemo: memo,
       amountToBePaid: totalAmount,
       paidAmount: paid,
-      date: createdAt,
+      date: utcCreatedAt,
       companyReturnAmount: due,
       currentDue: 0,
     };
@@ -198,9 +203,16 @@ module.exports.createCompanyProductReturn = async (req, res) => {
     const currentBalanceForPurchaseTransaction = supplier ? supplier.totalBalance : 0;
     const currentDueForPurchaseTransaction = supplier ? supplier.totalBalance : 0;
 
+    const now = dayjs()
+      .tz("Asia/Dhaka")
+      .utc()
+      .toDate();
+
     //* Company Product Return creation
     const companyProductReturn = new CompanyProductReturn({
       ...returns,
+      createdAt: utcCreatedAt,
+      issuedAt: now,
       memo,
       transactionRecords: [transaction._id],
     });
@@ -232,7 +244,7 @@ module.exports.createCompanyProductReturn = async (req, res) => {
       amount: amountForPurchaseTransaction,
       paidAmount: paidAmountForPurchaseTransaction,
 
-      date: new Date(),
+      date: now,
 
       currentBalance: currentBalanceForPurchaseTransaction,
 
@@ -330,6 +342,9 @@ module.exports.addPayment = async (req, res) => {
         ...transactionDetail
       } = companyProductReturn.toObject();
 
+      const utcCreatedAt = combineDateWithCurrentTime(createdAt);
+      const utcDate = combineDateWithCurrentTime(date);
+
       const unchangedPaid = Number(new Decimal(unchangedAmount).toFixed(4));
       const unchangedDue = Number(
         new Decimal(due).minus(new Decimal(unchangedAmount)).toFixed(4),
@@ -355,7 +370,7 @@ module.exports.addPayment = async (req, res) => {
         refMemo,
         amountToBePaid,
         paidAmount,
-        date: createCustomDate(date),
+        date: utcDate,
         currentDue,
         companyProductReturnId: companyProductReturn._id,
         unchangedPaid,
@@ -396,11 +411,17 @@ module.exports.companyProductReturnStatement = async (req, res) => {
     let dateSearchQuery;
     // For date search:
     if (dateSearch) {
-      const startOfDay = new Date(dateSearch);
-      startOfDay.setHours(0, 0, 0, 0);
+      const startOfDay = dayjs(dateSearch)
+        .tz("Asia/Dhaka")
+        .startOf("day")
+        .utc()
+        .toDate();
 
-      const endOfDay = new Date(dateSearch);
-      endOfDay.setHours(23, 59, 59, 999);
+      const endOfDay = dayjs(dateSearch)
+        .tz("Asia/Dhaka")
+        .endOf("day")
+        .utc()
+        .toDate();
 
       dateSearchQuery = {
         date: { $gte: startOfDay, $lte: endOfDay },

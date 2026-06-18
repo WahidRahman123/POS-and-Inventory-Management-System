@@ -4,6 +4,8 @@ const Purchase = require("../models/Purchase");
 const PurchaseReturnTransaction = require("../models/PurchaseReturnTransaction");
 const { createCustomDate } = require("../utils/createCustomDate");
 const { default: mongoose } = require("mongoose");
+const { combineDateWithCurrentTime } = require("../utils/combineDateWithCurrentTime");
+const dayjs = require("../utils/date.js");
 
 module.exports.index = async (req, res) => {
   try {
@@ -24,8 +26,17 @@ module.exports.index = async (req, res) => {
     // For date search:
     if (dateMode === "range") {
       if (dateSearchStart && dateSearchEnd) {
-        const startDate = new Date(dateSearchStart);
-        const endDate = new Date(dateSearchEnd);
+        const startDate = dayjs(dateSearchStart)
+          .tz("Asia/Dhaka")
+          .startOf("day")
+          .utc()
+          .toDate();
+
+        const endDate = dayjs(dateSearchEnd)
+          .tz("Asia/Dhaka")
+          .endOf("day")
+          .utc()
+          .toDate();
 
         dateSearchQuery = {
           createdAt: { $gte: startDate, $lte: endDate },
@@ -34,11 +45,17 @@ module.exports.index = async (req, res) => {
       }
     } else if (dateMode === "single") {
       if (dateSearch) {
-        const startOfDay = new Date(dateSearch);
-        startOfDay.setHours(0, 0, 0, 0);
+        const startOfDay = dayjs(dateSearch)
+          .tz("Asia/Dhaka")
+          .startOf("day")
+          .utc()
+          .toDate();
 
-        const endOfDay = new Date(dateSearch);
-        endOfDay.setHours(23, 59, 59, 999);
+        const endOfDay = dayjs(dateSearch)
+          .tz("Asia/Dhaka")
+          .endOf("day")
+          .utc()
+          .toDate();
 
         dateSearchQuery = {
           createdAt: { $gte: startOfDay, $lte: endOfDay },
@@ -108,6 +125,12 @@ module.exports.createPurchaseReturn = async (req, res) => {
       ...commonDetails
     } = purchaseReturns;
 
+    const utcCreatedAt = combineDateWithCurrentTime(createdAt);
+    const now = dayjs()
+      .tz("Asia/Dhaka")
+      .utc()
+      .toDate();
+
     const { purchaseId } = purchaseReturns;
 
     // session.startTransaction();
@@ -122,7 +145,7 @@ module.exports.createPurchaseReturn = async (req, res) => {
       refMemo: memo,
       amountToBePaid: totalReturnValue,
       paidAmount: paid,
-      date: createdAt,
+      date: utcCreatedAt,
       currentDue: due,
 
       returnType,
@@ -144,8 +167,8 @@ module.exports.createPurchaseReturn = async (req, res) => {
       totalReturnValue,
       due,
       paid,
-      createdAt,
-      issuedAt,
+      createdAt: utcCreatedAt,
+      issuedAt: now,
     });
 
     transaction.purchaseReturnId = purchaseReturn._id;
@@ -199,6 +222,8 @@ module.exports.addPaymentByExchange = async (req, res) => {
   const { id } = req.params;
   const { amount, date, ...rest } = req.body;
 
+  const utcDate = combineDateWithCurrentTime(date);
+
   try {
     // session.startTransaction();
     // const purchaseReturn = await PurchaseReturn.findById(id).session(session);
@@ -221,7 +246,7 @@ module.exports.addPaymentByExchange = async (req, res) => {
       // transaction creation
       const transaction = new PurchaseReturnTransaction({
         ...rest,
-        date: createCustomDate(date),
+        date: utcDate,
         amountToBePaid,
         paidAmount,
         currentDue,
@@ -256,6 +281,8 @@ module.exports.addPaymentByCash = async (req, res) => {
   const { id } = req.params;
   const { amount, date, ...rest } = req.body;
 
+  const utcDate = combineDateWithCurrentTime(date);
+
   try {
     // session.startTransaction();
     // const purchaseReturn = await PurchaseReturn.findById(id).session(session);
@@ -278,7 +305,7 @@ module.exports.addPaymentByCash = async (req, res) => {
       // transaction creation
       const transaction = new PurchaseReturnTransaction({
         ...rest,
-        date: createCustomDate(date),
+        date: utcDate,
         amountToBePaid,
         paidAmount,
         currentDue,
@@ -318,11 +345,17 @@ module.exports.purchaseReturnStatement = async (req, res) => {
     let dateSearchQuery;
     // For date search:
     if (dateSearch) {
-      const startOfDay = new Date(dateSearch);
-      startOfDay.setHours(0, 0, 0, 0);
+      const startOfDay = dayjs(dateSearch)
+        .tz("Asia/Dhaka")
+        .startOf("day")
+        .utc()
+        .toDate();
 
-      const endOfDay = new Date(dateSearch);
-      endOfDay.setHours(23, 59, 59, 999);
+      const endOfDay = dayjs(dateSearch)
+        .tz("Asia/Dhaka")
+        .endOf("day")
+        .utc()
+        .toDate();
 
       dateSearchQuery = {
         date: { $gte: startOfDay, $lte: endOfDay },

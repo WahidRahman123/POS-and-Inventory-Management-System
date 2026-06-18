@@ -8,6 +8,8 @@ const { createCustomDate } = require("../utils/createCustomDate");
 const ProductExchange = require("../models/ProductExchange");
 const { getNextSequenceForSale } = require("../utils/getNextSequenceForSale");
 const { getNextSequenceForOther } = require("../utils/getNextSequenceForOther");
+const dayjs = require("../utils/date.js");
+const { combineDateWithCurrentTime } = require("../utils/combineDateWithCurrentTime");
 
 module.exports.index = async (req, res) => {
   try {
@@ -51,6 +53,12 @@ module.exports.createSales = async (req, res) => {
       advanceBalance,
       ...transactionDetail
     } = salesData;
+
+    const utcCreatedAt = createCustomDate(createdAt);
+    const now = dayjs()
+      .tz("Asia/Dhaka")
+      .utc()
+      .toDate();
 
     let mainTotal = total;
     let mainDue = due;
@@ -116,7 +124,7 @@ module.exports.createSales = async (req, res) => {
       amountToBePaid: Number(amountToBePaid.toFixed(4)),
       paidAmount: mainPaid,
       advanceAmount: advanceBalance,
-      date: new Date(),
+      date: now,
       currentDue: Number(currentDue.toFixed(4)),
       saleTotal: mainTotal,
       exchangeMemoId,
@@ -131,6 +139,8 @@ module.exports.createSales = async (req, res) => {
       due: mainDue,
       invoiceNo,
       advanceAmount: advanceBalance,
+      createdAt: utcCreatedAt,
+      issuedAt: now,
       transactionRecords: [transaction._id],
     });
 
@@ -210,31 +220,32 @@ module.exports.searchByDates = async (req, res) => {
     if (!date) return res.status(400).json({ message: "Invalid Dates!" });
 
     let start, end;
-    const now = new Date();
+    const now = dayjs().tz("Asia/Dhaka");
 
     if (date === "t") {
       // Today
-      start = new Date();
-      start.setHours(0, 0, 0, 0);
-      end = new Date();
-      end.setHours(23, 59, 59, 999);
+      start = now.startOf("day").utc().toDate();
+      end = now.endOf("day").utc().toDate();
     } else if (date === "w") {
       // Weekly
-      start = new Date(now);
-      const day = start.getDay();
-      const diff = day >= 6 ? day - 6 : day + 1;
-      start.setDate(start.getDate() - diff);
-      start.setHours(0, 0, 0, 0);
-      end = new Date();
-      end.setHours(23, 59, 59, 999);
+      // start = new Date(now);
+      // const day = start.getDay();
+      // const diff = day >= 6 ? day - 6 : day + 1;
+      // start.setDate(start.getDate() - diff);
+      // start.setHours(0, 0, 0, 0);
+      // end = new Date();
+      // end.setHours(23, 59, 59, 999);
+      //* This Week (Saturday → Today)
+      start = now.startOf("week").add(1, "day").utc().toDate();
+      end = now.endOf("day").utc().toDate();
     } else if (date === "m") {
       // Monthly
-      start = new Date(now.getFullYear(), now.getMonth(), 1);
-      end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      start = now.startOf("month").utc().toDate();
+      end = now.endOf("month").utc().toDate();
     } else if (date === "y") {
       // Yearly
-      start = new Date(now.getFullYear(), 0, 1);
-      end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+      start = now.startOf("year").utc().toDate();
+      end = now.endOf("year").utc().toDate();
     }
 
     const { sales } = await getSalesAndTotal(start, end, order);
@@ -260,18 +271,38 @@ module.exports.searchByIndividualDate = async (req, res) => {
     const searchQuery = [];
 
     if (dateMode === "range" && dateSearchStart && dateSearchEnd) {
+      const startDate = dayjs(dateSearchStart)
+        .tz("Asia/Dhaka")
+        .startOf("day")
+        .utc()
+        .toDate();
+
+      const endDate = dayjs(dateSearchEnd)
+        .tz("Asia/Dhaka")
+        .endOf("day")
+        .utc()
+        .toDate();
+
       searchQuery.push({
         createdAt: {
-          $gte: new Date(dateSearchStart),
-          $lte: new Date(dateSearchEnd),
+          $gte: startDate,
+          $lte: endDate,
         },
       });
     } else if (dateMode === "single" && dateSearch) {
-      const s = new Date(dateSearch);
-      s.setHours(0, 0, 0, 0);
-      const e = new Date(dateSearch);
-      e.setHours(23, 59, 59, 999);
-      searchQuery.push({ createdAt: { $gte: s, $lte: e } });
+      const startOfDay = dayjs(dateSearch)
+        .tz("Asia/Dhaka")
+        .startOf("day")
+        .utc()
+        .toDate();
+
+      const endOfDay = dayjs(dateSearch)
+        .tz("Asia/Dhaka")
+        .endOf("day")
+        .utc()
+        .toDate();
+
+      searchQuery.push({ createdAt: { $gte: startOfDay, $lte: endOfDay } });
     }
 
     if (productName)
@@ -323,6 +354,8 @@ module.exports.addPayment = async (req, res) => {
       exchangeDetails,
     } = req.body;
     let mainAmount = amount;
+
+    const utcDate = combineDateWithCurrentTime(date);
 
     // session.startTransaction();
 
@@ -386,7 +419,7 @@ module.exports.addPayment = async (req, res) => {
       paidAmount,
       advanceAmount: advanceBalance,
       remarks,
-      date: createCustomDate(date),
+      date: utcDate,
       currentDue,
       // salesId: sale._id,
       cash,
@@ -454,11 +487,19 @@ module.exports.salesByCustomerName = async (req, res) => {
     let matchQuery = { customerName };
 
     if (dateSearch) {
-      const s = new Date(dateSearch);
-      s.setHours(0, 0, 0, 0);
-      const e = new Date(dateSearch);
-      e.setHours(23, 59, 59, 999);
-      matchQuery.createdAt = { $gte: s, $lte: e };
+      const startOfDay = dayjs(dateSearch)
+        .tz("Asia/Dhaka")
+        .startOf("day")
+        .utc()
+        .toDate();
+
+      const endOfDay = dayjs(dateSearch)
+        .tz("Asia/Dhaka")
+        .endOf("day")
+        .utc()
+        .toDate();
+        
+      matchQuery.createdAt = { $gte: startOfDay, $lte: endOfDay };
     }
 
     const transactions = await SalesTransaction.find(matchQuery)

@@ -3,6 +3,8 @@ const ProductExchange = require("../models/ProductExchange");
 const { getNextSequenceForOther } = require("../utils/getNextSequenceForOther");
 const { default: mongoose } = require("mongoose");
 const ProductExchangeStockManagement = require("../models/ProductExchangeStockManagement");
+const { combineDateWithCurrentTime } = require("../utils/combineDateWithCurrentTime");
+const dayjs = require("../utils/date.js");
 
 // List of all exchanges with pagination and search
 module.exports.index = async (req, res) => {
@@ -20,11 +22,17 @@ module.exports.index = async (req, res) => {
 
     // For date search:
     if (dateSearch) {
-      const startOfDay = new Date(dateSearch);
-      startOfDay.setHours(0, 0, 0, 0);
+      const startOfDay = dayjs(dateSearch)
+        .tz("Asia/Dhaka")
+        .startOf("day")
+        .utc()
+        .toDate();
 
-      const endOfDay = new Date(dateSearch);
-      endOfDay.setHours(23, 59, 59, 999);
+      const endOfDay = dayjs(dateSearch)
+        .tz("Asia/Dhaka")
+        .endOf("day")
+        .utc()
+        .toDate();
 
       dateSearchQuery = {
         createdAt: { $gte: startOfDay, $lte: endOfDay },
@@ -82,9 +90,17 @@ module.exports.createProductExchange = async (req, res) => {
     }
     const memo = "PE-" + count.seq;
 
+    const utcCreatedAt = combineDateWithCurrentTime(exchanges.createdAt);
+    const now = dayjs()
+      .tz("Asia/Dhaka")
+      .utc()
+      .toDate();
+
     //* Exchange creation with remainingBalance
     const exchange = new ProductExchange({
       ...exchanges,
+      createdAt: utcCreatedAt,
+      issuedAt: now,
       memo,
       remainingBalance: totalAmount,
     });
@@ -186,7 +202,6 @@ module.exports.searchByMemo = async (req, res) => {
       {
         memo: { $regex: search, $options: "i" },
       },
-      // products: 1 যোগ করা হয়েছে যাতে ফ্রন্টএন্ডে মেমোর ভেতরে কি পণ্য আছে তা দেখা যায়
       {
         memo: 1,
         totalAmount: 1,

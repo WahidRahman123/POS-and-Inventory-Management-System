@@ -6,6 +6,8 @@ const Decimal = require("decimal.js");
 const PurchaseTransaction = require("../models/PurchaseTransaction");
 const { createCustomDate } = require("../utils/createCustomDate");
 const { getNextSequenceForOther } = require("../utils/getNextSequenceForOther");
+const { combineDateWithCurrentTime } = require("../utils/combineDateWithCurrentTime");
+const dayjs = require("../utils/date.js");
 
 module.exports.index = async (req, res) => {
   try {
@@ -26,8 +28,17 @@ module.exports.index = async (req, res) => {
     // For date search:
     if (dateMode === "range") {
       if (dateSearchStart && dateSearchEnd) {
-        const startDate = new Date(dateSearchStart);
-        const endDate = new Date(dateSearchEnd);
+        const startDate = dayjs(dateSearchStart)
+          .tz("Asia/Dhaka")
+          .startOf("day")
+          .utc()
+          .toDate();
+
+        const endDate = dayjs(dateSearchEnd)
+          .tz("Asia/Dhaka")
+          .endOf("day")
+          .utc()
+          .toDate();
 
         dateSearchQuery = {
           createdAt: { $gte: startDate, $lte: endDate },
@@ -36,11 +47,17 @@ module.exports.index = async (req, res) => {
       }
     } else if (dateMode === "single") {
       if (dateSearch) {
-        const startOfDay = new Date(dateSearch);
-        startOfDay.setHours(0, 0, 0, 0);
+        const startOfDay = dayjs(dateSearch)
+          .tz("Asia/Dhaka")
+          .startOf("day")
+          .utc()
+          .toDate();
 
-        const endOfDay = new Date(dateSearch);
-        endOfDay.setHours(23, 59, 59, 999);
+        const endOfDay = dayjs(dateSearch)
+          .tz("Asia/Dhaka")
+          .endOf("day")
+          .utc()
+          .toDate();
 
         dateSearchQuery = {
           createdAt: { $gte: startOfDay, $lte: endOfDay },
@@ -102,6 +119,12 @@ module.exports.createPurchase = async (req, res) => {
       userId,
     } = req.body;
 
+    const utcCreatedAt = combineDateWithCurrentTime(createdAt);
+    const now = dayjs()
+      .tz("Asia/Dhaka")
+      .utc()
+      .toDate();
+
     // Get Supplier's Current Balance BEFORE this transaction
     const supplier = await Supplier.findById(supplierId);
     if (!supplier)
@@ -133,8 +156,8 @@ module.exports.createPurchase = async (req, res) => {
       paid: Number(paid),
       due: Number(due),
       advancePaymentAmount: Number(advancePaymentAmount),
-      createdAt: createdAt || new Date(),
-      issuedAt: new Date(),
+      createdAt: utcCreatedAt,
+      issuedAt: now,
     });
 
     // Calculate New Balance
@@ -169,11 +192,11 @@ module.exports.createPurchase = async (req, res) => {
       userId,
       refMemo: memo,
       amountToBePaid,
-      amount: purchaseType === "advance" ? Number(paid): Number(totalAmount),
-      paidAmount: purchaseType === "advance" ? Number(paid): 0,
+      amount: purchaseType === "advance" ? Number(paid) : Number(totalAmount),
+      paidAmount: purchaseType === "advance" ? Number(paid) : 0,
       currentDue: Number(due),
       currentBalance,
-      date: createdAt || new Date(),
+      date: utcCreatedAt,
       purchaseId: purchase._id,
       purchaseType,
       transactionType,
@@ -634,6 +657,8 @@ module.exports.addPayment = async (req, res) => {
       unchangedAmount,
     } = req.body;
 
+    const utcDate = combineDateWithCurrentTime(date);
+
     let purchase;
 
     if (isSupplierLevel) {
@@ -675,7 +700,7 @@ module.exports.addPayment = async (req, res) => {
       amountToBePaid: previousDue,
       paidAmount: paidAmount,
       currentDue: purchase.due,
-      date: date || new Date(),
+      date: utcDate,
       cash: Number(cash || 0),
       bankPaymentAmount: Number(bankPaymentAmount || 0),
       unchangedPaid: Number(unchangedAmount || paidAmount),
@@ -701,6 +726,8 @@ module.exports.paymentForAdvance = async (req, res) => {
 
   const { id } = req.params;
   const { date, productDetails, productTotal } = req.body;
+
+  const utcDate = combineDateWithCurrentTime(date);
 
   try {
     // session.startTransaction();
@@ -767,7 +794,7 @@ module.exports.paymentForAdvance = async (req, res) => {
         refMemo,
         amountToBePaid,
         paidAmount,
-        date: createCustomDate(date),
+        date: utcDate,
         currentDue,
         purchaseId: purchase._id,
         unchangedPaid,
@@ -996,6 +1023,8 @@ module.exports.supplierDuePayment = async (req, res) => {
       bankPaymentAmount = 0,
     } = req.body;
 
+    const utcDate = combineDateWithCurrentTime(date);
+
     console.log(amount);
 
     if (!supplierId || Number(amount) <= 0) {
@@ -1036,7 +1065,7 @@ module.exports.supplierDuePayment = async (req, res) => {
       amount: Number(amount),
       currentDue: currentBalance,
       currentBalance,
-      date: date || new Date(),
+      date: utcDate,
       cash: Number(cash),
       bankPaymentAmount: Number(bankPaymentAmount),
       unchangedPaid: paidAmount,
