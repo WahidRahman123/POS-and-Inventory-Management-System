@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, NavLink } from "react-router-dom";
 
 const SideBar = ({ closeSidebar }) => {
   const navigate = useNavigate();
@@ -18,156 +18,217 @@ const SideBar = ({ closeSidebar }) => {
       </div>
 
       <nav className="flex flex-col mt-4 overflow-y-auto">
-        <Link
+        <NavLink
           to="/"
+          end
           onClick={closeSidebar}
-          className="flex items-center p-4 hover:bg-gray-300"
+          className={({ isActive }) =>
+            `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+          }
         >
           <span className="mr-3">📊</span> Dashboard
-        </Link>
-        <Link
+        </NavLink>
+        <NavLink
           to="/point-of-sale"
+          end
           onClick={closeSidebar}
-          className="flex items-center p-4 hover:bg-gray-300"
+          className={({ isActive }) =>
+            `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+          }
         >
           <span className="mr-3">📠</span> POS
-        </Link>
+        </NavLink>
 
-        <Link
+        <NavLink
           to="/product"
+          end
           onClick={closeSidebar}
-          className="flex items-center p-4 hover:bg-gray-300"
+          className={({ isActive }) =>
+            `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+          }
         >
           <span className="mr-3">📦</span> Inventory
-        </Link>
-        <Link
+        </NavLink>
+        <NavLink
           to="/product/add"
+          end
           onClick={closeSidebar}
-          className="flex items-center p-4 hover:bg-gray-300"
+          className={({ isActive }) =>
+            `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+          }
         >
           <span className="mr-3">➕</span> Add Item
-        </Link>
-        <Link
+        </NavLink>
+        <NavLink
           to="/purchase"
+          end
           onClick={closeSidebar}
-          className="flex items-center p-4 hover:bg-gray-300"
+          className={({ isActive }) =>
+            `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+          }
         >
           <span className="mr-3">📅</span> Purchase
-        </Link>
-        <Link
+        </NavLink>
+        <NavLink
             to="/product-exchange"
+            end
             onClick={closeSidebar}
-            className="flex items-center p-4 hover:bg-gray-300"
+            className={({ isActive }) =>
+              `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+            }
           >
             <span className="mr-3">📅</span> Product Exchange
-          </Link>
-        <Link
+          </NavLink>
+        <NavLink
             to="/exchange-product-sell"
+            end
             onClick={closeSidebar}
-            className="flex items-center p-4 hover:bg-gray-300"
+            className={({ isActive }) =>
+              `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+            }
           >
             <span className="mr-3">📅</span> Exchange Product Sell
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             to="/company-return"
+            end
             onClick={closeSidebar}
-            className="flex items-center p-4 hover:bg-gray-300"
+            className={({ isActive }) =>
+              `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+            }
           >
             <span className="mr-3">📅</span> Exchange Return To Company
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             to="/company-sales-return"
+            end
             onClick={closeSidebar}
-            className="flex items-center p-4 hover:bg-gray-300"
+            className={({ isActive }) =>
+              `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+            }
           >
             <span className="mr-3">📅</span> Sales Return To Company
-          </Link>
+          </NavLink>
 
-          <Link
+          <NavLink
             to="/purchase-return"
+            end
             onClick={closeSidebar}
-            className="flex items-center p-4 hover:bg-gray-300"
+            className={({ isActive }) =>
+              `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+            }
           >
             <span className="mr-3">📅</span> Purchase Return
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             to="/purchase-return-statement"
+            end
             onClick={closeSidebar}
-            className="flex items-center p-4 hover:bg-gray-300"
+            className={({ isActive }) =>
+              `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+            }
           >
             <span className="mr-3">📅</span> Purchase Return Statement
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             to="/sales-return"
+            end
             onClick={closeSidebar}
-            className="flex items-center p-4 hover:bg-gray-300"
+            className={({ isActive }) =>
+              `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+            }
           >
             <span className="mr-3">📅</span> Sales Return
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             to="/sales-return-statement"
+            end
             onClick={closeSidebar}
-            className="flex items-center p-4 hover:bg-gray-300"
+            className={({ isActive }) =>
+              `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+            }
           >
             <span className="mr-3">📅</span> Sales Return Statement
-          </Link>
+          </NavLink>
 
         {user?.role === "admin" && (
-          <Link
+          <NavLink
             to="/sales-report"
+            end
             onClick={closeSidebar}
-            className="flex items-center p-4 hover:bg-gray-300"
+            className={({ isActive }) =>
+              `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+            }
           >
             <span className="mr-3">📅</span> Sales Report
-          </Link>
+          </NavLink>
           
         )}
 
-        <Link
+        <NavLink
           to="/category"
+          end
           onClick={closeSidebar}
-          className="flex items-center p-4 hover:bg-gray-300"
+          className={({ isActive }) =>
+            `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+          }
         >
           <span className="mr-3">🏷️</span> Categories
-        </Link>
+        </NavLink>
 
-        <Link
+        <NavLink
           to="/customer"
+          end
           onClick={closeSidebar}
-          className="flex items-center p-4 hover:bg-gray-300"
+          className={({ isActive }) =>
+            `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+          }
         >
           <span className="mr-3">👤</span> Customer
-        </Link>
-        <Link to="/customer-statement" onClick={closeSidebar} className="flex items-center p-4 hover:bg-gray-300">
+        </NavLink>
+        <NavLink to="/customer-statement" end onClick={closeSidebar} className={({ isActive }) =>
+          `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+        }>
           <span className="mr-3">📅</span> Customer Statement 
-        </Link>
+        </NavLink>
 
-        <Link
+        <NavLink
           to="/purchaser"
+          end
           onClick={closeSidebar}
-          className="flex items-center p-4 hover:bg-gray-300"
+          className={({ isActive }) =>
+            `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+          }
         >
           <span className="mr-3">👤</span> Supplier
-        </Link>
-        <Link
+        </NavLink>
+        <NavLink
           to="/purchaser-statement"
+          end
           onClick={closeSidebar}
-          className="flex items-center p-4 hover:bg-gray-300"
+          className={({ isActive }) =>
+            `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+          }
         >
           <span className="mr-3">📅</span> Supplier Statement
-        </Link>
-        <Link to="/expense-management" onClick={closeSidebar} className="flex items-center p-4 hover:bg-gray-300">
+        </NavLink>
+        <NavLink to="/expense-management" end onClick={closeSidebar} className={({ isActive }) =>
+          `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+        }>
           <span className="mr-3">💸</span> Expense Management
-        </Link>
+        </NavLink>
 
         {user?.role === "admin" && (
-          <Link
+          <NavLink
             to="/users"
+            end
             onClick={closeSidebar}
-            className="flex items-center p-4 hover:bg-gray-300"
+            className={({ isActive }) =>
+              `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
+            }
           >
             <span className="mr-3">👤</span> User Management
-          </Link>
+          </NavLink>
         )}
       </nav>
 
