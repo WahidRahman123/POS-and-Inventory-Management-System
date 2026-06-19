@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useReactToPrint } from "react-to-print";
 import { fetchCompanyProductReturnTRForSupplierName } from "../features/CompanyProductReturn/companyProductReturnSlice";
 import { useEffect } from "react";
+import dayjs from "../utils/date.js";
 
 const CompanyStatement = () => {
   const { user } = useSelector((state) => state.auth);
@@ -93,7 +94,9 @@ const CompanyStatement = () => {
                   Company Ledger Statement
                 </h1>
                 <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">
-                  Statement Date: {new Date().toLocaleDateString("en-GB")}
+                  Statement Date: {dayjs()
+                    .tz("Asia/Dhaka")
+                    .format("DD-MM-YYYY")}
                 </p>
               </div>
               <div className="text-right hidden sm:block">
@@ -186,9 +189,11 @@ const CompanyStatement = () => {
                             className={`${isPayment ? "bg-green-50/60" : "hover:bg-gray-50/50"} transition-colors`}
                           >
                             <td className="px-6 py-4 text-[11px] font-bold text-gray-500 font-mono">
-                              {new Date(transaction.date)
-                                .toLocaleDateString("en-GB")
-                                .replaceAll("/", "-")}
+                              {
+                                dayjs(transaction.date)
+                                  .tz("Asia/Dhaka")
+                                  .format("DD-MM-YYYY")
+                              }
                             </td>
                             <td className="px-6 py-4">
                               <span
@@ -204,24 +209,24 @@ const CompanyStatement = () => {
                                 {isPayment
                                   ? "CASH RECEIVED FROM COMPANY"
                                   : transaction.companyProductReturnId?.products.map(
-                                      (p, i) => (
-                                        <div key={i} className="mb-1">
-                                          <div>{p.productName}</div>
-                                          <div className="text-[9px] text-gray-400 font-black uppercase tracking-tighter">
-                                            Qty:{" "}
-                                            {
-                                              p.quantity
-                                            }
-                                          </div>
-                                          <div className="text-[9px] text-gray-400 font-black uppercase tracking-tighter">
-                                            wgt:{" "}
-                                            {
-                                              p.qtyInKg
-                                            }
-                                          </div>
+                                    (p, i) => (
+                                      <div key={i} className="mb-1">
+                                        <div>{p.productName}</div>
+                                        <div className="text-[9px] text-gray-400 font-black uppercase tracking-tighter">
+                                          Qty:{" "}
+                                          {
+                                            p.quantity
+                                          }
                                         </div>
-                                      ),
-                                    )}
+                                        <div className="text-[9px] text-gray-400 font-black uppercase tracking-tighter">
+                                          wgt:{" "}
+                                          {
+                                            p.qtyInKg
+                                          }
+                                        </div>
+                                      </div>
+                                    ),
+                                  )}
                               </span>
                             </td>
                             <td className="px-6 py-4 text-right font-black">

@@ -2507,6 +2507,7 @@ import {
 } from "../features/purchase/purchaseSlice";
 import Decimal from "decimal.js";
 import axios from "axios";
+import dayjs from "../utils/date.js";
 
 const Purchase = () => {
   const { user } = useSelector((state) => state.auth);
@@ -2703,9 +2704,9 @@ const Purchase = () => {
   const totalAmount =
     purchaseType === "normal"
       ? products.reduce(
-          (acc, p) => acc.plus(new Decimal(Number(p.subTotal || 0))),
-          new Decimal(0),
-        )
+        (acc, p) => acc.plus(new Decimal(Number(p.subTotal || 0))),
+        new Decimal(0),
+      )
       : new Decimal(0);
 
   const paid = purchaseType === "normal" ? new Decimal(0) : Number(advancePaymentAmount);
@@ -3307,11 +3308,11 @@ const Purchase = () => {
                             rowSpan={rowspan}
                             className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2"
                           >
-                            {new Date(purchase.createdAt)
-                              .toLocaleDateString("en-GB", {
-                                timeZone: "Asia/Dhaka",
-                              })
-                              .replaceAll("/", "-")}
+                            {
+                              dayjs(purchase.createdAt)
+                                .tz("Asia/Dhaka")
+                                .format("DD-MM-YYYY")
+                            }
                           </td>
                           <td
                             rowSpan={rowspan}

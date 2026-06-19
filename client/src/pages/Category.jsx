@@ -7,6 +7,7 @@ import {
   deleteCategory,
   fetchAllCategories,
 } from "../features/category/categorySlice";
+import dayjs from "../utils/date.js";
 
 const Category = () => {
   const { user } = useSelector((state) => state.auth);
@@ -114,9 +115,8 @@ const Category = () => {
             <button
               type="submit"
               disabled={loading && aid}
-              className={`text-white px-3 py-2 rounded-md text-sm ${
-                loading && aid ? "bg-blue-400" : "bg-blue-600 hover:bg-blue-700"
-              }`}
+              className={`text-white px-3 py-2 rounded-md text-sm ${loading && aid ? "bg-blue-400" : "bg-blue-600 hover:bg-blue-700"
+                }`}
             >
               {loading && aid ? <BeatLoader size={3} /> : "Add"}
             </button>
@@ -172,9 +172,10 @@ const Category = () => {
                   <td className="p-2">{(page - 1) * 15 + idx + 1}</td>
                   <td className="p-2 hidden sm:table-cell">
                     {cat.createdAt
-                      ? `${new Date(cat.createdAt).toLocaleDateString(
-                          "en-GB"
-                        )} / ${new Date(cat.createdAt).toLocaleTimeString()}`
+                      ?
+                      dayjs(cat.createdAt)
+                        .tz("Asia/Dhaka")
+                        .format("DD MMM YYYY, hh:mm A")
                       : "-"}
                   </td>
                   <td className="p-2">{cat.name}</td>
@@ -188,11 +189,10 @@ const Category = () => {
                     <button
                       disabled={loading && did === cat._id}
                       onClick={() => handleDelete(cat._id)}
-                      className={`text-xs text-white px-2 py-1 rounded ${
-                        loading && did === cat._id
+                      className={`text-xs text-white px-2 py-1 rounded ${loading && did === cat._id
                           ? "bg-red-400"
                           : "bg-red-500 hover:bg-red-600"
-                      }`}
+                        }`}
                     >
                       {loading && did === cat._id ? (
                         <BeatLoader size={3} />
@@ -220,9 +220,8 @@ const Category = () => {
           <button
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
             disabled={page === 1}
-            className={`${
-              page === 1 ? "" : "cursor-pointer hover:bg-black hover:text-white"
-            } px-2 py-1 border rounded  disabled:opacity-50`}
+            className={`${page === 1 ? "" : "cursor-pointer hover:bg-black hover:text-white"
+              } px-2 py-1 border rounded  disabled:opacity-50`}
           >
             Prev
           </button>
@@ -232,11 +231,10 @@ const Category = () => {
           <button
             onClick={() => setCurrentPage((p) => Math.min(p + 1, pages))}
             disabled={page === pages}
-            className={`${
-              page === pages
+            className={`${page === pages
                 ? ""
                 : "cursor-pointer hover:bg-black hover:text-white"
-            }  px-2 py-1 border rounded  disabled:opacity-50`}
+              }  px-2 py-1 border rounded  disabled:opacity-50`}
           >
             Next
           </button>

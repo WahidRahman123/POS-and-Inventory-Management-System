@@ -5,6 +5,7 @@ import { useReactToPrint } from "react-to-print";
 import { FaArrowLeft, FaPrint, FaFilter } from "react-icons/fa";
 import { fetchSalesReturnsForCustomerName } from "../features/SalesReturn/salesReturnSlice";
 import { fetchPurchaseReturnsForSupplierName } from "../features/PurchaseReturn/purchaseReturnSlice";
+import dayjs from "../utils/date.js";
 
 const PurchaseReturnStatement = () => {
   const { user } = useSelector((state) => state.auth);
@@ -177,9 +178,11 @@ const PurchaseReturnStatement = () => {
                           className={`${isPayment ? "bg-blue-50/30" : "hover:bg-gray-50/50"} transition-colors`}
                         >
                           <td className="px-4 py-4 whitespace-nowrap text-gray-500 font-medium text-xs">
-                            {new Date(transaction.date)
-                              .toLocaleDateString("en-GB")
-                              .replaceAll("/", "-")}
+                            {
+                              dayjs(transaction.date)
+                                .tz("Asia/Dhaka")
+                                .format("DD-MM-YYYY")
+                            }
                           </td>
                           <td className="px-6 py-4">
                             <span className="px-4 py-4 font-bold text-blue-700">
@@ -200,8 +203,8 @@ const PurchaseReturnStatement = () => {
                               {isPayment
                                 ? `Payment against Memo-${transaction.purchaseReturnId.memo}`
                                 : transaction.purchaseReturnId?.products
-                                    ?.map((p) => p.productName)
-                                    .join(", ") || "Sales Items"}
+                                  ?.map((p) => p.productName)
+                                  .join(", ") || "Sales Items"}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-right font-black">

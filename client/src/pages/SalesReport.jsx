@@ -6,6 +6,7 @@ import {
 } from "../features/sales/salesSlice";
 import { Link, useNavigate } from "react-router-dom";
 import Decimal from "decimal.js";
+import dayjs from "../utils/date.js";
 
 const SalesReport = () => {
   const { user } = useSelector((state) => state.auth);
@@ -479,11 +480,11 @@ const SalesReport = () => {
                           rowSpan={rowspan}
                           className="border px-2 py-1 sm:px-4 sm:py-2"
                         >
-                          {new Date(sale.createdAt)
-                            .toLocaleDateString("en-GB", {
-                              timeZone: "Asia/Dhaka",
-                            })
-                            .replaceAll("/", "-")}
+                          {
+                            dayjs(sale.createdAt)
+                              .tz("Asia/Dhaka")
+                              .format("DD-MM-YYYY")
+                          }
                         </td>
 
                         <td
@@ -564,9 +565,8 @@ const SalesReport = () => {
 
                         <td
                           rowSpan={rowspan}
-                          className={`border px-2 py-1 sm:px-4 sm:py-2 ${
-                            sale.due > 0 ? "text-red-500 font-bold" : ""
-                          }`}
+                          className={`border px-2 py-1 sm:px-4 sm:py-2 ${sale.due > 0 ? "text-red-500 font-bold" : ""
+                            }`}
                         >
                           {sale.due}
                         </td>

@@ -5,6 +5,7 @@ import { useReactToPrint } from "react-to-print";
 import { FaArrowLeft, FaPrint, FaFilter } from "react-icons/fa";
 import { fetchSalesReturnsForCustomerName } from "../features/SalesReturn/salesReturnSlice";
 import Decimal from "decimal.js";
+import dayjs from "../utils/date.js";
 
 const SalesReturnStatement = () => {
   const { user } = useSelector((state) => state.auth);
@@ -202,9 +203,11 @@ const SalesReturnStatement = () => {
                               )}
                             </td>
                             <td className="px-4 py-4 whitespace-nowrap text-gray-500 font-medium text-xs">
-                              {new Date(transaction.date)
-                                .toLocaleDateString("en-GB")
-                                .replaceAll("/", "-")}
+                              {
+                                dayjs(transaction.date)
+                                  .tz("Asia/Dhaka")
+                                  .format("DD-MM-YYYY")
+                              }
                             </td>
                             <td className="px-6 py-4">
                               <span className="px-4 py-4 font-bold text-blue-700">
@@ -223,8 +226,8 @@ const SalesReturnStatement = () => {
                                 {isPayment
                                   ? `Payment against Memo-${transaction.salesReturnId?.memo}`
                                   : transaction.salesReturnId?.products
-                                      ?.map((p) => p.productName)
-                                      .join(", ") || "Sales Items"}
+                                    ?.map((p) => p.productName)
+                                    .join(", ") || "Sales Items"}
                               </span>
                             </td>
                             <td className="px-6 py-4 text-right font-black">
@@ -559,13 +562,13 @@ const SalesReturnStatement = () => {
                   ৳{Number(totalAmount).toLocaleString()}
                 </p>
                 <div className="text-xl font-black text-orange-600">
-                    <span className="text-gray-400 tracking-tight">
-                      Return Qty:
-                    </span>
-                    <span className="font-mono text-red-600">
-                       {Number(totalReturnQuantity).toLocaleString("en-BD")}
-                    </span>
-                  </div>
+                  <span className="text-gray-400 tracking-tight">
+                    Return Qty:
+                  </span>
+                  <span className="font-mono text-red-600">
+                    {Number(totalReturnQuantity).toLocaleString("en-BD")}
+                  </span>
+                </div>
               </div>
               <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-center">
                 <p className="text-[10px] text-gray-500 uppercase font-bold">
@@ -574,14 +577,14 @@ const SalesReturnStatement = () => {
                 <p className="text-xl font-black text-green-600">
                   ৳{Number(totalPaid).toLocaleString()}
                 </p>
-                 <div className="text-xl font-black text-orange-600">
-                    <span className="text-gray-400 tracking-tight">
-                      Adjusted Qty:
-                    </span>
-                    <span className="font-mono text-green-600">
-                       {Number(totalExchangeQuantity).toLocaleString("en-BD")}
-                    </span>
-                  </div>
+                <div className="text-xl font-black text-orange-600">
+                  <span className="text-gray-400 tracking-tight">
+                    Adjusted Qty:
+                  </span>
+                  <span className="font-mono text-green-600">
+                    {Number(totalExchangeQuantity).toLocaleString("en-BD")}
+                  </span>
+                </div>
               </div>
               <div className="bg-white p-4 rounded-xl border border-blue-200 shadow-sm flex flex-col justify-center">
                 <p className="text-[10px] text-gray-500 uppercase font-bold">
@@ -591,15 +594,15 @@ const SalesReturnStatement = () => {
                   ৳{Number(totalDue).toLocaleString()}
                 </p>
                 <div className="text-xl font-black text-orange-600">
-                    <span className="text-gray-400 tracking-tight">
-                      Pending Qty:
-                    </span>
-                    <span className="font-mono text-red-600">
-                      {Number(
-                        totalReturnQuantity - totalExchangeQuantity,
-                      ).toLocaleString("en-BD")}
-                    </span>
-                  </div>
+                  <span className="text-gray-400 tracking-tight">
+                    Pending Qty:
+                  </span>
+                  <span className="font-mono text-red-600">
+                    {Number(
+                      totalReturnQuantity - totalExchangeQuantity,
+                    ).toLocaleString("en-BD")}
+                  </span>
+                </div>
               </div>
             </div>
 

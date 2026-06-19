@@ -8,6 +8,7 @@ import {
   fetchPurchaseReturn,
   setPurchaseSearchedByInvoiceToEmpty,
 } from "../features/PurchaseReturn/purchaseReturnSlice";
+import dayjs from "../utils/date.js";
 
 const PurchaseReturn = () => {
   const { user } = useSelector((state) => state.auth);
@@ -53,7 +54,7 @@ const PurchaseReturn = () => {
     if (!data.invoiceNo) alert("Enter an invoice number!");
     try {
       dispatch(fetchPurchaseByInvoice({ memo: data.invoiceNo }));
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const handleSubmit = async (e) => {
@@ -160,7 +161,7 @@ const PurchaseReturn = () => {
         paymentMethod: "Cash",
         note: "",
       });
-      
+
       setProducts([
         {
           id: 1,
@@ -172,7 +173,7 @@ const PurchaseReturn = () => {
         },
       ]);
       dispatch(setPurchaseSearchedByInvoiceToEmpty());
-    } catch (error) {}
+    } catch (error) { }
   };
 
   //* Add Product Section Starts
@@ -242,22 +243,22 @@ const PurchaseReturn = () => {
   const totalSaleValue =
     originalSaleProducts.length > 0
       ? originalSaleProducts.reduce(
-          (acc, product) =>
-            acc.plus(
-              new Decimal(Number(product.quantity)).mul(
-                new Decimal(Number(product.unitPrice)),
-              ),
+        (acc, product) =>
+          acc.plus(
+            new Decimal(Number(product.quantity)).mul(
+              new Decimal(Number(product.unitPrice)),
             ),
-          new Decimal(0),
-        )
+          ),
+        new Decimal(0),
+      )
       : new Decimal(0);
 
   const totalReturnValue =
     originalSaleProducts.length > 0
       ? originalSaleProducts.reduce(
-          (acc, product) => acc.plus(new Decimal(Number(product.lineTotal))),
-          new Decimal(0),
-        )
+        (acc, product) => acc.plus(new Decimal(Number(product.lineTotal))),
+        new Decimal(0),
+      )
       : new Decimal(0);
 
   const adjustmentAmount = totalReturnValue.minus(totalExchangeValue);
@@ -417,162 +418,162 @@ const PurchaseReturn = () => {
                 {/* Original Products */}
                 {originalSaleProducts.length > 0
                   ? originalSaleProducts.map((product, index) => (
-                      <div
-                        key={index}
-                        className="grid grid-cols-1 md:grid-cols-8 gap-3 mb-3 items-end bg-white p-3 rounded border border-blue-100"
-                      >
-                        <div className="md:col-span-2">
-                          <label className="block text-xs text-gray-600 mb-1">
-                            Product Name
-                          </label>
-                          <input
-                            type="text"
-                            value={product.productName}
-                            disabled
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1">
-                            Purchase Qty
-                          </label>
-                          <input
-                            type="number"
-                            value={product.availableReturnQty}
-                            disabled
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1">
-                            Purchase Price
-                          </label>
-                          <input
-                            type="number"
-                            value={product.unitPrice}
-                            disabled
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs mb-1 text-red-600">
-                            Return Price
-                          </label>
-                          <input
-                            type="number"
-                            placeholder="Return Price"
-                            // min={product.sellPrice}
-                            min={0}
-                            value={product.returnPrice}
-                            onChange={(e) => {
-                              setOriginalSaleProducts((prev) =>
-                                prev.map((p, i) =>
-                                  i === index
-                                    ? {
-                                        ...p,
-                                        returnPrice: e.target.value,
-                                        lineTotal: Number(
-                                          new Decimal(
-                                            Number(p.returnQuantity),
-                                          ).mul(
-                                            new Decimal(Number(e.target.value)),
-                                          ),
-                                        ),
-                                      }
-                                    : p,
-                                ),
-                              );
-                            }}
-                            step="any"
-                            className="w-full px-3 py-2 border border-red-400 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs mb-1 text-red-600">
-                            Return Qty
-                          </label>
-                          <input
-                            type="number"
-                            placeholder="Qty"
-                            min={1}
-                            max={product.availableReturnQty}
-                            value={product.returnQuantity}
-                            onChange={(e) => {
-                              setOriginalSaleProducts((prev) =>
-                                prev.map((p, i) =>
-                                  i === index
-                                    ? {
-                                        ...p,
-                                        returnQuantity: e.target.value,
-                                        lineTotal: Number(
-                                          new Decimal(
-                                            Number(p.returnPrice),
-                                          ).mul(
-                                            new Decimal(Number(e.target.value)),
-                                          ),
-                                        ),
-                                      }
-                                    : p,
-                                ),
-                              );
-                            }}
-                            step="any"
-                            className="w-full px-3 py-2 border border-red-400 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1">
-                            Qty (kg)
-                          </label>
-                          <input
-                            type="number"
-                            placeholder="kg"
-                            min={0}
-                            value={product.returnQtyInKg}
-                            onChange={(e) => {
-                              setOriginalSaleProducts((prev) =>
-                                prev.map((p, i) =>
-                                  i === index
-                                    ? {
-                                        ...p,
-                                        returnQtyInKg: e.target.value,
-                                      }
-                                    : p,
-                                ),
-                              );
-                            }}
-                            step="any"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs text-gray-600 mb-1">
-                            Line Total
-                          </label>
-                          <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-red-50 text-red-700 font-semibold text-sm">
-                            ৳{" "}
-                            {new Decimal(Number(product.lineTotal)).toFixed(2)}
-                          </div>
-                        </div>
-                        {originalSaleProducts.length > 1 ? (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setOriginalSaleProducts((prev) =>
-                                prev.filter((p, i) => p.productName !== product.productName),
-                              );
-                            }}
-                            className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-sm h-fit mt-5 cursor-pointer"
-                          >
-                            ×
-                          </button>
-                        ) : (
-                          ""
-                        )}
+                    <div
+                      key={index}
+                      className="grid grid-cols-1 md:grid-cols-8 gap-3 mb-3 items-end bg-white p-3 rounded border border-blue-100"
+                    >
+                      <div className="md:col-span-2">
+                        <label className="block text-xs text-gray-600 mb-1">
+                          Product Name
+                        </label>
+                        <input
+                          type="text"
+                          value={product.productName}
+                          disabled
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-sm"
+                        />
                       </div>
-                    ))
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">
+                          Purchase Qty
+                        </label>
+                        <input
+                          type="number"
+                          value={product.availableReturnQty}
+                          disabled
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">
+                          Purchase Price
+                        </label>
+                        <input
+                          type="number"
+                          value={product.unitPrice}
+                          disabled
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs mb-1 text-red-600">
+                          Return Price
+                        </label>
+                        <input
+                          type="number"
+                          placeholder="Return Price"
+                          // min={product.sellPrice}
+                          min={0}
+                          value={product.returnPrice}
+                          onChange={(e) => {
+                            setOriginalSaleProducts((prev) =>
+                              prev.map((p, i) =>
+                                i === index
+                                  ? {
+                                    ...p,
+                                    returnPrice: e.target.value,
+                                    lineTotal: Number(
+                                      new Decimal(
+                                        Number(p.returnQuantity),
+                                      ).mul(
+                                        new Decimal(Number(e.target.value)),
+                                      ),
+                                    ),
+                                  }
+                                  : p,
+                              ),
+                            );
+                          }}
+                          step="any"
+                          className="w-full px-3 py-2 border border-red-400 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs mb-1 text-red-600">
+                          Return Qty
+                        </label>
+                        <input
+                          type="number"
+                          placeholder="Qty"
+                          min={1}
+                          max={product.availableReturnQty}
+                          value={product.returnQuantity}
+                          onChange={(e) => {
+                            setOriginalSaleProducts((prev) =>
+                              prev.map((p, i) =>
+                                i === index
+                                  ? {
+                                    ...p,
+                                    returnQuantity: e.target.value,
+                                    lineTotal: Number(
+                                      new Decimal(
+                                        Number(p.returnPrice),
+                                      ).mul(
+                                        new Decimal(Number(e.target.value)),
+                                      ),
+                                    ),
+                                  }
+                                  : p,
+                              ),
+                            );
+                          }}
+                          step="any"
+                          className="w-full px-3 py-2 border border-red-400 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">
+                          Qty (kg)
+                        </label>
+                        <input
+                          type="number"
+                          placeholder="kg"
+                          min={0}
+                          value={product.returnQtyInKg}
+                          onChange={(e) => {
+                            setOriginalSaleProducts((prev) =>
+                              prev.map((p, i) =>
+                                i === index
+                                  ? {
+                                    ...p,
+                                    returnQtyInKg: e.target.value,
+                                  }
+                                  : p,
+                              ),
+                            );
+                          }}
+                          step="any"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">
+                          Line Total
+                        </label>
+                        <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-red-50 text-red-700 font-semibold text-sm">
+                          ৳{" "}
+                          {new Decimal(Number(product.lineTotal)).toFixed(2)}
+                        </div>
+                      </div>
+                      {originalSaleProducts.length > 1 ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOriginalSaleProducts((prev) =>
+                              prev.filter((p, i) => p.productName !== product.productName),
+                            );
+                          }}
+                          className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-sm h-fit mt-5 cursor-pointer"
+                        >
+                          ×
+                        </button>
+                      ) : (
+                        ""
+                      )}
+                    </div>
+                  ))
                   : ""}
 
                 {/* Original Sale Summary */}
@@ -594,11 +595,10 @@ const PurchaseReturn = () => {
                 {/* LEFT - Refund by Product */}
                 <div
                   onClick={() => setReturnType("product")}
-                  className={`p-4 rounded-lg border-2 cursor-pointer ${
-                    returnType === "product"
+                  className={`p-4 rounded-lg border-2 cursor-pointer ${returnType === "product"
                       ? "border-green-500 bg-green-50"
                       : "border-gray-200 bg-gray-50"
-                  }`}
+                    }`}
                 >
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -621,11 +621,10 @@ const PurchaseReturn = () => {
                 {/* RIGHT - Refund by Cash */}
                 <div
                   onClick={() => setReturnType("cash")}
-                  className={`p-4 rounded-lg border-2 cursor-pointer ${
-                    returnType === "cash"
+                  className={`p-4 rounded-lg border-2 cursor-pointer ${returnType === "cash"
                       ? "border-blue-500 bg-blue-50"
                       : "border-gray-200 bg-gray-50"
-                  }`}
+                    }`}
                 >
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -1134,7 +1133,7 @@ const PurchaseReturn = () => {
                     dateSearchStart: "",
                     dateSearchEnd: "",
                   });
-                  
+
                   setFilterToggler(!filterToggler);
                 }}
                 className="flex-1 sm:flex-none bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600"
@@ -1188,9 +1187,11 @@ const PurchaseReturn = () => {
                     className="hover:bg-gray-50 cursor-pointer"
                   >
                     <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                      {new Date(purchaseReturn.createdAt)
-                        .toLocaleDateString("en-GB")
-                        .replaceAll("/", "-")}
+                      {
+                        dayjs(purchaseReturn.createdAt)
+                          .tz("Asia/Dhaka")
+                          .format("DD-MM-YYYY")
+                      }
                     </td>
                     <td className="border px-2 py-1 sm:px-4 sm:py-2 text-center">
                       {purchaseReturn.memo}
@@ -1201,16 +1202,16 @@ const PurchaseReturn = () => {
                     <td className="border px-2 py-1 sm:px-4 sm:py-2">
                       {purchaseReturn.transactionRecords[0].returnType ===
                         "product" && (
-                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                          Product
-                        </span>
-                      )}
+                          <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                            Product
+                          </span>
+                        )}
                       {purchaseReturn.transactionRecords[0].returnType ===
                         "cash" && (
-                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                          Cash
-                        </span>
-                      )}
+                          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                            Cash
+                          </span>
+                        )}
                     </td>
                     <td className="border px-2 py-1 sm:px-4 sm:py-2 text-red-600">
                       ৳ {purchaseReturn.totalReturnValue}
@@ -1272,11 +1273,10 @@ const PurchaseReturn = () => {
             <button
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={page === 1}
-              className={`${
-                page === 1
+              className={`${page === 1
                   ? ""
                   : "cursor-pointer hover:bg-black hover:text-white"
-              } px-2 py-1 border rounded  disabled:opacity-50`}
+                } px-2 py-1 border rounded  disabled:opacity-50`}
             >
               Prev
             </button>
@@ -1286,11 +1286,10 @@ const PurchaseReturn = () => {
             <button
               onClick={() => setCurrentPage((p) => Math.min(p + 1, pages))}
               disabled={page === pages}
-              className={`${
-                page === pages
+              className={`${page === pages
                   ? ""
                   : "cursor-pointer hover:bg-black hover:text-white"
-              }  px-2 py-1 border rounded  disabled:opacity-50`}
+                }  px-2 py-1 border rounded  disabled:opacity-50`}
             >
               Next
             </button>

@@ -6,6 +6,7 @@ import { useReactToPrint } from "react-to-print";
 import { FaArrowLeft, FaPrint, FaFilter } from "react-icons/fa";
 import { fetchPurchaseReturnsForSupplierName } from "../features/PurchaseReturn/purchaseReturnSlice";
 import { fetchSalesForCustomer } from "../features/sales/salesSlice";
+import dayjs from "../utils/date.js";
 
 const CustomerStatement = () => {
   const { user } = useSelector((state) => state.auth);
@@ -131,7 +132,9 @@ const CustomerStatement = () => {
                 Sales Ledger Statement
               </h1>
               <p className="text-xs text-gray-500 font-bold uppercase">
-                Statement Date: {new Date().toLocaleDateString("en-GB")}
+                Statement Date: {dayjs()
+                  .tz("Asia/Dhaka")
+                  .format("DD-MM-YYYY")}
               </p>
             </div>
 
@@ -240,9 +243,11 @@ const CustomerStatement = () => {
                             className={`${isPayment ? "bg-green-50/60" : "hover:bg-gray-50/50"} transition-colors`}
                           >
                             <td className="px-6 py-4 text-[11px] font-bold text-gray-500">
-                              {new Date(transaction.date)
-                                .toLocaleDateString("en-GB")
-                                .replaceAll("/", "-")}
+                              {
+                                dayjs(transaction.date)
+                                  .tz("Asia/Dhaka")
+                                  .format("DD-MM-YYYY")
+                              }
                             </td>
                             <td className="px-6 py-4">
                               <span
@@ -258,16 +263,16 @@ const CustomerStatement = () => {
                                 {isPayment
                                   ? "PAYMENT AGAINST DUE"
                                   : transaction.salesId?.products
-                                      ?.map((p) => p.productName)
-                                      .join(", ") || "Purchase Items"}
+                                    ?.map((p) => p.productName)
+                                    .join(", ") || "Purchase Items"}
                               </span>
                             </td>
                             <td className="px-6 py-4 text-left font-black">
                               {transaction.saleTotal
                                 ? `৳ ${transaction.saleTotal.toLocaleString(
-                                    "en-BD",
-                                    { minimumFractionDigits: 2 },
-                                  )}`
+                                  "en-BD",
+                                  { minimumFractionDigits: 2 },
+                                )}`
                                 : "--"}
                             </td>
                             {/* <td className="px-6 py-4 text-right font-black">
@@ -281,11 +286,11 @@ const CustomerStatement = () => {
                               ৳{" "}
                               {transaction.advanceAmount
                                 ? (
-                                    transaction.advanceAmount +
-                                    transaction.paidAmount
-                                  ).toLocaleString("en-BD", {
-                                    minimumFractionDigits: 2,
-                                  })
+                                  transaction.advanceAmount +
+                                  transaction.paidAmount
+                                ).toLocaleString("en-BD", {
+                                  minimumFractionDigits: 2,
+                                })
                                 : 0}
                             </td>
                             <td className="px-6 py-4 text-right font-black text-green-600">

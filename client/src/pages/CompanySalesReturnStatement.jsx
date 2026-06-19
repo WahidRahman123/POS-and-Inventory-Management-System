@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useReactToPrint } from "react-to-print";
 import { useEffect } from "react";
 import { fetchCompanySalesReturnTRForSupplierName } from "../features/CompanySalesReturn/companySalesReturnSlice";
+import dayjs from "../utils/date.js";
 
 const CompanySalesReturnStatement = () => {
   const { user } = useSelector((state) => state.auth);
@@ -93,7 +94,9 @@ const CompanySalesReturnStatement = () => {
                   Company Sales Return Ledger Statement
                 </h1>
                 <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">
-                  Statement Date: {new Date().toLocaleDateString("en-GB")}
+                  Statement Date: {dayjs()
+                    .tz("Asia/Dhaka")
+                    .format("DD-MM-YYYY")}
                 </p>
               </div>
               <div className="text-right hidden sm:block">
@@ -183,9 +186,11 @@ const CompanySalesReturnStatement = () => {
                             className={`${isPayment ? "bg-green-50/60" : "hover:bg-gray-50/50"} transition-colors`}
                           >
                             <td className="px-6 py-4 text-[11px] font-bold text-gray-500 font-mono">
-                              {new Date(transaction.date)
-                                .toLocaleDateString("en-GB")
-                                .replaceAll("/", "-")}
+                              {
+                                dayjs(transaction.date)
+                                  .tz("Asia/Dhaka")
+                                  .format("DD-MM-YYYY")
+                              }
                             </td>
                             <td className="px-6 py-4">
                               <span
@@ -260,7 +265,7 @@ const CompanySalesReturnStatement = () => {
                             <td className="px-6 py-4 text-center print:hidden">
                               <div className="flex items-center justify-center gap-3">
                                 {!isPayment &&
-                                transaction.companySalesReturnId?.dueQty > 0 ? (
+                                  transaction.companySalesReturnId?.dueQty > 0 ? (
                                   <Link
                                     to={`/company-sales-return/${transaction.companySalesReturnId._id}/edit-due`}
                                     className="text-green-600 font-black text-[10px] uppercase underline hover:text-green-800"

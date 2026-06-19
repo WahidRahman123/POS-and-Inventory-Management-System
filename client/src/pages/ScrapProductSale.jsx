@@ -30,6 +30,7 @@ import {
   addScrapProductSell,
   fetchScrapProductSell,
 } from "../features/ScrapProductSell/scrapProductSellSlice";
+import dayjs from "../utils/date.js";
 
 const ScrapProductSale = () => {
   const navigate = useNavigate();
@@ -255,15 +256,15 @@ const ScrapProductSale = () => {
       prev.map((product) =>
         product.id === id
           ? {
-              ...product,
-              productId: productData.productId,
-              productName: productData.productName,
-              quantity: productData.tempQuantity,
-              qtyInKg: productData.tempQtyInKg,
+            ...product,
+            productId: productData.productId,
+            productName: productData.productName,
+            quantity: productData.tempQuantity,
+            qtyInKg: productData.tempQtyInKg,
 
-              tempQuantity: productData.tempQuantity,
-              tempQtyInKg: productData.tempQtyInKg,
-            }
+            tempQuantity: productData.tempQuantity,
+            tempQtyInKg: productData.tempQtyInKg,
+          }
           : product,
       ),
     );
@@ -563,7 +564,7 @@ const ScrapProductSale = () => {
                       {/* SEARCH DROPDOWN */}
                       {activeSearchRow === product.id &&
                         productExchangeStockSearchedByProductName.length >
-                          0 && (
+                        0 && (
                           <div className="absolute z-50 w-full bg-white shadow-xl border border-gray-300 rounded-lg mt-1 max-h-60 overflow-y-auto">
                             {productExchangeStockSearchedByProductName.map(
                               (p, i) => (
@@ -836,11 +837,11 @@ const ScrapProductSale = () => {
                     }
                   >
                     <td className="p-4 font-bold text-gray-400 italic font-mono">
-                      {new Date(scrapProductSell.createdAt)
-                        .toLocaleDateString("en-GB", {
-                          timeZone: "Asia/Dhaka",
-                        })
-                        .replaceAll("/", "-")}
+                      {
+                        dayjs(scrapProductSell.createdAt)
+                          .tz("Asia/Dhaka")
+                          .format("DD-MM-YYYY")
+                      }
                     </td>
                     <td className="p-4 text-gray-500 uppercase font-black">
                       {scrapProductSell.memo}

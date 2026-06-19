@@ -12,6 +12,7 @@ import {
   fetchSalesReturns,
   setSaleSearchedByInvoiceToEmpty,
 } from "../features/SalesReturn/salesReturnSlice";
+import dayjs from "../utils/date.js";
 
 const SalesReturn = () => {
   const { user } = useSelector((state) => state.auth);
@@ -412,14 +413,14 @@ const SalesReturn = () => {
                             prev.map((p, i) =>
                               i === index
                                 ? {
-                                    ...p,
-                                    returnPrice: e.target.value,
-                                    lineTotal: Number(
-                                      new Decimal(Number(p.returnQuantity)).mul(
-                                        Number(e.target.value),
-                                      ),
+                                  ...p,
+                                  returnPrice: e.target.value,
+                                  lineTotal: Number(
+                                    new Decimal(Number(p.returnQuantity)).mul(
+                                      Number(e.target.value),
                                     ),
-                                  }
+                                  ),
+                                }
                                 : p,
                             ),
                           );
@@ -443,14 +444,14 @@ const SalesReturn = () => {
                             prev.map((p, i) =>
                               i === index
                                 ? {
-                                    ...p,
-                                    returnQuantity: e.target.value,
-                                    lineTotal: Number(
-                                      new Decimal(Number(p.returnPrice)).mul(
-                                        Number(e.target.value),
-                                      ),
+                                  ...p,
+                                  returnQuantity: e.target.value,
+                                  lineTotal: Number(
+                                    new Decimal(Number(p.returnPrice)).mul(
+                                      Number(e.target.value),
                                     ),
-                                  }
+                                  ),
+                                }
                                 : p,
                             ),
                           );
@@ -970,9 +971,11 @@ const SalesReturn = () => {
                         {idx === 0 && (
                           <>
                             <td rowSpan={rowspan} className="border px-4 py-3">
-                              {new Date(sr.createdAt)
-                                .toLocaleDateString("en-GB")
-                                .replaceAll("/", "-")}
+                              {
+                                dayjs(sr.createdAt)
+                                  .tz("Asia/Dhaka")
+                                  .format("DD-MM-YYYY")
+                              }
                             </td>
                             <td
                               rowSpan={rowspan}

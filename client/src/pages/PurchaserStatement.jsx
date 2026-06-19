@@ -641,6 +641,7 @@ import { fetchPurchasesForSupplierName } from "../features/statements/sStatement
 import { useReactToPrint } from "react-to-print";
 import { FaArrowLeft, FaPrint } from "react-icons/fa";
 import Decimal from 'decimal.js';
+import dayjs from "../utils/date.js";
 
 const PurchaserStatement = () => {
   const { user } = useSelector((state) => state.auth);
@@ -776,7 +777,11 @@ const PurchaserStatement = () => {
 
                 return (
                   <tr key={t._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">{new Date(t.date).toLocaleDateString('en-GB')}</td>
+                    <td className="px-6 py-4">{
+                      dayjs(t.date)
+                        .tz("Asia/Dhaka")
+                        .format("DD-MM-YYYY")
+                    }</td>
                     <td className="px-6 py-4 font-medium">{t.refMemo}</td>
                     <td className="px-6 py-4">
                       {/* {isAdvance ?  : 

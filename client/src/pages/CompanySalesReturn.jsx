@@ -26,6 +26,7 @@ import {
   searchProductsforPOS,
   setProductsBySearchToEmpty,
 } from "../features/product/productSlice";
+import dayjs from "../utils/date.js";
 
 const CompanySalesReturn = () => {
   const navigate = useNavigate();
@@ -743,11 +744,11 @@ const CompanySalesReturn = () => {
                     }
                   >
                     <td className="p-4 font-bold text-gray-400 italic font-mono">
-                      {new Date(salesReturn.createdAt)
-                        .toLocaleDateString("en-GB", {
-                          timeZone: "Asia/Dhaka",
-                        })
-                        .replaceAll("/", "-")}
+                      {
+                        dayjs(salesReturn.createdAt)
+                          .tz("Asia/Dhaka")
+                          .format("DD-MM-YYYY")
+                      }
                     </td>
                     <td className="p-4 text-gray-500 uppercase font-black">
                       {salesReturn.memo}

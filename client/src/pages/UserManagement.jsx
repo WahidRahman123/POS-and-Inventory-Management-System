@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addUser, deleteUser, fetchUsers } from "../features/user/userSlice";
 import { useNavigate } from "react-router-dom";
+import dayjs from "../utils/date.js";
 
 const UserManagement = () => {
   const { user } = useSelector((state) => state.auth);
@@ -127,9 +128,8 @@ const UserManagement = () => {
               setUserInput({ ...userInput, confirmPassword: e.target.value })
             }
             placeholder="Confirm Password"
-            className={`w-full border border-gray-300 rounded-md px-3 py-2 ${
-              passerror ? "" : "mb-1"
-            }`}
+            className={`w-full border border-gray-300 rounded-md px-3 py-2 ${passerror ? "" : "mb-1"
+              }`}
             required
           />
           <div className="text-red-700 text-sm mb-2">
@@ -151,11 +151,10 @@ const UserManagement = () => {
           <button
             type="submit"
             disabled={loading && aid ? true : false}
-            className={`w-full text-white font-semibold py-2 rounded-md ${
-              loading && aid
+            className={`w-full text-white font-semibold py-2 rounded-md ${loading && aid
                 ? "cursor-not-allowed bg-blue-500"
                 : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
-            }`}
+              }`}
           >
             {loading && aid ? "Adding..." : "Add New User"}
           </button>
@@ -181,13 +180,9 @@ const UserManagement = () => {
                   <td className="p-2">{user.role}</td>
                   <td className="p-2">
                     {user.createdAt ? (
-                      `${new Date(user.createdAt)
-                        .toLocaleDateString("en-GB", { timeZone: "Asia/Dhaka" })
-                        .replaceAll("/", "-")} / ${new Date(
-                        user.createdAt
-                      ).toLocaleTimeString("en-US", {
-                        timeZone: "Asia/Dhaka",
-                      })}`
+                      dayjs(user.createdAt)
+                        .tz("Asia/Dhaka")
+                        .format("DD-MM-YYYY / hh:mm A")
                     ) : (
                       <span className="font-bold">-</span>
                     )}
@@ -197,16 +192,15 @@ const UserManagement = () => {
                       onClick={() => handleDelete(user._id)}
                       disabled={
                         user._id === "689e359f51378e685a5e5ad5" ||
-                        (loading && did && did === user._id)
+                          (loading && did && did === user._id)
                           ? true
                           : false
                       }
-                      className={`text-xs  text-white px-2 py-1 rounded  ${
-                        user._id === "689e359f51378e685a5e5ad5" ||
-                        (loading && did && did === user._id)
+                      className={`text-xs  text-white px-2 py-1 rounded  ${user._id === "689e359f51378e685a5e5ad5" ||
+                          (loading && did && did === user._id)
                           ? "cursor-not-allowed bg-red-400"
                           : "hover:bg-red-600 bg-red-500 cursor-pointer"
-                      }`}
+                        }`}
                     >
                       {loading && did && did === user._id
                         ? "Deleting..."

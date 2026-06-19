@@ -237,6 +237,7 @@ import {
 } from "../features/expense/expenseSlice";
 import { FaArrowLeft, FaPlus, FaTrash, FaPrint } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import dayjs from "../utils/date.js";
 
 const ExpenseManagement = () => {
   const dispatch = useDispatch();
@@ -314,8 +315,8 @@ const ExpenseManagement = () => {
 
     expenses.forEach((item) => {
       // ডেট ফরম্যাট সেম রাখার জন্য standard স্ট্রিং তৈরি
-      const dateKey = new Date(item.date).toDateString(); 
-      
+      const dateKey = new Date(item.date).toDateString();
+
       if (!groups[dateKey]) {
         groups[dateKey] = {
           date: item.date,
@@ -354,8 +355,8 @@ const ExpenseManagement = () => {
 
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800">Expense Management</h1>
-          <button 
-            onClick={() => navigate(-1)} 
+          <button
+            onClick={() => navigate(-1)}
             className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-800 hover:text-white rounded-lg transition"
           >
             <FaArrowLeft /> Back
@@ -465,17 +466,21 @@ const ExpenseManagement = () => {
                     const rowSpanCount = group.items.length;
 
                     return group.items.map((subItem, itemIdx) => (
-                      <tr 
-                        key={`${group.date}-${itemIdx}`} 
+                      <tr
+                        key={`${group.date}-${itemIdx}`}
                         className={`${groupIdx % 2 === 0 ? "bg-white" : "bg-gray-50/60"} hover:bg-blue-50/40 transition-colors`}
                       >
                         {/* ১. শুধুমাত্র প্রথম সাব-আইটেমের জন্য ডেট সেলটি rowSpan হবে */}
                         {itemIdx === 0 && (
-                          <td 
-                            rowSpan={rowSpanCount} 
+                          <td
+                            rowSpan={rowSpanCount}
                             className="border border-gray-300 px-4 py-3 font-medium text-gray-900 align-middle whitespace-nowrap"
                           >
-                            {new Date(group.date).toLocaleDateString("en-GB").replaceAll("/", "-")}
+                            {
+                              dayjs(group.date)
+                                .tz("Asia/Dhaka")
+                                .format("DD-MM-YYYY")
+                            }
                           </td>
                         )}
 
@@ -490,14 +495,14 @@ const ExpenseManagement = () => {
                         {/* ৩. গ্র্যান্ড টোটাল কলাম ও অ্যাকশন বাটন rowSpan হয়ে মার্জ থাকবে */}
                         {itemIdx === 0 && (
                           <>
-                            <td 
-                              rowSpan={rowSpanCount} 
+                            <td
+                              rowSpan={rowSpanCount}
                               className="border border-gray-300 px-4 py-3 text-right font-bold text-red-600 font-mono text-base align-middle"
                             >
                               ৳ {group.totalAmount.toFixed(2)}
                             </td>
-                            <td 
-                              rowSpan={rowSpanCount} 
+                            <td
+                              rowSpan={rowSpanCount}
                               className="border border-gray-300 px-4 py-3 text-center align-middle"
                             >
                               <button className="text-blue-600 hover:text-blue-800 p-2 border border-gray-200 rounded hover:bg-blue-50 transition shadow-sm bg-white">
