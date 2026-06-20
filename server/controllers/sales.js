@@ -83,6 +83,8 @@ module.exports.createSales = async (req, res) => {
       customer = await Customer.findById(salesData.customerId);
     }
 
+    const previousBalance = customer ? customer.currentBalance : 0;
+
     //! seeder use korle comment kore nibo
     if (customer) {
       // 1. Adding advanceBalance to the customer's advanceBalance
@@ -193,16 +195,20 @@ module.exports.createSales = async (req, res) => {
     }
     customer.salesRecord.push(sale._id);
     transaction.currentBalance = customer.advanceBalance - customer.due;
+    transaction.previousBalance = previousBalance;
     await customer.save();
     await transaction.save();
 
     // const createdSale = await sale.save({ session });
     const createdSale = await sale.save();
 
+    const customerCurrentBalance = customer.currentBalance;
+
     // await session.commitTransaction();
     // session.endSession();
+    const finalSale = createdSale.toObject();
 
-    res.status(201).json(createdSale);
+    res.status(201).json({ ...finalSale, previousBalance, currentBalance: customerCurrentBalance });
   } catch (error) {
     // if (session.inTransaction()) {
     //   await session.abortTransaction();
@@ -367,6 +373,8 @@ module.exports.addPayment = async (req, res) => {
     const customer = await Customer.findOne({ name });
     // console.log(customer);
 
+    const previousBalance = customer ? customer.currentBalance : 0;
+
     if (customer) {
       // 1. Adding advanceBalance to the customer's advanceBalance
       customer.advanceBalance += advanceBalance;
@@ -425,6 +433,7 @@ module.exports.addPayment = async (req, res) => {
       cash,
       bankPaymentAmount,
       exchange,
+      previousBalance,
       exchangeMemoId,
       exchangeDetails,
       currentBalance,
@@ -436,10 +445,11 @@ module.exports.addPayment = async (req, res) => {
       ),
     });
 
+    await customer.save();
+    
     // await transaction.save({ session });
     await transaction.save();
     // await sale.save({ session });
-    await customer.save();
 
     if (exchangeMemoId && exchange > 0) {
       // const memoData =

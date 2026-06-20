@@ -48,6 +48,7 @@ import EditCompanySalesReturnDue from "./pages/EditCompanySalesReturnDue";
 import PurchaseAdvanceSettlement from "./pages/PurchaseAdvanceSettlement";
 import PurchaseSupplierDueList from "./pages/PurchaseSupplierDueList";
 import ScrapProductSale from "./pages/ScrapProductSale";
+import InvoiceForCustomer from "./pages/InvoiceForCustomer";
 
 
 function App() {
@@ -59,6 +60,7 @@ function App() {
         {/* Login page without layout */}
         <Route path="/login" element={<Login />} />
         <Route path="/invoice" element={<InvoicePage />} />
+        <Route path="/invoice-for-customer" element={<InvoiceForCustomer />} />
         <Route path="/invoice-exchange" element={<InvoiceForExchange />} />
         <Route path="/invoice-purchase" element={<InvoiceForPurchase />} />
         <Route path="/invoice-purchase-return" element={<InvoiceForPurchaseReturn />} />

@@ -7,6 +7,7 @@ import { FaArrowLeft, FaPrint, FaFilter } from "react-icons/fa";
 import { fetchPurchaseReturnsForSupplierName } from "../features/PurchaseReturn/purchaseReturnSlice";
 import { fetchSalesForCustomer } from "../features/sales/salesSlice";
 import dayjs from "../utils/date.js";
+import Decimal from "decimal.js";
 
 const CustomerStatement = () => {
   const { user } = useSelector((state) => state.auth);
@@ -18,17 +19,23 @@ const CustomerStatement = () => {
     page,
     currentBalance,
   } = useSelector((state) => state.sales);
-  // console.log(transactions)
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { state } = useLocation();
 
-  // console.log(purchases);
+  console.log(transactions);
 
   const [filterToggler, setFilterToggler] = useState(true);
   const [date, setDate] = useState("");
   // console.log(state);
+
+  const customerDetails = state ? {
+    customerEmail: state.customerEmail,
+    customerId: state.customerId,
+    customerName: state.customerName,
+    customerPhone: state.customerPhone
+  } : null;
 
   // Printing
   const documentTitle = `customer-statement-${new Date()
@@ -207,8 +214,8 @@ const CustomerStatement = () => {
                       <th className="px-6 py-4 text-left">Description</th>
                       <th className="px-6 py-4 text-left">Sale Total</th>
                       {/* <th className="px-6 py-4 text-right">Bill Amt</th> */}
-                      <th className="px-6 py-4 text-right">Total Amt</th>
-                      <th className="px-6 py-4 text-right">Paid Amt</th>
+                      <th className="px-6 py-4 text-right">Total Paid Amt</th>
+                      {/* <th className="px-6 py-4 text-right">Paid Amt</th> */}
                       <th className="px-6 py-4 text-right">Current Balance</th>
                       <th className="px-6 py-4 text-center w-[160px]">
                         Remarks
@@ -223,19 +230,6 @@ const CustomerStatement = () => {
                       transactions.map((transaction, idx) => {
                         const isPayment =
                           transaction.refMemo?.startsWith("REF-");
-
-                        // Data structure for the single invoice page
-                        const invoiceData = {
-                          ...transaction.purchaseId,
-                          memo: transaction.refMemo,
-                          createdAt: transaction.date,
-                          totalAmount: transaction.amountToBePaid,
-                          paid: transaction.paidAmount,
-                          due: transaction.currentDue,
-                          supplierName: state.supplierName,
-                          supplierPhone: state.supplierPhone,
-                          supplierEmail: state.supplierEmail,
-                        };
 
                         return (
                           <tr
@@ -264,7 +258,7 @@ const CustomerStatement = () => {
                                   ? "PAYMENT AGAINST DUE"
                                   : transaction.salesId?.products
                                     ?.map((p) => p.productName)
-                                    .join(", ") || "Purchase Items"}
+                                    .join(", ") || "Loan/Payment"}
                               </span>
                             </td>
                             <td className="px-6 py-4 text-left font-black">
@@ -284,21 +278,20 @@ const CustomerStatement = () => {
                             </td> */}
                             <td className="px-6 py-4 text-right font-black text-green-600">
                               ৳{" "}
-                              {transaction.advanceAmount
+                              {transaction.advanceAmount || transaction.paidAmount
                                 ? (
-                                  transaction.advanceAmount +
-                                  transaction.paidAmount
-                                ).toLocaleString("en-BD", {
-                                  minimumFractionDigits: 2,
-                                })
+                                  new Decimal(transaction.advanceAmount).plus(
+                                    new Decimal(transaction.paidAmount)
+                                  ).toFixed(2)
+                                )
                                 : 0}
                             </td>
-                            <td className="px-6 py-4 text-right font-black text-green-600">
+                            {/* <td className="px-6 py-4 text-right font-black text-green-600">
                               ৳{" "}
                               {transaction.paidAmount.toLocaleString("en-BD", {
                                 minimumFractionDigits: 2,
                               })}
-                            </td>
+                            </td> */}
 
                             <td className="px-6 py-4 text-right font-black text-red-500 font-mono">
                               {transaction.currentBalance?.toLocaleString(
@@ -308,16 +301,16 @@ const CustomerStatement = () => {
                                 },
                               )}
                             </td>
-                            <td className="px-6 py-4 text-left font-black font-mono align-top">
-                              <div className="w-[160px] break-all whitespace-normal">
-                                {transaction.remarks}
+                            <td className={`px-6 py-4 text-left font-black font-mono ${transaction.remarks ? " align-top" : "align-middle"}`}>
+                              <div className={`w-[160px] break-all whitespace-normal ${transaction.remarks ? "text-gray-700" : "text-gray-400 italic text-center"}`}>
+                                {transaction.remarks || "--"}
                               </div>
                             </td>
                             <td className="px-6 py-4 text-center print:hidden">
                               <div className="flex items-center justify-center gap-3">
                                 <Link
-                                  to="/invoice-purchase"
-                                  state={invoiceData}
+                                  to="/invoice-for-customer"
+                                  state={{ ...transaction, ...customerDetails, currentBalance }}
                                   className="text-blue-600 font-black text-[10px] uppercase hover:underline"
                                 >
                                   Invoice
