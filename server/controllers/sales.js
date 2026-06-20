@@ -367,7 +367,7 @@ module.exports.addPayment = async (req, res) => {
 
     //* Sales Due Payment
     const count = await getNextSequenceForOther("SalesDuePayment");
-    const memo = `DUE-PAY-${count.seq}`;
+    const memo = `DP-${count.seq}`;
 
     //* Customer grabbing
     const customer = await Customer.findOne({ name });

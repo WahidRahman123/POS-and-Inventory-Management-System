@@ -58,7 +58,9 @@ const InvoiceForCustomer = () => {
 		amountToBePaid,
 	} = location.state;
 
-	const isDuePayment = location.state && refMemo?.includes("DUE-PAY-");
+	// console.log(amountToBePaid);
+
+	const isDuePayment = location.state && refMemo?.includes("DP-");
 
 	return (
 		<>
@@ -203,7 +205,7 @@ const InvoiceForCustomer = () => {
 						{isDuePayment && (
 							<div className="my-5 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-center">
 								<p className="text-lg font-bold text-red-700 uppercase tracking-wide">
-									Due Payment
+									{amountToBePaid === 0 ? "Advance Payment" : "Due Payment"}
 								</p>
 
 								<p className="mt-1 text-sm text-gray-700">
@@ -259,7 +261,7 @@ const InvoiceForCustomer = () => {
                       : new Decimal(due).toFixed(2)}
                   </span>
                 </p> */}
-								<p className="font-bold">Advance Paid<span className="float-right">{advanceAmount ? new Decimal(advanceAmount).toFixed(2) : "0.00"}</span></p>
+								{/* <p className="font-bold">Advance Paid<span className="float-right">{advanceAmount ? new Decimal(advanceAmount).toFixed(2) : "0.00"}</span></p> */}
 								<p className="font-bold">Current Balance<span className="float-right">{currentBalance ? new Decimal(currentBalance || 0).toFixed(2) : "0.00"}</span></p>
 							</div>
 						</div>
