@@ -1129,7 +1129,7 @@ const SalesReturn = () => {
           </table>
         </div>
 
-        {pages && (
+        {pages > 0 && (
           <div className="flex justify-center items-center mt-6 gap-4 text-sm">
             <button
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
