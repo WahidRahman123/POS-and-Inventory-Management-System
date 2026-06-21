@@ -310,7 +310,7 @@ const CustomerStatement = () => {
                               <div className="flex items-center justify-center gap-3">
                                 <Link
                                   to="/invoice-for-customer"
-                                  state={{ ...transaction, ...customerDetails, currentBalance }}
+                                  state={{ ...transaction, ...customerDetails }}
                                   className="text-blue-600 font-black text-[10px] uppercase hover:underline"
                                 >
                                   Invoice
