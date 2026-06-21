@@ -348,7 +348,7 @@ const InvoiceForSalesReturn = () => {
                 <th className="border border-gray-300 px-4 py-3 text-left">SL</th>
                 <th className="border border-gray-300 px-4 py-3 text-left">Product Name</th>
                 <th className="border border-gray-300 px-4 py-3 text-center">Return Qty</th>
-                <th className="border border-gray-300 px-4 py-3 text-center">Qty (KG)</th>
+                {/* <th className="border border-gray-300 px-4 py-3 text-center">Qty (KG)</th> */}
                 <th className="border border-gray-300 px-4 py-3 text-right">Return Price</th>
                 <th className="border border-gray-300 px-4 py-3 text-right">Total</th>
               </tr>
@@ -359,7 +359,7 @@ const InvoiceForSalesReturn = () => {
                   <td className="border border-gray-300 px-4 py-3">{index + 1}</td>
                   <td className="border border-gray-300 px-4 py-3">{item?.productName}</td>
                   <td className="border border-gray-300 px-4 py-3 text-center">{item?.returnQuantity}</td>
-                  <td className="border border-gray-300 px-4 py-3 text-center">{item?.returnQtyInKg}</td>
+                  {/* <td className="border border-gray-300 px-4 py-3 text-center">{item?.returnQtyInKg}</td> */}
                   <td className="border border-gray-300 px-4 py-3 text-right">
                     ৳ {new Decimal(item?.returnPrice || 0).toFixed(2)}
                   </td>
@@ -382,7 +382,7 @@ const InvoiceForSalesReturn = () => {
                   <th className="border border-gray-300 px-4 py-3 text-left">SL</th>
                   <th className="border border-gray-300 px-4 py-3 text-left">Product</th>
                   <th className="border border-gray-300 px-4 py-3 text-center">Qty</th>
-                  <th className="border border-gray-300 px-4 py-3 text-center">Qty (KG)</th>
+                  {/* <th className="border border-gray-300 px-4 py-3 text-center">Qty (KG)</th> */}
                   <th className="border border-gray-300 px-4 py-3 text-right">Unit Price</th>
                   <th className="border border-gray-300 px-4 py-3 text-right">Total</th>
                 </tr>
@@ -393,7 +393,7 @@ const InvoiceForSalesReturn = () => {
                     <td className="border border-gray-300 px-4 py-3">{index + 1}</td>
                     <td className="border border-gray-300 px-4 py-3">{item?.productName}</td>
                     <td className="border border-gray-300 px-4 py-3 text-center">{item?.quantity}</td>
-                    <td className="border border-gray-300 px-4 py-3 text-center">{item?.qtyInKg}</td>
+                    {/* <td className="border border-gray-300 px-4 py-3 text-center">{item?.qtyInKg}</td> */}
                     <td className="border border-gray-300 px-4 py-3 text-right">
                       ৳ {new Decimal(item?.unitPrice || 0).toFixed(2)}
                     </td>

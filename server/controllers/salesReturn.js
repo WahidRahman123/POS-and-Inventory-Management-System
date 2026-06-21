@@ -8,6 +8,7 @@ const { createCustomDate } = require("../utils/createCustomDate");
 const SalesReturnStockManagement = require("../models/SalesReturnStockManagement");
 const { combineDateWithCurrentTime } = require("../utils/combineDateWithCurrentTime");
 const dayjs = require("../utils/date.js");
+const { getNextSequenceForOther } = require("../utils/getNextSequenceForOther.js");
 
 module.exports.index = async (req, res) => {
   try {
@@ -112,7 +113,7 @@ module.exports.createSalesReturn = async (req, res) => {
     // console.log(salesReturns);
     // return
     const {
-      memo,
+      // memo,
       returnType,
       products,
       exchangeProducts,
@@ -137,6 +138,13 @@ module.exports.createSalesReturn = async (req, res) => {
 
     const { salesId } = salesReturns;
     // const { salesId } = salesReturns;
+
+    // const count = await getNextSequenceForSale(session);
+    const count = await getNextSequenceForOther("SalesReturn");
+    if (!count) {
+      throw new Error("Sequence generation failed");
+    }
+    const memo = ("SR-" + count.seq).toUpperCase();
 
     //* Check if the memo exists or not
     // const returnFound = await SalesReturn.find({ memo });
@@ -292,6 +300,13 @@ module.exports.addPaymentByExchange = async (req, res) => {
 
   const utcDate = combineDateWithCurrentTime(date);
 
+  // const count = await getNextSequenceForSale(session);
+  const count = await getNextSequenceForOther("SalesReturnTransaction");
+  if (!count) {
+    throw new Error("Sequence generation failed");
+  }
+  const memo = rest.refMemo + count.seq;
+
   try {
     // session.startTransaction();
     // const salesReturn = await SalesReturn.findById(id).session(session);
@@ -314,6 +329,7 @@ module.exports.addPaymentByExchange = async (req, res) => {
       // transaction creation
       const transaction = new SalesReturnTransaction({
         ...rest,
+        refMemo: memo,
         date: utcDate,
         amountToBePaid,
         paidAmount,
@@ -368,6 +384,13 @@ module.exports.addPaymentByCash = async (req, res) => {
 
   const utcDate = combineDateWithCurrentTime(date);
 
+  // const count = await getNextSequenceForSale(session);
+  const count = await getNextSequenceForOther("SalesReturnTransaction");
+  if (!count) {
+    throw new Error("Sequence generation failed");
+  }
+  const memo = rest.refMemo + count.seq;
+
   try {
     // session.startTransaction();
     // const salesReturn = await SalesReturn.findById(id).session(session);
@@ -390,6 +413,7 @@ module.exports.addPaymentByCash = async (req, res) => {
       // transaction creation
       const transaction = new SalesReturnTransaction({
         ...rest,
+        refMemo: memo,
         date: utcDate,
         amountToBePaid,
         paidAmount,
@@ -495,24 +519,110 @@ module.exports.salesReturnStatement = async (req, res) => {
       },
     ]);
 
-    const quantityExchangeProductDetails =
-      await SalesReturnTransaction.aggregate([
-        {
-          $match: nameSearchQuery,
-        },
-        {
-          $unwind: "$exchangeProducts",
-        },
-        {
-          $group: {
-            _id: null,
-            totalExchangeQuantity: {
+    // const test =
+    //   await SalesReturnTransaction.aggregate([
+    //     {
+    //       $match: nameSearchQuery,
+    //     },
+    //     // {
+    //     //   $unwind: "$exchangeProducts",
+    //     // },
+    //     {
+    //       $group: {
+    //         _id: "$salesReturnId",
+    //         count: {$sum: 1}
+    //       },
+    //     },
+    //   ]);
+
+    //   console.log(test)
+
+    // const quantityExchangeProductDetails =
+    //   await SalesReturn.aggregate([
+    //     {
+    //       $match: { $and: [nameSearchQuery, { due: { $eq: 0 } }] },
+    //     },
+    //     {
+    //       $unwind: "$products",
+    //     },
+    //     {
+    //       $group: {
+    //         _id: null,
+    //         totalExchangeQuantity: {
+    //           $sum: "$products.returnQuantity",
+    //         },
+    //       },
+    //     },
+    //   ]);
+
+    //* Generated - starts
+    const groups = await SalesReturnTransaction.aggregate([
+      {
+        $match: nameSearchQuery,
+      },
+      {
+        $group: {
+          _id: "$salesReturnId",
+
+          hasZeroDue: {
+            $max: {
+              $cond: [
+                { $eq: ["$currentDue", 0] },
+                1,
+                0,
+              ],
+            },
+          },
+
+          exchangeQty: {
+            $sum: {
               $sum: "$exchangeProducts.quantity",
             },
           },
         },
-      ]);
+      },
+    ]);
 
+    const ids = groups
+      .filter(x => x.hasZeroDue)
+      .map(x => x._id);
+
+    const salesReturns = await SalesReturn.aggregate([
+      {
+        $match: {
+          _id: { $in: ids },
+        },
+      },
+      {
+        $unwind: "$products",
+      },
+      {
+        $group: {
+          _id: "$_id",
+          qty: {
+            $sum: "$products.returnQuantity",
+          },
+        },
+      },
+    ]);
+
+    let totalExchangeQuantity = 0;
+
+    const map = {};
+
+    salesReturns.forEach(item => {
+      map[item._id.toString()] = item.qty;
+    });
+
+    groups.forEach(group => {
+      if (group.hasZeroDue) {
+        totalExchangeQuantity += map[group._id.toString()] || 0;
+      } else {
+        totalExchangeQuantity += group.exchangeQty;
+      }
+    });
+
+    //* Generated - ends
 
     const totalReturnQuantity =
       result[0].quantityProductDetails.length > 0
@@ -524,9 +634,9 @@ module.exports.salesReturnStatement = async (req, res) => {
         ? result[0].quantityProductDetails[0].totalReturnQuantityInKg
         : 0;
 
-    const totalExchangeQuantity = quantityExchangeProductDetails[0]
-      ? quantityExchangeProductDetails[0].totalExchangeQuantity
-      : 0;
+    // const totalExchangeQuantity = quantityExchangeProductDetails[0]
+    //   ? quantityExchangeProductDetails[0].totalExchangeQuantity
+    //   : 0;
 
     const remainingQuantity = totalReturnQuantity - totalExchangeQuantity;
 
