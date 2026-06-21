@@ -49,6 +49,7 @@ import PurchaseAdvanceSettlement from "./pages/PurchaseAdvanceSettlement";
 import PurchaseSupplierDueList from "./pages/PurchaseSupplierDueList";
 import ScrapProductSale from "./pages/ScrapProductSale";
 import InvoiceForCustomer from "./pages/InvoiceForCustomer";
+import InvoiceForSalesReturn from "./pages/InvoiceForSalesReturn";
 
 
 function App() {
@@ -64,6 +65,7 @@ function App() {
         <Route path="/invoice-exchange" element={<InvoiceForExchange />} />
         <Route path="/invoice-purchase" element={<InvoiceForPurchase />} />
         <Route path="/invoice-purchase-return" element={<InvoiceForPurchaseReturn />} />
+        <Route path="/invoice-sales-return" element={<InvoiceForSalesReturn />} />
 
 
         {/* All other pages with Layout */}

@@ -253,7 +253,15 @@ const SalesReturnStatement = () => {
                             </td>
                             <td className="px-4 py-4 text-center print:hidden ">
                               <div className="flex justify-center gap-2">
-                                <button className="text-blue-600 hover:text-blue-800 font-bold cursor-pointer">
+                                <button onClick={() => {
+                                  const invoiceData = {
+                                    ...transaction,
+                                    customerName: state?.customerName,
+                                    customerPhone: state?.customerPhone,
+                                    customerEmail: state?.customerEmail,
+                                  };
+                                  navigate("/invoice-sales-return", { state: invoiceData });
+                                }} className="text-blue-600 hover:text-blue-800 font-bold cursor-pointer">
                                   Print
                                 </button>
                                 {!isPayment &&
