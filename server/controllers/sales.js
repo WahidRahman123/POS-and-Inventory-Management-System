@@ -355,6 +355,7 @@ module.exports.addPayment = async (req, res) => {
       bankPaymentAmount,
       remarks,
       exchange,
+      saleType,
       exchangeMemoId,
       advanceBalance,
       exchangeDetails,
@@ -425,6 +426,7 @@ module.exports.addPayment = async (req, res) => {
       refMemo: memo,
       amountToBePaid,
       paidAmount,
+      saleType,
       advanceAmount: advanceBalance,
       remarks,
       date: utcDate,
@@ -515,7 +517,8 @@ module.exports.salesByCustomerName = async (req, res) => {
     const transactions = await SalesTransaction.find(matchQuery)
       .sort({ date: -1 })
       .populate("salesId")
-      .populate("customerId");
+      .populate("customerId")
+      .populate("scrapProductSellId");
 
     const result = await Customer.findOne({ name: customerName });
 

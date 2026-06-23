@@ -13,6 +13,7 @@ const SalesTransaction = require("../models/SalesTransaction");
 const { getNextSequenceForSale } = require("../utils/getNextSequenceForSale");
 const { combineDateWithCurrentTime } = require("../utils/combineDateWithCurrentTime");
 const dayjs = require("../utils/date.js");
+const Customer = require("../models/Customer.js");
 
 module.exports.index = async (req, res) => {
   try {
@@ -84,7 +85,21 @@ module.exports.createScrapProductSell = async (req, res) => {
       .utc()
       .toDate();
 
+    const paidAmountForSaleTransaction = 0;
+
     // session.startTransaction();
+
+    const customer = await Customer.findById(returns.customerId);
+
+    const previousBalanceForSaleTransaction = customer ? customer.currentBalance : 0;
+
+    const amountToBePaidForSaleTransaction = customer ? customer.due : 0;
+
+    if (customer) {
+      customer.scrapProductSellAmount += due;
+      customer.due += due;
+      customer.total += due;
+    }
 
     //* Generate the memo
     // const count = await getNextSequenceForOther(
@@ -141,6 +156,7 @@ module.exports.createScrapProductSell = async (req, res) => {
     }
 
     //* Sale creation
+    const saleType = "scrap-sell";
     const {
       _id,
       memo: scrapMemo,
@@ -166,22 +182,40 @@ module.exports.createScrapProductSell = async (req, res) => {
     const createdSale = await Sales({
       ...rest,
       invoiceNo,
+      saleType,
       createdAt: utcScrapCreatedAt,
       issuedAt: utcScrapIssuedAt,
       total: scrapTotalAmount,
     });
     createdSale.scrapProductSellId.push(_id);
+    customer.salesRecord.push(createdSale._id);
+    await customer.save();
+
 
     //* Sale transaction creation
+    const countForSaleTransaction = await getNextSequenceForOther("ScrapProductSellForSaleTransaction");
+    if (!countForSaleTransaction) {
+      throw new Error("Failed to generate sequence");
+    }
+    const memoForSalesTransaction = "EPS-" + countForSaleTransaction.seq;
+
+    const currentBalanceForSaleTransaction = customer ? customer.currentBalance: 0;
+    const currentDueForSaleTransaction = customer ? customer.due : 0;
+
     const saleTransaction = await SalesTransaction({
       ...rest,
-      refMemo: createdSale.invoiceNo,
-      amountToBePaid: Number(scrapTotalAmount),
-      paidAmount: Number(createdScrapProductSell.paid),
-      currentDue: Number(createdScrapProductSell.due),
+      refMemo: memoForSalesTransaction,
+      amountToBePaid: amountToBePaidForSaleTransaction,
+      paidAmount: paidAmountForSaleTransaction,
+      currentDue: currentDueForSaleTransaction,
       date: utcScrapCreatedAt,
+      saleType,
+      previousBalance: previousBalanceForSaleTransaction,
+      currentBalance: currentBalanceForSaleTransaction,
       unchangedPaid: Number(createdScrapProductSell.paid),
       unchangedDue: Number(createdScrapProductSell.due),
+      scrapProductSellId: _id,
+      advanceAmount: 0,
       salesId: createdSale._id
     });
 

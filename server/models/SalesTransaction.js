@@ -112,6 +112,18 @@ const salesTransactionSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Sales",
   },
+
+  saleType: {
+    type: String,
+    enum: ["normal", "loan", "due-payment", "scrap-sell", "others"],
+    // required: true,
+    default: "normal"
+  },
+
+  scrapProductSellId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "ScrapProductSell",
+  },
 });
 
 module.exports = mongoose.model("SalesTransaction", salesTransactionSchema);

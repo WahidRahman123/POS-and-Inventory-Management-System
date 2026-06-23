@@ -252,13 +252,52 @@ const CustomerStatement = () => {
                             </td>
                             <td className="px-6 py-4">
                               <span
-                                className={`text-xs ${isPayment ? "font-black text-green-700 italic" : "font-bold text-gray-700"}`}
+                                className="font-bold text-gray-700 text-xs"
                               >
-                                {isPayment
-                                  ? "PAYMENT AGAINST DUE"
-                                  : transaction.salesId?.products
-                                    ?.map((p) => p.productName)
-                                    .join(", ") || "Loan/Payment"}
+                                {transaction.saleType === "normal" && transaction.salesId?.products
+                                  ?.map((p) => p.productName)
+                                  .join(", ")}
+
+                                {transaction.saleType === "loan" && "LOAN GIVEN"}
+
+                                {transaction.saleType === "due-payment" && "PAYMENT AGAINST DUE"}
+
+                                {transaction.saleType === "others" && "OTHER TRANSACTIONS"}
+
+                                {transaction.saleType === "scrap-sell" &&
+                                  (<table className="w-full text-[10px] uppercase">
+                                    <thead>
+                                      <tr className="text-gray-400 border-b">
+                                        <th className="text-left pb-1">Product</th>
+                                        <th className="text-center pb-1">Qty</th>
+                                        <th className="text-center pb-1">Weight</th>
+                                        <th className="text-right pb-1">Unit</th>
+                                      </tr>
+                                    </thead>
+
+                                    <tbody>
+                                      {transaction.scrapProductSellId?.products?.map((product, i) => (
+                                        <tr key={i} className="text-gray-700 font-bold">
+                                          <td className="py-1 pr-2">
+                                            {product.productName}
+                                          </td>
+
+                                          <td className="text-center">
+                                            {product.quantity}
+                                          </td>
+
+                                          <td className="text-center">
+                                            {product.qtyInKg} Kg
+                                          </td>
+
+                                          <td className="text-right">
+                                            ৳ {product.unitPrice}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>)
+                                }
                               </span>
                             </td>
                             <td className="px-6 py-4 text-left font-black">

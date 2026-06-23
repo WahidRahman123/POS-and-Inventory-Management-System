@@ -285,7 +285,7 @@ module.exports.createCompanyProductReturn = async (req, res) => {
       await productExchangeStockSearchData.save();
     }
 
-    console.log(transaction)
+    // console.log(transaction)
 
     res.status(201).json(createdCompanyProductReturn);
   } catch (error) {

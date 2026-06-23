@@ -83,6 +83,7 @@ const EditDue = () => {
           info: {
             date,
             amount,
+            saleType: "due-payment",
             name: customerByName.name,
             cash: Number(cashInput || 0),
             advanceBalance,

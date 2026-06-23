@@ -32,6 +32,12 @@ const salesSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
+  saleType: {
+    type: String,
+    enum: ["normal", "loan", "due-payment", "scrap-sell", "others"],
+    // required: true,
+    default: "normal"
+  },
   products: [
     {
       _id: false,

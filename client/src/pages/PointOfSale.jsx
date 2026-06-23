@@ -90,6 +90,9 @@ const PointOfSale = () => {
     // if (selectedProducts.length === 0 && Number(loanInput || 0) <= 0) {
     //   return alert("Select product or enter loan amount!");
     // }
+    if(selectedProducts.length === 0 && !loanInput && !cashInput && !bankPaymentAmount && !exchangeValue){
+      return alert("Invalid Request!");
+    }
 
     if (exchangeMemoId && Number(exchangeValue) > maxAvailableBalance) {
       return alert(
@@ -113,6 +116,15 @@ const PointOfSale = () => {
         ),
       }));
 
+      //* saleType
+      let saleType = "normal";
+
+      if(finalProducts.length === 0 && loanInput) {
+        saleType = "loan";
+      } else if(finalProducts.length === 0 && !loanInput) {
+        saleType = "others";
+      }
+
       const payload = {
         customerId: customer.customerId,
         userId: user._id,
@@ -122,6 +134,7 @@ const PointOfSale = () => {
         customerEmail: customer.customerEmail,
         customerPhone: customer.customerPhone,
         products: finalProducts,
+        saleType,
         totalWithoutDiscount: Number(orderTotal.toFixed(2)),
         total: Number(totalWithLoan.toFixed(2)),
         discount: Number(new Decimal(discount || 0).toFixed(2)),

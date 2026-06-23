@@ -830,7 +830,7 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const { dashboardResult, loading } = useSelector((state) => state.dashboard);
 
-  console.log(dashboardResult)
+  // console.log(dashboardResult)
 
   useEffect(() => {
     dispatch(fetchDashboardResult());
