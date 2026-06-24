@@ -41,6 +41,7 @@ const InvoiceForCustomer = () => {
 		discount,
 		advanceAmount,
 		loan,
+		saleType,
 		refMemo,
 		total,
 		cash,
@@ -58,7 +59,7 @@ const InvoiceForCustomer = () => {
 		amountToBePaid,
 	} = location.state;
 
-	// console.log(amountToBePaid);
+	// console.log(saleType);
 
 	const isDuePayment = location.state && refMemo?.includes("DP-");
 
@@ -124,9 +125,25 @@ const InvoiceForCustomer = () => {
 						</div>
 						<p className="border-b border-gray-300 pb-2 text-sm"><span className="font-semibold ">Customer Mobile:</span> {customerPhone}</p>
 
+						{saleType !== "normal" && saleType !== "loan" && (
+							<div className="my-5 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-center">
+								<p className="text-lg font-bold text-red-700 uppercase tracking-wide">
+									{saleType !== "scrap-sell" ? amountToBePaid === 0 ? "Advance Payment" : "Due Payment" : ""}
+									{saleType === "scrap-sell" && "EXCHANGE PRODUCT SALE TRANSACTION"}
+								</p>
+
+								<p className="mt-1 text-sm text-gray-700">
+									Against Memo No :
+									<span className="ml-2 font-semibold text-gray-900">
+										{refMemo}
+									</span>
+								</p>
+							</div>
+						)}
+
 
 						{/* Main Products Table */}
-						{!isDuePayment && (<table className="w-full border-collapse mt-4 text-sm">
+						{!isDuePayment && saleType !== "scrap-sell" && (<table className="w-full border-collapse mt-4 text-sm">
 							<thead>
 								<tr className="bg-red-600 text-white">
 									<th className="border border-gray-300 px-2 py-1">SL.</th>
@@ -158,6 +175,49 @@ const InvoiceForCustomer = () => {
 								)}
 							</tbody>
 						</table>)}
+
+						{saleType === "scrap-sell" && (
+							<table className="w-full border-collapse mt-4 text-sm">
+								<thead>
+									<tr className="bg-red-600 text-white">
+										<th className="border border-gray-300 px-2 py-1 text-left">
+											Product
+										</th>
+										<th className="border border-gray-300 px-2 py-1 text-center">
+											Qty
+										</th>
+										<th className="border border-gray-300 px-2 py-1 text-center">
+											Weight
+										</th>
+										<th className="border border-gray-300 px-2 py-1 text-right">
+											Unit Price
+										</th>
+									</tr>
+								</thead>
+
+								<tbody>
+									{location.state.scrapProductSellId?.products?.map((product, i) => (
+										<tr key={i}>
+											<td className="border border-gray-300 px-2 py-1">
+												{product.productName}
+											</td>
+
+											<td className="border border-gray-300 px-2 py-1 text-center">
+												{product.quantity}
+											</td>
+
+											<td className="border border-gray-300 px-2 py-1 text-center">
+												{product.qtyInKg} Kg
+											</td>
+
+											<td className="border border-gray-300 px-2 py-1 text-right">
+												৳ {new Decimal(product.unitPrice).toFixed(2)}
+											</td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+						)}
 
 
 						{/* --- EXCHANGE DETAILS SECTION (NEW) --- */}
@@ -202,26 +262,13 @@ const InvoiceForCustomer = () => {
 							</div>
 						)}
 
-						{isDuePayment && (
-							<div className="my-5 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-center">
-								<p className="text-lg font-bold text-red-700 uppercase tracking-wide">
-									{amountToBePaid === 0 ? "Advance Payment" : "Due Payment"}
-								</p>
 
-								<p className="mt-1 text-sm text-gray-700">
-									Against Memo No :
-									<span className="ml-2 font-semibold text-gray-900">
-										{refMemo}
-									</span>
-								</p>
-							</div>
-						)}
 
 						{/* Summary Section */}
 						<div className="mt-4 text-sm space-y-1">
-							{!isDuePayment && (
+							{!isDuePayment && saleType !== "scrap-sell" && (
 								<>
-									<p className="font-semibold text-red-600">
+									<div className="font-semibold text-red-600">
 										Total Item(s): {salesId.products?.length || 0}
 										<span className="float-right">
 											{new Decimal(salesId.totalWithoutDiscount).toFixed(2)}
@@ -236,17 +283,17 @@ const InvoiceForCustomer = () => {
 										<p className="font-bold border-t border-gray-200 pt-1">
 											Payable Amount<span className="float-right">{new Decimal(salesId.total).toFixed(2)}</span>
 										</p>
-									</p>
+									</div>
 								</>
 							)}
 
 
 
-							{isDuePayment && (
+							{saleType === "due-payment" || saleType === "scrap-sell" ? (
 								<p className="font-bold border-t border-gray-200 pt-1">
 									Amount To Be Paid<span className="float-right">{new Decimal(amountToBePaid).toFixed(2)}</span>
 								</p>
-							)}
+							) : ""}
 							<div className="pt-2 border-t border-dotted border-gray-300">
 								<p>Cash<span className="float-right">{cash ? new Decimal(cash).toFixed(2) : "0.00"}</span></p>
 								<p>Bank<span className="float-right">{bankPaymentAmount ? new Decimal(bankPaymentAmount).toFixed(2) : "0.00"}</span></p>

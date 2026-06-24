@@ -87,9 +87,11 @@ const PointOfSale = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!customer.customerId) return alert("Select a customer!");
-    // if (selectedProducts.length === 0 && Number(loanInput || 0) <= 0) {
-    //   return alert("Select product or enter loan amount!");
-    // }
+    
+    if (selectedProducts.length === 0 && Number(loanInput || 0) <= 0) {
+      return alert("Select product or enter loan amount!");
+    }
+
     if(selectedProducts.length === 0 && !loanInput && !cashInput && !bankPaymentAmount && !exchangeValue){
       return alert("Invalid Request!");
     }
