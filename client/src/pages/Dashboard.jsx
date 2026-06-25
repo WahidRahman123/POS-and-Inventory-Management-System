@@ -1122,11 +1122,17 @@ const Dashboard = () => {
             textColor="text-black"
           />
           <Row
+            label="Due Collection"
+            value={dashboardResult.dueCollectionToday}
+            suffix=" ৳"
+            textColor="text-black"
+          />
+          {/* <Row
             label="Today's Advance"
             value={dashboardResult.salesAdvanceToday}
             suffix=" ৳"
             textColor="text-black"
-          />
+          /> */}
           {/* <Row
             label="Advance"
             value={dashboardResult.advanceToday}
