@@ -77,6 +77,8 @@ module.exports.createScrapProductSell = async (req, res) => {
       // memo,
       ...transactionDetail
     } = returns;
+    // console.log(returns);
+    // return
 
     const utcCreatedAt = combineDateWithCurrentTime(createdAt);
     const now = dayjs()
@@ -84,7 +86,8 @@ module.exports.createScrapProductSell = async (req, res) => {
       .utc()
       .toDate();
 
-    let mainTotal = total;
+    let mainTotal = totalAmount;
+    let saleTotal = totalAmount;
     let mainDue = due;
     let mainPaid = paid;
 
@@ -243,6 +246,7 @@ module.exports.createScrapProductSell = async (req, res) => {
       currentDue: currentDueForSaleTransaction,
       date: utcScrapCreatedAt,
       saleType,
+      saleTotal,
       previousBalance: previousBalanceForSaleTransaction,
       currentBalance: currentBalanceForSaleTransaction,
       unchangedPaid: Number(createdScrapProductSell.paid),

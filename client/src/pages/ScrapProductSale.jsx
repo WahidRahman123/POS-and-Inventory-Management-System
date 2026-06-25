@@ -149,7 +149,7 @@ const ScrapProductSale = () => {
       );
       dueAmount = 0;
     } else {
-      paidAmount = Number(totalAmount.toFixed(4));
+      paidAmount = Number(paid.toFixed(4));
       advanceBalance = 0;
       dueAmount = Number(due.toFixed(4));
     }

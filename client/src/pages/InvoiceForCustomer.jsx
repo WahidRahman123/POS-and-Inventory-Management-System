@@ -59,6 +59,15 @@ const InvoiceForCustomer = () => {
 		amountToBePaid,
 	} = location.state;
 
+	const scrapTotal =
+		location.state.scrapProductSellId?.products?.reduce((total, product) => {
+			return new Decimal(total)
+				.plus(
+					new Decimal(product.qtyInKg).times(product.unitPrice)
+				)
+				.toNumber();
+		}, 0) || 0;
+
 	// console.log(saleType);
 
 	const isDuePayment = location.state && refMemo?.includes("DP-");
@@ -216,13 +225,26 @@ const InvoiceForCustomer = () => {
 										</tr>
 									))}
 								</tbody>
+								<tfoot>
+									<tr className="bg-gray-100 font-bold">
+										<td
+											colSpan={3}
+											className="border border-gray-300 px-2 py-2 text-right"
+										>
+											Total
+										</td>
+										<td className="border border-gray-300 px-2 py-2 text-right">
+											৳ {new Decimal(scrapTotal).toFixed(2)}
+										</td>
+									</tr>
+								</tfoot>
 							</table>
 						)}
 
 
 						{/* --- EXCHANGE DETAILS SECTION (NEW) --- */}
 						{/* --- EXCHANGE DETAILS SECTION --- */}
-						{exchangeDetails && (
+						{exchangeDetails && exchangeDetails.products.length > 0 && (
 							<div className="mt-6 border-2 border-gray-200 rounded">
 								<div className="bg-gray-100 px-2 py-1 border-b border-gray-200 flex justify-between items-center">
 									<h3 className="text-xs font-bold text-gray-700">
@@ -289,7 +311,7 @@ const InvoiceForCustomer = () => {
 
 
 
-							{saleType === "due-payment" || saleType === "scrap-sell" ? (
+							{saleType === "due-payment" ? (
 								<p className="font-bold border-t border-gray-200 pt-1">
 									Amount To Be Paid<span className="float-right">{new Decimal(amountToBePaid).toFixed(2)}</span>
 								</p>
