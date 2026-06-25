@@ -37,6 +37,13 @@ const customerSchema = new mongoose.Schema(
         ref: "Sales",
       },
     ],
+
+    scrapProductSaleRecord: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ScrapProductSell",
+      },
+    ],
     advanceBalance: {
       type: Number,
       default: 0,

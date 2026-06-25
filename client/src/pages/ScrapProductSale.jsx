@@ -139,6 +139,21 @@ const ScrapProductSale = () => {
     e.preventDefault();
     if (customer.customerId === "") return alert("Select a customer!");
 
+    let paidAmount;
+    let advanceBalance;
+    let dueAmount;
+    if (paid.greaterThan(totalAmount)) {
+      paidAmount = Number(totalAmount.toFixed(4));
+      advanceBalance = Number(
+        paid.minus(totalAmount).toFixed(4),
+      );
+      dueAmount = 0;
+    } else {
+      paidAmount = Number(totalAmount.toFixed(4));
+      advanceBalance = 0;
+      dueAmount = Number(due.toFixed(4));
+    }
+
     const newProducts = products.map(
       ({ id, tempQuantity, tempQtyInKg, ...rest }) => ({
         ...rest,
@@ -167,8 +182,9 @@ const ScrapProductSale = () => {
       products: newProducts,
 
       totalAmount: Number(totalAmount.toFixed(4)),
-      paid: Number(paid.toFixed(4)),
-      due: Number(due.toFixed(4)),
+      paid: paidAmount,
+      due: dueAmount,
+      advanceBalance,
 
       cash: Number(cashInput),
       bankPaymentAmount: Number(bankPaymentAmount),

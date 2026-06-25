@@ -59,10 +59,8 @@ module.exports.index = async (req, res) => {
 };
 
 module.exports.createScrapProductSell = async (req, res) => {
-  // const session = await mongoose.startSession();
   try {
     const returns = req.body;
-    // const { memo } = purchases;
     const {
       createdAt,
       issuedAt,
@@ -72,6 +70,7 @@ module.exports.createScrapProductSell = async (req, res) => {
       // qtyInKg,
       // unitPrice,
       // subTotal,
+      advanceBalance,
       totalAmount,
       paid,
       due,
@@ -85,7 +84,9 @@ module.exports.createScrapProductSell = async (req, res) => {
       .utc()
       .toDate();
 
-    const paidAmountForSaleTransaction = 0;
+    let mainTotal = total;
+    let mainDue = due;
+    let mainPaid = paid;
 
     // session.startTransaction();
 
@@ -93,13 +94,49 @@ module.exports.createScrapProductSell = async (req, res) => {
 
     const previousBalanceForSaleTransaction = customer ? customer.currentBalance : 0;
 
-    const amountToBePaidForSaleTransaction = customer ? customer.due : 0;
+    if (customer) {
+      // 1. Adding advanceBalance to the customer's advanceBalance
+      customer.advanceBalance += advanceBalance;
+
+      // 2. advanceBalance adjustment
+      if (customer.advanceBalance > 0) {
+        const need = mainTotal - mainPaid;
+
+        if (need <= customer.advanceBalance) {
+          mainPaid += need;
+          customer.advanceBalance -= need;
+        } else if (need > advanceBalance) {
+          mainPaid += customer.advanceBalance;
+          customer.advanceBalance = 0;
+        }
+      }
+    } else {
+      throw new Error("Customer does not exist!");
+    }
+    mainDue = mainTotal - mainPaid;
+
+    let amountToBePaidForSaleTransaction = 0;
+
+    if (customer.salesRecord.length === 0 && customer.scrapProductSaleRecord.length === 0) {
+      amountToBePaidForSaleTransaction = new Decimal(customer.total).plus(new Decimal(mainTotal));
+    } else {
+      amountToBePaidForSaleTransaction = customer.due;
+    }
 
     if (customer) {
-      customer.scrapProductSellAmount += due;
-      customer.due += due;
-      customer.total += due;
+      customer.paid += mainPaid;
+      customer.total += mainTotal;
+      customer.due = customer.total - customer.paid;
+      customer.scrapProductSellAmount += customer.due;
+      if (customer.due < 0) {
+        customer.advanceBalance += Math.abs(customer.due);
+        customer.due = 0;
+      }
     }
+    const currentDueForSaleTransaction = customer ? customer.due : 0;
+
+    const paidAmountForSaleTransaction = Number(new Decimal(mainPaid).toFixed(4));
+    const currentBalanceForSaleTransaction = customer ? customer.advanceBalance - customer.due : 0;
 
     //* Generate the memo
     // const count = await getNextSequenceForOther(
@@ -189,8 +226,7 @@ module.exports.createScrapProductSell = async (req, res) => {
     });
     createdSale.scrapProductSellId.push(_id);
     customer.salesRecord.push(createdSale._id);
-    await customer.save();
-
+    customer.scrapProductSaleRecord.push(createdScrapProductSell._id);
 
     //* Sale transaction creation
     const countForSaleTransaction = await getNextSequenceForOther("ScrapProductSellForSaleTransaction");
@@ -198,9 +234,6 @@ module.exports.createScrapProductSell = async (req, res) => {
       throw new Error("Failed to generate sequence");
     }
     const memoForSalesTransaction = "EPS-" + countForSaleTransaction.seq;
-
-    const currentBalanceForSaleTransaction = customer ? customer.currentBalance: 0;
-    const currentDueForSaleTransaction = customer ? customer.due : 0;
 
     const saleTransaction = await SalesTransaction({
       ...rest,
@@ -221,6 +254,7 @@ module.exports.createScrapProductSell = async (req, res) => {
 
     await createdSale.save();
     await saleTransaction.save();
+    await customer.save();
 
     createdScrapProductSell.salesId = createdSale._id;
     await createdScrapProductSell.save();
@@ -234,6 +268,182 @@ module.exports.createScrapProductSell = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+// module.exports.createScrapProductSell = async (req, res) => {
+//   // const session = await mongoose.startSession();
+//   try {
+//     const returns = req.body;
+//     // const { memo } = purchases;
+//     const {
+//       createdAt,
+//       issuedAt,
+//       products,
+//       // productName,
+//       // quantity,
+//       // qtyInKg,
+//       // unitPrice,
+//       // subTotal,
+//       totalAmount,
+//       paid,
+//       due,
+//       // memo,
+//       ...transactionDetail
+//     } = returns;
+
+//     const utcCreatedAt = combineDateWithCurrentTime(createdAt);
+//     const now = dayjs()
+//       .tz("Asia/Dhaka")
+//       .utc()
+//       .toDate();
+
+//     const paidAmountForSaleTransaction = 0;
+
+//     // session.startTransaction();
+
+//     const customer = await Customer.findById(returns.customerId);
+
+//     const previousBalanceForSaleTransaction = customer ? customer.currentBalance : 0;
+
+//     const amountToBePaidForSaleTransaction = customer ? customer.due : 0;
+
+//     if (customer) {
+//       customer.scrapProductSellAmount += due;
+//       customer.due += due;
+//       customer.total += due;
+//     }
+
+//     //* Generate the memo
+//     // const count = await getNextSequenceForOther(
+//     //   "CompanyProductReturn",
+//     //   session,
+//     // );
+//     const count = await getNextSequenceForOther("ScrapProductSell");
+//     if (!count) {
+//       throw new Error("Failed to generate sequence");
+//     }
+//     const memo = "SPS-" + count.seq;
+
+//     //* Transaction Creation
+//     const transactionDetails = {
+//       ...transactionDetail,
+//       refMemo: memo,
+//       amountToBePaid: totalAmount,
+//       paidAmount: paid,
+//       date: utcCreatedAt,
+//       currentDue: due,
+//     };
+//     const transaction = new ScrapProductSellTransaction(transactionDetails);
+
+//     //* Company Product Return creation
+//     const scrapProductSell = new ScrapProductSell({
+//       ...returns,
+//       memo,
+//       createdAt: utcCreatedAt,
+//       issuedAt: now,
+//       transactionRecords: [transaction._id],
+//     });
+
+//     transaction.scrapProductSellId = scrapProductSell._id;
+//     // await transaction.save({ session });
+//     await transaction.save();
+
+//     // const createdCompanyProductReturn = await companyProductReturn.save({
+//     //   session,
+//     // });
+//     const createdScrapProductSell = await scrapProductSell.save();
+
+//     // Commit
+//     // await session.commitTransaction();
+//     // session.endSession();
+
+//     for (const product of products) {
+//       const productExchangeStockSearchData =
+//         await ProductExchangeStockManagement.findOne({
+//           productId: product.productId,
+//         });
+//       productExchangeStockSearchData.tempQuantity -= product.quantity;
+//       productExchangeStockSearchData.tempQtyInKg -= product.qtyInKg;
+//       await productExchangeStockSearchData.save();
+//     }
+
+//     //* Sale creation
+//     const saleType = "scrap-sell";
+//     const {
+//       _id,
+//       memo: scrapMemo,
+//       products: scrapProducts,
+//       transactionRecords,
+//       totalAmount: scrapTotalAmount,
+//       createdAt: scrapCreatedAt,
+//       issuedAt: scrapIssuedAt,
+//       ...rest
+//     } = createdScrapProductSell.toObject();
+
+//     const utcScrapCreatedAt = combineDateWithCurrentTime(scrapCreatedAt);
+//     const utcScrapIssuedAt = combineDateWithCurrentTime(scrapIssuedAt);
+
+//     const saleCount = await getNextSequenceForSale();
+
+//     if (!saleCount) {
+//       throw new Error("Sequence generation failed");
+//     }
+//     const chars = saleCount.seqChars?.join("");
+//     const invoiceNo = ("s" + chars + "-" + saleCount.seq).toUpperCase();
+
+//     const createdSale = await Sales({
+//       ...rest,
+//       invoiceNo,
+//       saleType,
+//       createdAt: utcScrapCreatedAt,
+//       issuedAt: utcScrapIssuedAt,
+//       total: scrapTotalAmount,
+//     });
+//     createdSale.scrapProductSellId.push(_id);
+//     customer.salesRecord.push(createdSale._id);
+//     await customer.save();
+
+
+//     //* Sale transaction creation
+//     const countForSaleTransaction = await getNextSequenceForOther("ScrapProductSellForSaleTransaction");
+//     if (!countForSaleTransaction) {
+//       throw new Error("Failed to generate sequence");
+//     }
+//     const memoForSalesTransaction = "EPS-" + countForSaleTransaction.seq;
+
+//     const currentBalanceForSaleTransaction = customer ? customer.currentBalance: 0;
+//     const currentDueForSaleTransaction = customer ? customer.due : 0;
+
+//     const saleTransaction = await SalesTransaction({
+//       ...rest,
+//       refMemo: memoForSalesTransaction,
+//       amountToBePaid: amountToBePaidForSaleTransaction,
+//       paidAmount: paidAmountForSaleTransaction,
+//       currentDue: currentDueForSaleTransaction,
+//       date: utcScrapCreatedAt,
+//       saleType,
+//       previousBalance: previousBalanceForSaleTransaction,
+//       currentBalance: currentBalanceForSaleTransaction,
+//       unchangedPaid: Number(createdScrapProductSell.paid),
+//       unchangedDue: Number(createdScrapProductSell.due),
+//       scrapProductSellId: _id,
+//       advanceAmount: 0,
+//       salesId: createdSale._id
+//     });
+
+//     await createdSale.save();
+//     await saleTransaction.save();
+
+//     createdScrapProductSell.salesId = createdSale._id;
+//     await createdScrapProductSell.save();
+
+//     res.status(201).json(createdScrapProductSell);
+//   } catch (error) {
+//     // await session.abortTransaction();
+//     // session.endSession();
+
+//     console.error(error);
+//     res.status(500).send("Server Error");
+//   }
+// };
 
 module.exports.searchById = async (req, res) => {
   try {

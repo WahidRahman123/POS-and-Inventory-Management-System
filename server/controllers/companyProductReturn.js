@@ -491,51 +491,77 @@ module.exports.productExchangeReport = async (req, res) => {
       },
     ]);
 
-    const companyData = await CompanyProductReturn.aggregate([
+    const companyProductReturn = await CompanyProductReturn.aggregate([
       {
-        $unwind: "$products",
-      },
-      {
-        $group: {
-          _id: null,
-          companySentItems: { $sum: "$products.quantity" },
-          companyWeight: { $sum: "$products.qtyInKg" }
-        },
-      },
-    ]);
+        $facet: {
+          total: [
+            {
+              $unwind: "$products",
+            },
+            {
+              $group: {
+                _id: null,
+                totalSentItems: { $sum: "$products.quantity" },
+                totalWeight: { $sum: "$products.qtyInKg" },
+              },
+            },
+          ],
 
-    const companyProductData = await CompanyProductReturn.aggregate([
-      {
-        $group: {
-          _id: null,
-          totalAmount: { $sum: { $multiply: ["$totalAmount", 10000] } },
+          totalAmount: [
+            {
+              $group: {
+                _id: null,
+                totalAmount: { $sum: { $multiply: ["$totalAmount", 10000] } },
+              },
+            },
+          ],
         },
       },
     ]);
 
     const scrapProductSell = await ScrapProductSell.aggregate([
       {
-        $group: {
-          _id: null,
-          totalAmount: { $sum: { $multiply: ["$totalAmount", 10000] } },
+        $facet: {
+          total: [
+            {
+              $unwind: "$products",
+            },
+            {
+              $group: {
+                _id: null,
+                totalSentItems: { $sum: "$products.quantity" },
+                totalWeight: { $sum: "$products.qtyInKg" },
+              },
+            },
+          ],
+
+          totalAmount: [
+            {
+              $group: {
+                _id: null,
+                totalAmount: { $sum: { $multiply: ["$totalAmount", 10000] } },
+              },
+            },
+          ],
         },
       },
     ]);
 
-    const totalCompanySentItems = companyData[0]
-      ? companyData[0].companySentItems
-      : 0;
+    const totalSentItemsProductExchange = productExchange[0].total[0] ? productExchange[0].total[0].totalSentItems : 0;
+    const totalSentItemsCompanyProductReturn = companyProductReturn[0].total[0] ? companyProductReturn[0].total[0].totalSentItems : 0;
+    const totalSentItemsScrapProductSell = scrapProductSell[0].total[0] ? scrapProductSell[0].total[0].totalSentItems : 0;
 
-    const totalCompanyWeight = companyData[0]
-      ? companyData[0].companyWeight
-      : 0;
+    const totalWeightProductExchange = productExchange[0].total[0] ? productExchange[0].total[0].totalWeight : 0;
+    const totalWeightCompanyProductReturn = companyProductReturn[0].total[0] ? companyProductReturn[0].total[0].totalWeight : 0;
+    const totalWeightScrapProductSell = scrapProductSell[0].total[0] ? scrapProductSell[0].total[0].totalWeight : 0;
 
-    const companyTotalAmount = companyProductData[0] ? companyProductData[0].totalAmount : 0;
-    const totalAmountFromProductExchange = productExchange[0].totalAmount[0] ? productExchange[0].totalAmount[0].totalAmount
-      : 0;
-    const totalAmountFromScrapProductSell = scrapProductSell[0] ? scrapProductSell[0].totalAmount : 0;
+    const totalAmountProductExchange = productExchange[0].totalAmount[0] ? productExchange[0].totalAmount[0].totalAmount : 0;
+    const totalAmountCompanyProductReturn = companyProductReturn[0].totalAmount[0] ? companyProductReturn[0].totalAmount[0].totalAmount : 0;
+    const totalAmountScrapProductSell = scrapProductSell[0].totalAmount[0] ? scrapProductSell[0].totalAmount[0].totalAmount : 0;
 
-    const totalAmount = (totalAmountFromProductExchange - totalAmountFromScrapProductSell - companyTotalAmount) / 10000;
+    // console.log(productExchange)
+    // console.log(companyProductReturn)
+    // console.log(scrapProductSell)
 
     const result = await CompanyProductReturn.aggregate([
       {
@@ -547,16 +573,10 @@ module.exports.productExchangeReport = async (req, res) => {
     ]);
 
     res.status(201).json({
-      totalSentItems:
-        productExchange[0].total.length > 0
-          ? productExchange[0].total[0].totalSentItems - totalCompanySentItems
-          : 0,
-      totalWeight:
-        productExchange[0].total.length > 0
-          ? productExchange[0].total[0].totalWeight - totalCompanyWeight
-          : 0,
-      totalAmount,
-      totalDue: result.length > 0 ? result[0].totalDue / 10000 : 0,
+      totalSentItems: (totalSentItemsProductExchange - totalSentItemsCompanyProductReturn - totalSentItemsScrapProductSell),
+      totalWeight: (totalWeightProductExchange - totalWeightCompanyProductReturn - totalWeightScrapProductSell),
+      totalAmount: (totalAmountProductExchange - totalAmountCompanyProductReturn - totalAmountScrapProductSell) / 10000,
+      totalDue: result.length > 0 ? result[0].totalDue / 10000: 0,
     });
   } catch (error) {
     console.error(error);
