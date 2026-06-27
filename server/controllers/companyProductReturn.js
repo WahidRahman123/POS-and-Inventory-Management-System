@@ -572,11 +572,15 @@ module.exports.productExchangeReport = async (req, res) => {
       },
     ]);
 
+    const totalAmount = (totalAmountProductExchange - totalAmountCompanyProductReturn - totalAmountScrapProductSell) / 10000;
+
     res.status(201).json({
       totalSentItems: (totalSentItemsProductExchange - totalSentItemsCompanyProductReturn - totalSentItemsScrapProductSell),
+
       totalWeight: (totalWeightProductExchange - totalWeightCompanyProductReturn - totalWeightScrapProductSell),
-      totalAmount: (totalAmountProductExchange - totalAmountCompanyProductReturn - totalAmountScrapProductSell) / 10000,
-      totalDue: result.length > 0 ? result[0].totalDue / 10000: 0,
+
+      totalAmount: totalAmount > 0 ? totalAmount : 0,
+      totalDue: result.length > 0 ? result[0].totalDue / 10000 : 0,
     });
   } catch (error) {
     console.error(error);

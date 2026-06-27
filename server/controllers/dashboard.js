@@ -15,6 +15,8 @@ const Expense = require("../models/Expense"); // <--- এক্সপেন্�
 const Supplier = require("../models/Supplier");
 const { combineDateWithCurrentTime } = require('../utils/combineDateWithCurrentTime');
 const dayjs = require('../utils/date.js');
+const CompanyProductReturn = require("../models/CompanyProductReturn.js");
+const ScrapProductSell = require("../models/ScrapProductSell.js");
 
 module.exports.index = async (req, res) => {
   try {
@@ -233,6 +235,8 @@ module.exports.index = async (req, res) => {
                     $sum: { $multiply: ["$bankPaymentAmount", 10000] },
                   },
 
+                  // main: {$push:"$$ROOT"},
+
                   // SA included/ref starts with SA হলে due sum
 
                   totalSalesDueToday: {
@@ -259,6 +263,7 @@ module.exports.index = async (req, res) => {
           },
         },
       ]),
+
 
       // ================== TODAY'S EXPENSES AGGREGATION ==================
       // ২. আজকের নির্দিষ্ট তারিখের সকল খচর বা সাব-খরচ যোগ করার কুয়েরি
@@ -307,6 +312,81 @@ module.exports.index = async (req, res) => {
       },
     ]);
 
+    //* Product Exchange totalAmount calculation - starts
+    const companyProductReturn = await CompanyProductReturn.aggregate([
+      {
+        $facet: {
+          total: [
+            {
+              $unwind: "$products",
+            },
+            {
+              $group: {
+                _id: null,
+                totalSentItems: { $sum: "$products.quantity" },
+                totalWeight: { $sum: "$products.qtyInKg" },
+              },
+            },
+          ],
+
+          totalAmount: [
+            {
+              $group: {
+                _id: null,
+                totalAmount: { $sum: { $multiply: ["$totalAmount", 10000] } },
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+    const scrapProductSell = await ScrapProductSell.aggregate([
+      {
+        $facet: {
+          total: [
+            {
+              $unwind: "$products",
+            },
+            {
+              $group: {
+                _id: null,
+                totalSentItems: { $sum: "$products.quantity" },
+                totalWeight: { $sum: "$products.qtyInKg" },
+              },
+            },
+          ],
+
+          totalAmount: [
+            {
+              $group: {
+                _id: null,
+                totalAmount: { $sum: { $multiply: ["$totalAmount", 10000] } },
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+
+    const totalSentItemsProductExchange = productExchange[0].quantityDetails[0] ? productExchange[0].quantityDetails[0].productQuantityTotal : 0;
+    const totalSentItemsCompanyProductReturn = companyProductReturn[0].total[0] ? companyProductReturn[0].total[0].totalSentItems : 0;
+    const totalSentItemsScrapProductSell = scrapProductSell[0].total[0] ? scrapProductSell[0].total[0].totalSentItems : 0;
+
+    const totalWeightProductExchange = productExchange[0].quantityDetails[0] ? productExchange[0].quantityDetails[0].productQuantityInKgTotal : 0;
+    const totalWeightCompanyProductReturn = companyProductReturn[0].total[0] ? companyProductReturn[0].total[0].totalWeight : 0;
+    const totalWeightScrapProductSell = scrapProductSell[0].total[0] ? scrapProductSell[0].total[0].totalWeight : 0;
+
+    const totalAmountProductExchange = productExchange[0].exchangeDetails[0] ? productExchange[0].exchangeDetails[0].exchangeTotal : 0;
+    const totalAmountCompanyProductReturn = companyProductReturn[0].totalAmount[0] ? companyProductReturn[0].totalAmount[0].totalAmount : 0;
+    const totalAmountScrapProductSell = scrapProductSell[0].totalAmount[0] ? scrapProductSell[0].totalAmount[0].totalAmount : 0;
+
+    const totalAmountForPE = (totalAmountProductExchange - totalAmountCompanyProductReturn - totalAmountScrapProductSell) / 10000;
+
+    //* Product Exchange totalAmount calculation - starts
+
+
     //* Supplier Due calculation:
     const supplierDetails = await Supplier.aggregate([
       {
@@ -316,6 +396,7 @@ module.exports.index = async (req, res) => {
         },
       },
     ]);
+
 
     //* customers all current due
     const customer = await Customer.aggregate([
@@ -475,17 +556,25 @@ module.exports.index = async (req, res) => {
           : 0,
 
       exchangeTotalQuantity:
-        productExchange[0].quantityDetails.length > 0
-          ? productExchange[0].quantityDetails[0].productQuantityTotal
-          : 0,
+        (totalSentItemsProductExchange - totalSentItemsCompanyProductReturn - totalSentItemsScrapProductSell),
+
       exchangeTotalQuantityInKg:
-        productExchange[0].quantityDetails.length > 0
-          ? productExchange[0].quantityDetails[0].productQuantityInKgTotal
-          : 0,
+        (totalWeightProductExchange - totalWeightCompanyProductReturn - totalWeightScrapProductSell),
+        
+      // exchangeTotalQuantity:
+      //   productExchange[0].quantityDetails.length > 0
+      //     ? productExchange[0].quantityDetails[0].productQuantityTotal
+      //     : 0,
+      // exchangeTotalQuantityInKg:
+      //   productExchange[0].quantityDetails.length > 0
+      //     ? productExchange[0].quantityDetails[0].productQuantityInKgTotal
+      //     : 0,
       exchangeTotalPrice:
-        productExchange[0].exchangeDetails.length > 0
-          ? productExchange[0].exchangeDetails[0].exchangeTotal / 10000
-          : 0,
+        totalAmountForPE > 0 ? totalAmountForPE : 0,
+      // exchangeTotalPrice:
+      //   productExchange[0].exchangeDetails.length > 0
+      //     ? productExchange[0].exchangeDetails[0].exchangeTotal / 10000
+      //     : 0,
       exchangeTotalRemaining:
         productExchange[0].exchangeDetails.length > 0
           ? productExchange[0].exchangeDetails[0].exchangeRemaining / 10000
@@ -532,7 +621,7 @@ module.exports.index = async (req, res) => {
       //     : 0,
       salesDueToday:
         salesTransaction[0].todaysReport[0] ? salesTransaction[0].todaysReport[0].totalSalesDueToday : 0,
-        
+
       dueCollectionToday:
         salesTransaction[0].todaysReport[0] ? salesTransaction[0].todaysReport[0].totalDuePaidToday / 10000 : 0,
 
