@@ -200,7 +200,12 @@ module.exports.index = async (req, res) => {
 
       // ================== COMPANY SALES RETURN ==================
       CompanySalesReturn.aggregate([
-        { $group: { _id: null, productQuantityTotal: { $sum: "$quantity" } } },
+        {
+          $group: {
+            _id: null, productQuantityTotal: { $sum: "$quantity" },
+            totalAmount: { $sum: { $multiply: ["$totalAmount", 10000] } }
+          }
+        },
       ]),
 
       // ================== SALES TRANSACTION ==================
@@ -369,6 +374,17 @@ module.exports.index = async (req, res) => {
       },
     ]);
 
+
+    //* Sales Return caluculation - starts:
+    const salesreturnTotalAmount = salesReturnForNewData[0].totalAmount[0] ? salesReturnForNewData[0].totalAmount[0].totalAmount : 0;
+
+    const salesreturnTotalDue = salesReturnForNewData[0].totalAmount[0] ? salesReturnForNewData[0].totalAmount[0].totalDue / 10000 : 0;
+
+    console.log(companySalesReturn);
+
+    const companySalesReturnTotalAmount = companySalesReturn[0] ? companySalesReturn[0].totalAmount : 0;
+
+    //* Sales Return caluculation - ends:
 
     const totalSentItemsProductExchange = productExchange[0].quantityDetails[0] ? productExchange[0].quantityDetails[0].productQuantityTotal : 0;
     const totalSentItemsCompanyProductReturn = companyProductReturn[0].total[0] ? companyProductReturn[0].total[0].totalSentItems : 0;
@@ -560,7 +576,7 @@ module.exports.index = async (req, res) => {
 
       exchangeTotalQuantityInKg:
         (totalWeightProductExchange - totalWeightCompanyProductReturn - totalWeightScrapProductSell),
-        
+
       // exchangeTotalQuantity:
       //   productExchange[0].quantityDetails.length > 0
       //     ? productExchange[0].quantityDetails[0].productQuantityTotal
@@ -692,19 +708,22 @@ module.exports.index = async (req, res) => {
           ? salesReturnForNewData[0].totalAmount[0].totalPaid / 10000
           : 0,
       totalDueForSalesReturn:
-        salesReturnForNewData && salesReturnForNewData[0].totalAmount.length > 0
-          ? salesReturnForNewData[0].totalAmount[0].totalDue / 10000
-          : 0,
+        salesreturnTotalDue,
+      // totalDueForSalesReturn:
+      //   salesReturnForNewData && salesReturnForNewData[0].totalAmount.length > 0
+      //     ? salesReturnForNewData[0].totalAmount[0].totalDue / 10000
+      //     : 0,
 
       cardFiveQty: cardFiveQty,
-      cardFiveAmount: cardFiveAmount,
+      cardFiveAmount: (salesreturnTotalAmount - companySalesReturnTotalAmount) / 10000,
       cardSixGivenQty: cardSixGivenQty,
 
       totalAmountQtyForCSR: companyTotalAmountQty,
       totalPaidQtyForCSR: companyTotalPaidQty,
       totalDueQtyForCSR: companyTotalDueQty,
       totalDueForCSR: companyTotalDueValue,
-      totalPaidForCSR: companyTotalAmountValue,
+      // totalPaidForCSR: companyTotalAmountValue,
+      totalPaidForCSR: companySalesReturnTotalAmount / 10000,
       totalAmountForCSR: companyTotalAmountValue,
       totalReceivedValueForCSR: companyTotalPaidValue,
     };
