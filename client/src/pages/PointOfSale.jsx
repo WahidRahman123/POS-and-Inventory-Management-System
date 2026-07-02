@@ -350,6 +350,7 @@ const PointOfSale = () => {
                       type="number"
                       value={product.newSellPrice}
                       step="any"
+                      min={product.costPrice}
                       className="w-[100px] border rounded px-2"
                       onChange={(e) =>
                         setSelectedProducts((prev) =>

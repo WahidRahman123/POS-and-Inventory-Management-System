@@ -587,7 +587,7 @@ module.exports.salesDueList = async (req, res) => {
     const skip = (parseInt(page) - 1) * limit;
 
     const customers = await Customer.find(searchQuery)
-      // .sort({ currentBalance: parseInt(order) })
+      .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limit);
 
