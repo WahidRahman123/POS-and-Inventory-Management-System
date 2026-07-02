@@ -461,6 +461,135 @@ module.exports.companyProductReturnStatement = async (req, res) => {
   }
 };
 
+// module.exports.productExchangeReport = async (req, res) => {
+//   try {
+//     const productExchange = await ProductExchange.aggregate([
+//       {
+//         $facet: {
+//           total: [
+//             {
+//               $unwind: "$products",
+//             },
+//             {
+//               $group: {
+//                 _id: null,
+//                 totalSentItems: { $sum: "$products.quantity" },
+//                 totalWeight: { $sum: "$products.qtyInKg" },
+//               },
+//             },
+//           ],
+
+//           totalAmount: [
+//             {
+//               $group: {
+//                 _id: null,
+//                 totalAmount: { $sum: { $multiply: ["$totalAmount", 10000] } },
+//               },
+//             },
+//           ],
+//         },
+//       },
+//     ]);
+
+//     const companyProductReturn = await CompanyProductReturn.aggregate([
+//       {
+//         $facet: {
+//           total: [
+//             {
+//               $unwind: "$products",
+//             },
+//             {
+//               $group: {
+//                 _id: null,
+//                 totalSentItems: { $sum: "$products.quantity" },
+//                 totalWeight: { $sum: "$products.qtyInKg" },
+//               },
+//             },
+//           ],
+
+//           totalAmount: [
+//             {
+//               $group: {
+//                 _id: null,
+//                 totalAmount: { $sum: { $multiply: ["$totalAmount", 10000] } },
+//               },
+//             },
+//           ],
+//         },
+//       },
+//     ]);
+
+//     const scrapProductSell = await ScrapProductSell.aggregate([
+//       {
+//         $facet: {
+//           total: [
+//             {
+//               $unwind: "$products",
+//             },
+//             {
+//               $group: {
+//                 _id: null,
+//                 totalSentItems: { $sum: "$products.quantity" },
+//                 totalWeight: { $sum: "$products.qtyInKg" },
+//               },
+//             },
+//           ],
+
+//           totalAmount: [
+//             {
+//               $group: {
+//                 _id: null,
+//                 totalAmount: { $sum: { $multiply: ["$totalAmount", 10000] } },
+//               },
+//             },
+//           ],
+//         },
+//       },
+//     ]);
+
+//     const totalSentItemsProductExchange = productExchange[0].total[0] ? productExchange[0].total[0].totalSentItems : 0;
+//     const totalSentItemsCompanyProductReturn = companyProductReturn[0].total[0] ? companyProductReturn[0].total[0].totalSentItems : 0;
+//     const totalSentItemsScrapProductSell = scrapProductSell[0].total[0] ? scrapProductSell[0].total[0].totalSentItems : 0;
+
+//     const totalWeightProductExchange = productExchange[0].total[0] ? productExchange[0].total[0].totalWeight : 0;
+//     const totalWeightCompanyProductReturn = companyProductReturn[0].total[0] ? companyProductReturn[0].total[0].totalWeight : 0;
+//     const totalWeightScrapProductSell = scrapProductSell[0].total[0] ? scrapProductSell[0].total[0].totalWeight : 0;
+
+//     const totalAmountProductExchange = productExchange[0].totalAmount[0] ? productExchange[0].totalAmount[0].totalAmount : 0;
+//     const totalAmountCompanyProductReturn = companyProductReturn[0].totalAmount[0] ? companyProductReturn[0].totalAmount[0].totalAmount : 0;
+//     const totalAmountScrapProductSell = scrapProductSell[0].totalAmount[0] ? scrapProductSell[0].totalAmount[0].totalAmount : 0;
+
+//     // console.log(productExchange)
+//     // console.log(companyProductReturn)
+//     // console.log(scrapProductSell)
+
+//     const result = await CompanyProductReturn.aggregate([
+//       {
+//         $group: {
+//           _id: null,
+//           totalDue: { $sum: { $multiply: ["$due", 10000] } },
+//         },
+//       },
+//     ]);
+
+//     const totalAmount = (totalAmountProductExchange - totalAmountCompanyProductReturn - totalAmountScrapProductSell) / 10000;
+
+//     res.status(201).json({
+//       totalSentItems: (totalSentItemsProductExchange - totalSentItemsCompanyProductReturn - totalSentItemsScrapProductSell),
+
+//       totalWeight: (totalWeightProductExchange - totalWeightCompanyProductReturn - totalWeightScrapProductSell),
+
+//       totalAmount: totalAmount > 0 ? totalAmount : 0,
+//       totalDue: result.length > 0 ? result[0].totalDue / 10000 : 0,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Server Error");
+//   }
+// };
+
+
+
 module.exports.productExchangeReport = async (req, res) => {
   try {
     const productExchange = await ProductExchange.aggregate([
@@ -479,14 +608,34 @@ module.exports.productExchangeReport = async (req, res) => {
             },
           ],
 
-          totalAmount: [
+          totalAmount:
+           [
+            { $unwind: "$products" },
+            {
+              $lookup: {
+                from: "productexchangestockmanagements",
+                localField: "products.productId",
+                foreignField: "productId",
+                as: "stock"
+              }
+            },
+            { $unwind: "$stock" },
             {
               $group: {
                 _id: null,
-                totalAmount: { $sum: { $multiply: ["$totalAmount", 10000] } },
-              },
-            },
-          ],
+                totalAmount: {
+                  $sum: {
+                    $multiply: [
+                      "$products.qtyInKg",
+                      "$stock.unitPrice",
+                      10000
+                    ]
+                  }
+                },
+                // main: { $first: "$$ROOT" },
+              }
+            }
+          ]
         },
       },
     ]);
@@ -508,12 +657,30 @@ module.exports.productExchangeReport = async (req, res) => {
           ],
 
           totalAmount: [
+            { $unwind: "$products" },
+            {
+              $lookup: {
+                from: "productexchangestockmanagements",
+                localField: "products.productId",
+                foreignField: "productId",
+                as: "stock"
+              }
+            },
+            { $unwind: "$stock" },
             {
               $group: {
                 _id: null,
-                totalAmount: { $sum: { $multiply: ["$totalAmount", 10000] } },
-              },
-            },
+                totalAmount: {
+                  $sum: {
+                    $multiply: [
+                      "$products.qtyInKg",
+                      "$stock.unitPrice",
+                      10000
+                    ]
+                  }
+                }
+              }
+            }
           ],
         },
       },
@@ -536,12 +703,30 @@ module.exports.productExchangeReport = async (req, res) => {
           ],
 
           totalAmount: [
+            { $unwind: "$products" },
+            {
+              $lookup: {
+                from: "productexchangestockmanagements",
+                localField: "products.productId",
+                foreignField: "productId",
+                as: "stock"
+              }
+            },
+            { $unwind: "$stock" },
             {
               $group: {
                 _id: null,
-                totalAmount: { $sum: { $multiply: ["$totalAmount", 10000] } },
-              },
-            },
+                totalAmount: {
+                  $sum: {
+                    $multiply: [
+                      "$products.qtyInKg",
+                      "$stock.unitPrice",
+                      10000
+                    ]
+                  }
+                }
+              }
+            }
           ],
         },
       },
@@ -559,10 +744,6 @@ module.exports.productExchangeReport = async (req, res) => {
     const totalAmountCompanyProductReturn = companyProductReturn[0].totalAmount[0] ? companyProductReturn[0].totalAmount[0].totalAmount : 0;
     const totalAmountScrapProductSell = scrapProductSell[0].totalAmount[0] ? scrapProductSell[0].totalAmount[0].totalAmount : 0;
 
-    // console.log(productExchange)
-    // console.log(companyProductReturn)
-    // console.log(scrapProductSell)
-
     const result = await CompanyProductReturn.aggregate([
       {
         $group: {
@@ -573,6 +754,10 @@ module.exports.productExchangeReport = async (req, res) => {
     ]);
 
     const totalAmount = (totalAmountProductExchange - totalAmountCompanyProductReturn - totalAmountScrapProductSell) / 10000;
+
+    // console.log("totalAmountProductExchange:", totalAmountProductExchange / 10000);
+    // console.log("totalAmountCompanyProductReturn:", totalAmountCompanyProductReturn / 10000);
+    // console.log("totalAmountScrapProductSell:", totalAmountScrapProductSell / 10000);
 
     res.status(201).json({
       totalSentItems: (totalSentItemsProductExchange - totalSentItemsCompanyProductReturn - totalSentItemsScrapProductSell),

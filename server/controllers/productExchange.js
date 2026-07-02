@@ -121,8 +121,11 @@ module.exports.createProductExchange = async (req, res) => {
         productExchangeStock.qtyInKg += product.qtyInKg;
         productExchangeStock.tempQtyInKg += product.qtyInKg;
 
-        productExchangeStock.unitPrice += product.unitPrice;
-        productExchangeStock.tempUnitPrice += product.unitPrice;
+        // productExchangeStock.unitPrice += product.unitPrice;
+        // productExchangeStock.tempUnitPrice += product.unitPrice;
+
+        productExchangeStock.unitPrice = product.unitPrice;
+        productExchangeStock.tempUnitPrice = product.unitPrice;
 
         productExchangeStock.productExchangeRef.push(exchange._id);
         await productExchangeStock.save();

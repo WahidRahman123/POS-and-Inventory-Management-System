@@ -143,6 +143,33 @@ module.exports.index = async (req, res) => {
                 },
               },
             ],
+
+            totalAmountOfProductExchange: [
+            { $unwind: "$products" },
+            {
+              $lookup: {
+                from: "productexchangestockmanagements",
+                localField: "products.productId",
+                foreignField: "productId",
+                as: "stock"
+              }
+            },
+            { $unwind: "$stock" },
+            {
+              $group: {
+                _id: null,
+                totalAmount: {
+                  $sum: {
+                    $multiply: [
+                      "$products.qtyInKg",
+                      "$stock.unitPrice",
+                      10000
+                    ]
+                  }
+                }
+              }
+            }
+          ],
           },
         },
       ]),
@@ -342,6 +369,33 @@ module.exports.index = async (req, res) => {
               },
             },
           ],
+
+          totalAmountOfProductExchange: [
+            { $unwind: "$products" },
+            {
+              $lookup: {
+                from: "productexchangestockmanagements",
+                localField: "products.productId",
+                foreignField: "productId",
+                as: "stock"
+              }
+            },
+            { $unwind: "$stock" },
+            {
+              $group: {
+                _id: null,
+                totalAmount: {
+                  $sum: {
+                    $multiply: [
+                      "$products.qtyInKg",
+                      "$stock.unitPrice",
+                      10000
+                    ]
+                  }
+                }
+              }
+            }
+          ],
         },
       },
     ]);
@@ -370,6 +424,33 @@ module.exports.index = async (req, res) => {
               },
             },
           ],
+
+          totalAmountOfProductExchange: [
+            { $unwind: "$products" },
+            {
+              $lookup: {
+                from: "productexchangestockmanagements",
+                localField: "products.productId",
+                foreignField: "productId",
+                as: "stock"
+              }
+            },
+            { $unwind: "$stock" },
+            {
+              $group: {
+                _id: null,
+                totalAmount: {
+                  $sum: {
+                    $multiply: [
+                      "$products.qtyInKg",
+                      "$stock.unitPrice",
+                      10000
+                    ]
+                  }
+                }
+              }
+            }
+          ],
         },
       },
     ]);
@@ -380,7 +461,7 @@ module.exports.index = async (req, res) => {
 
     const salesreturnTotalDue = salesReturnForNewData[0].totalAmount[0] ? salesReturnForNewData[0].totalAmount[0].totalDue / 10000 : 0;
 
-    console.log(companySalesReturn);
+    // console.log(companySalesReturn);
 
     const companySalesReturnTotalAmount = companySalesReturn[0] ? companySalesReturn[0].totalAmount : 0;
 
@@ -394,9 +475,9 @@ module.exports.index = async (req, res) => {
     const totalWeightCompanyProductReturn = companyProductReturn[0].total[0] ? companyProductReturn[0].total[0].totalWeight : 0;
     const totalWeightScrapProductSell = scrapProductSell[0].total[0] ? scrapProductSell[0].total[0].totalWeight : 0;
 
-    const totalAmountProductExchange = productExchange[0].exchangeDetails[0] ? productExchange[0].exchangeDetails[0].exchangeTotal : 0;
-    const totalAmountCompanyProductReturn = companyProductReturn[0].totalAmount[0] ? companyProductReturn[0].totalAmount[0].totalAmount : 0;
-    const totalAmountScrapProductSell = scrapProductSell[0].totalAmount[0] ? scrapProductSell[0].totalAmount[0].totalAmount : 0;
+    const totalAmountProductExchange = productExchange[0].totalAmountOfProductExchange[0] ? productExchange[0].totalAmountOfProductExchange[0].totalAmount : 0;
+    const totalAmountCompanyProductReturn = companyProductReturn[0].totalAmountOfProductExchange[0] ? companyProductReturn[0].totalAmountOfProductExchange[0].totalAmount : 0;
+    const totalAmountScrapProductSell = scrapProductSell[0].totalAmountOfProductExchange[0] ? scrapProductSell[0].totalAmountOfProductExchange[0].totalAmount : 0;
 
     const totalAmountForPE = (totalAmountProductExchange - totalAmountCompanyProductReturn - totalAmountScrapProductSell) / 10000;
 

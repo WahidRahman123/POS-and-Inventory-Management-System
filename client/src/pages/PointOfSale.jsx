@@ -20,7 +20,7 @@ const PointOfSale = () => {
   const { productsBySearchforPOS } = useSelector((state) => state.product);
   const dispatch = useDispatch();
   const [customDate, setCustomDate] = useState("");
-  
+
   const [customerState, setCustomerState] = useState("");
 
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -87,12 +87,12 @@ const PointOfSale = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!customer.customerId) return alert("Select a customer!");
-    
+
     if (selectedProducts.length === 0 && Number(loanInput || 0) <= 0) {
       return alert("Select product or enter loan amount!");
     }
 
-    if(selectedProducts.length === 0 && !loanInput && !cashInput && !bankPaymentAmount && !exchangeValue){
+    if (selectedProducts.length === 0 && !loanInput && !cashInput && !bankPaymentAmount && !exchangeValue) {
       return alert("Invalid Request!");
     }
 
@@ -121,9 +121,9 @@ const PointOfSale = () => {
       //* saleType
       let saleType = "normal";
 
-      if(finalProducts.length === 0 && loanInput) {
+      if (finalProducts.length === 0 && loanInput) {
         saleType = "loan";
-      } else if(finalProducts.length === 0 && !loanInput) {
+      } else if (finalProducts.length === 0 && !loanInput) {
         saleType = "others";
       }
 
@@ -149,11 +149,11 @@ const PointOfSale = () => {
         // ইনভয়েসে দেখানোর জন্য পুরো এক্সচেঞ্জ ডিটেইলস পাঠানো হচ্ছে
         exchangeDetails: selectedExchangeData
           ? {
-              memo: selectedExchangeData.memo,
-              totalAmount: selectedExchangeData.totalAmount,
-              remainingBalance: selectedExchangeData.remainingBalance,
-              products: selectedExchangeData.products,
-            }
+            memo: selectedExchangeData.memo,
+            totalAmount: selectedExchangeData.totalAmount,
+            remainingBalance: selectedExchangeData.remainingBalance,
+            products: selectedExchangeData.products,
+          }
           : null,
         due: Number(liveDue),
         paid: Number(
@@ -242,7 +242,7 @@ const PointOfSale = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if(state) {
+    if (state) {
       setCustomerState(state);
     }
   }, [state]);
@@ -258,7 +258,7 @@ const PointOfSale = () => {
       </div>
 
       <form onSubmit={handleSubmit}>
-        <CustomerSelect customer={customer} setCustomer={setCustomer} customerState={customerState}/>
+        <CustomerSelect customer={customer} setCustomer={setCustomer} customerState={customerState} />
 
         <div className="grid grid-cols-2 gap-x-6 mb-4">
           <div>
@@ -435,7 +435,7 @@ const PointOfSale = () => {
         <div className="flex flex-col gap-4 max-w-[50%] mb-4">
           <div>
             <label className="block text-sm font-bold text-red-600 mb-1">
-              Give Loan
+              Give Loan / Payment
             </label>
             <input
               type="number"
@@ -444,6 +444,7 @@ const PointOfSale = () => {
               step="any"
               className="block w-full px-3 py-1.5 border border-red-300 rounded-sm text-sm"
               placeholder="0.00"
+              onWheel={(e) => e.target.blur()} 
             />
           </div>
           <div>
@@ -454,6 +455,7 @@ const PointOfSale = () => {
               onChange={(e) => setCashInput(e.target.value)}
               step="any"
               className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
+              onWheel={(e) => e.target.blur()}
             />
           </div>
           <div>
@@ -465,6 +467,7 @@ const PointOfSale = () => {
               value={bankPaymentAmount}
               onChange={(e) => setBankPaymentAmount(e.target.value)}
               step="any"
+              onWheel={(e) => e.target.blur()}
               className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm"
             />
           </div>
@@ -505,6 +508,7 @@ const PointOfSale = () => {
                   className="block w-full px-3 py-1.5 border border-orange-300 bg-orange-50 rounded-sm text-sm"
                   min={0}
                   max={maxAvailableBalance}
+                  onWheel={(e) => e.target.blur()}
                 />
               </div>
             )}

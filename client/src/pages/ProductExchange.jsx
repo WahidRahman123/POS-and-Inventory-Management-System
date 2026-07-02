@@ -297,7 +297,7 @@ const ProductExchange = () => {
             </div>
             <p className="text-2xl font-black text-gray-800">
               {productExchangeReportData
-                ? productExchangeReportData.totalSentItems
+                ? new Decimal(productExchangeReportData.totalSentItems).toFixed(0)
                 : "--"}{" "}
               <span className="text-xs font-normal text-gray-500">Pcs</span>
             </p>
@@ -313,7 +313,7 @@ const ProductExchange = () => {
             </div>
             <p className="text-2xl font-black text-gray-800">
               {productExchangeReportData
-                ? productExchangeReportData.totalWeight
+                ? new Decimal(productExchangeReportData.totalWeight).toFixed(2)
                 : "--"}{" "}
               <span className="text-xs font-normal text-gray-500">Kg</span>
             </p>
@@ -330,7 +330,7 @@ const ProductExchange = () => {
             <p className="text-2xl font-black text-white">
               ৳{" "}
               {productExchangeReportData
-                ? productExchangeReportData.totalAmount
+                ? new Decimal(productExchangeReportData.totalAmount).toFixed(2)
                 : "--"}
             </p>
           </div>
@@ -541,7 +541,9 @@ const ProductExchange = () => {
                       )
                     }
                     className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
+                    step="1"
                     required
+                    onWheel={(e) => e.target.blur()}
                   />
                 </div>
                 <div>
@@ -566,6 +568,8 @@ const ProductExchange = () => {
                     }}
                     className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
                     required
+                    onWheel={(e) => e.target.blur()}
+
                   />
                 </div>
                 <div className="flex gap-2">
@@ -592,6 +596,8 @@ const ProductExchange = () => {
                       }}
                       className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
                       required
+                      onWheel={(e) => e.target.blur()}
+
                     />
                   </div>
                   {products.length > 1 && (

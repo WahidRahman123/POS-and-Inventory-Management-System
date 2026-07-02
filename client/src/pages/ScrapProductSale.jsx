@@ -390,7 +390,7 @@ const ScrapProductSale = () => {
             </div>
             <p className="text-2xl font-black text-gray-800">
               {productExchangeReportData
-                ? productExchangeReportData.totalSentItems
+                ? new Decimal(productExchangeReportData.totalSentItems).toFixed(0)
                 : "--"}{" "}
               <span className="text-xs">Pcs</span>
             </p>
@@ -405,7 +405,7 @@ const ScrapProductSale = () => {
             </div>
             <p className="text-2xl font-black text-gray-800">
               {productExchangeReportData
-                ? productExchangeReportData.totalWeight
+                ? new Decimal(productExchangeReportData.totalWeight).toFixed(2)
                 : "--"}{" "}
               <span className="text-xs">Kg</span>
             </p>
@@ -421,7 +421,7 @@ const ScrapProductSale = () => {
             <p className="text-2xl font-black text-white">
               ৳{" "}
               {productExchangeReportData
-                ? productExchangeReportData.totalAmount
+                ? new Decimal(productExchangeReportData.totalAmount).toFixed(2)
                 : "--"}
             </p>
           </div>
