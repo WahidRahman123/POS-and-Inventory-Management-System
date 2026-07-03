@@ -21,6 +21,8 @@ const Purchase = () => {
   );
   const { productsBySearchforPurchase } = useSelector((state) => state.product);
 
+  // console.log(purchases)
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation(); // location অবজেক্ট নেওয়া হলো রিডাইরেকশনের ডেটা ধরার জন্য
@@ -759,7 +761,7 @@ const Purchase = () => {
                   </th>
                   <th
                     className="border border-gray-400 px-4 py-3 text-center font-semibold"
-                    colSpan={3}
+                    colSpan={4}
                   >
                     Products
                   </th>
@@ -797,6 +799,9 @@ const Purchase = () => {
                   </th>
                   <th className="border border-gray-400 px-4 py-3 text-left font-semibold">
                     Unit Price
+                  </th>
+                  <th className="border border-gray-400 px-4 py-3 text-left font-semibold">
+                    Sub Total
                   </th>
                 </tr>
               </thead>
@@ -863,6 +868,9 @@ const Purchase = () => {
                         </td>
                         <td className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2">
                           {product.unitPrice || 0}
+                        </td>
+                        <td className="border border-gray-400 px-2 py-1 sm:px-4 sm:py-2">
+                          {product.subTotal || 0}
                         </td>
                         {pIndex === 0 && (
                           <>
