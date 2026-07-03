@@ -511,7 +511,7 @@ module.exports.salesByCustomerName = async (req, res) => {
         .utc()
         .toDate();
         
-      matchQuery.createdAt = { $gte: startOfDay, $lte: endOfDay };
+      matchQuery.date = { $gte: startOfDay, $lte: endOfDay };
     }
 
     const transactions = await SalesTransaction.find(matchQuery)

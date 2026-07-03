@@ -187,7 +187,7 @@ const CustomerStatement = () => {
                     CURRENT BALANCE
                   </p>
                   <p
-                    className={`text-xl font-bold ${currentBalance < 0 ? "text-red-600" : "text-green-600"}`}
+                    className={`text-xl font-bold ${currentBalance > 0 ? "text-red-600" : "text-green-600"}`}
                   >
                     ৳
                     {currentBalance?.toLocaleString("en-BD", {

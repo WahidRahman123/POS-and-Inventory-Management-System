@@ -143,7 +143,7 @@ const SalesDueList = () => {
                     <td className="px-6 py-4 font-medium">{customer.name}</td>
                     <td className="px-6 py-4">{customer.phone || "N/A"}</td>
                     <td
-                      className={`px-6 py-4 text-right font-bold ${customer.currentBalance < 0 && "text-red-600"} ${customer.currentBalance > 0 && "text-green-600"}`}
+                      className={`px-6 py-4 text-right font-bold ${customer.currentBalance > 0 && "text-red-600"} ${customer.currentBalance < 0 && "text-green-600"}`}
                     >
                       ৳{" "}
                       {Number(customer.currentBalance || 0).toLocaleString(
