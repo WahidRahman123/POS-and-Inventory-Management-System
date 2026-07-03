@@ -314,367 +314,115 @@ const PurchaseReturn = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-slate-50 p-3 sm:p-4 md:p-6 font-sans">
-      {/* Title */}
-      <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
-        Purchase Return Entry
-      </h1>
+    <>
+      <title>{`Purchase Return | ${import.meta.env.VITE_COMPANY_NAME}`}</title>
+      <div className="min-h-screen bg-slate-50 p-3 sm:p-4 md:p-6 font-sans">
+        {/* Title */}
+        <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
+          Purchase Return Entry
+        </h1>
 
-      <div className="max-w-6xl mx-auto bg-white shadow-md rounded-lg p-4 sm:p-6 mb-6">
-        {purchaseSearchedByInvoice ? null : (
-          <div className="mb-4 flex items-start gap-2 bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-md text-sm">
-            <span className="font-semibold">নির্দেশনা:</span>
-            <span>
-              পারচেজ রিটার্ন তৈরি করতে মেমো নম্বর লিখে <strong>লোড</strong>{" "}
-              বাটনে চাপ দিন।
-            </span>
-          </div>
-        )}
-        <form onSubmit={handleSubmit}>
-          {/* Date and Memo Row */}
-          <div
-            className={`grid grid-cols-1 sm:grid-cols-2 gap-4 ${purchaseSearchedByInvoice ? "mb-4" : ""}`}
-          >
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={data.invoiceNo}
-                onChange={(e) =>
-                  setData((prev) => ({ ...prev, invoiceNo: e.target.value }))
-                }
-                placeholder="Enter Memo Number"
-                className="border border-gray-300 rounded-md px-3 py-2 text-sm flex-1"
-                required
-              />
-              <button
-                type="button"
-                onClick={handleSaleLoad}
-                disabled={invoiceLoading}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium cursor-pointer disabled:bg-blue-400 disabled:cursor-not-allowed"
-              >
-                {invoiceLoading ? "Loading..." : "Load"}
-              </button>
+        <div className="max-w-6xl mx-auto bg-white shadow-md rounded-lg p-4 sm:p-6 mb-6">
+          {purchaseSearchedByInvoice ? null : (
+            <div className="mb-4 flex items-start gap-2 bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-md text-sm">
+              <span className="font-semibold">নির্দেশনা:</span>
+              <span>
+                পারচেজ রিটার্ন তৈরি করতে মেমো নম্বর লিখে <strong>লোড</strong>{" "}
+                বাটনে চাপ দিন।
+              </span>
             </div>
-            {purchaseSearchedByInvoice ? (
-              <div>
+          )}
+          <form onSubmit={handleSubmit}>
+            {/* Date and Memo Row */}
+            <div
+              className={`grid grid-cols-1 sm:grid-cols-2 gap-4 ${purchaseSearchedByInvoice ? "mb-4" : ""}`}
+            >
+              <div className="flex gap-2">
                 <input
-                  type="date"
-                  value={data.date}
+                  type="text"
+                  value={data.invoiceNo}
                   onChange={(e) =>
-                    setData((prev) => ({ ...data, date: e.target.value }))
+                    setData((prev) => ({ ...prev, invoiceNo: e.target.value }))
                   }
-                  className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full"
+                  placeholder="Enter Memo Number"
+                  className="border border-gray-300 rounded-md px-3 py-2 text-sm flex-1"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={handleSaleLoad}
+                  disabled={invoiceLoading}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium cursor-pointer disabled:bg-blue-400 disabled:cursor-not-allowed"
+                >
+                  {invoiceLoading ? "Loading..." : "Load"}
+                </button>
               </div>
-            ) : (
-              ""
-            )}
-          </div>
-          {purchaseSearchedByInvoice ? (
-            <>
-              {/* Supplier Info Section */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 mb-4">
+              {purchaseSearchedByInvoice ? (
                 <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Supplier Name
-                  </label>
-                  <div className="flex">
-                    <input
-                      type="search"
-                      value={purchaseSearchedByInvoice.supplierName}
-                      disabled
-                      placeholder="Supplier Name"
-                      className="block w-full px-3 py-1.5 border border-gray-300 bg-gray-200 text-gray-700 rounded-sm text-sm"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Address
-                  </label>
                   <input
-                    type="text"
-                    placeholder="Address"
-                    value={purchaseSearchedByInvoice.address}
-                    disabled
-                    className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm bg-gray-200 text-gray-700 select-none"
+                    type="date"
+                    value={data.date}
+                    onChange={(e) =>
+                      setData((prev) => ({ ...data, date: e.target.value }))
+                    }
+                    className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full"
+                    required
                   />
                 </div>
-              </div>
-
-              {/* Original Purchase Products - Auto Loaded */}
-              <div className="bg-blue-50 rounded-lg p-4 mb-4 border border-blue-200">
-                <h3 className="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
-                  <span>
-                    Original Sale Products (Memo: #
-                    {purchaseSearchedByInvoice.memo})
-                  </span>
-                  <span className="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded">
-                    Auto Loaded
-                  </span>
-                </h3>
-
-                {/* Original Products */}
-                {originalSaleProducts.length > 0
-                  ? originalSaleProducts.map((product, index) => (
-                    <div
-                      key={index}
-                      className="grid grid-cols-1 md:grid-cols-8 gap-3 mb-3 items-end bg-white p-3 rounded border border-blue-100"
-                    >
-                      <div className="md:col-span-2">
-                        <label className="block text-xs text-gray-600 mb-1">
-                          Product Name
-                        </label>
-                        <input
-                          type="text"
-                          value={product.productName}
-                          disabled
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">
-                          Purchase Qty
-                        </label>
-                        <input
-                          type="number"
-                          value={product.availableReturnQty}
-                          disabled
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">
-                          Purchase Price
-                        </label>
-                        <input
-                          type="number"
-                          value={product.unitPrice}
-                          disabled
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1 text-red-600">
-                          Return Price
-                        </label>
-                        <input
-                          type="number"
-                          placeholder="Return Price"
-                          // min={product.sellPrice}
-                          min={0}
-                          value={product.returnPrice}
-                          onChange={(e) => {
-                            setOriginalSaleProducts((prev) =>
-                              prev.map((p, i) =>
-                                i === index
-                                  ? {
-                                    ...p,
-                                    returnPrice: e.target.value,
-                                    lineTotal: Number(
-                                      new Decimal(
-                                        Number(p.returnQuantity),
-                                      ).mul(
-                                        new Decimal(Number(e.target.value)),
-                                      ),
-                                    ),
-                                  }
-                                  : p,
-                              ),
-                            );
-                          }}
-                          step="any"
-                          className="w-full px-3 py-2 border border-red-400 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1 text-red-600">
-                          Return Qty
-                        </label>
-                        <input
-                          type="number"
-                          placeholder="Qty"
-                          min={1}
-                          max={product.availableReturnQty}
-                          value={product.returnQuantity}
-                          onChange={(e) => {
-                            setOriginalSaleProducts((prev) =>
-                              prev.map((p, i) =>
-                                i === index
-                                  ? {
-                                    ...p,
-                                    returnQuantity: e.target.value,
-                                    lineTotal: Number(
-                                      new Decimal(
-                                        Number(p.returnPrice),
-                                      ).mul(
-                                        new Decimal(Number(e.target.value)),
-                                      ),
-                                    ),
-                                  }
-                                  : p,
-                              ),
-                            );
-                          }}
-                          step="any"
-                          className="w-full px-3 py-2 border border-red-400 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">
-                          Qty (kg)
-                        </label>
-                        <input
-                          type="number"
-                          placeholder="kg"
-                          min={0}
-                          value={product.returnQtyInKg}
-                          onChange={(e) => {
-                            setOriginalSaleProducts((prev) =>
-                              prev.map((p, i) =>
-                                i === index
-                                  ? {
-                                    ...p,
-                                    returnQtyInKg: e.target.value,
-                                  }
-                                  : p,
-                              ),
-                            );
-                          }}
-                          step="any"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">
-                          Line Total
-                        </label>
-                        <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-red-50 text-red-700 font-semibold text-sm">
-                          ৳{" "}
-                          {new Decimal(Number(product.lineTotal)).toFixed(2)}
-                        </div>
-                      </div>
-                      {originalSaleProducts.length > 1 ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setOriginalSaleProducts((prev) =>
-                              prev.filter((p, i) => p.productName !== product.productName),
-                            );
-                          }}
-                          className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-sm h-fit mt-5 cursor-pointer"
-                        >
-                          ×
-                        </button>
-                      ) : (
-                        ""
-                      )}
+              ) : (
+                ""
+              )}
+            </div>
+            {purchaseSearchedByInvoice ? (
+              <>
+                {/* Supplier Info Section */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Supplier Name
+                    </label>
+                    <div className="flex">
+                      <input
+                        type="search"
+                        value={purchaseSearchedByInvoice.supplierName}
+                        disabled
+                        placeholder="Supplier Name"
+                        className="block w-full px-3 py-1.5 border border-gray-300 bg-gray-200 text-gray-700 rounded-sm text-sm"
+                      />
                     </div>
-                  ))
-                  : ""}
-
-                {/* Original Sale Summary */}
-                <div className="border-t border-blue-200 pt-3 mt-3">
-                  <div className="flex justify-end gap-6 text-sm">
-                    <span className="text-blue-800">
-                      Total Sale: <strong>৳ {totalSaleValue.toFixed(2)}</strong>
-                    </span>
-                    <span className="text-red-600 font-semibold text-lg">
-                      Total Return Value:{" "}
-                      <strong>৳ {totalReturnValue.toFixed(2)}</strong>
-                    </span>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Address
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Address"
+                      value={purchaseSearchedByInvoice.address}
+                      disabled
+                      className="block w-full px-3 py-1.5 border border-gray-300 rounded-sm text-sm bg-gray-200 text-gray-700 select-none"
+                    />
                   </div>
                 </div>
-              </div>
 
-              {/* Return Type Selection */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                {/* LEFT - Refund by Product */}
-                <div
-                  onClick={() => setReturnType("product")}
-                  className={`p-4 rounded-lg border-2 cursor-pointer ${returnType === "product"
-                      ? "border-green-500 bg-green-50"
-                      : "border-gray-200 bg-gray-50"
-                    }`}
-                >
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="returnType"
-                      value="product"
-                      checked={returnType === "product"}
-                      onChange={() => setReturnType("product")}
-                      className="w-4 h-4 text-green-600"
-                    />
-                    <span className="font-medium text-gray-700">
-                      Refund by Product (Exchange)
+                {/* Original Purchase Products - Auto Loaded */}
+                <div className="bg-blue-50 rounded-lg p-4 mb-4 border border-blue-200">
+                  <h3 className="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                    <span>
+                      Original Sale Products (Memo: #
+                      {purchaseSearchedByInvoice.memo})
                     </span>
-                  </label>
-                  <p className="text-xs text-gray-500 mt-1 ml-6">
-                    Take new products from supplier
-                  </p>
-                </div>
-
-                {/* RIGHT - Refund by Cash */}
-                <div
-                  onClick={() => setReturnType("cash")}
-                  className={`p-4 rounded-lg border-2 cursor-pointer ${returnType === "cash"
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-200 bg-gray-50"
-                    }`}
-                >
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="returnType"
-                      value="cash"
-                      checked={returnType === "cash"}
-                      onChange={() => setReturnType("cash")}
-                      className="w-4 h-4 text-blue-600"
-                    />
-                    <span className="font-medium text-gray-700">
-                      Refund by Cash (Money Back)
+                    <span className="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded">
+                      Auto Loaded
                     </span>
-                  </label>
-                  <p className="text-xs text-gray-500 mt-1 ml-6">
-                    Take cash from supplier
-                  </p>
-                </div>
-              </div>
+                  </h3>
 
-              {/* CONDITIONAL SECTIONS */}
-
-              {/* 1. REFUND BY PRODUCT - Multiple Products */}
-              {returnType === "product" && (
-                <div className="bg-green-50 rounded-lg p-4 mb-4 border border-green-200">
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="text-sm font-semibold text-green-800">
-                      New Exchange Products
-                    </h3>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleAddProduct}
-                    className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap cursor-pointer mb-2"
-                  >
-                    + Add Product
-                  </button>
-
-                  {/* Products Section */}
-                  <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                      Products
-                    </h3>
-
-                    {/* Single Product Row */}
-                    {products.map((product, index) => (
+                  {/* Original Products */}
+                  {originalSaleProducts.length > 0
+                    ? originalSaleProducts.map((product, index) => (
                       <div
-                        key={product.id}
-                        className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-3 items-end"
+                        key={index}
+                        className="grid grid-cols-1 md:grid-cols-8 gap-3 mb-3 items-end bg-white p-3 rounded border border-blue-100"
                       >
                         <div className="md:col-span-2">
                           <label className="block text-xs text-gray-600 mb-1">
@@ -683,44 +431,97 @@ const PurchaseReturn = () => {
                           <input
                             type="text"
                             value={product.productName}
-                            onChange={(e) =>
-                              handleProductChange(
-                                product.id,
-                                "productName",
-                                e.target.value,
-                              )
-                            }
-                            placeholder="Product Name"
-                            className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                            required
+                            disabled
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-sm"
                           />
                         </div>
                         <div>
                           <label className="block text-xs text-gray-600 mb-1">
-                            Quantity
+                            Purchase Qty
                           </label>
                           <input
                             type="number"
-                            value={product.quantity}
+                            value={product.availableReturnQty}
+                            disabled
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-600 mb-1">
+                            Purchase Price
+                          </label>
+                          <input
+                            type="number"
+                            value={product.unitPrice}
+                            disabled
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs mb-1 text-red-600">
+                            Return Price
+                          </label>
+                          <input
+                            type="number"
+                            placeholder="Return Price"
+                            // min={product.sellPrice}
+                            min={0}
+                            value={product.returnPrice}
                             onChange={(e) => {
-                              handleProductChange(
-                                product.id,
-                                "quantity",
-                                e.target.value,
-                              );
-
-                              const subTotal = new Decimal(
-                                Number(e.target.value),
-                              ).mul(new Decimal(Number(product.unitPrice)));
-
-                              handleProductChange(
-                                product.id,
-                                "subTotal",
-                                Number(subTotal.toFixed(4)),
+                              setOriginalSaleProducts((prev) =>
+                                prev.map((p, i) =>
+                                  i === index
+                                    ? {
+                                      ...p,
+                                      returnPrice: e.target.value,
+                                      lineTotal: Number(
+                                        new Decimal(
+                                          Number(p.returnQuantity),
+                                        ).mul(
+                                          new Decimal(Number(e.target.value)),
+                                        ),
+                                      ),
+                                    }
+                                    : p,
+                                ),
                               );
                             }}
+                            step="any"
+                            className="w-full px-3 py-2 border border-red-400 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs mb-1 text-red-600">
+                            Return Qty
+                          </label>
+                          <input
+                            type="number"
                             placeholder="Qty"
-                            className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            min={1}
+                            max={product.availableReturnQty}
+                            value={product.returnQuantity}
+                            onChange={(e) => {
+                              setOriginalSaleProducts((prev) =>
+                                prev.map((p, i) =>
+                                  i === index
+                                    ? {
+                                      ...p,
+                                      returnQuantity: e.target.value,
+                                      lineTotal: Number(
+                                        new Decimal(
+                                          Number(p.returnPrice),
+                                        ).mul(
+                                          new Decimal(Number(e.target.value)),
+                                        ),
+                                      ),
+                                    }
+                                    : p,
+                                ),
+                              );
+                            }}
+                            step="any"
+                            className="w-full px-3 py-2 border border-red-400 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
                             required
                           />
                         </div>
@@ -730,37 +531,189 @@ const PurchaseReturn = () => {
                           </label>
                           <input
                             type="number"
-                            value={product.qtyInKg}
+                            placeholder="kg"
+                            min={0}
+                            value={product.returnQtyInKg}
                             onChange={(e) => {
-                              handleProductChange(
-                                product.id,
-                                "qtyInKg",
-                                e.target.value,
+                              setOriginalSaleProducts((prev) =>
+                                prev.map((p, i) =>
+                                  i === index
+                                    ? {
+                                      ...p,
+                                      returnQtyInKg: e.target.value,
+                                    }
+                                    : p,
+                                ),
                               );
                             }}
-                            placeholder="Qty in kg"
                             step="any"
-                            className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                           />
                         </div>
-                        <div className="flex gap-2">
-                          <div className="flex-1">
+                        <div>
+                          <label className="block text-xs text-gray-600 mb-1">
+                            Line Total
+                          </label>
+                          <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-red-50 text-red-700 font-semibold text-sm">
+                            ৳{" "}
+                            {new Decimal(Number(product.lineTotal)).toFixed(2)}
+                          </div>
+                        </div>
+                        {originalSaleProducts.length > 1 ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setOriginalSaleProducts((prev) =>
+                                prev.filter((p, i) => p.productName !== product.productName),
+                              );
+                            }}
+                            className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-sm h-fit mt-5 cursor-pointer"
+                          >
+                            ×
+                          </button>
+                        ) : (
+                          ""
+                        )}
+                      </div>
+                    ))
+                    : ""}
+
+                  {/* Original Sale Summary */}
+                  <div className="border-t border-blue-200 pt-3 mt-3">
+                    <div className="flex justify-end gap-6 text-sm">
+                      <span className="text-blue-800">
+                        Total Sale: <strong>৳ {totalSaleValue.toFixed(2)}</strong>
+                      </span>
+                      <span className="text-red-600 font-semibold text-lg">
+                        Total Return Value:{" "}
+                        <strong>৳ {totalReturnValue.toFixed(2)}</strong>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Return Type Selection */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  {/* LEFT - Refund by Product */}
+                  <div
+                    onClick={() => setReturnType("product")}
+                    className={`p-4 rounded-lg border-2 cursor-pointer ${returnType === "product"
+                      ? "border-green-500 bg-green-50"
+                      : "border-gray-200 bg-gray-50"
+                      }`}
+                  >
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="returnType"
+                        value="product"
+                        checked={returnType === "product"}
+                        onChange={() => setReturnType("product")}
+                        className="w-4 h-4 text-green-600"
+                      />
+                      <span className="font-medium text-gray-700">
+                        Refund by Product (Exchange)
+                      </span>
+                    </label>
+                    <p className="text-xs text-gray-500 mt-1 ml-6">
+                      Take new products from supplier
+                    </p>
+                  </div>
+
+                  {/* RIGHT - Refund by Cash */}
+                  <div
+                    onClick={() => setReturnType("cash")}
+                    className={`p-4 rounded-lg border-2 cursor-pointer ${returnType === "cash"
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 bg-gray-50"
+                      }`}
+                  >
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="returnType"
+                        value="cash"
+                        checked={returnType === "cash"}
+                        onChange={() => setReturnType("cash")}
+                        className="w-4 h-4 text-blue-600"
+                      />
+                      <span className="font-medium text-gray-700">
+                        Refund by Cash (Money Back)
+                      </span>
+                    </label>
+                    <p className="text-xs text-gray-500 mt-1 ml-6">
+                      Take cash from supplier
+                    </p>
+                  </div>
+                </div>
+
+                {/* CONDITIONAL SECTIONS */}
+
+                {/* 1. REFUND BY PRODUCT - Multiple Products */}
+                {returnType === "product" && (
+                  <div className="bg-green-50 rounded-lg p-4 mb-4 border border-green-200">
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="text-sm font-semibold text-green-800">
+                        New Exchange Products
+                      </h3>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleAddProduct}
+                      className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap cursor-pointer mb-2"
+                    >
+                      + Add Product
+                    </button>
+
+                    {/* Products Section */}
+                    <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                      <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                        Products
+                      </h3>
+
+                      {/* Single Product Row */}
+                      {products.map((product, index) => (
+                        <div
+                          key={product.id}
+                          className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-3 items-end"
+                        >
+                          <div className="md:col-span-2">
                             <label className="block text-xs text-gray-600 mb-1">
-                              Unit Price
+                              Product Name
+                            </label>
+                            <input
+                              type="text"
+                              value={product.productName}
+                              onChange={(e) =>
+                                handleProductChange(
+                                  product.id,
+                                  "productName",
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="Product Name"
+                              className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-gray-600 mb-1">
+                              Quantity
                             </label>
                             <input
                               type="number"
-                              value={product.unitPrice}
+                              value={product.quantity}
                               onChange={(e) => {
                                 handleProductChange(
                                   product.id,
-                                  "unitPrice",
+                                  "quantity",
                                   e.target.value,
                                 );
 
                                 const subTotal = new Decimal(
                                   Number(e.target.value),
-                                ).mul(new Decimal(Number(product.quantity)));
+                                ).mul(new Decimal(Number(product.unitPrice)));
 
                                 handleProductChange(
                                   product.id,
@@ -768,537 +721,587 @@ const PurchaseReturn = () => {
                                   Number(subTotal.toFixed(4)),
                                 );
                               }}
-                              placeholder="Unit Price"
-                              step="any"
+                              placeholder="Qty"
                               className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                               required
                             />
                           </div>
-                          {products.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveProduct(product.id)}
-                              className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-sm"
-                            >
-                              ×
-                            </button>
-                          )}
+                          <div>
+                            <label className="block text-xs text-gray-600 mb-1">
+                              Qty (kg)
+                            </label>
+                            <input
+                              type="number"
+                              value={product.qtyInKg}
+                              onChange={(e) => {
+                                handleProductChange(
+                                  product.id,
+                                  "qtyInKg",
+                                  e.target.value,
+                                );
+                              }}
+                              placeholder="Qty in kg"
+                              step="any"
+                              className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <div className="flex-1">
+                              <label className="block text-xs text-gray-600 mb-1">
+                                Unit Price
+                              </label>
+                              <input
+                                type="number"
+                                value={product.unitPrice}
+                                onChange={(e) => {
+                                  handleProductChange(
+                                    product.id,
+                                    "unitPrice",
+                                    e.target.value,
+                                  );
+
+                                  const subTotal = new Decimal(
+                                    Number(e.target.value),
+                                  ).mul(new Decimal(Number(product.quantity)));
+
+                                  handleProductChange(
+                                    product.id,
+                                    "subTotal",
+                                    Number(subTotal.toFixed(4)),
+                                  );
+                                }}
+                                placeholder="Unit Price"
+                                step="any"
+                                className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                required
+                              />
+                            </div>
+                            {products.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveProduct(product.id)}
+                                className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-sm"
+                              >
+                                ×
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Product Total Summary */}
+                      <div className="border-t border-gray-400 pt-3 mt-3">
+                        <div className="flex justify-end gap-6 text-sm">
+                          <span className="text-gray-600">
+                            Total Qty: <strong>{totalQty.toFixed(0)}</strong>
+                          </span>
+                          <span className="text-gray-600">
+                            Total Qty (kg):{" "}
+                            <strong>{totalQtyInKg.toFixed(0)}</strong>
+                          </span>
+                          <span className="text-gray-800 font-semibold">
+                            Products Total: ৳ {returnAmount.toFixed(2)}
+                          </span>
                         </div>
                       </div>
-                    ))}
+                    </div>
 
-                    {/* Product Total Summary */}
-                    <div className="border-t border-gray-400 pt-3 mt-3">
-                      <div className="flex justify-end gap-6 text-sm">
-                        <span className="text-gray-600">
-                          Total Qty: <strong>{totalQty.toFixed(0)}</strong>
+                    {/* Exchange Summary */}
+                    <div className="border-t border-green-200 pt-3 mt-3">
+                      <div className="flex justify-end">
+                        <span className="text-green-800 font-semibold text-lg">
+                          Total Exchange Value: ৳ {totalExchangeValue.toFixed(2)}
                         </span>
-                        <span className="text-gray-600">
-                          Total Qty (kg):{" "}
-                          <strong>{totalQtyInKg.toFixed(0)}</strong>
-                        </span>
-                        <span className="text-gray-800 font-semibold">
-                          Products Total: ৳ {returnAmount.toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Exchange Summary */}
-                  <div className="border-t border-green-200 pt-3 mt-3">
-                    <div className="flex justify-end">
-                      <span className="text-green-800 font-semibold text-lg">
-                        Total Exchange Value: ৳ {totalExchangeValue.toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* 2. REFUND BY CASH - Simple Amount Input */}
-              {returnType === "cash" && (
-                <div className="bg-blue-50 rounded-lg p-4 mb-4 border border-blue-200">
-                  <h3 className="text-sm font-semibold text-blue-800 mb-3">
-                    Cash Refund Details
-                  </h3>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">
-                        Cash Refund Amount
-                      </label>
-                      <input
-                        type="number"
-                        placeholder="Enter refund amount"
-                        value={cashDetails.cashRefundAmount}
-                        onChange={(e) =>
-                          setCashDetails((prev) => ({
-                            ...prev,
-                            cashRefundAmount: e.target.value,
-                          }))
-                        }
-                        className="w-full px-4 py-2 border border-blue-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-semibold"
-                        required={returnType === "cash"}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">
-                        Payment Method
-                      </label>
-                      <select
-                        value={cashDetails.paymentMethod}
-                        onChange={(e) =>
-                          setCashDetails((prev) => ({
-                            ...prev,
-                            paymentMethod: e.target.value,
-                          }))
-                        }
-                        required={returnType === "cash"}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                      >
-                        <option value="Cash">Cash</option>
-                        <option value="Bank Transfer">Bank Transfer</option>
-                        <option value="Mobile Banking">Mobile Banking</option>
-                        <option value="Check">Check</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">
-                        Reference/Note
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Optional note"
-                        value={cashDetails.note}
-                        onChange={(e) =>
-                          setCashDetails((prev) => ({
-                            ...prev,
-                            note: e.target.value,
-                          }))
-                        }
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Final Summary */}
-              <div className="bg-yellow-50 rounded-lg p-4 mb-4 border border-yellow-200">
-                <h3 className="text-sm font-semibold text-yellow-800 mb-3">
-                  Summary
-                </h3>
-
-                {returnType === "product" ? (
-                  /* Product Exchange Summary */
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="text-center p-3 bg-white rounded border border-red-200">
-                      <div className="text-xs text-gray-600 mb-1">
-                        Return Value
-                      </div>
-                      <div className="text-xl font-bold text-red-600">
-                        ৳ {totalReturnValue.toFixed(2)}
-                      </div>
-                    </div>
-                    <div className="text-center p-3 bg-white rounded border border-green-200">
-                      <div className="text-xs text-gray-600 mb-1">
-                        Exchange Value
-                      </div>
-                      <div className="text-xl font-bold text-green-600">
-                        ৳ {totalExchangeValue.toFixed(2)}
-                      </div>
-                    </div>
-                    <div className="text-center p-3 bg-white rounded border border-blue-200">
-                      <div className="text-xs text-gray-600 mb-1">
-                        {returnType === "product"
-                          ? "Adjustment"
-                          : "Cash to Pay"}
-                      </div>
-                      <div className="text-xl font-bold text-blue-600">
-                        ৳ {adjustmentAmount.toFixed(2)}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  /* Cash Refund Summary */
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="text-center p-3 bg-white rounded border border-red-200">
-                      <div className="text-xs text-gray-600 mb-1">
-                        Total Return Value
-                      </div>
-                      <div className="text-xl font-bold text-red-600">
-                        ৳ {totalReturnValue.toFixed(2)}
-                      </div>
-                    </div>
-                    <div className="text-center p-3 bg-white rounded border border-blue-200">
-                      <div className="text-xs text-gray-600 mb-1">
-                        Cash Refund Amount
-                      </div>
-                      <div className="text-xl font-bold text-blue-600">
-                        ৳{" "}
-                        {Number(cashDetails.cashRefundAmount).toLocaleString(
-                          "en-BD",
-                          { minimumFractionDigits: 2 },
-                        )}
                       </div>
                     </div>
                   </div>
                 )}
-              </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-500 transition-colors cursor-pointer"
-                >
-                  Add Return
-                </button>
+                {/* 2. REFUND BY CASH - Simple Amount Input */}
+                {returnType === "cash" && (
+                  <div className="bg-blue-50 rounded-lg p-4 mb-4 border border-blue-200">
+                    <h3 className="text-sm font-semibold text-blue-800 mb-3">
+                      Cash Refund Details
+                    </h3>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setData({
-                      invoiceNo: "",
-                      date: "",
-                    });
-                    setCashDetails({
-                      cashRefundAmount: "",
-                      paymentMethod: "Cash",
-                      note: "",
-                    });
-                    setProducts([
-                      {
-                        id: 1,
-                        productName: "",
-                        quantity: "",
-                        qtyInKg: "",
-                        unitPrice: "",
-                        subTotal: "",
-                      },
-                    ]);
-                    dispatch(setPurchaseSearchedByInvoiceToEmpty());
-                  }}
-                  className="px-6 py-2 bg-gray-500 text-white font-medium rounded-md hover:bg-gray-600 disabled:cursor-not-allowed disabled:bg-gray-400 transition-colors cursor-pointer"
-                >
-                  Reset
-                </button>
-              </div>
-            </>
-          ) : (
-            ""
-          )}
-        </form>
-      </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">
+                          Cash Refund Amount
+                        </label>
+                        <input
+                          type="number"
+                          placeholder="Enter refund amount"
+                          value={cashDetails.cashRefundAmount}
+                          onChange={(e) =>
+                            setCashDetails((prev) => ({
+                              ...prev,
+                              cashRefundAmount: e.target.value,
+                            }))
+                          }
+                          className="w-full px-4 py-2 border border-blue-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-semibold"
+                          required={returnType === "cash"}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">
+                          Payment Method
+                        </label>
+                        <select
+                          value={cashDetails.paymentMethod}
+                          onChange={(e) =>
+                            setCashDetails((prev) => ({
+                              ...prev,
+                              paymentMethod: e.target.value,
+                            }))
+                          }
+                          required={returnType === "cash"}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        >
+                          <option value="Cash">Cash</option>
+                          <option value="Bank Transfer">Bank Transfer</option>
+                          <option value="Mobile Banking">Mobile Banking</option>
+                          <option value="Check">Check</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">
+                          Reference/Note
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Optional note"
+                          value={cashDetails.note}
+                          onChange={(e) =>
+                            setCashDetails((prev) => ({
+                              ...prev,
+                              note: e.target.value,
+                            }))
+                          }
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
 
-      {/* Purchase Return Report Table */}
-      <div className="max-w-6xl mx-auto bg-white shadow-md rounded-lg p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-          <h2 className="text-lg sm:text-xl font-semibold">
-            Purchase Return Report
-          </h2>
+                {/* Final Summary */}
+                <div className="bg-yellow-50 rounded-lg p-4 mb-4 border border-yellow-200">
+                  <h3 className="text-sm font-semibold text-yellow-800 mb-3">
+                    Summary
+                  </h3>
+
+                  {returnType === "product" ? (
+                    /* Product Exchange Summary */
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="text-center p-3 bg-white rounded border border-red-200">
+                        <div className="text-xs text-gray-600 mb-1">
+                          Return Value
+                        </div>
+                        <div className="text-xl font-bold text-red-600">
+                          ৳ {totalReturnValue.toFixed(2)}
+                        </div>
+                      </div>
+                      <div className="text-center p-3 bg-white rounded border border-green-200">
+                        <div className="text-xs text-gray-600 mb-1">
+                          Exchange Value
+                        </div>
+                        <div className="text-xl font-bold text-green-600">
+                          ৳ {totalExchangeValue.toFixed(2)}
+                        </div>
+                      </div>
+                      <div className="text-center p-3 bg-white rounded border border-blue-200">
+                        <div className="text-xs text-gray-600 mb-1">
+                          {returnType === "product"
+                            ? "Adjustment"
+                            : "Cash to Pay"}
+                        </div>
+                        <div className="text-xl font-bold text-blue-600">
+                          ৳ {adjustmentAmount.toFixed(2)}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Cash Refund Summary */
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="text-center p-3 bg-white rounded border border-red-200">
+                        <div className="text-xs text-gray-600 mb-1">
+                          Total Return Value
+                        </div>
+                        <div className="text-xl font-bold text-red-600">
+                          ৳ {totalReturnValue.toFixed(2)}
+                        </div>
+                      </div>
+                      <div className="text-center p-3 bg-white rounded border border-blue-200">
+                        <div className="text-xs text-gray-600 mb-1">
+                          Cash Refund Amount
+                        </div>
+                        <div className="text-xl font-bold text-blue-600">
+                          ৳{" "}
+                          {Number(cashDetails.cashRefundAmount).toLocaleString(
+                            "en-BD",
+                            { minimumFractionDigits: 2 },
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-500 transition-colors cursor-pointer"
+                  >
+                    Add Return
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setData({
+                        invoiceNo: "",
+                        date: "",
+                      });
+                      setCashDetails({
+                        cashRefundAmount: "",
+                        paymentMethod: "Cash",
+                        note: "",
+                      });
+                      setProducts([
+                        {
+                          id: 1,
+                          productName: "",
+                          quantity: "",
+                          qtyInKg: "",
+                          unitPrice: "",
+                          subTotal: "",
+                        },
+                      ]);
+                      dispatch(setPurchaseSearchedByInvoiceToEmpty());
+                    }}
+                    className="px-6 py-2 bg-gray-500 text-white font-medium rounded-md hover:bg-gray-600 disabled:cursor-not-allowed disabled:bg-gray-400 transition-colors cursor-pointer"
+                  >
+                    Reset
+                  </button>
+                </div>
+              </>
+            ) : (
+              ""
+            )}
+          </form>
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-3">
-          <div>
-            <select
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value)}
-              className="border border-gray-300 bg-white rounded-md px-3 py-2 text-sm shadow-sm hover:border-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="1">Oldest First</option>
-              <option value="-1">Newest First</option>
-            </select>
+        {/* Purchase Return Report Table */}
+        <div className="max-w-6xl mx-auto bg-white shadow-md rounded-lg p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+            <h2 className="text-lg sm:text-xl font-semibold">
+              Purchase Return Report
+            </h2>
           </div>
 
-          <div className="flex flex-col gap-2 w-full lg:w-auto">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
-              <label className="text-xs sm:text-sm text-gray-600">
-                Search by Supplier Name:
-              </label>
-              <input
-                type="text"
-                value={nameSearch}
-                onChange={(e) => setNameSearch(e.target.value)}
-                placeholder="Supplier Name"
-                className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
-              />
+          <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-3">
+            <div>
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+                className="border border-gray-300 bg-white rounded-md px-3 py-2 text-sm shadow-sm hover:border-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="1">Oldest First</option>
+                <option value="-1">Newest First</option>
+              </select>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
-              <div className="flex gap-4 items-center">
-                <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="dateMode"
-                    value="single"
-                    checked={dateMode === "single"}
-                    onChange={(e) => setDateMode(e.target.value)}
-                    className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                  />
-                  Single Date
-                </label>
-                <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="dateMode"
-                    value="range"
-                    checked={dateMode === "range"}
-                    onChange={(e) => setDateMode(e.target.value)}
-                    className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                  />
-                  Date Range
-                </label>
-              </div>
-            </div>
-
-            {dateMode === "single" && (
+            <div className="flex flex-col gap-2 w-full lg:w-auto">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
                 <label className="text-xs sm:text-sm text-gray-600">
-                  Search by Date:
+                  Search by Supplier Name:
                 </label>
                 <input
-                  type="date"
-                  value={dateSearch}
-                  onChange={(e) => {
-                    setDateSearch(e.target.value);
-                  }}
+                  type="text"
+                  value={nameSearch}
+                  onChange={(e) => setNameSearch(e.target.value)}
+                  placeholder="Supplier Name"
                   className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
                 />
               </div>
-            )}
 
-            {dateMode === "range" && (
-              <>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
+                <div className="flex gap-4 items-center">
+                  <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="dateMode"
+                      value="single"
+                      checked={dateMode === "single"}
+                      onChange={(e) => setDateMode(e.target.value)}
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    Single Date
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="dateMode"
+                      value="range"
+                      checked={dateMode === "range"}
+                      onChange={(e) => setDateMode(e.target.value)}
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    Date Range
+                  </label>
+                </div>
+              </div>
+
+              {dateMode === "single" && (
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
                   <label className="text-xs sm:text-sm text-gray-600">
-                    Start Date:
+                    Search by Date:
                   </label>
                   <input
                     type="date"
-                    max={
-                      rangeDateSearch.dateSearchEnd
-                        ? rangeDateSearch.dateSearchEnd
-                        : ""
-                    }
-                    value={rangeDateSearch.dateSearchStart}
+                    value={dateSearch}
                     onChange={(e) => {
-                      setRangeDateSearch((prev) => ({
-                        ...prev,
-                        dateSearchStart: e.target.value,
-                      }));
+                      setDateSearch(e.target.value);
                     }}
                     className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
                   />
                 </div>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
-                  <label className="text-xs sm:text-sm text-gray-600">
-                    End Date:
-                  </label>
-                  <input
-                    type="date"
-                    min={
-                      rangeDateSearch.dateSearchStart
-                        ? rangeDateSearch.dateSearchStart
-                        : ""
-                    }
-                    value={rangeDateSearch.dateSearchEnd}
-                    onChange={(e) => {
-                      setRangeDateSearch((prev) => ({
-                        ...prev,
-                        dateSearchEnd: e.target.value,
-                      }));
-                    }}
-                    className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
-                  />
-                </div>
-              </>
-            )}
+              )}
 
-            <div className="flex gap-2 justify-start sm:justify-end  w-full">
-              <button
-                onClick={() => {
-                  setFilterToggler(!filterToggler);
-                }}
-                className="flex-1 sm:flex-none bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600"
-                type="button"
-              >
-                Filter
-              </button>
-              <button
-                onClick={() => {
-                  setNameSearch("");
-                  setDateSearch("");
-                  setRangeDateSearch({
-                    dateSearchStart: "",
-                    dateSearchEnd: "",
-                  });
+              {dateMode === "range" && (
+                <>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
+                    <label className="text-xs sm:text-sm text-gray-600">
+                      Start Date:
+                    </label>
+                    <input
+                      type="date"
+                      max={
+                        rangeDateSearch.dateSearchEnd
+                          ? rangeDateSearch.dateSearchEnd
+                          : ""
+                      }
+                      value={rangeDateSearch.dateSearchStart}
+                      onChange={(e) => {
+                        setRangeDateSearch((prev) => ({
+                          ...prev,
+                          dateSearchStart: e.target.value,
+                        }));
+                      }}
+                      className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
+                    />
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:ml-auto w-full">
+                    <label className="text-xs sm:text-sm text-gray-600">
+                      End Date:
+                    </label>
+                    <input
+                      type="date"
+                      min={
+                        rangeDateSearch.dateSearchStart
+                          ? rangeDateSearch.dateSearchStart
+                          : ""
+                      }
+                      value={rangeDateSearch.dateSearchEnd}
+                      onChange={(e) => {
+                        setRangeDateSearch((prev) => ({
+                          ...prev,
+                          dateSearchEnd: e.target.value,
+                        }));
+                      }}
+                      className="w-full sm:w-40 border border-gray-300 rounded-md px-3 py-1.5 text-sm"
+                    />
+                  </div>
+                </>
+              )}
 
-                  setFilterToggler(!filterToggler);
-                }}
-                className="flex-1 sm:flex-none bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600"
-                type="button"
-              >
-                Clear
-              </button>
+              <div className="flex gap-2 justify-start sm:justify-end  w-full">
+                <button
+                  onClick={() => {
+                    setFilterToggler(!filterToggler);
+                  }}
+                  className="flex-1 sm:flex-none bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600"
+                  type="button"
+                >
+                  Filter
+                </button>
+                <button
+                  onClick={() => {
+                    setNameSearch("");
+                    setDateSearch("");
+                    setRangeDateSearch({
+                      dateSearchStart: "",
+                      dateSearchEnd: "",
+                    });
+
+                    setFilterToggler(!filterToggler);
+                  }}
+                  className="flex-1 sm:flex-none bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600"
+                  type="button"
+                >
+                  Clear
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-xs sm:text-sm border-collapse">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                  Date
-                </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                  Memo
-                </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                  Supplier
-                </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                  Type
-                </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                  Return
-                </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                  Refund
-                </th>
-                <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {purchaseReturns.length > 0 ? (
-                purchaseReturns.map((purchaseReturn, index) => (
-                  <tr
-                    onClick={(e) => {
-                      if (e.target.tagName !== "TD") return;
-                      navigate("/purchase-return-statement", {
-                        state: purchaseReturn,
-                      });
-                    }}
-                    key={index}
-                    className="hover:bg-gray-50 cursor-pointer"
-                  >
-                    <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                      {
-                        dayjs(purchaseReturn.createdAt)
-                          .tz("Asia/Dhaka")
-                          .format("DD-MM-YYYY")
-                      }
-                    </td>
-                    <td className="border px-2 py-1 sm:px-4 sm:py-2 text-center">
-                      {purchaseReturn.memo}
-                    </td>
-                    <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                      {purchaseReturn.supplierName}
-                    </td>
-                    <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                      {purchaseReturn.transactionRecords[0].returnType ===
-                        "product" && (
-                          <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                            Product
-                          </span>
-                        )}
-                      {purchaseReturn.transactionRecords[0].returnType ===
-                        "cash" && (
-                          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                            Cash
-                          </span>
-                        )}
-                    </td>
-                    <td className="border px-2 py-1 sm:px-4 sm:py-2 text-red-600">
-                      ৳ {purchaseReturn.totalReturnValue}
-                    </td>
-                    <td className="border px-2 py-1 sm:px-4 sm:py-2 text-green-600">
-                      ৳ {purchaseReturn.paid}
-                    </td>
-                    <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                      <div className="flex gap-1">
-                        <Link
-                          to={
-                            purchaseReturn.due > 0
-                              ? `/purchase-return/${purchaseReturn._id}/exchange-due`
-                              : `#`
-                          }
-                          className={` text-xs  text-white px-2 py-1 rounded  ${purchaseReturn.due > 0 ? "cursor-pointer bg-green-600 hover:bg-green-700" : "bg-green-500 cursor-not-allowed"}`}
-                        >
-                          Exchange
-                        </Link>
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-xs sm:text-sm border-collapse">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+                    Date
+                  </th>
+                  <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+                    Memo
+                  </th>
+                  <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+                    Supplier
+                  </th>
+                  <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+                    Type
+                  </th>
+                  <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+                    Return
+                  </th>
+                  <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+                    Refund
+                  </th>
+                  <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {purchaseReturns.length > 0 ? (
+                  purchaseReturns.map((purchaseReturn, index) => (
+                    <tr
+                      onClick={(e) => {
+                        if (e.target.tagName !== "TD") return;
+                        navigate("/purchase-return-statement", {
+                          state: purchaseReturn,
+                        });
+                      }}
+                      key={index}
+                      className="hover:bg-gray-50 cursor-pointer"
+                    >
+                      <td className="border px-2 py-1 sm:px-4 sm:py-2">
+                        {
+                          dayjs(purchaseReturn.createdAt)
+                            .tz("Asia/Dhaka")
+                            .format("DD-MM-YYYY")
+                        }
+                      </td>
+                      <td className="border px-2 py-1 sm:px-4 sm:py-2 text-center">
+                        {purchaseReturn.memo}
+                      </td>
+                      <td className="border px-2 py-1 sm:px-4 sm:py-2">
+                        {purchaseReturn.supplierName}
+                      </td>
+                      <td className="border px-2 py-1 sm:px-4 sm:py-2">
+                        {purchaseReturn.transactionRecords[0].returnType ===
+                          "product" && (
+                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                              Product
+                            </span>
+                          )}
+                        {purchaseReturn.transactionRecords[0].returnType ===
+                          "cash" && (
+                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                              Cash
+                            </span>
+                          )}
+                      </td>
+                      <td className="border px-2 py-1 sm:px-4 sm:py-2 text-red-600">
+                        ৳ {purchaseReturn.totalReturnValue}
+                      </td>
+                      <td className="border px-2 py-1 sm:px-4 sm:py-2 text-green-600">
+                        ৳ {purchaseReturn.paid}
+                      </td>
+                      <td className="border px-2 py-1 sm:px-4 sm:py-2">
+                        <div className="flex gap-1">
+                          <Link
+                            to={
+                              purchaseReturn.due > 0
+                                ? `/purchase-return/${purchaseReturn._id}/exchange-due`
+                                : `#`
+                            }
+                            className={` text-xs  text-white px-2 py-1 rounded  ${purchaseReturn.due > 0 ? "cursor-pointer bg-green-600 hover:bg-green-700" : "bg-green-500 cursor-not-allowed"}`}
+                          >
+                            Exchange
+                          </Link>
 
-                        <Link
-                          to={
-                            purchaseReturn.due > 0
-                              ? `/purchase-return/${purchaseReturn._id}/edit-due`
-                              : `#`
-                          }
-                          className={` text-xs  text-white px-2 py-1 rounded  ${purchaseReturn.due > 0 ? "cursor-pointer bg-blue-600 hover:bg-blue-700" : "bg-blue-500 cursor-not-allowed"}`}
-                        >
-                          Cash Refund
-                        </Link>
+                          <Link
+                            to={
+                              purchaseReturn.due > 0
+                                ? `/purchase-return/${purchaseReturn._id}/edit-due`
+                                : `#`
+                            }
+                            className={` text-xs  text-white px-2 py-1 rounded  ${purchaseReturn.due > 0 ? "cursor-pointer bg-blue-600 hover:bg-blue-700" : "bg-blue-500 cursor-not-allowed"}`}
+                          >
+                            Cash Refund
+                          </Link>
 
-                        <Link
-                          to="/invoice-sales-return"
-                          className="cursor-pointer text-xs bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700"
-                        >
-                          Print
-                        </Link>
-                      </div>
+                          <Link
+                            to="/invoice-sales-return"
+                            className="cursor-pointer text-xs bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700"
+                          >
+                            Print
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className="text-center text-gray-500 py-6 select-none border"
+                    >
+                      No Purchase Return Available.
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan={7}
-                    className="text-center text-gray-500 py-6 select-none border"
-                  >
-                    No Purchase Return Available.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        {pages ? (
-          <div className="flex justify-center items-center mt-4 gap-2 text-sm">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={page === 1}
-              className={`${page === 1
-                  ? ""
-                  : "cursor-pointer hover:bg-black hover:text-white"
-                } px-2 py-1 border rounded  disabled:opacity-50`}
-            >
-              Prev
-            </button>
-            <span>
-              Page {page} of {pages}
-            </span>
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, pages))}
-              disabled={page === pages}
-              className={`${page === pages
-                  ? ""
-                  : "cursor-pointer hover:bg-black hover:text-white"
-                }  px-2 py-1 border rounded  disabled:opacity-50`}
-            >
-              Next
-            </button>
+                )}
+              </tbody>
+            </table>
           </div>
-        ) : (
-          ""
-        )}
+
+          {/* Pagination */}
+          {pages ? (
+            <div className="flex justify-center items-center mt-4 gap-2 text-sm">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={page === 1}
+                className={`${page === 1
+                  ? ""
+                  : "cursor-pointer hover:bg-black hover:text-white"
+                  } px-2 py-1 border rounded  disabled:opacity-50`}
+              >
+                Prev
+              </button>
+              <span>
+                Page {page} of {pages}
+              </span>
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, pages))}
+                disabled={page === pages}
+                className={`${page === pages
+                  ? ""
+                  : "cursor-pointer hover:bg-black hover:text-white"
+                  }  px-2 py-1 border rounded  disabled:opacity-50`}
+              >
+                Next
+              </button>
+            </div>
+          ) : (
+            ""
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -177,6 +177,8 @@ const EditSRExchangeDue = () => {
   if (user && user.role !== "admin") return null;
   return (
     <>
+      <title>{`Sales Return - Product Refund | ${import.meta.env.VITE_COMPANY_NAME}`}</title>
+
       <div className="bg-white shadow-md rounded-lg p-3 sm:p-4 md:p-6 space-y-6">
         {/* Return Summary Card */}
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 mb-6">

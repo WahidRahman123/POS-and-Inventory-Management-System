@@ -37,6 +37,7 @@ const AddStock = () => {
 
   return (
     <>
+      <title>{`Add Stock | ${import.meta.env.VITE_COMPANY_NAME}`}</title>
       <div className="flex flex-col md:flex-row bg-white shadow-md rounded-lg p-3 sm:p-4 md:p-6 gap-4 md:gap-8">
         {/* Left: Stock Form */}
         <form onSubmit={handleSubmit} className="flex-1">

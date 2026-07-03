@@ -1,6 +1,7 @@
 const Decimal = require("decimal.js");
 const PurchaseReturn = require("../models/PurchaseReturn");
 const Purchase = require("../models/Purchase");
+const Product = require("../models/Product");
 const PurchaseReturnTransaction = require("../models/PurchaseReturnTransaction");
 const { createCustomDate } = require("../utils/createCustomDate");
 const { default: mongoose } = require("mongoose");

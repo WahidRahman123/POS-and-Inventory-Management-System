@@ -80,6 +80,8 @@ const EditProductPage = () => {
   }, [productSearchedById]);
 
   return (
+    <>
+    <title>{`Edit Inventory Item | ${import.meta.env.VITE_COMPANY_NAME}`}</title>
     <div className="bg-slate-50 min-h-screen p-3 sm:p-4 md:p-6 font-sans">
       {/* Header */}
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
@@ -189,6 +191,7 @@ const EditProductPage = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

@@ -352,29 +352,31 @@ const CompanySalesReturn = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* --- Section 1: Financial Summary (Updated to reflect Cash flow) --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          {/* === SALES RETURN STOCK CARD (FIXED) === */}
-          <div
-            className="bg-white p-5 shadow-sm border-b-4 border-blue-600 rounded-sm cursor-pointer hover:shadow-md transition"
-            onClick={() => navigate("/sales-return")}
-          >
-            <div className="flex items-center gap-3 mb-2 text-blue-600">
-              <FaBox size={20} />
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">
-                SALES RETURN STOCK
+    <>
+      <title>{`Sales Return To Company | ${import.meta.env.VITE_COMPANY_NAME}`}</title>
+      <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+        <div className="max-w-7xl mx-auto">
+          {/* --- Section 1: Financial Summary (Updated to reflect Cash flow) --- */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            {/* === SALES RETURN STOCK CARD (FIXED) === */}
+            <div
+              className="bg-white p-5 shadow-sm border-b-4 border-blue-600 rounded-sm cursor-pointer hover:shadow-md transition"
+              onClick={() => navigate("/sales-return")}
+            >
+              <div className="flex items-center gap-3 mb-2 text-blue-600">
+                <FaBox size={20} />
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">
+                  SALES RETURN STOCK
+                </p>
+              </div>
+              <p className="text-3xl font-black text-gray-800">
+                {salesReturnReportData?.availableStock || 0}
+                <span className="text-base font-normal text-gray-500 ml-1">Pcs</span>
               </p>
+              <p className="text-xs text-gray-500 mt-1">Available in Warehouse</p>
             </div>
-            <p className="text-3xl font-black text-gray-800">
-              {salesReturnReportData?.availableStock || 0}
-              <span className="text-base font-normal text-gray-500 ml-1">Pcs</span>
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Available in Warehouse</p>
-          </div>
 
-          {/* <div className="bg-white p-5 shadow-sm border-b-4 border-orange-500 rounded-sm">
+            {/* <div className="bg-white p-5 shadow-sm border-b-4 border-orange-500 rounded-sm">
             <div className="flex items-center gap-3 mb-2 text-orange-500">
               <FaWeightHanging size={20} />
               <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">
@@ -387,7 +389,7 @@ const CompanySalesReturn = () => {
             </p>
           </div> */}
 
-          {/* <div className="bg-gray-900 p-5 shadow-sm border-b-4 border-green-600 rounded-sm">
+            {/* <div className="bg-gray-900 p-5 shadow-sm border-b-4 border-green-600 rounded-sm">
             <div className="flex items-center gap-3 mb-2 text-green-500">
               <FaMoneyBillWave size={20} />
               <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
@@ -400,151 +402,151 @@ const CompanySalesReturn = () => {
             </p>
           </div> */}
 
-          <div className="bg-white p-5 shadow-sm border-b-4 border-red-600 rounded-sm">
-            <div className="flex items-center gap-3 mb-2 text-red-500">
-              <FaTruck size={20} />
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">
-                Pending From Co.
+            <div className="bg-white p-5 shadow-sm border-b-4 border-red-600 rounded-sm">
+              <div className="flex items-center gap-3 mb-2 text-red-500">
+                <FaTruck size={20} />
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">
+                  Pending From Co.
+                </p>
+              </div>
+              <p className="text-2xl font-black text-gray-800">
+                {salesReturnReportData
+                  ? salesReturnReportData.totalDue + " Pcs"
+                  : "--"}
               </p>
             </div>
-            <p className="text-2xl font-black text-gray-800">
-              {salesReturnReportData
-                ? salesReturnReportData.totalDue + " Pcs"
-                : "--"}
-            </p>
           </div>
-        </div>
 
-        {/* --- Section 2: Horizontal Entry Form --- */}
-        <div className="bg-white p-6 rounded-sm shadow-md mb-8 border-t-4 border-blue-600">
-          <h2 className="text-xs font-black mb-4 flex items-center gap-2 text-gray-700 uppercase">
-            <FaPlus className="text-blue-600" /> Dispatch New Return to Company
-          </h2>
+          {/* --- Section 2: Horizontal Entry Form --- */}
+          <div className="bg-white p-6 rounded-sm shadow-md mb-8 border-t-4 border-blue-600">
+            <h2 className="text-xs font-black mb-4 flex items-center gap-2 text-gray-700 uppercase">
+              <FaPlus className="text-blue-600" /> Dispatch New Return to Company
+            </h2>
 
-          <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-4 sm:p-6 mb-6">
-            <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-2 gap-x-6 mb-4">
-                <div className="relative">
-                  <label className="block text-sm font-medium mb-1">
-                    Company Name
-                  </label>
-                  <div className="flex">
-                    <input
-                      type="search"
-                      value={name}
-                      onChange={handleSupplierNameOnChange}
-                      ref={supplierNameRef}
-                      placeholder="Company Name"
-                      className="block w-[85%] px-3 py-1.5 border border-gray-300 rounded-sm text-sm disabled:bg-gray-300"
-                      disabled={disable}
-                    />
-                    <button
-                      type="button"
-                      disabled={!disable}
-                      className="bg-red-500 hover:bg-red-600 cursor-pointer ml-2 px-2 py-1 font-bold text-white rounded disabled:bg-red-300 disabled:cursor-not-allowed"
-                      onClick={() => {
-                        setDisable(false);
-                        setName("");
-                        setData(null);
-                        setSupplier({
-                          supplierId: "",
-                          supplierName: "",
-                          address: "",
-                          supplierEmail: "",
-                          supplierPhone: "",
-                        });
-                      }}
-                    >
-                      Change
-                    </button>
-                  </div>
-                  {data && (
-                    <div className="absolute z-10 w-[85%] bg-white shadow-md border border-gray-300 max-h-50 overflow-y-scroll">
-                      <table className="w-full">
-                        <tbody>
-                          {data.map((d, i) => (
-                            <tr
-                              key={i}
-                              className="p-2 cursor-pointer border-b border-gray-300 hover:bg-gray-100 text-gray-800 text-sm"
-                              onClick={() => handleSupplierOnClick(d)}
-                            >
-                              <td className="p-2">{d.name}</td>
-                              <td className="text-center">{d.address}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Address
-                  </label>
-                  <input
-                    type="text"
-                    value={supplier.address}
-                    placeholder="Address"
-                    disabled
-                    className="block w-full px-3 py-1.5 border border-gray-400 rounded-sm text-sm bg-gray-200 text-gray-700 select-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Pick A Date
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, date: e.target.value }))
-                    }
-                    className="w-full px-4 py-2 border border-gray-400 rounded-md"
-                    required
-                  />
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleAddProduct}
-                className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-sm font-medium mb-2 cursor-pointer"
-              >
-                + Add Product
-              </button>
-
-              {/* Products Section */}
-              <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                  Products
-                </h3>
-                {products.map((product) => (
-                  <div
-                    key={product.id}
-                    className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-3 items-end"
-                  >
-                    <div className="md:col-span-2 relative">
-                      <label className="block text-xs text-gray-600 mb-1">
-                        Product Name
-                      </label>
+            <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-4 sm:p-6 mb-6">
+              <form onSubmit={handleSubmit}>
+                <div className="grid grid-cols-2 gap-x-6 mb-4">
+                  <div className="relative">
+                    <label className="block text-sm font-medium mb-1">
+                      Company Name
+                    </label>
+                    <div className="flex">
                       <input
-                        type="text"
-                        value={product.productName}
-                        onChange={(e) =>
-                          handleProductSearchChange(product.id, e.target.value)
-                        }
-                        placeholder="Product Name"
-                        className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
-                        required
+                        type="search"
+                        value={name}
+                        onChange={handleSupplierNameOnChange}
+                        ref={supplierNameRef}
+                        placeholder="Company Name"
+                        className="block w-[85%] px-3 py-1.5 border border-gray-300 rounded-sm text-sm disabled:bg-gray-300"
+                        disabled={disable}
                       />
-                      {/* প্রোডাক্ট সার্চ রেজাল্ট ড্রপডাউন */}
-                      {activeSearchRow === product.id &&
-                        companySalesReturnSearchedByProductName.length > 0 && (
-                          <div className="absolute z-50 w-full bg-white shadow-xl border border-gray-300 rounded mt-1 max-h-60 overflow-y-auto">
-                            {/* {productsBySearchforPOS.map((p, i) => (
+                      <button
+                        type="button"
+                        disabled={!disable}
+                        className="bg-red-500 hover:bg-red-600 cursor-pointer ml-2 px-2 py-1 font-bold text-white rounded disabled:bg-red-300 disabled:cursor-not-allowed"
+                        onClick={() => {
+                          setDisable(false);
+                          setName("");
+                          setData(null);
+                          setSupplier({
+                            supplierId: "",
+                            supplierName: "",
+                            address: "",
+                            supplierEmail: "",
+                            supplierPhone: "",
+                          });
+                        }}
+                      >
+                        Change
+                      </button>
+                    </div>
+                    {data && (
+                      <div className="absolute z-10 w-[85%] bg-white shadow-md border border-gray-300 max-h-50 overflow-y-scroll">
+                        <table className="w-full">
+                          <tbody>
+                            {data.map((d, i) => (
+                              <tr
+                                key={i}
+                                className="p-2 cursor-pointer border-b border-gray-300 hover:bg-gray-100 text-gray-800 text-sm"
+                                onClick={() => handleSupplierOnClick(d)}
+                              >
+                                <td className="p-2">{d.name}</td>
+                                <td className="text-center">{d.address}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Address
+                    </label>
+                    <input
+                      type="text"
+                      value={supplier.address}
+                      placeholder="Address"
+                      disabled
+                      className="block w-full px-3 py-1.5 border border-gray-400 rounded-sm text-sm bg-gray-200 text-gray-700 select-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Pick A Date
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.date}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, date: e.target.value }))
+                      }
+                      className="w-full px-4 py-2 border border-gray-400 rounded-md"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleAddProduct}
+                  className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-md text-sm font-medium mb-2 cursor-pointer"
+                >
+                  + Add Product
+                </button>
+
+                {/* Products Section */}
+                <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                    Products
+                  </h3>
+                  {products.map((product) => (
+                    <div
+                      key={product.id}
+                      className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-3 items-end"
+                    >
+                      <div className="md:col-span-2 relative">
+                        <label className="block text-xs text-gray-600 mb-1">
+                          Product Name
+                        </label>
+                        <input
+                          type="text"
+                          value={product.productName}
+                          onChange={(e) =>
+                            handleProductSearchChange(product.id, e.target.value)
+                          }
+                          placeholder="Product Name"
+                          className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
+                          required
+                        />
+                        {/* প্রোডাক্ট সার্চ রেজাল্ট ড্রপডাউন */}
+                        {activeSearchRow === product.id &&
+                          companySalesReturnSearchedByProductName.length > 0 && (
+                            <div className="absolute z-50 w-full bg-white shadow-xl border border-gray-300 rounded mt-1 max-h-60 overflow-y-auto">
+                              {/* {productsBySearchforPOS.map((p, i) => (
                               <div
                                 key={i}
                                 onClick={() =>
@@ -559,89 +561,43 @@ const CompanySalesReturn = () => {
                               </div>
                             ))} */}
 
-                            {companySalesReturnSearchedByProductName.map(
-                              (p, i) => (
-                                <div
-                                  key={i}
-                                  onClick={() =>
-                                    handleSelectProductFromSearch(product.id, p)
-                                  }
-                                  className="px-3 py-2 border-b border-gray-100 cursor-pointer hover:bg-blue-50 text-gray-800 text-sm"
-                                >
-                                  <div className="font-semibold">
-                                    {p.productName}
-                                  </div>
+                              {companySalesReturnSearchedByProductName.map(
+                                (p, i) => (
+                                  <div
+                                    key={i}
+                                    onClick={() =>
+                                      handleSelectProductFromSearch(product.id, p)
+                                    }
+                                    className="px-3 py-2 border-b border-gray-100 cursor-pointer hover:bg-blue-50 text-gray-800 text-sm"
+                                  >
+                                    <div className="font-semibold">
+                                      {p.productName}
+                                    </div>
 
-                                  <div className="flex gap-4 text-[11px] text-gray-500 mt-1">
-                                    <span>Qty: {p.tempReturnQuantity}</span>
-                                    <span>Weight: {p.tempReturnQtyInKg} Kg</span>
+                                    <div className="flex gap-4 text-[11px] text-gray-500 mt-1">
+                                      <span>Qty: {p.tempReturnQuantity}</span>
+                                      <span>Weight: {p.tempReturnQtyInKg} Kg</span>
+                                    </div>
                                   </div>
-                                </div>
-                              ),
-                            )}
-                          </div>
-                        )}
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">
-                        Quantity
-                      </label>
-                      <input
-                        type="number"
-                        onWheel={(e) => e.target.blur()}
-                        value={product.quantity}
-                        max={product.tempQuantity}
-                        onChange={(e) => {
-                          const qty = e.target.value;
-                          handleProductChange(product.id, "quantity", qty);
-                          const sub = new Decimal(Number(qty || 0)).mul(
-                            new Decimal(Number(product.unitPrice || 0)),
-                          );
-                          handleProductChange(
-                            product.id,
-                            "subTotal",
-                            Number(sub.toFixed(4)),
-                          );
-                        }}
-                        placeholder="Qty"
-                        min={0}
-                        className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">
-                        Weight
-                      </label>
-                      <input
-                        type="number"
-                        onWheel={(e) => e.target.blur()}
-                        value={product.qtyInKg}
-                        max={product.tempQtyInKg}
-                        onChange={(e) => {
-                          const qtyInKg = e.target.value;
-                          handleProductChange(product.id, "qtyInKg", qtyInKg);
-                        }}
-                        placeholder="Qty"
-                        min={0}
-                        className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
-                        required
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <div className="flex-1">
+                                ),
+                              )}
+                            </div>
+                          )}
+                      </div>
+                      <div>
                         <label className="block text-xs text-gray-600 mb-1">
-                          Unit Price
+                          Quantity
                         </label>
                         <input
                           type="number"
                           onWheel={(e) => e.target.blur()}
-                          value={product.unitPrice}
+                          value={product.quantity}
+                          max={product.tempQuantity}
                           onChange={(e) => {
-                            const price = e.target.value;
-                            handleProductChange(product.id, "unitPrice", price);
-                            const sub = new Decimal(Number(price || 0)).mul(
-                              new Decimal(Number(product.quantity || 0)),
+                            const qty = e.target.value;
+                            handleProductChange(product.id, "quantity", qty);
+                            const sub = new Decimal(Number(qty || 0)).mul(
+                              new Decimal(Number(product.unitPrice || 0)),
                             );
                             handleProductChange(
                               product.id,
@@ -649,216 +605,263 @@ const CompanySalesReturn = () => {
                               Number(sub.toFixed(4)),
                             );
                           }}
-                          placeholder="Unit Price"
-                          step="any"
+                          placeholder="Qty"
                           min={0}
                           className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
                           required
                         />
                       </div>
-                      {products.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveProduct(product.id)}
-                          className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
-                        >
-                          ×
-                        </button>
-                      )}
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">
+                          Weight
+                        </label>
+                        <input
+                          type="number"
+                          onWheel={(e) => e.target.blur()}
+                          value={product.qtyInKg}
+                          max={product.tempQtyInKg}
+                          onChange={(e) => {
+                            const qtyInKg = e.target.value;
+                            handleProductChange(product.id, "qtyInKg", qtyInKg);
+                          }}
+                          placeholder="Qty"
+                          min={0}
+                          className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
+                          required
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <div className="flex-1">
+                          <label className="block text-xs text-gray-600 mb-1">
+                            Unit Price
+                          </label>
+                          <input
+                            type="number"
+                            onWheel={(e) => e.target.blur()}
+                            value={product.unitPrice}
+                            onChange={(e) => {
+                              const price = e.target.value;
+                              handleProductChange(product.id, "unitPrice", price);
+                              const sub = new Decimal(Number(price || 0)).mul(
+                                new Decimal(Number(product.quantity || 0)),
+                              );
+                              handleProductChange(
+                                product.id,
+                                "subTotal",
+                                Number(sub.toFixed(4)),
+                              );
+                            }}
+                            placeholder="Unit Price"
+                            step="any"
+                            min={0}
+                            className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm"
+                            required
+                          />
+                        </div>
+                        {products.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveProduct(product.id)}
+                            className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  <div className="border-t border-gray-400 pt-3 mt-3">
+                    <div className="flex justify-end gap-6 text-sm">
+                      <span className="text-gray-600">
+                        Total Qty: <strong>{totalQty.toFixed(0)}</strong>
+                      </span>
+                      <span className="text-gray-800 font-semibold">
+                        Products Total: ৳ {totalAmount.toFixed(2)}
+                      </span>
                     </div>
                   </div>
-                ))}
-                <div className="border-t border-gray-400 pt-3 mt-3">
-                  <div className="flex justify-end gap-6 text-sm">
-                    <span className="text-gray-600">
-                      Total Qty: <strong>{totalQty.toFixed(0)}</strong>
-                    </span>
-                    <span className="text-gray-800 font-semibold">
-                      Products Total: ৳ {totalAmount.toFixed(2)}
-                    </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Total Amount
+                    </label>
+                    <input
+                      type="number"
+                      value={totalAmount.toFixed(2)}
+                      disabled
+                      className="w-full px-4 py-2 border border-gray-400 rounded-md bg-gray-100 font-semibold"
+                    />
                   </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Total Amount
-                  </label>
-                  <input
-                    type="number"
-                    value={totalAmount.toFixed(2)}
-                    disabled
-                    className="w-full px-4 py-2 border border-gray-400 rounded-md bg-gray-100 font-semibold"
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full sm:w-auto bg-blue-600 cursor-pointer text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-medium disabled:bg-blue-500"
-                disabled={addLoading}
-              >
-                {addLoading ? "Saving..." : "Save & Send"}
-              </button>
-            </form>
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto bg-blue-600 cursor-pointer text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-medium disabled:bg-blue-500"
+                  disabled={addLoading}
+                >
+                  {addLoading ? "Saving..." : "Save & Send"}
+                </button>
+              </form>
+            </div>
           </div>
-        </div>
 
-        {/* --- Section 3: History Table (Payment Focused) --- */}
-        <div className="bg-white shadow-xl border-t-4 border-gray-800 overflow-hidden">
-          <div className="p-4 border-b flex justify-between items-center bg-gray-50">
-            <h2 className="text-[10px] font-black uppercase text-gray-600 tracking-widest">
-              Company Payment Tracking
-            </h2>
-            <input
-              type="search"
-              value={memoSearch}
-              onChange={(e) => setMemoSearch(e.target.value)}
-              placeholder="Search Memo..."
-              className="text-[10px] border px-3 py-1.5 outline-none w-48 font-bold"
-            />
-          </div>
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-gray-100 text-[10px] uppercase font-black text-gray-500 border-b">
-                <th className="p-4">Date</th>
-                <th className="p-4">Memo</th>
-                <th className="p-4">Company</th>
-                <th className="p-4">Product Info</th>
-                {/* <th className="p-4 text-center">Dispatch Qty</th> */}
-                <th className="p-4 text-right">Claim Product (Pcs)</th>
-                <th className="p-4 text-center">Product Status</th>
-              </tr>
-            </thead>
-            <tbody className="text-xs">
-              {companySalesReturns.length > 0 ? (
-                companySalesReturns.map((salesReturn, index) => (
-                  <tr
-                    key={index}
-                    className="border-b hover:bg-blue-50 transition-colors cursor-pointer group"
-                    onClick={() =>
-                      navigate("/company-sales-return-statement", {
-                        state: salesReturn,
-                      })
-                    }
-                  >
-                    <td className="p-4 font-bold text-gray-400 italic font-mono">
-                      {
-                        dayjs(salesReturn.createdAt)
-                          .tz("Asia/Dhaka")
-                          .format("DD-MM-YYYY")
+          {/* --- Section 3: History Table (Payment Focused) --- */}
+          <div className="bg-white shadow-xl border-t-4 border-gray-800 overflow-hidden">
+            <div className="p-4 border-b flex justify-between items-center bg-gray-50">
+              <h2 className="text-[10px] font-black uppercase text-gray-600 tracking-widest">
+                Company Payment Tracking
+              </h2>
+              <input
+                type="search"
+                value={memoSearch}
+                onChange={(e) => setMemoSearch(e.target.value)}
+                placeholder="Search Memo..."
+                className="text-[10px] border px-3 py-1.5 outline-none w-48 font-bold"
+              />
+            </div>
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-gray-100 text-[10px] uppercase font-black text-gray-500 border-b">
+                  <th className="p-4">Date</th>
+                  <th className="p-4">Memo</th>
+                  <th className="p-4">Company</th>
+                  <th className="p-4">Product Info</th>
+                  {/* <th className="p-4 text-center">Dispatch Qty</th> */}
+                  <th className="p-4 text-right">Claim Product (Pcs)</th>
+                  <th className="p-4 text-center">Product Status</th>
+                </tr>
+              </thead>
+              <tbody className="text-xs">
+                {companySalesReturns.length > 0 ? (
+                  companySalesReturns.map((salesReturn, index) => (
+                    <tr
+                      key={index}
+                      className="border-b hover:bg-blue-50 transition-colors cursor-pointer group"
+                      onClick={() =>
+                        navigate("/company-sales-return-statement", {
+                          state: salesReturn,
+                        })
                       }
-                    </td>
-                    <td className="p-4 text-gray-500 uppercase font-black">
-                      {salesReturn.memo}
-                    </td>
-                    <td className="p-4 font-black text-blue-600 group-hover:underline uppercase tracking-tighter">
-                      {salesReturn.supplierName}
-                    </td>
-                    {/* <td className="p-4 font-semibold text-gray-600 uppercase">
+                    >
+                      <td className="p-4 font-bold text-gray-400 italic font-mono">
+                        {
+                          dayjs(salesReturn.createdAt)
+                            .tz("Asia/Dhaka")
+                            .format("DD-MM-YYYY")
+                        }
+                      </td>
+                      <td className="p-4 text-gray-500 uppercase font-black">
+                        {salesReturn.memo}
+                      </td>
+                      <td className="p-4 font-black text-blue-600 group-hover:underline uppercase tracking-tighter">
+                        {salesReturn.supplierName}
+                      </td>
+                      {/* <td className="p-4 font-semibold text-gray-600 uppercase">
                       {salesReturn.productName}
                     </td> */}
-                    <td className="p-4">
-                      <table className="w-full text-[10px] uppercase">
-                        <thead>
-                          <tr className="text-gray-400 border-b">
-                            <th className="text-left pb-1">Product</th>
-                            <th className="text-center pb-1">Qty</th>
-                            <th className="text-center pb-1">Weight</th>
-                            <th className="text-right pb-1">Unit</th>
-                          </tr>
-                        </thead>
-
-                        <tbody>
-                          {salesReturn.products?.map((product, i) => (
-                            <tr key={i} className="text-gray-700 font-bold">
-                              <td className="py-1 pr-2">
-                                {product.productName}
-                              </td>
-
-                              <td className="text-center">
-                                {product.quantity}
-                              </td>
-
-                              <td className="text-center">
-                                {product.qtyInKg} Kg
-                              </td>
-
-                              <td className="text-right">
-                                ৳ {product.unitPrice}
-                              </td>
+                      <td className="p-4">
+                        <table className="w-full text-[10px] uppercase">
+                          <thead>
+                            <tr className="text-gray-400 border-b">
+                              <th className="text-left pb-1">Product</th>
+                              <th className="text-center pb-1">Qty</th>
+                              <th className="text-center pb-1">Weight</th>
+                              <th className="text-right pb-1">Unit</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </td>
-                    {/* <td className="p-4 text-center font-black">
+                          </thead>
+
+                          <tbody>
+                            {salesReturn.products?.map((product, i) => (
+                              <tr key={i} className="text-gray-700 font-bold">
+                                <td className="py-1 pr-2">
+                                  {product.productName}
+                                </td>
+
+                                <td className="text-center">
+                                  {product.quantity}
+                                </td>
+
+                                <td className="text-center">
+                                  {product.qtyInKg} Kg
+                                </td>
+
+                                <td className="text-right">
+                                  ৳ {product.unitPrice}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </td>
+                      {/* <td className="p-4 text-center font-black">
                       {`${salesReturn.quantity} Pcs | ${salesReturn.qtyInKg} Kg`}
                     </td> */}
-                    <td className="p-4 text-center font-black text-gray-800 tracking-tighter text-sm">
-                      {salesReturn.totalAmountQty}
-                    </td>
-                    <td className="p-4 text-center">
-                      {salesReturn.dueQty > 0 ? (
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded-full">
-                          <FaExclamationCircle
-                            size={10}
-                            className="animate-pulse"
-                          />
-                          <span className="text-[9px] font-black uppercase tracking-tighter italic">
-                            {salesReturn.dueQty} Pcs Pending
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-700 border border-green-200 rounded-full">
-                          <FaCheckCircle size={10} />
-                          <span className="text-[9px] font-black uppercase tracking-tighter">
-                            Full Received
-                          </span>
-                        </div>
-                      )}
+                      <td className="p-4 text-center font-black text-gray-800 tracking-tighter text-sm">
+                        {salesReturn.totalAmountQty}
+                      </td>
+                      <td className="p-4 text-center">
+                        {salesReturn.dueQty > 0 ? (
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded-full">
+                            <FaExclamationCircle
+                              size={10}
+                              className="animate-pulse"
+                            />
+                            <span className="text-[9px] font-black uppercase tracking-tighter italic">
+                              {salesReturn.dueQty} Pcs Pending
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-700 border border-green-200 rounded-full">
+                            <FaCheckCircle size={10} />
+                            <span className="text-[9px] font-black uppercase tracking-tighter">
+                              Full Received
+                            </span>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className="text-center text-gray-500 py-10 text-lg border-b border-gray-400"
+                    >
+                      No Return Available.
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan={7}
-                    className="text-center text-gray-500 py-10 text-lg border-b border-gray-400"
-                  >
-                    No Return Available.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination logic remains unchanged */}
-        {pages > 0 && (
-          <div className="flex justify-center items-center mt-4 gap-2 text-sm">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={page === 1}
-              className={`${page === 1 ? "" : "cursor-pointer hover:bg-black hover:text-white"} px-2 py-1 border rounded disabled:opacity-50`}
-            >
-              Prev
-            </button>
-            <span>
-              Page {page} of {pages}
-            </span>
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, pages))}
-              disabled={page === pages}
-              className={`${page === pages ? "" : "cursor-pointer hover:bg-black hover:text-white"} px-2 py-1 border rounded disabled:opacity-50`}
-            >
-              Next
-            </button>
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
+
+          {/* Pagination logic remains unchanged */}
+          {pages > 0 && (
+            <div className="flex justify-center items-center mt-4 gap-2 text-sm">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={page === 1}
+                className={`${page === 1 ? "" : "cursor-pointer hover:bg-black hover:text-white"} px-2 py-1 border rounded disabled:opacity-50`}
+              >
+                Prev
+              </button>
+              <span>
+                Page {page} of {pages}
+              </span>
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, pages))}
+                disabled={page === pages}
+                className={`${page === pages ? "" : "cursor-pointer hover:bg-black hover:text-white"} px-2 py-1 border rounded disabled:opacity-50`}
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
