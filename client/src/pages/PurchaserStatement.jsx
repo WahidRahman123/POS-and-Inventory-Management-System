@@ -203,7 +203,7 @@ const PurchaserStatement = () => {
                     </td>
                     <td className="px-6 py-4 text-center print:hidden">
                       <Link
-                        // to="/invoice-purchase"
+                        to="/invoice-purchase"
                         state={invoiceData}
                         className="text-blue-600 hover:text-blue-800 font-medium text-sm hover:underline"
                       >

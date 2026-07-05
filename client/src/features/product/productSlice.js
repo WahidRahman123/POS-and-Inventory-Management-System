@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 
 const initialState = {
   products: [],
+  productsForSalesReturnPayment: [],
   productSearchedById: {
     name: "",
     sellPrice: 0,
@@ -37,6 +38,27 @@ export const fetchAllProducts = createAsyncThunk(
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
           params: value,
+        }
+      );
+
+      return data;
+    } catch (error) {
+      const message = "Product Fetching Failed!";
+      return ThunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+export const fetchAllProductsForSalesReturnPayment = createAsyncThunk(
+  "product/fetchAllProductsForSalesReturnPayment",
+  async (_, ThunkAPI) => {
+    try {
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URI}/api/products/all`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          }
         }
       );
 
@@ -310,6 +332,28 @@ const productSlice = createSlice({
           progress: undefined,
           theme: "colored",
         });
+      })
+      .addCase(fetchAllProductsForSalesReturnPayment.pending, (state, action) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllProductsForSalesReturnPayment.fulfilled, (state, action) => {
+        state.loading = false;
+        state.productsForSalesReturnPayment = action.payload.products;
+      })
+      .addCase(fetchAllProductsForSalesReturnPayment.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error;
+        // toast.error(action.payload, {
+        //   position: "bottom-right",
+        //   autoClose: 3000,
+        //   hideProgressBar: false,
+        //   closeOnClick: false,
+        //   pauseOnHover: true,
+        //   draggable: true,
+        //   progress: undefined,
+        //   theme: "colored",
+        // });
       })
       .addCase(searchProducts.pending, (state, action) => {
         state.loading = true;

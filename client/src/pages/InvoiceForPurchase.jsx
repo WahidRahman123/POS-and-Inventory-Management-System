@@ -9,10 +9,18 @@ const InvoiceForPurchase = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const contentRef = useRef(null);
-  console.log("Invoice Data:", location.state);
+  // console.log("Invoice Data:", location.state);
 
   const data = location.state || {};
 
+  let normalPurchaseProducts = [];
+  if (data.purchaseType === "normal") {
+    if (data.products?.length > 0) {
+      normalPurchaseProducts = data.products;
+    } else if (data.purchaseId?.products?.length > 0) {
+      normalPurchaseProducts = data.purchaseId.products;
+    }
+  }
   useEffect(() => {
     if (!user) navigate("/login");
   }, [user, navigate]);
@@ -47,7 +55,7 @@ const InvoiceForPurchase = () => {
         </button>
       </div>
 
-      <div ref={contentRef} className="max-w-4xl mx-auto bg-white shadow-lg p-8">
+      <div ref={contentRef} className="max-w-4xl mx-auto bg-white shadow-lg print:shadow-none p-8">
         {/* Header */}
         <div className="border-b pb-6 mb-6">
           <div className="flex justify-between items-start">
@@ -73,13 +81,16 @@ const InvoiceForPurchase = () => {
           <div className="text-right">
             <p className="text-xs uppercase text-gray-500 mb-1">Transaction Type</p>
             <p className="font-bold text-xl text-blue-600">
-              {isDuePayment ? "Due Payment" : isAdvance ? "Advance Payment" : "Normal Purchase"}
+              {data.purchaseType === "exchangeAdjust" && "Exchange Adjustment"}
+              {data.purchaseType === "normal" && "Normal Purchase"}
+              {data.purchaseType === "due" && "Due Payment"}
+              {data.purchaseType === "advance" && "Advance Payment"}
             </p>
           </div>
         </div>
 
         {/* Products Table - Only for Normal Purchase */}
-        {!isDuePayment && !isAdvance && data.products && data.products.length > 0 && (
+        {!isDuePayment && !isAdvance && normalPurchaseProducts.length > 0 && (
           <table className="w-full border-collapse mb-8">
             <thead>
               <tr className="bg-gray-100">
@@ -91,7 +102,7 @@ const InvoiceForPurchase = () => {
               </tr>
             </thead>
             <tbody>
-              {data.products.map((item, index) => (
+              {normalPurchaseProducts.map((item, index) => (
                 <tr key={index} className="border-b border-gray-200">
                   <td className="border border-gray-300 px-4 py-3">{index + 1}</td>
                   <td className="border border-gray-300 px-4 py-3">{item.productName}</td>
@@ -105,6 +116,106 @@ const InvoiceForPurchase = () => {
             </tbody>
           </table>
         )}
+
+
+        {data.purchaseType === "exchangeAdjust" &&
+          data.companyProductReturnId?.products?.length > 0 && (
+            <div className="my-8">
+              <div className="border-b-2 border-black pb-2 mb-4">
+                <h3 className="text-lg font-bold uppercase tracking-wide">
+                  Exchange Adjustment Details
+                </h3>
+              </div>
+
+              <table className="w-full border border-black border-collapse text-sm">
+                <thead>
+                  <tr>
+                    <th className="border border-black py-2 px-2 text-center w-12">
+                      SL
+                    </th>
+
+                    <th className="border border-black py-2 px-3 text-left">
+                      Product Description
+                    </th>
+
+                    <th className="border border-black py-2 px-2 text-center w-20">
+                      Qty
+                    </th>
+
+                    <th className="border border-black py-2 px-2 text-center w-28">
+                      Weight
+                    </th>
+
+                    <th className="border border-black py-2 px-3 text-right w-32">
+                      Unit Price
+                    </th>
+
+                    <th className="border border-black py-2 px-3 text-right w-36">
+                      Total
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {data.companyProductReturnId.products.map((item, index) => (
+                    <tr key={index}>
+                      <td className="border border-black py-2 px-2 text-center">
+                        {index + 1}
+                      </td>
+
+                      <td className="border border-black py-2 px-3">
+                        {item.productName}
+                      </td>
+
+                      <td className="border border-black py-2 px-2 text-center">
+                        {item.quantity}
+                      </td>
+
+                      <td className="border border-black py-2 px-2 text-center">
+                        {item.qtyInKg ?? "-"} Kg
+                      </td>
+
+                      <td className="border border-black py-2 px-3 text-right">
+                        ৳ {new Decimal(item.unitPrice || 0).toFixed(2)}
+                      </td>
+
+                      <td className="border border-black py-2 px-3 text-right">
+                        ৳ {new Decimal(item.subTotal || 0).toFixed(2)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+
+                <tfoot>
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="border border-black py-3 px-3 text-right font-bold"
+                    >
+                      TOTAL ADJUSTMENT VALUE
+                    </td>
+
+                    <td className="border border-black py-3 px-3 text-right font-bold">
+                      ৳{" "}
+                      {data.companyProductReturnId.products
+                        .reduce(
+                          (sum, item) => sum.plus(item.subTotal || 0),
+                          new Decimal(0)
+                        )
+                        .toFixed(2)}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+
+              {data.remarks && (
+                <div className="mt-5 border border-black p-3">
+                  <p className="font-bold mb-2 uppercase">Remarks</p>
+                  <p>{data.remarks}</p>
+                </div>
+              )}
+            </div>
+          )}
 
         {/* Summary */}
         <div className="flex justify-end">
@@ -120,12 +231,27 @@ const InvoiceForPurchase = () => {
                 <span className="font-bold text-green-600">৳ {paidAmount.toFixed(2)}</span>
               </div>
 
-              <div className="flex justify-between border-t border-gray-300 pt-3 text-xl font-bold">
-                <span>Current Due / Balance</span>
+              <div className="flex justify-between border-t border-gray-300 pt-3 font-bold">
+                <span className="font-medium">Current Due</span>
                 <span className={currentDue.greaterThanOrEqualTo(0) ? "text-green-600" : "text-red-600"}>
                   {currentDue.greaterThanOrEqualTo(0) ? "+" : ""}৳ {currentDue.toFixed(2)}
                 </span>
               </div>
+
+              <div className="flex justify-between border-t border-gray-300 pt-3 font-bold">
+                <span className="font-medium">Previous Balance</span>
+                <span className="font-bold">
+                  ৳ {data.previousBalance ? new Decimal(data.previousBalance).toFixed(2) : "0.00"}
+                </span>
+              </div>
+
+              <div className="flex justify-between border-t border-gray-300 pt-3 font-bold">
+                <span className="font-medium">Current Balance</span>
+                <span className="font-bold">
+                  ৳ {data.currentBalance ? new Decimal(data.currentBalance).toFixed(2) : "0.00"}
+                </span>
+              </div>
+
             </div>
           </div>
         </div>

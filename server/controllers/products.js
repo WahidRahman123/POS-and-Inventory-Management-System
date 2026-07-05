@@ -35,6 +35,18 @@ module.exports.index = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+module.exports.allProductsForSalesReturnPayment = async (req, res) => {
+  try {
+    const products = await Product.find();
+
+    res.status(201).json({
+      products
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};
 
 module.exports.createProduct = async (req, res) => {
   try {

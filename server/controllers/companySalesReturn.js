@@ -157,6 +157,8 @@ module.exports.addPayment = async (req, res) => {
   const { id } = req.params;
   const { date, amount, receiveAmount, payDetails, unchangedAmount } = req.body;
 
+  // console.log(payDetails);
+
   const utcDate = combineDateWithCurrentTime(date);
 
   try {
@@ -226,7 +228,7 @@ module.exports.addPayment = async (req, res) => {
     // ৪. মেইন ইনভেন্টরি স্টক প্লাস লজিক
     if (payDetails && payDetails.length > 0) {
       for (let i = 0; i < payDetails.length; i++) {
-        const { productName, quantity } = payDetails[i];
+        const { productName, quantity, unitPrice } = payDetails[i];
         const product = await Product.findOne({ name: productName });
 
         if (!product) {
@@ -234,6 +236,8 @@ module.exports.addPayment = async (req, res) => {
         }
 
         product.quantity = product.quantity + Number(quantity);
+        //* product er costPrice ta sorasori add hobe payDetails er unitPrice ta
+        product.costPrice = Number(unitPrice);
         await product.save();
       }
     }

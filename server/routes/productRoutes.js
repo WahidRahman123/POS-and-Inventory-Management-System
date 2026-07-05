@@ -20,6 +20,11 @@ router.post('/', protect, products.createProduct);
 // @access private
 router.get('/search', protect, products.searchProduct);
 
+//* @route GET /api/products/all
+// @desc search products
+// @access private
+router.get('/all', protect, products.allProductsForSalesReturnPayment);
+
 //* @route GET /api/products/searchforpos
 // @desc search products for POS System
 // @access private

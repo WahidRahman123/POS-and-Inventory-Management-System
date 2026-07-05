@@ -104,10 +104,10 @@ const SalesDueList = () => {
 
           {/* সর্ট অর্ডার ফিল্ডের পাশে অল-রেকর্ডস গ্র্যান্ড টোটাল */}
           <div className="bg-red-50 border border-red-200 rounded-xl px-5 py-2.5 flex items-center justify-between sm:justify-start gap-4 shadow-sm w-full sm:w-auto self-stretch sm:self-center">
-            <span className="text-xs sm:text-sm font-semibold text-green-700 uppercase tracking-wider">
+            <span className="text-xs sm:text-sm font-semibold text-red-700 uppercase tracking-wider">
               Total Customers Due:
             </span>
-            <span className="text-base sm:text-lg font-black text-green-600 animate-pulse">
+            <span className="text-base sm:text-lg font-black text-red-600 animate-pulse">
               ৳ {grandTotalDue.toLocaleString("en-BD")}
             </span>
           </div>
@@ -145,7 +145,7 @@ const SalesDueList = () => {
                       <td className="px-6 py-4 font-medium">{customer.name}</td>
                       <td className="px-6 py-4">{customer.phone || "N/A"}</td>
                       <td
-                        className={`px-6 py-4 text-right font-bold ${customer.currentBalance > 0 && "text-red-600"} ${customer.currentBalance < 0 && "text-green-600"}`}
+                        className={`px-6 py-4 text-right font-bold ${customer.currentBalance < 0 && "text-red-600"} ${customer.currentBalance > 0 && "text-green-600"}`}
                       >
                         ৳{" "}
                         {Number(customer.currentBalance || 0).toLocaleString(

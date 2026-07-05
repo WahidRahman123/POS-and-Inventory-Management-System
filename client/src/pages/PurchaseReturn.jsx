@@ -24,7 +24,7 @@ const PurchaseReturn = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // console.log(purchaseReturns)
+  console.log(purchaseReturns)
 
   //* For Date
   const [dateMode, setDateMode] = useState("single");
@@ -1149,119 +1149,197 @@ const PurchaseReturn = () => {
 
           {/* Table */}
           <div className="overflow-x-auto">
-            <table className="min-w-full text-xs sm:text-sm border-collapse">
+            <table className="min-w-full text-sm border-collapse">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                    Date
-                  </th>
-                  <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                    Memo
-                  </th>
-                  <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                    Supplier
-                  </th>
-                  <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                    Type
-                  </th>
-                  <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                    Return
-                  </th>
-                  <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                    Refund
-                  </th>
-                  <th className="border px-2 py-1 sm:px-4 sm:py-2 text-left">
-                    Action
-                  </th>
+                  <th className="border px-4 py-3 text-left">Date</th>
+                  <th className="border px-4 py-3 text-left">Memo</th>
+                  <th className="border px-4 py-3 text-left">Supplier</th>
+                  <th className="border px-4 py-3 text-left">Product Name</th>
+                  <th className="border px-4 py-3 text-center">Return Qty</th>
+                  <th className="border px-4 py-3 text-center">Qty (KG)</th>
+                  <th className="border px-4 py-3 text-center">Return Price</th>
+                  <th className="border px-4 py-3 text-center">Line Total</th>
+                  <th className="border px-4 py-3 text-left">Type</th>
+                  <th className="border px-4 py-3 text-center">Total Return</th>
+                  <th className="border px-4 py-3 text-center">Refund</th>
+                  <th className="border px-4 py-3 text-center">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {purchaseReturns.length > 0 ? (
-                  purchaseReturns.map((purchaseReturn, index) => (
-                    <tr
-                      onClick={(e) => {
-                        if (e.target.tagName !== "TD") return;
-                        navigate("/purchase-return-statement", {
-                          state: purchaseReturn,
-                        });
-                      }}
-                      key={index}
-                      className="hover:bg-gray-50 cursor-pointer"
-                    >
-                      <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                        {
-                          dayjs(purchaseReturn.createdAt)
-                            .tz("Asia/Dhaka")
-                            .format("DD-MM-YYYY")
-                        }
-                      </td>
-                      <td className="border px-2 py-1 sm:px-4 sm:py-2 text-center">
-                        {purchaseReturn.memo}
-                      </td>
-                      <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                        {purchaseReturn.supplierName}
-                      </td>
-                      <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                        {purchaseReturn.transactionRecords[0].returnType ===
-                          "product" && (
-                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                              Product
-                            </span>
-                          )}
-                        {purchaseReturn.transactionRecords[0].returnType ===
-                          "cash" && (
-                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                              Cash
-                            </span>
-                          )}
-                      </td>
-                      <td className="border px-2 py-1 sm:px-4 sm:py-2 text-red-600">
-                        ৳ {purchaseReturn.totalReturnValue}
-                      </td>
-                      <td className="border px-2 py-1 sm:px-4 sm:py-2 text-green-600">
-                        ৳ {purchaseReturn.paid}
-                      </td>
-                      <td className="border px-2 py-1 sm:px-4 sm:py-2">
-                        <div className="flex gap-1">
-                          <Link
-                            to={
-                              purchaseReturn.due > 0
-                                ? `/purchase-return/${purchaseReturn._id}/exchange-due`
-                                : `#`
-                            }
-                            className={` text-xs  text-white px-2 py-1 rounded  ${purchaseReturn.due > 0 ? "cursor-pointer bg-green-600 hover:bg-green-700" : "bg-green-500 cursor-not-allowed"}`}
-                          >
-                            Exchange
-                          </Link>
+                  purchaseReturns.map((sr) => {
+                    const products = sr.products || [];
+                    const rowspan = products.length || 1;
 
-                          <Link
-                            to={
-                              purchaseReturn.due > 0
-                                ? `/purchase-return/${purchaseReturn._id}/edit-due`
-                                : `#`
-                            }
-                            className={` text-xs  text-white px-2 py-1 rounded  ${purchaseReturn.due > 0 ? "cursor-pointer bg-blue-600 hover:bg-blue-700" : "bg-blue-500 cursor-not-allowed"}`}
-                          >
-                            Cash Refund
-                          </Link>
+                    return products.length > 0 ? (
+                      products.map((product, idx) => (
+                        <tr key={`${sr._id}-${idx}`} className="hover:bg-gray-50">
+                          {idx === 0 && (
+                            <>
+                              <td rowSpan={rowspan} className="border px-4 py-3">
+                                {
+                                  dayjs(sr.createdAt)
+                                    .tz("Asia/Dhaka")
+                                    .format("DD-MM-YYYY")
+                                }
+                              </td>
+                              <td
+                                rowSpan={rowspan}
+                                className="border px-4 py-3 font-medium"
+                              >
+                                {sr.memo}
+                              </td>
+                              <td
+                                rowSpan={rowspan}
+                                className="border px-4 py-3 cursor-pointer hover:text-blue-600 hover:underline"
+                                onClick={() =>
+                                  navigate("/purchase-return-statement", {
+                                    state: sr,
+                                  })
+                                }
+                              >
+                                {sr.supplierName}
+                              </td>
+                            </>
+                          )}
 
-                          <Link
-                            to="/invoice-sales-return"
-                            className="cursor-pointer text-xs bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700"
+                          <td className="border px-4 py-3">
+                            {product.productName}
+                          </td>
+                          <td className="border px-4 py-3 text-center">
+                            {product.returnQuantity}
+                          </td>
+                          <td className="border px-4 py-3 text-center">
+                            {product.returnQtyInKg}
+                          </td>
+                          <td className="border px-4 py-3 text-center">
+                            ৳ {product.returnPrice}
+                          </td>
+                          <td className="border px-4 py-3 text-center font-medium">
+                            ৳ {new Decimal(Number(product.lineTotal)).toFixed(2)}
+                          </td>
+
+                          {idx === 0 && (
+                            <>
+                              <td rowSpan={rowspan} className="border px-4 py-3">
+                                {sr.transactionRecords[0].returnType ===
+                                  "product" && (
+                                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                                      Product
+                                    </span>
+                                  )}
+                                {sr.transactionRecords[0].returnType ===
+                                  "cash" && (
+                                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                                      Cash
+                                    </span>
+                                  )}
+                              </td>
+                              <td
+                                rowSpan={rowspan}
+                                className="border px-4 py-3 text-red-600 font-semibold text-center"
+                              >
+                                ৳ {sr.totalReturnValue}
+                              </td>
+                              <td
+                                rowSpan={rowspan}
+                                className="border px-4 py-3 text-green-600 font-semibold text-center"
+                              >
+                                ৳ {sr.paid}
+                              </td>
+                              <td
+                                rowSpan={rowspan}
+                                className="border px-4 py-3 text-center"
+                              >
+                                <div className="flex gap-2 justify-center flex-col">
+                                  <Link
+                                    to={
+                                      sr.due > 0
+                                        ? `/purchase-return/${sr._id}/exchange-due`
+                                        : "#"
+                                    }
+                                    className="text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
+                                  >
+                                    Exchange
+                                  </Link>
+                                  <Link
+                                    to={
+                                      sr.due > 0
+                                        ? `/purchase-return/${sr._id}/edit-due`
+                                        : "#"
+                                    }
+                                    className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
+                                  >
+                                    Cash
+                                  </Link>
+                                  <button
+                                    onClick={() =>
+                                      navigate("/invoice-sales-return", {
+                                        state: sr,
+                                      })
+                                    }
+                                    className="text-xs cursor-pointer bg-gray-700 hover:bg-gray-800 text-white px-3 py-1 rounded"
+                                  >
+                                    Print
+                                  </button>
+                                </div>
+                              </td>
+                            </>
+                          )}
+                        </tr>
+                      ))
+                    ) : (
+                      <tr key={sr._id}>
+                        <td className="border px-4 py-3">
+                          {new Date(sr.createdAt)
+                            .toLocaleDateString("en-GB")
+                            .replaceAll("/", "-")}
+                        </td>
+                        <td className="border px-4 py-3 font-medium">
+                          {sr.memo}
+                        </td>
+                        <td
+                          className="border px-4 py-3 cursor-pointer hover:text-blue-600 hover:underline"
+                          onClick={() =>
+                            navigate("/sales-return-statement", { state: sr })
+                          }
+                        >
+                          {sr.customerName}
+                        </td>
+                        <td
+                          className="border px-4 py-3 text-gray-500"
+                          colSpan={5}
+                        >
+                          No Products
+                        </td>
+                        <td className="border px-4 py-3">{sr.returnType}</td>
+                        <td className="border px-4 py-3 text-red-600 font-semibold text-center">
+                          ৳ {sr.totalReturnValue}
+                        </td>
+                        <td className="border px-4 py-3 text-green-600 font-semibold text-center">
+                          ৳ {sr.paid}
+                        </td>
+                        <td className="border px-4 py-3 text-center">
+                          <button
+                            onClick={() =>
+                              navigate("/invoice-sales-return", { state: sr })
+                            }
+                            className="text-xs bg-gray-700 hover:bg-gray-800 text-white px-3 py-1 rounded"
                           >
                             Print
-                          </Link>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
                     <td
-                      colSpan={7}
-                      className="text-center text-gray-500 py-6 select-none border"
+                      colSpan={12}
+                      className="text-center py-12 text-gray-500 border"
                     >
-                      No Purchase Return Available.
+                      No Sales Return Available.
                     </td>
                   </tr>
                 )}

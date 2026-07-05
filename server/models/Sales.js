@@ -163,6 +163,16 @@ const salesSchema = new mongoose.Schema({
     type: Number,
     // required: true,
   },
+
+  previousBalance: {
+    type: Number,
+    default: 0,
+  },
+  currentBalance: {
+    type: Number,
+    default: 0,
+  },
+
   createdAt: {
     type: Date,
     required: true,

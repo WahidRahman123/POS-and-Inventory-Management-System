@@ -196,6 +196,7 @@ module.exports.createPurchase = async (req, res) => {
       paidAmount: purchaseType === "advance" ? Number(paid) : 0,
       currentDue: Number(due),
       currentBalance,
+      previousBalance: Number(previousBalance.toFixed(4)),
       date: utcCreatedAt,
       purchaseId: purchase._id,
       purchaseType,
@@ -209,6 +210,8 @@ module.exports.createPurchase = async (req, res) => {
 
     await transaction.save();
     await supplier.save();
+    purchase.previousBalance = Number(previousBalance.toFixed(4));
+    purchase.currentBalance = currentBalance;
     const createdPurchase = await purchase.save();
 
     // Important: Send balance data for Invoice

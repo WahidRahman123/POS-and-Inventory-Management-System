@@ -195,7 +195,9 @@ module.exports.createSales = async (req, res) => {
     }
     customer.salesRecord.push(sale._id);
     transaction.currentBalance = customer.advanceBalance - customer.due;
+    sale.currentBalance = customer.advanceBalance - customer.due;
     transaction.previousBalance = previousBalance;
+    sale.previousBalance = previousBalance;
     await customer.save();
     await transaction.save();
 

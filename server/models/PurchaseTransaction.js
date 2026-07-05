@@ -46,6 +46,10 @@ const purchaseTransactionSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+  previousBalance: {
+    type: Number,
+    default: 0,
+  },
   currentBalance: {
     //* Current Due
     type: Number,

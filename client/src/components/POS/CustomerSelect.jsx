@@ -144,8 +144,8 @@ const CustomerSelect = ({
             placeholder="Current Balance"
             disabled
             className={`block w-full px-3 py-1.5 font-bold border border-gray-300 rounded-sm text-sm bg-gray-200 select-none ${
-              customer.currentBalance < 0
-                ? "text-green-700" : customer.currentBalance > 0
+              customer.currentBalance > 0
+                ? "text-green-700" : customer.currentBalance < 0
                 ? "text-red-700"
                 : "text-gray-700"
             }`}

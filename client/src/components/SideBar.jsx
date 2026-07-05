@@ -110,7 +110,7 @@ const SideBar = ({ closeSidebar }) => {
             <span className="mr-3">📅</span> Sales Return To Company
           </NavLink>
 
-          <NavLink
+          {/* <NavLink
             to="/purchase-return"
             end
             onClick={closeSidebar}
@@ -129,7 +129,8 @@ const SideBar = ({ closeSidebar }) => {
             }
           >
             <span className="mr-3">📅</span> Purchase Return Statement
-          </NavLink>
+          </NavLink> */}
+          
           <NavLink
             to="/sales-return"
             end
@@ -140,7 +141,7 @@ const SideBar = ({ closeSidebar }) => {
           >
             <span className="mr-3">📅</span> Sales Return
           </NavLink>
-          <NavLink
+          {/* <NavLink
             to="/sales-return-statement"
             end
             onClick={closeSidebar}
@@ -149,7 +150,7 @@ const SideBar = ({ closeSidebar }) => {
             }
           >
             <span className="mr-3">📅</span> Sales Return Statement
-          </NavLink>
+          </NavLink> */}
 
         {user?.role === "admin" && (
           <NavLink
@@ -186,11 +187,11 @@ const SideBar = ({ closeSidebar }) => {
         >
           <span className="mr-3">👤</span> Customer
         </NavLink>
-        <NavLink to="/customer-statement" end onClick={closeSidebar} className={({ isActive }) =>
+        {/* <NavLink to="/customer-statement" end onClick={closeSidebar} className={({ isActive }) =>
           `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
         }>
           <span className="mr-3">📅</span> Customer Statement 
-        </NavLink>
+        </NavLink> */}
 
         <NavLink
           to="/purchaser"
@@ -202,7 +203,7 @@ const SideBar = ({ closeSidebar }) => {
         >
           <span className="mr-3">👤</span> Supplier
         </NavLink>
-        <NavLink
+        {/* <NavLink
           to="/purchaser-statement"
           end
           onClick={closeSidebar}
@@ -211,7 +212,7 @@ const SideBar = ({ closeSidebar }) => {
           }
         >
           <span className="mr-3">📅</span> Supplier Statement
-        </NavLink>
+        </NavLink> */}
         <NavLink to="/expense-management" end onClick={closeSidebar} className={({ isActive }) =>
           `flex items-center p-4 hover:bg-gray-400 ${isActive ? "bg-gray-300 font-bold" : ""}`
         }>
