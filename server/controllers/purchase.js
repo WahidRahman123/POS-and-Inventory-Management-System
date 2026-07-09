@@ -80,7 +80,8 @@ module.exports.index = async (req, res) => {
     const skip = (parseInt(page) - 1) * limit;
 
     const purchases = await Purchase.find(mainSearch)
-      .sort({ createdAt: parseInt(order) })
+      // .sort({ createdAt: parseInt(order) })
+      .sort({ issuedAt: parseInt(order) })
       .skip(skip)
       .limit(limit);
 

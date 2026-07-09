@@ -149,7 +149,8 @@ module.exports.purchaseBySupplierName = async (req, res) => {
       supplierName,
       ...dateQuery,
     })
-      .sort({ date: -1 })
+      .sort({ _id: -1 })
+      // .sort({ date: -1 })
       .populate("purchaseId")
       .populate("companyProductReturnId");
 
@@ -189,6 +190,7 @@ module.exports.purchaseBySupplierName = async (req, res) => {
 
     const supplierBalance = supplier ? Number(supplier.totalBalance) : 0;
     const totalCompanyReturnAmount = supplier ? Number(supplier.companyReturnBalance) : 0;
+
 
     res.status(201).json({
       transactions,

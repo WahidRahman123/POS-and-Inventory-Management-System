@@ -517,7 +517,8 @@ module.exports.salesByCustomerName = async (req, res) => {
     }
 
     const transactions = await SalesTransaction.find(matchQuery)
-      .sort({ date: -1 })
+      // .sort({ date: -1 })
+      .sort({ _id: -1 })
       .populate("salesId")
       .populate("customerId")
       .populate("scrapProductSellId");
