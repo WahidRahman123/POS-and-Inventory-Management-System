@@ -112,6 +112,10 @@ const purchaseSchema = new mongoose.Schema({
     required: true,
     // min: 0,
   },
+  remarks: {
+    type: String,
+    // trim: true,
+  },
 
   createdAt: {
     type: Date,

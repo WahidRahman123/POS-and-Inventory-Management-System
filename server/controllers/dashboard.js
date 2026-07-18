@@ -17,6 +17,7 @@ const { combineDateWithCurrentTime } = require('../utils/combineDateWithCurrentT
 const dayjs = require('../utils/date.js');
 const CompanyProductReturn = require("../models/CompanyProductReturn.js");
 const ScrapProductSell = require("../models/ScrapProductSell.js");
+const PurchaseTransaction = require("../models/PurchaseTransaction.js");
 
 module.exports.index = async (req, res) => {
   try {
@@ -38,6 +39,7 @@ module.exports.index = async (req, res) => {
       sales,
       productExchange,
       purchase,
+      purchaseTransaction,
       purchaseReturn,
       salesReturn,
       companySalesReturn,
@@ -199,6 +201,49 @@ module.exports.index = async (req, res) => {
                 },
               },
             ],
+          },
+        },
+      ]),
+
+      // ================== PURCHASE TRANSACTION ==================
+      // advance e totalAmount = 0, normal e totalAmount = amount
+      // totalAmount baki gulo te nai
+      //* So the total purchase = normal purchase type's amount/totalAmount.
+      PurchaseTransaction.aggregate([
+        {
+          $facet: {
+            purchaseTotalToday: [
+              // { $match: { date: { $gte: start, $lte: end } } },
+              { $match: { $and: [{ date: { $gte: start, $lte: end } }, { purchaseType: "normal" }]} },
+              {
+                $group: {
+                  _id: null,
+                  purchaseTotal: {
+                    $sum: { $multiply: ["$amount", 10000] },
+                  }
+                },
+              },
+            ],
+            advancePaymentTotal: [
+              { $match: { date: { $gte: start, $lte: end } } },
+              {
+                $group: {
+                  _id: null,
+                  advancePaymentTotal: {
+                    $sum: { $multiply: ["$advancePaymentAmount", 10000] },
+                  }
+                },
+              },
+            ],
+            // quantityDetailsToday: [
+            //   { $unwind: "$products" },
+            //   {
+            //     $group: {
+            //       _id: null,
+            //       productQuantityTotal: { $sum: "$products.quantity" },
+            //     },
+            //   },
+            // ],
           },
         },
       ]),
@@ -652,6 +697,15 @@ module.exports.index = async (req, res) => {
           ? purchase[0].quantityDetails[0].productQuantityTotal
           : 0,
 
+      purchaseTotalToday:
+        purchaseTransaction[0].purchaseTotalToday.length > 0
+          ? purchaseTransaction[0].purchaseTotalToday[0].purchaseTotal / 10000
+          : 0,
+      advancePaymentTotal:
+        purchaseTransaction[0].advancePaymentTotal.length > 0
+          ? purchaseTransaction[0].advancePaymentTotal[0].advancePaymentTotal / 10000
+          : 0,
+
       exchangeTotalQuantity:
         (totalSentItemsProductExchange - totalSentItemsCompanyProductReturn - totalSentItemsScrapProductSell),
 
@@ -808,6 +862,9 @@ module.exports.index = async (req, res) => {
       totalAmountForCSR: companyTotalAmountValue,
       totalReceivedValueForCSR: companyTotalPaidValue,
     };
+
+    // console.log(purchaseTransaction[0].advancePaymentTotal)
+    // console.log(result.purchaseTotalToday)
 
     res.status(201).json(result);
   } catch (error) {

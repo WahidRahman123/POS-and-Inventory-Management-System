@@ -138,12 +138,47 @@ const Dashboard = () => {
           {/* PURCHASE */}
           <DashboardCard
             title="কোম্পানির কাছ থেকে মোট কেনা"
-            value={dashboardResult.purchaseTotal}
+            value={dashboardResult.purchaseTotalToday}
             suffix=" ৳"
             color="bg-blue-600"
             to="/purchase/supplier-balance-list"
           >
-            <Row label="Due" value={dashboardResult.purchaseDue} suffix=" ৳" />
+            <Row label="Total Purchase" value={dashboardResult.purchaseTotal} suffix=" ৳" />
+            <Row label="Daily Purchase" value={dashboardResult.purchaseTotalToday} suffix=" ৳" />
+            {/* <Row label="Due" value={dashboardResult.purchaseDue} suffix=" ৳" /> */}
+            <div
+              className={`flex justify-between text-xs sm:text-sm mt-2 text-white/90`}
+            >
+              <span>Due</span>
+              <span className="font-medium">
+                <CountUp
+                  className={`${dashboardResult.purchaseDue > 0
+                  ? "text-green-300"
+                  : dashboardResult.purchaseDue < 0
+                    ? "text-red-300"
+                    : "text-white"}`}
+                  end={dashboardResult.purchaseDue || 0}
+                  duration={0.4}
+                  formattingFn={(val) => Number(val).toLocaleString("en-BD") + " ৳"}
+                />
+              </span>
+            </div>
+            <div
+              className={`flex justify-end text-sm font-semibold ${dashboardResult.purchaseDue > 0
+                  ? "text-green-300"
+                  : dashboardResult.purchaseDue < 0
+                    ? "text-red-300"
+                    : "text-white"
+                }`}
+            >
+              {dashboardResult.purchaseDue > 0
+                ? "(আমি পাবো)"
+                : dashboardResult.purchaseDue < 0
+                  ? "(কোম্পানি পাবে)"
+                  : ""}
+            </div>
+
+            <Row label="Today's Advance" value={dashboardResult.advancePaymentTotal} suffix=" ৳"/>
             <Row label="Products" value={dashboardResult.purchaseTotalQuantity} />
           </DashboardCard>
 

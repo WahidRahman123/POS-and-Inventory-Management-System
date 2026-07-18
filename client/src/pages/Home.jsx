@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import { countLowQuantityProduct } from "../features/product/productSlice";
 import { jwtDecode } from "jwt-decode";
 import { setUserToNull } from "../features/user/authSlice";
+import InternetStatus from "../components/InternetStatus";
 
 const Home = () => {
   const { user } = useSelector((state) => state.auth);
@@ -53,6 +54,7 @@ const Home = () => {
   return (
     <>
       <ToastContainer />
+      <InternetStatus />
       <div className="flex min-h-screen bg-gray-50">
         {/* Sidebar */}
         <div

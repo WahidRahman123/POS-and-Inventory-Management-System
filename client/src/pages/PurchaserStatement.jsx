@@ -114,6 +114,7 @@ const PurchaserStatement = () => {
                 <th className="px-6 py-4 text-right">Debit</th>
                 <th className="px-6 py-4 text-right">Credit</th>
                 <th className="px-6 py-4 text-right">Balance</th>
+                <th className="px-6 py-4 text-right">Remarks</th>
                 <th className="px-6 py-4 text-center print:hidden">Action</th>
               </tr>
             </thead>
@@ -200,6 +201,9 @@ const PurchaserStatement = () => {
                     </td>
                     <td className="px-6 py-4 text-right font-bold">
                       ৳{t.currentBalance.toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600 italic">
+                      {t.remarks || "-"}
                     </td>
                     <td className="px-6 py-4 text-center print:hidden">
                       <Link

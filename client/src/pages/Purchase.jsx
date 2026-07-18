@@ -85,6 +85,8 @@ const Purchase = () => {
     dateSearchEnd: "",
   });
 
+  const [remarks, setRemarks] = useState("");
+
   // ================== Handle Redirected Advance Data ==================
   useEffect(() => {
     // যদি অন্য পেজ থেকে Advance Payment এর জন্য সাপ্লায়ার ডেটা পাঠানো হয়
@@ -292,6 +294,7 @@ const Purchase = () => {
       supplierEmail: supplier.supplierEmail || "",
       supplierPhone: supplier.supplierPhone,
       userId: user._id,
+      remarks,
       ...payload,
     };
 
@@ -324,6 +327,7 @@ const Purchase = () => {
         advanceBalance: 0,
         totalBalance: 0,
       });
+      setRemarks("");
     } catch (error) {
       console.error(error);
       alert(error || "Failed to add purchase!");
@@ -708,6 +712,17 @@ const Purchase = () => {
                 />
               </div>
             )}
+
+            <div className="mb-6">
+                <label className="block text-sm font-medium mb-1">
+                  Remarks
+                </label>
+                <textarea
+                  value={remarks}
+                  onChange={(e) => setRemarks(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-md text-lg"
+                />
+              </div>
 
             <button
               type="submit"

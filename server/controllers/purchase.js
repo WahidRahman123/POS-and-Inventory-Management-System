@@ -118,6 +118,7 @@ module.exports.createPurchase = async (req, res) => {
       supplierPhone,
       transactionType,
       userId,
+      remarks = ""
     } = req.body;
 
     const utcCreatedAt = combineDateWithCurrentTime(createdAt);
@@ -159,6 +160,7 @@ module.exports.createPurchase = async (req, res) => {
       advancePaymentAmount: Number(advancePaymentAmount),
       createdAt: utcCreatedAt,
       issuedAt: now,
+      remarks
     });
 
     // Calculate New Balance
@@ -174,7 +176,7 @@ module.exports.createPurchase = async (req, res) => {
       for (let item of products) {
         await Product.findByIdAndUpdate(item.productId, {
           $inc: { quantity: item.quantity },
-          costPrice: item.unitPrice,
+          // costPrice: item.unitPrice,
         });
       }
     }
@@ -205,6 +207,7 @@ module.exports.createPurchase = async (req, res) => {
       advancePaymentAmount: Number(advancePaymentAmount),
       unchangedPaid: Number(paid),
       unchangedDue: Number(due),
+      remarks
     });
 
     purchase.transactionRecords = [transaction._id];

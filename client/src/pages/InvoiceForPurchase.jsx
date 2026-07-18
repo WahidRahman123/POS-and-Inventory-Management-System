@@ -207,13 +207,6 @@ const InvoiceForPurchase = () => {
                   </tr>
                 </tfoot>
               </table>
-
-              {data.remarks && (
-                <div className="mt-5 border border-black p-3">
-                  <p className="font-bold mb-2 uppercase">Remarks</p>
-                  <p>{data.remarks}</p>
-                </div>
-              )}
             </div>
           )}
 
@@ -255,6 +248,30 @@ const InvoiceForPurchase = () => {
             </div>
           </div>
         </div>
+
+        {/* {data.remarks && (
+                <div className="mt-5 border border-black p-3">
+                  <p className="font-bold mb-2 uppercase">Remarks</p>
+                  <p>{data.remarks}</p>
+                </div>
+              )} */}
+        {/* Remarks */}
+        {/* Remarks */}
+        <div className="mt-8 mb-8">
+          <div className="border border-gray-500 px-3 py-2">
+            <span className="text-xs font-semibold uppercase tracking-wide text-gray-700">
+              Remarks
+            </span>
+
+            <div
+              className={`mt-2 min-h-[40px] text-sm ${data.remarks?.trim() ? "text-black" : "text-gray-400 italic"
+                }`}
+            >
+              {data.remarks?.trim() || "No additional remarks."}
+            </div>
+          </div>
+        </div>
+
 
         {/* Footer */}
         <div className="mt-16 flex justify-between text-sm">
