@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchDashboardResult } from "../features/dashboard/dashboardSlice";
 import { Link } from "react-router-dom";
 import CountUp from "react-countup";
+import GrandTotalCard from "../components/GrandTotalCard";
 
 /* Row Item */
 const Row = ({ label, value, suffix = "", textColor = "text-white" }) => (
@@ -134,7 +135,7 @@ const Dashboard = () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 items-stretch">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 items-stretch">
           {/* PURCHASE */}
           <DashboardCard
             title="কোম্পানির কাছ থেকে মোট কেনা"
@@ -450,6 +451,8 @@ const Dashboard = () => {
             <Row label="Due" value={dashboardResult.salesDue} suffix=" ৳" />
             <Row label="Profit" value={dashboardResult.salesProfit} suffix=" ৳" />
           </DashboardCard>
+
+          <GrandTotalCard dashboardResult={dashboardResult} />
 
         </div>
       </div>

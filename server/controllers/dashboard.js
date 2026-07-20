@@ -147,31 +147,31 @@ module.exports.index = async (req, res) => {
             ],
 
             totalAmountOfProductExchange: [
-            { $unwind: "$products" },
-            {
-              $lookup: {
-                from: "productexchangestockmanagements",
-                localField: "products.productId",
-                foreignField: "productId",
-                as: "stock"
-              }
-            },
-            { $unwind: "$stock" },
-            {
-              $group: {
-                _id: null,
-                totalAmount: {
-                  $sum: {
-                    $multiply: [
-                      "$products.qtyInKg",
-                      "$stock.unitPrice",
-                      10000
-                    ]
+              { $unwind: "$products" },
+              {
+                $lookup: {
+                  from: "productexchangestockmanagements",
+                  localField: "products.productId",
+                  foreignField: "productId",
+                  as: "stock"
+                }
+              },
+              { $unwind: "$stock" },
+              {
+                $group: {
+                  _id: null,
+                  totalAmount: {
+                    $sum: {
+                      $multiply: [
+                        "$products.qtyInKg",
+                        "$stock.unitPrice",
+                        10000
+                      ]
+                    }
                   }
                 }
               }
-            }
-          ],
+            ],
           },
         },
       ]),
@@ -214,7 +214,7 @@ module.exports.index = async (req, res) => {
           $facet: {
             purchaseTotalToday: [
               // { $match: { date: { $gte: start, $lte: end } } },
-              { $match: { $and: [{ date: { $gte: start, $lte: end } }, { purchaseType: "normal" }]} },
+              { $match: { $and: [{ date: { $gte: start, $lte: end } }, { purchaseType: "normal" }] } },
               {
                 $group: {
                   _id: null,
@@ -866,7 +866,19 @@ module.exports.index = async (req, res) => {
     // console.log(purchaseTransaction[0].advancePaymentTotal)
     // console.log(result.purchaseTotalToday)
 
-    res.status(201).json(result);
+    //* Total ledger value calculation
+    //* Total = supplier.totalBalance + 2 + 3 + 4 + 5 - 6 + 7
+    // const totalLedgerValue = result.purchaseDue + result.exchangeTotalPrice + result.salesDue + result.totalStockValue + result.cardFiveAmount - result.totalDueForSalesReturn + result.totalPaidForCSR;
+
+    const totalLedgerValue = Number(new Decimal(result.purchaseDue)
+      .plus(new Decimal(result.exchangeTotalPrice))
+      .plus(new Decimal(result.salesDue))
+      .plus(new Decimal(result.totalStockValue))
+      .plus(new Decimal(result.cardFiveAmount))
+      .minus(new Decimal(result.totalDueForSalesReturn))
+      .plus(new Decimal(result.totalPaidForCSR)).toFixed(2));
+
+    res.status(201).json({ ...result, totalLedgerValue });
   } catch (error) {
     console.error(error);
     res.status(500).send("Server Error");

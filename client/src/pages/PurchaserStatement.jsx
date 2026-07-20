@@ -11,6 +11,8 @@ const PurchaserStatement = () => {
   const { user } = useSelector((state) => state.auth);
   const { transactions = [], totalAmount = 0, totalPaid = 0, totalDue = 0, supplierBalance = 0, totalCompanyReturnAmount = 0 } = useSelector((state) => state.sstatement);
 
+  // console.log(transactions)
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { state } = useLocation();

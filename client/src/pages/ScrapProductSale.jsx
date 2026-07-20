@@ -598,8 +598,8 @@ const ScrapProductSale = () => {
                                     </div>
 
                                     <div className="flex gap-4 text-[11px] text-gray-500 mt-1">
-                                      <span>Qty: {p.tempQuantity}</span>
-                                      <span>Weight: {p.tempQtyInKg} Kg</span>
+                                      <span>Qty: {new Decimal(p.tempQuantity).toFixed(0)}</span>
+                                      <span>Weight: {new Decimal(p.tempQtyInKg).toFixed(2)} Kg</span>
                                     </div>
                                   </div>
                                 ),
