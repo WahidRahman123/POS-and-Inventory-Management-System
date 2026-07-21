@@ -24,6 +24,7 @@ const CompanySalesReturnRoutes = require("./routes/companySalesReturnRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
 const scrapProductRoutes = require("./routes/scrapProductRoutes");
 const scrapProductSellRoutes = require("./routes/scrapProductSellRoutes");
+const productStatementRoutes = require("./routes/productStatementRoutes");
 
 const app = express();
 app.use(express.json());
@@ -57,6 +58,7 @@ connectDB();
 //     res.send("Server is working!");
 // });
 app.use("/api/products", productRoutes);
+app.use("/api/product-statement", productStatementRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/sales", salesRoutes);

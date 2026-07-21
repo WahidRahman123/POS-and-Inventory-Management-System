@@ -755,10 +755,6 @@ module.exports.productExchangeReport = async (req, res) => {
 
     const totalAmount = (totalAmountProductExchange - totalAmountCompanyProductReturn - totalAmountScrapProductSell) / 10000;
 
-    // console.log("totalAmountProductExchange:", totalAmountProductExchange / 10000);
-    // console.log("totalAmountCompanyProductReturn:", totalAmountCompanyProductReturn / 10000);
-    // console.log("totalAmountScrapProductSell:", totalAmountScrapProductSell / 10000);
-
     res.status(201).json({
       totalSentItems: (totalSentItemsProductExchange - totalSentItemsCompanyProductReturn - totalSentItemsScrapProductSell),
 

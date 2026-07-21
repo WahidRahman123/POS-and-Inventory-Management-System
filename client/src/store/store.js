@@ -19,6 +19,7 @@ import expenseReducer from '../features/expense/expenseSlice';
 import scrapProductReducer from '../features/ScrapProduct/scrapProductSlice';
 import productExchangeStockReducer from '../features/ProductExchangeStock/productExchangeStockSlice';
 import scrapProductSellReducer from '../features/ScrapProductSell/scrapProductSellSlice';
+import productStatementReducer from '../features/ProductStatement/productStatementSlice';
 
 export const store = configureStore({
     reducer: {
@@ -41,6 +42,7 @@ export const store = configureStore({
         expense: expenseReducer,
         scrapproduct: scrapProductReducer,
         productExchangeStock: productExchangeStockReducer,
-        ScrapProductSell: scrapProductSellReducer
+        ScrapProductSell: scrapProductSellReducer,
+        productStatement: productStatementReducer
     }
 })
