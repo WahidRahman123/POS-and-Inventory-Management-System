@@ -298,6 +298,9 @@ const Purchase = () => {
       ...payload,
     };
 
+    // console.log(purchaseData)
+    // return
+
     try {
       setAddLoading(true);
       await dispatch(addPurchase(purchaseData)).unwrap();

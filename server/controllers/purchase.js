@@ -8,6 +8,7 @@ const { createCustomDate } = require("../utils/createCustomDate");
 const { getNextSequenceForOther } = require("../utils/getNextSequenceForOther");
 const { combineDateWithCurrentTime } = require("../utils/combineDateWithCurrentTime");
 const dayjs = require("../utils/date.js");
+const ProductStatement = require("../models/ProductStatement.js");
 
 module.exports.index = async (req, res) => {
   try {
@@ -174,10 +175,34 @@ module.exports.createPurchase = async (req, res) => {
 
       // Stock Update
       for (let item of products) {
-        await Product.findByIdAndUpdate(item.productId, {
-          $inc: { quantity: item.quantity },
-          // costPrice: item.unitPrice,
-        });
+        const foundProducts = await Product.findById(item.productId);
+        const previousQuantity = foundProducts.quantity;
+        foundProducts.quantity += item.quantity;
+        foundProducts.save();
+
+        //* Product Statement Creation
+        const payload = {
+          productId: item.productId,
+          productName: item.productName,
+
+          supplierId,
+          supplierName,
+
+          transactionType: "Purchase",
+          referenceId: purchase._id,
+
+          previousQuantity,
+          quantityAmount: item.quantity,
+          CurrentQuantity: foundProducts.quantity,
+
+          status: "increased",
+
+          date: utcCreatedAt,
+          userId,
+        }
+
+        const productStatement = new ProductStatement(payload);
+        await productStatement.save();
       }
     }
 
