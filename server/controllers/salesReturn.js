@@ -9,6 +9,7 @@ const SalesReturnStockManagement = require("../models/SalesReturnStockManagement
 const { combineDateWithCurrentTime } = require("../utils/combineDateWithCurrentTime");
 const dayjs = require("../utils/date.js");
 const { getNextSequenceForOther } = require("../utils/getNextSequenceForOther.js");
+const ProductStatement = require("../models/ProductStatement.js");
 
 module.exports.index = async (req, res) => {
   try {
@@ -206,18 +207,42 @@ module.exports.createSalesReturn = async (req, res) => {
     //* Inventory Adjustment for ExchangeProducts
     if (salesReturns.returnType === "product") {
       for (const product of salesReturns.exchangeProducts) {
-        {
-          // const productFound = await Product.findById(
-          //   product.productId,
-          // ).session(session);
-          const productFound = await Product.findById(product.productId);
+        // const productFound = await Product.findById(
+        //   product.productId,
+        // ).session(session);
+        const productFound = await Product.findById(product.productId);
 
-          if (productFound) {
-            productFound.quantity = productFound.quantity - product.quantity;
-            // console.log(productFound);
-            // await productFound.save({ session });
-            await productFound.save();
+        if (productFound) {
+          const previousQuantity = productFound.quantity;
+
+          productFound.quantity = productFound.quantity - product.quantity;
+          // console.log(productFound);
+          // await productFound.save({ session });
+          await productFound.save();
+
+          //* Product Statement Creation
+          const payload = {
+            productId: product.productId,
+            productName: product.productName,
+
+            customerId: createdSalesReturn.customerId,
+            customerName: createdSalesReturn.customerName,
+
+            transactionType: "Exchange Product in Sales Return",
+            referenceId: createdSalesReturn._id,
+
+            previousQuantity,
+            quantityAmount: Number(product.quantity),
+            CurrentQuantity: productFound.quantity,
+
+            status: "decreased",
+
+            date: utcCreatedAt,
+            userId: createdSalesReturn.userId,
           }
+
+          const productStatement = new ProductStatement(payload);
+          await productStatement.save();
         }
       }
     }
