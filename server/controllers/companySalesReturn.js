@@ -9,6 +9,7 @@ const Product = require("../models/Product");
 const SalesReturnStockManagement = require("../models/SalesReturnStockManagement");
 const { combineDateWithCurrentTime } = require("../utils/combineDateWithCurrentTime");
 const dayjs = require("../utils/date.js");
+const ProductStatement = require("../models/ProductStatement.js");
 
 module.exports.index = async (req, res) => {
   try {
@@ -155,7 +156,7 @@ module.exports.searchById = async (req, res) => {
 // ================== FIXED & PERFECT BUSINESS LOGIC FOR addPayment ==================
 module.exports.addPayment = async (req, res) => {
   const { id } = req.params;
-  const { date, amount, receiveAmount, payDetails, unchangedAmount } = req.body;
+  const { date, amount, receiveAmount, payDetails, unchangedAmount, userId = "" } = req.body;
 
   // console.log(payDetails);
 
@@ -228,17 +229,44 @@ module.exports.addPayment = async (req, res) => {
     // ৪. মেইন ইনভেন্টরি স্টক প্লাস লজিক
     if (payDetails && payDetails.length > 0) {
       for (let i = 0; i < payDetails.length; i++) {
-        const { productName, quantity, unitPrice } = payDetails[i];
+        const { productName, quantity, unitPrice, productId } = payDetails[i];
         const product = await Product.findOne({ name: productName });
 
         if (!product) {
           throw new Error(`Product not found: ${productName}`);
         }
 
+        const previousQuantity = product.quantity;
+
         product.quantity = product.quantity + Number(quantity);
         //* product er costPrice ta sorasori add hobe payDetails er unitPrice ta
         product.costPrice = Number(unitPrice);
         await product.save();
+
+
+        //* Product Statement Creation
+        const payload = {
+          productId,
+          productName,
+
+          supplierId: companySalesReturn.supplierId,
+          supplierName: companySalesReturn.supplierName,
+
+          transactionType: "Company Sales Return Payment",
+          referenceId: transaction._id,
+
+          previousQuantity,
+          quantityAmount: Number(quantity),
+          CurrentQuantity: product.quantity,
+
+          status: "increased",
+
+          date: utcDate,
+          userId,
+        }
+
+        const productStatement = new ProductStatement(payload);
+        await productStatement.save();
       }
     }
 

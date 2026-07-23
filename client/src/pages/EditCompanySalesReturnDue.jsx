@@ -47,6 +47,7 @@ const EditCompanySalesReturnDue = () => {
         ...p,
         quantity: p.availableQty || p.dueQty || 0,
         unitPrice: p.unitPrice || p.costPrice || 0,
+        _id: p.productId,
         productId: `init-${index}`,
       }));
 
@@ -156,6 +157,7 @@ const EditCompanySalesReturnDue = () => {
     setAid("Run");
 
     const payDetails = receivableProducts.map((p) => ({
+      productId: p._id,
       productName: p.productName,
       quantity: p.quantity,
       unitPrice: p.unitPrice, 
@@ -174,6 +176,7 @@ const EditCompanySalesReturnDue = () => {
             receiveAmount: totalReceiveAmount, 
             payDetails,
             unchangedAmount: totalReceiveQty,
+            userId: user._id
           },
         })
       ).unwrap();
