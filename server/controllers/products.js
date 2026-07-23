@@ -52,7 +52,12 @@ module.exports.allProductsForSalesReturnPayment = async (req, res) => {
 
 module.exports.createProduct = async (req, res) => {
   try {
-    const { name, sellPrice, costPrice, quantity, categoryName } = req.body;
+    const { name, sellPrice, costPrice, quantity, categoryName, userId } = req.body;
+
+    const now = dayjs()
+      .tz("Asia/Dhaka")
+      .utc()
+      .toDate();
 
     // search the category in category
     let categorySearch = await Category.findOne({ name: categoryName });
@@ -66,6 +71,27 @@ module.exports.createProduct = async (req, res) => {
     });
 
     const createdProduct = await product.save();
+
+    //* Product Statement Creation
+    const payload = {
+      productId: createdProduct._id,
+      productName: createdProduct.name,
+
+      transactionType: "Add Product",
+
+      previousQuantity: 0,
+      quantityAmount: Number(quantity),
+      CurrentQuantity: Number(quantity),
+
+      status: "created",
+
+      date: now,
+      userId,
+    }
+
+    const productStatement = new ProductStatement(payload);
+    await productStatement.save();
+
     res.status(201).json({ message: "Item Added Successfully!" });
   } catch (error) {
     console.error(error);

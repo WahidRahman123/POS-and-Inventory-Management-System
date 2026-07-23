@@ -48,7 +48,7 @@ const AddItem = () => {
         costPrice: Number(new Decimal(product.costPrice).toFixed(4)),
         quantity: Number(product.quantity),
       };
-      await dispatch(addProduct(newProduct)).unwrap();
+      await dispatch(addProduct({...newProduct, userId: user._id})).unwrap();
 
       setProduct({
         name: "",
