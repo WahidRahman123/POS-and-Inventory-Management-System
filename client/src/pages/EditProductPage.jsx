@@ -52,7 +52,7 @@ const EditProductPage = () => {
         costPrice: Number(new Decimal(product.costPrice).toFixed(4)),
         quantity: Number(product.quantity),
       };
-      await dispatch(updateProduct({ id, item: newProduct })).unwrap();
+      await dispatch(updateProduct({ id, item: { ...newProduct, userId: user._id } })).unwrap();
       navigate("/product");
     } catch {
       console.log("Submission Failed!");

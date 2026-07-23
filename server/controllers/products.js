@@ -87,10 +87,26 @@ module.exports.showProduct = async (req, res) => {
 
 module.exports.updateProduct = async (req, res) => {
   const { id } = req.params;
-  const { name, sellPrice, costPrice, quantity, categoryName } = req.body;
+  const { name, sellPrice, costPrice, quantity, categoryName, userId } = req.body;
+  const now = dayjs()
+    .tz("Asia/Dhaka")
+    .utc()
+    .toDate();
 
   try {
     const product = await Product.findById(id);
+
+    const previousQuantity = product.quantity;
+    const mainQuantity = Number(product.quantity) - Number(quantity);
+
+    let status = "";
+    if (mainQuantity > 0) {
+      status = "decreased"
+    } else if (mainQuantity < 0) {
+      status = "increased"
+    } else if (mainQuantity === 0) {
+      status = "unchanged"
+    }
 
     // search the category in category
     let categorySearch = await Category.findOne({ name: categoryName });
@@ -103,6 +119,26 @@ module.exports.updateProduct = async (req, res) => {
       product.category = categorySearch._id || product.category;
 
       await product.save();
+
+      //* Product Statement Creation
+      const payload = {
+        productId: product._id,
+        productName: product.name,
+
+        transactionType: "Update Product",
+
+        previousQuantity,
+        quantityAmount: Number(Math.abs(mainQuantity)),
+        CurrentQuantity: product.quantity,
+
+        status,
+
+        date: now,
+        userId,
+      }
+
+      const productStatement = new ProductStatement(payload);
+      await productStatement.save();
 
       res.status(201).json({ message: "Product updated successfully" });
     } else {
