@@ -52,7 +52,7 @@ const productStatementSchema = new mongoose.Schema(
 
 		status: {
 			type: String,
-			enum: ["increased", "decreased", "unchanged"],
+			enum: ["increased", "decreased", "unchanged", "created"],
 			required: true,
 		},
 

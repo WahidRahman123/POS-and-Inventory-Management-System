@@ -376,10 +376,36 @@ module.exports.addPaymentByExchange = async (req, res) => {
           const productFound = await Product.findById(product.productId);
 
           if (productFound) {
+            const previousQuantity = productFound.quantity;
+
             productFound.quantity = productFound.quantity - product.quantity;
             // console.log(productFound);
             // await productFound.save({ session });
             await productFound.save();
+
+            //* Product Statement Creation
+            const payload = {
+              productId: product.productId,
+              productName: product.productName,
+
+              customerId: transaction.customerId,
+              customerName: transaction.customerName,
+
+              transactionType: "Exchange Product in Sales Return Pay",
+              referenceId: transaction._id,
+
+              previousQuantity,
+              quantityAmount: Number(product.quantity),
+              CurrentQuantity: productFound.quantity,
+
+              status: "decreased",
+
+              date: utcDate,
+              userId: transaction.userId,
+            }
+
+            const productStatement = new ProductStatement(payload);
+            await productStatement.save();
           }
         }
       }
