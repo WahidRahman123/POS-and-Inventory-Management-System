@@ -1,5 +1,7 @@
+const dayjs = require("dayjs");
 const Category = require("../models/Category");
 const Product = require("../models/Product");
+const ProductStatement = require("../models/ProductStatement");
 
 module.exports.index = async (req, res) => {
   try {
@@ -202,11 +204,40 @@ module.exports.quantityOfProduct = async (req, res) => {
 module.exports.addStock = async (req, res) => {
   try {
     const { id } = req.params;
-    const { quantity } = req.body;
+    const { quantity, userId } = req.body;
     const product = await Product.findById(id);
+
+    const previousQuantity = product.quantity;
 
     product.quantity = product.quantity + quantity;
     product.save();
+
+    const now = dayjs()
+      .tz("Asia/Dhaka")
+      .utc()
+      .toDate();
+
+    //* Product Statement Creation
+    const payload = {
+      productId: product._id,
+      productName: product.name,
+
+      transactionType: "Add Stock",
+
+      previousQuantity,
+      quantityAmount: Number(quantity),
+      CurrentQuantity: product.quantity,
+
+      status: "increased",
+
+      date: now,
+      userId,
+    }
+
+    const productStatement = new ProductStatement(payload);
+    await productStatement.save();
+
+
     res.status(200).json({ message: "Stock Add Successfully" });
   } catch (error) {
     console.error(error);

@@ -21,7 +21,7 @@ const AddStock = () => {
     e.preventDefault();
     setAid("Run");
     try {
-      await dispatch(addStock({ id, info: { quantity: Number(stockValue) } })).unwrap();
+      await dispatch(addStock({ id, info: { quantity: Number(stockValue), userId: user._id } })).unwrap();
       navigate("/product");
     } catch {
       console.log("Add Stock Failed!");

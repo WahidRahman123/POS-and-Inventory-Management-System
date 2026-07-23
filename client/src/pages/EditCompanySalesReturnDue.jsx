@@ -47,7 +47,7 @@ const EditCompanySalesReturnDue = () => {
         ...p,
         quantity: p.availableQty || p.dueQty || 0,
         unitPrice: p.unitPrice || p.costPrice || 0,
-        _id: p.productId,
+        pid: p.productId,
         productId: `init-${index}`,
       }));
 
@@ -157,14 +157,11 @@ const EditCompanySalesReturnDue = () => {
     setAid("Run");
 
     const payDetails = receivableProducts.map((p) => ({
-      productId: p._id,
+      productId: p.pid,
       productName: p.productName,
       quantity: p.quantity,
       unitPrice: p.unitPrice, 
     }));
-
-    // console.log(payDetails)
-    // return
 
     try {
       await dispatch(
