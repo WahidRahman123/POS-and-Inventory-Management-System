@@ -10,6 +10,7 @@ const { getNextSequenceForSale } = require("../utils/getNextSequenceForSale");
 const { getNextSequenceForOther } = require("../utils/getNextSequenceForOther");
 const dayjs = require("../utils/date.js");
 const { combineDateWithCurrentTime } = require("../utils/combineDateWithCurrentTime");
+const ProductStatement = require("../models/ProductStatement.js");
 
 module.exports.index = async (req, res) => {
   try {
@@ -151,7 +152,7 @@ module.exports.createSales = async (req, res) => {
 
     if (products && products.length > 0) {
       for (let i = 0; i < products.length; i++) {
-        const { productName, quantity } = products[i];
+        const { productName, quantity, productId } = products[i];
         // const product = await Product.findOne({ name: productName }).session(
         //   session,
         // );
@@ -161,9 +162,36 @@ module.exports.createSales = async (req, res) => {
           throw new Error(`Product not found: ${productName}`);
         }
 
+        const previousQuantity = product.quantity;
+
         product.quantity = product.quantity - quantity;
         // await product.save({ session });
         await product.save();
+
+
+        //* Product Statement Creation
+        const payload = {
+          productId,
+          productName,
+
+          customerId: sale.customerId,
+          customerName: sale.customerName,
+
+          transactionType: "Sale",
+          referenceId: sale._id,
+
+          previousQuantity,
+          quantityAmount: Number(quantity),
+          CurrentQuantity: product.quantity,
+
+          status: "decreased",
+
+          date: utcCreatedAt,
+          userId: sale.userId,
+        }
+
+        const productStatement = new ProductStatement(payload);
+        await productStatement.save();
       }
     }
 
@@ -450,7 +478,7 @@ module.exports.addPayment = async (req, res) => {
     });
 
     await customer.save();
-    
+
     // await transaction.save({ session });
     await transaction.save();
     // await sale.save({ session });
@@ -512,7 +540,7 @@ module.exports.salesByCustomerName = async (req, res) => {
         .endOf("day")
         .utc()
         .toDate();
-        
+
       matchQuery.date = { $gte: startOfDay, $lte: endOfDay };
     }
 
