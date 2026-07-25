@@ -50,6 +50,7 @@ import PurchaseSupplierDueList from "./pages/PurchaseSupplierDueList";
 import ScrapProductSale from "./pages/ScrapProductSale";
 import InvoiceForCustomer from "./pages/InvoiceForCustomer";
 import InvoiceForSalesReturn from "./pages/InvoiceForSalesReturn";
+import ProductStatement from "./pages/ProductStatement";
 
 
 function App() {
@@ -77,6 +78,7 @@ function App() {
 
           <Route path="/product" element={<Product />} />
           <Route path="/product/add" element={<AddItem />} />
+          <Route path="/product-statement" element={<ProductStatement />} />
           <Route path="/product/:id/edit" element={<EditProductPage />} />
           <Route path="/product/:id/add-stock" element={<AddStock />} />
           <Route path="/product/low-stock" element={<LowQuantityProductsPage />} />

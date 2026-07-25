@@ -140,7 +140,10 @@ const Product = () => {
             <tbody>
               {products.length ? (
                 products.map((product, index) => (
-                  <tr key={product._id} className="hover:bg-gray-50 border-b border-gray-100">
+                  <tr onClick={(e) => {
+                    if (e.target.tagName !== "TD") return;
+                    navigate("/product-statement", { state: product.name });
+                  }} key={product._id} className="hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
                     <td className="p-2">
                       {(page - 1) * 15 + index + 1}
                     </td>
@@ -174,8 +177,8 @@ const Product = () => {
                           onClick={() => handleDelete(product._id)}
                           disabled={loading && did === product._id}
                           className={`text-xs text-white px-2 py-1 rounded ${loading && did === product._id
-                              ? "bg-red-400 cursor-not-allowed"
-                              : "bg-red-500 hover:bg-red-600"
+                            ? "bg-red-400 cursor-not-allowed"
+                            : "bg-red-500 hover:bg-red-600"
                             }`}
                         >
                           {loading && did === product._id ? (

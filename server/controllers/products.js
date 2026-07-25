@@ -1,5 +1,5 @@
-const dayjs = require("dayjs");
 const Category = require("../models/Category");
+const dayjs = require("../utils/date.js");
 const Product = require("../models/Product");
 const ProductStatement = require("../models/ProductStatement");
 
