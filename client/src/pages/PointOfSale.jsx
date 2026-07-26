@@ -249,6 +249,8 @@ const PointOfSale = () => {
 
   if (!user) return null;
 
+  // console.log(selectedProducts)
+
   return (
     <>
       <title>{`Point of Sale | ${import.meta.env.VITE_COMPANY_NAME}`}</title>
@@ -372,6 +374,7 @@ const PointOfSale = () => {
                       <input
                         type="number"
                         value={product.qty}
+                        max={product.quantity}
                         className="w-[60px] border rounded px-2"
                         onChange={(e) =>
                           setSelectedProducts((prev) =>

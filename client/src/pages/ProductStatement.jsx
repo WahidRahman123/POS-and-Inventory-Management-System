@@ -18,7 +18,7 @@ const ProductStatement = () => {
 		useSelector((state) => state.productStatement);
 
 	// console.log(productStatementReport);
-	const [productName, setProductName] = useState("");
+	const [productName, setProductName] = useState(state);
 	const [dateSearch, setDateSearch] = useState("");
 	// const [filterToggler, setFilterToggler] = useState(true);
 	const [currentPage, setCurrentPage] = useState(page);
@@ -37,8 +37,10 @@ const ProductStatement = () => {
 	}, [user, navigate, dispatch, currentPage, productName, dateSearch]);
 
 	useEffect(() => {
-		setProductName(state)
-	}, [state])
+		if(!state) {
+			navigate(-1);
+		}
+	}, [])
 
 	if (!user) return null;
 
