@@ -51,6 +51,7 @@ const InvoiceForCustomer = () => {
 		paidAmount,
 		salesId,
 		due,
+		date,
 		bankPaymentAmount,
 		previousBalance,
 		previousAdvanceBalance,
@@ -74,10 +75,10 @@ const InvoiceForCustomer = () => {
 	const isDuePayment = location.state && refMemo?.includes("DP-");
 
 	// const invoiceAmount = new Decimal(cash || 0)
-  // .plus(exchange || 0)
-  // .plus(bankPaymentAmount || 0)
-  // .plus(previousAdvanceBalance || 0)
-  // .minus(salesId.total || 0);
+	// .plus(exchange || 0)
+	// .plus(bankPaymentAmount || 0)
+	// .plus(previousAdvanceBalance || 0)
+	// .minus(salesId.total || 0);
 
 	return (
 		<>
@@ -129,10 +130,9 @@ const InvoiceForCustomer = () => {
 							<div className="text-right">
 								<p>
 									<span className="font-semibold">Date:</span>{" "}
-									{
-										dayjs(createdAt)
-											.tz("Asia/Dhaka")
-											.format("DD MMM YYYY")
+									{dayjs(date)
+										.tz("Asia/Dhaka")
+										.format("DD MMM YYYY")
 									}{" "}
 									{/* {new Date(createdAt).toLocaleTimeString("en-US")} */}
 								</p>
