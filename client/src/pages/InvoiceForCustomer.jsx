@@ -53,6 +53,7 @@ const InvoiceForCustomer = () => {
 		due,
 		bankPaymentAmount,
 		previousBalance,
+		previousAdvanceBalance,
 		currentBalance,
 		remarks,
 		createdAt,
@@ -71,6 +72,12 @@ const InvoiceForCustomer = () => {
 	// console.log(saleType);
 
 	const isDuePayment = location.state && refMemo?.includes("DP-");
+
+	// const invoiceAmount = new Decimal(cash || 0)
+  // .plus(exchange || 0)
+  // .plus(bankPaymentAmount || 0)
+  // .plus(previousAdvanceBalance || 0)
+  // .minus(salesId.total || 0);
 
 	return (
 		<>
@@ -303,7 +310,7 @@ const InvoiceForCustomer = () => {
 										</p>
 
 										<p className="font-bold border-t border-gray-200 pt-1">
-											Payable Amount<span className="float-right">{new Decimal(salesId.total).toFixed(2)}</span>
+											Payable Amount<span className="float-right">-{new Decimal(salesId.total).toFixed(2)}</span>
 										</p>
 									</div>
 								</>
@@ -311,16 +318,17 @@ const InvoiceForCustomer = () => {
 
 
 
-							{saleType === "due-payment" ? (
+							{/* {saleType === "due-payment" ? (
 								<p className="font-bold border-t border-gray-200 pt-1">
 									Amount To Be Paid<span className="float-right">{new Decimal(amountToBePaid).toFixed(2)}</span>
 								</p>
-							) : ""}
+							) : ""} */}
 							<div className="pt-2 border-t border-dotted border-gray-300">
 								<p>Cash<span className="float-right">{cash ? new Decimal(cash).toFixed(2) : "0.00"}</span></p>
 								<p>Bank<span className="float-right">{bankPaymentAmount ? new Decimal(bankPaymentAmount).toFixed(2) : "0.00"}</span></p>
-								<p>Exchange<span className="float-right">{exchange ? new Decimal(exchange).toFixed(2) : "0.00"}</span></p>
-								<p className="font-bold">Total Paid<span className="float-right">{paidAmount || advanceAmount ? new Decimal(paidAmount).plus(new Decimal(advanceAmount)).toFixed(2) : "0.00"}</span></p>
+								<p >Exchange<span className="float-right">{exchange ? new Decimal(exchange).toFixed(2) : "0.00"}</span></p>
+								{previousAdvanceBalance && (<p className="border-b border-dashed border-gray-300">Previous Advance Balance<span className="float-right">{new Decimal(previousAdvanceBalance).toFixed(2)}</span></p>)}
+								{/* <p className="font-bold mb-2">Invoice Amount<span className="float-right">{invoiceAmount.toFixed(2)}</span></p> */}
 								<p className="font-bold">Previous Balance<span className="float-right">{previousBalance ? new Decimal(previousBalance || 0).toFixed(2) : "0.00"}</span></p>
 								{/* <p className="font-bold text-red-700">
                   Due Amount
@@ -331,6 +339,7 @@ const InvoiceForCustomer = () => {
                   </span>
                 </p> */}
 								{/* <p className="font-bold">Advance Paid<span className="float-right">{advanceAmount ? new Decimal(advanceAmount).toFixed(2) : "0.00"}</span></p> */}
+								{/* <p className="font-bold">Invoice Amount<span className="float-right">{invoiceAmount.toFixed(2)}</span></p> */}
 								<p className="font-bold">Current Balance<span className="float-right">{currentBalance ? new Decimal(currentBalance || 0).toFixed(2) : "0.00"}</span></p>
 							</div>
 						</div>

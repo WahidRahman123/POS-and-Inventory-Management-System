@@ -86,6 +86,8 @@ module.exports.createSales = async (req, res) => {
 
     const previousBalance = customer ? customer.currentBalance : 0;
 
+    const customerAdvanceBalance = customer ? customer.advanceBalance : 0;
+
     //! seeder use korle comment kore nibo
     if (customer) {
       // 1. Adding advanceBalance to the customer's advanceBalance
@@ -93,12 +95,13 @@ module.exports.createSales = async (req, res) => {
 
       // 2. advanceBalance adjustment
       if (customer.advanceBalance > 0) {
-        const need = mainTotal - mainPaid;
+        // const need = mainTotal - mainPaid;
+        const need = customer.due + mainTotal - mainPaid;
 
         if (need <= customer.advanceBalance) {
           mainPaid += need;
           customer.advanceBalance -= need;
-        } else if (need > advanceBalance) {
+        } else if (need > customer.advanceBalance) {
           mainPaid += customer.advanceBalance;
           customer.advanceBalance = 0;
         }
@@ -130,6 +133,7 @@ module.exports.createSales = async (req, res) => {
       date: now,
       currentDue: Number(currentDue.toFixed(4)),
       saleTotal: mainTotal,
+      previousAdvanceBalance: customerAdvanceBalance,
       exchangeMemoId,
     };
     const transaction = new SalesTransaction(transactionDetails);
@@ -144,6 +148,7 @@ module.exports.createSales = async (req, res) => {
       advanceAmount: advanceBalance,
       createdAt: utcCreatedAt,
       issuedAt: now,
+      previousAdvanceBalance: customerAdvanceBalance,
       transactionRecords: [transaction._id],
     });
 
@@ -405,6 +410,7 @@ module.exports.addPayment = async (req, res) => {
     // console.log(customer);
 
     const previousBalance = customer ? customer.currentBalance : 0;
+    const customerAdvanceBalance = customer ? customer.advanceBalance : 0;
 
     if (customer) {
       // 1. Adding advanceBalance to the customer's advanceBalance
@@ -417,7 +423,7 @@ module.exports.addPayment = async (req, res) => {
         if (need <= customer.advanceBalance) {
           mainAmount += need;
           customer.advanceBalance -= need;
-        } else if (need > advanceBalance) {
+        } else if (need > customer.advanceBalance) {
           mainAmount += customer.advanceBalance;
           customer.advanceBalance = 0;
         }
@@ -425,6 +431,7 @@ module.exports.addPayment = async (req, res) => {
     } else {
       throw new Error("Customer does not exist!");
     }
+
     //* customer calculation
     customer.paid = Number(
       new Decimal(customer.paid).plus(new Decimal(mainAmount)).toFixed(4),
@@ -434,6 +441,7 @@ module.exports.addPayment = async (req, res) => {
     customer.due = Number(
       new Decimal(customer.total).minus(new Decimal(customer.paid)).toFixed(4),
     );
+
     if (customer.due < 0) {
       customer.advanceBalance = Number(
         new Decimal(customer.advanceBalance)
@@ -458,6 +466,7 @@ module.exports.addPayment = async (req, res) => {
       paidAmount,
       saleType,
       advanceAmount: advanceBalance,
+      previousAdvanceBalance: customerAdvanceBalance,
       remarks,
       date: utcDate,
       currentDue,

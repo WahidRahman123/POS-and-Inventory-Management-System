@@ -172,6 +172,9 @@ const salesSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  previousAdvanceBalance: {
+    type: Number
+  },
 
   createdAt: {
     type: Date,

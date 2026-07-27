@@ -107,6 +107,9 @@ const salesTransactionSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
+  previousAdvanceBalance: {
+    type: Number
+  },
 
   salesId: {
     type: mongoose.Schema.Types.ObjectId,
