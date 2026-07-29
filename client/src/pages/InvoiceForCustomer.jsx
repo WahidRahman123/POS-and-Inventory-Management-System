@@ -80,6 +80,10 @@ const InvoiceForCustomer = () => {
 	// .plus(previousAdvanceBalance || 0)
 	// .minus(salesId.total || 0);
 
+	const totalPayment = new Decimal(cash || 0)
+		.plus(bankPaymentAmount || 0)
+		.plus(exchange || 0);
+
 	return (
 		<>
 			<div className="m-5">
@@ -317,30 +321,123 @@ const InvoiceForCustomer = () => {
 							)}
 
 
-
-							{/* {saleType === "due-payment" ? (
-								<p className="font-bold border-t border-gray-200 pt-1">
-									Amount To Be Paid<span className="float-right">{new Decimal(amountToBePaid).toFixed(2)}</span>
-								</p>
-							) : ""} */}
-							<div className="pt-2 border-t border-dotted border-gray-300">
+							{/* <div className="pt-2 border-t border-dotted border-gray-300">
 								<p>Cash<span className="float-right">{cash ? new Decimal(cash).toFixed(2) : "0.00"}</span></p>
 								<p>Bank<span className="float-right">{bankPaymentAmount ? new Decimal(bankPaymentAmount).toFixed(2) : "0.00"}</span></p>
 								<p >Exchange<span className="float-right">{exchange ? new Decimal(exchange).toFixed(2) : "0.00"}</span></p>
 								{previousAdvanceBalance && (<p className="border-b border-dashed border-gray-300">Previous Advance Balance<span className="float-right">{new Decimal(previousAdvanceBalance).toFixed(2)}</span></p>)}
-								{/* <p className="font-bold mb-2">Invoice Amount<span className="float-right">{invoiceAmount.toFixed(2)}</span></p> */}
+
 								<p className="font-bold">Previous Balance<span className="float-right">{previousBalance ? new Decimal(previousBalance || 0).toFixed(2) : "0.00"}</span></p>
-								{/* <p className="font-bold text-red-700">
-                  Due Amount
-                  <span className="float-right">
-                    {new Decimal(due).lessThan(0)
-                      ? `${new Decimal(due).abs().toFixed(2)} (Refund)`
-                      : new Decimal(due).toFixed(2)}
-                  </span>
-                </p> */}
-								{/* <p className="font-bold">Advance Paid<span className="float-right">{advanceAmount ? new Decimal(advanceAmount).toFixed(2) : "0.00"}</span></p> */}
-								{/* <p className="font-bold">Invoice Amount<span className="float-right">{invoiceAmount.toFixed(2)}</span></p> */}
+								
 								<p className="font-bold">Current Balance<span className="float-right">{currentBalance ? new Decimal(currentBalance || 0).toFixed(2) : "0.00"}</span></p>
+							</div> */}
+
+							{/* <div className="pt-2 border-t border-dotted border-gray-300">
+
+								<div className="border-t border-dashed border-gray-300 mt-2 pt-2">
+									<p className="font-semibold">Payment Received</p>
+
+									<p>
+										Cash
+										<span className="float-right">
+											{new Decimal(cash || 0).toFixed(2)}
+										</span>
+									</p>
+
+									<p>
+										Bank
+										<span className="float-right">
+											{new Decimal(bankPaymentAmount || 0).toFixed(2)}
+										</span>
+									</p>
+
+									<p>
+										Exchange
+										<span className="float-right">
+											{new Decimal(exchange || 0).toFixed(2)}
+										</span>
+									</p>
+
+									<p className="font-semibold border-t border-dashed border-gray-300 pt-1">
+										Total Payment
+										<span className="float-right">
+											{totalPayment.toFixed(2)}
+										</span>
+									</p>
+								</div>
+
+								<p className="font-semibold border-t border-dashed border-gray-300 pt-2">
+									Previous Balance
+									<span className="float-right">
+										{new Decimal(previousBalance || 0).toFixed(2)}
+									</span>
+								</p>
+
+								<p className="font-bold text-lg border-t-2 border-gray-500 mt-2 pt-2">
+									Current Balance
+									<span className="float-right">
+										{new Decimal(currentBalance || 0).toFixed(2)}
+									</span>
+								</p>
+
+							</div> */}
+
+							<div className="mt-2 border-t border-dotted border-gray-300 pt-2 text-sm">
+
+								{/* Payment Section */}
+								<div>
+									<p className="font-semibold text-gray-700 uppercase tracking-wide">
+										Payment Received
+									</p>
+
+									<div className="mt-1 pl-3 space-y-1">
+										<p>
+											Cash
+											<span className="float-right">
+												{new Decimal(cash || 0).toFixed(2)}
+											</span>
+										</p>
+
+										<p>
+											Bank
+											<span className="float-right">
+												{new Decimal(bankPaymentAmount || 0).toFixed(2)}
+											</span>
+										</p>
+
+										<p>
+											Exchange
+											<span className="float-right">
+												{new Decimal(exchange || 0).toFixed(2)}
+											</span>
+										</p>
+									</div>
+
+									<p className="mt-2 border-t border-dashed border-gray-300 pt-1 font-semibold">
+										Total Payment
+										<span className="float-right">
+											{totalPayment.toFixed(2)}
+										</span>
+									</p>
+								</div>
+
+								{/* Balance Section */}
+								<div className="mt-3 border-t border-dotted border-gray-300 pt-2">
+									<p className="font-medium">
+										Previous Balance
+										<span className="float-right">
+											{new Decimal(previousBalance || 0).toFixed(2)}
+										</span>
+									</p>
+
+									<p className="mt-2 font-bold text-base text-red-700 border-t-2 border-gray-500 pt-2">
+										Current Balance
+										<span className="float-right">
+											{new Decimal(currentBalance || 0).toFixed(2)}
+										</span>
+									</p>
+								</div>
+
 							</div>
 						</div>
 
