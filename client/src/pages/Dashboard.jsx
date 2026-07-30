@@ -4,6 +4,7 @@ import { fetchDashboardResult } from "../features/dashboard/dashboardSlice";
 import { Link } from "react-router-dom";
 import CountUp from "react-countup";
 import GrandTotalCard from "../components/GrandTotalCard";
+// import DashboardFilter from "../components/Dashboard/DashboardFilter";
 
 /* Row Item */
 const Row = ({ label, value, suffix = "", textColor = "text-white" }) => (
@@ -68,6 +69,10 @@ const Dashboard = () => {
   useEffect(() => {
     dispatch(fetchDashboardResult());
   }, [dispatch]);
+
+  const handleFilter = (filter) => {
+    dispatch(fetchDashboardResult(filter));
+  };
 
   if (loading || !dashboardResult) {
     return <p className="p-4 sm:p-6">Loading...</p>;
@@ -135,6 +140,8 @@ const Dashboard = () => {
           </Link>
         </div>
 
+        {/* <DashboardFilter onApply={handleFilter} /> */}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 items-stretch">
           {/* PURCHASE */}
           <DashboardCard
@@ -154,10 +161,10 @@ const Dashboard = () => {
               <span className="font-medium">
                 <CountUp
                   className={`${dashboardResult.purchaseDue > 0
-                  ? "text-green-300"
-                  : dashboardResult.purchaseDue < 0
-                    ? "text-red-300"
-                    : "text-white"}`}
+                    ? "text-green-300"
+                    : dashboardResult.purchaseDue < 0
+                      ? "text-red-300"
+                      : "text-white"}`}
                   end={dashboardResult.purchaseDue || 0}
                   duration={0.4}
                   formattingFn={(val) => Number(val).toLocaleString("en-BD") + " ৳"}
@@ -166,10 +173,10 @@ const Dashboard = () => {
             </div>
             <div
               className={`flex justify-end text-sm font-semibold ${dashboardResult.purchaseDue > 0
-                  ? "text-green-300"
-                  : dashboardResult.purchaseDue < 0
-                    ? "text-red-300"
-                    : "text-white"
+                ? "text-green-300"
+                : dashboardResult.purchaseDue < 0
+                  ? "text-red-300"
+                  : "text-white"
                 }`}
             >
               {dashboardResult.purchaseDue > 0
@@ -179,7 +186,7 @@ const Dashboard = () => {
                   : ""}
             </div>
 
-            <Row label="Today's Advance" value={dashboardResult.advancePaymentTotal} suffix=" ৳"/>
+            <Row label="Today's Advance" value={dashboardResult.advancePaymentTotal} suffix=" ৳" />
             <Row label="Products" value={dashboardResult.purchaseTotalQuantity} />
           </DashboardCard>
 

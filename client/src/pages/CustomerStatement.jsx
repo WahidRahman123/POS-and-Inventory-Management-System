@@ -317,13 +317,15 @@ const CustomerStatement = () => {
                             </td> */}
                             <td className="px-6 py-4 text-right font-black text-green-600">
                               ৳{" "}
-                              {transaction.advanceAmount || transaction.paidAmount
+                              {/* {transaction.advanceAmount || transaction.paidAmount
                                 ? (
                                   new Decimal(transaction.advanceAmount).plus(
                                     new Decimal(transaction.paidAmount)
                                   ).toFixed(2)
                                 )
-                                : 0}
+                                : 0} */}
+
+                                {new Decimal(transaction.cash).plus(new Decimal(transaction.bankPaymentAmount)).plus(new Decimal(transaction.exchange)).toFixed(2)}
                             </td>
                             {/* <td className="px-6 py-4 text-right font-black text-green-600">
                               ৳{" "}
