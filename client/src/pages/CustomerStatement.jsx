@@ -211,13 +211,13 @@ const CustomerStatement = () => {
                     <tr>
                       <th className="px-6 py-4 text-left">Date</th>
                       <th className="px-6 py-4 text-left">Ref / Memo</th>
-                      <th className="px-6 py-4 text-left">Description</th>
+                      <th className="px-6 py-4 text-left w-[420px]">Description</th>
                       <th className="px-6 py-4 text-left">Sale Total</th>
                       {/* <th className="px-6 py-4 text-right">Bill Amt</th> */}
                       <th className="px-6 py-4 text-right">Total Paid Amt</th>
                       {/* <th className="px-6 py-4 text-right">Paid Amt</th> */}
                       <th className="px-6 py-4 text-right">Current Balance</th>
-                      <th className="px-6 py-4 text-center w-[160px]">
+                      <th className="px-6 py-4 text-center w-[100px]">
                         Remarks
                       </th>
                       <th className="px-6 py-4 text-center print:hidden">
@@ -250,7 +250,7 @@ const CustomerStatement = () => {
                                 {transaction.refMemo}
                               </span>
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-6 py-4 w-[420px]">
                               <span
                                 className="font-bold text-gray-700 text-xs"
                               >
@@ -260,7 +260,36 @@ const CustomerStatement = () => {
 
                                 {transaction.saleType === "loan" && "LOAN GIVEN"}
 
-                                {transaction.saleType === "due-payment" && "PAYMENT AGAINST DUE"}
+                                {transaction.saleType === "due-payment" && (transaction.exchangeDetails ? (<table className="w-full text-[10px] uppercase">
+                                  <thead>
+                                    <tr className="text-gray-400 border-b">
+                                      <th className="text-left pb-1">Product</th>
+                                      <th className="text-center pb-1">Qty</th>
+                                      <th className="text-center pb-1">Weight</th>
+                                      <th className="text-right pb-1">Unit</th>
+                                    </tr>
+                                  </thead>
+
+                                  <tbody>
+                                    <tr className="text-gray-700 font-bold">
+                                        <td className="py-1 pr-2">
+                                          {transaction.exchangeDetails.products[0].productName}
+                                        </td>
+
+                                        <td className="text-center">
+                                          {transaction.exchangeDetails.products[0].quantity}
+                                        </td>
+
+                                        <td className="text-center">
+                                          {transaction.exchangeDetails.products[0].qtyInKg}Kg
+                                        </td>
+
+                                        <td className="text-right">
+                                          ৳ {transaction.exchangeDetails.products[0].unitPrice}
+                                        </td>
+                                      </tr>
+                                  </tbody>
+                                </table>) : "PAYMENT AGAINST DUE")}
 
                                 {transaction.saleType === "others" && "OTHER TRANSACTIONS"}
 
@@ -287,11 +316,11 @@ const CustomerStatement = () => {
                                           </td>
 
                                           <td className="text-center">
-                                            {product.qtyInKg} Kg
+                                            {product.qtyInKg} kg
                                           </td>
 
                                           <td className="text-right">
-                                            ৳ {product.unitPrice}
+                                            ৳{product.unitPrice}
                                           </td>
                                         </tr>
                                       ))}
@@ -325,7 +354,7 @@ const CustomerStatement = () => {
                                 )
                                 : 0} */}
 
-                                {new Decimal(transaction.cash).plus(new Decimal(transaction.bankPaymentAmount)).plus(new Decimal(transaction.exchange)).toFixed(2)}
+                              {new Decimal(transaction.cash).plus(new Decimal(transaction.bankPaymentAmount)).plus(new Decimal(transaction.exchange)).toFixed(2)}
                             </td>
                             {/* <td className="px-6 py-4 text-right font-black text-green-600">
                               ৳{" "}
@@ -343,7 +372,7 @@ const CustomerStatement = () => {
                               )}
                             </td>
                             <td className={`px-6 py-4 text-left font-black font-mono ${transaction.remarks ? " align-top" : "align-middle"}`}>
-                              <div className={`w-[160px] break-all whitespace-normal ${transaction.remarks ? "text-gray-700" : "text-gray-400 italic text-center"}`}>
+                              <div className={`w-[100px] break-words whitespace-normal ${transaction.remarks ? "text-gray-700" : "text-gray-400 italic text-center"}`}>
                                 {transaction.remarks || "--"}
                               </div>
                             </td>

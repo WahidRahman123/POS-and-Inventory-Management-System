@@ -1,10 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDashboardResult } from "../features/dashboard/dashboardSlice";
 import { Link } from "react-router-dom";
 import CountUp from "react-countup";
 import GrandTotalCard from "../components/GrandTotalCard";
-// import DashboardFilter from "../components/Dashboard/DashboardFilter";
 
 /* Row Item */
 const Row = ({ label, value, suffix = "", textColor = "text-white" }) => (
@@ -16,6 +15,7 @@ const Row = ({ label, value, suffix = "", textColor = "text-white" }) => (
       <CountUp
         end={value || 0}
         duration={0.4}
+        preserveValue={true}
         formattingFn={(val) => Number(val).toLocaleString("en-BD") + suffix}
       />
     </span>
@@ -61,18 +61,38 @@ const DashboardCard = ({
 );
 
 const Dashboard = () => {
+  const [filterMode, setFilterMode] = useState("range");
+  const [dateRange, setDateRange] = useState({
+    from: "",
+    to: "",
+  });
+  const [singleDate, setSingleDate] = useState("");
+  const [toggler, setToggler] = useState(false);
+
   const dispatch = useDispatch();
   const { dashboardResult, loading } = useSelector((state) => state.dashboard);
 
   // console.log(dashboardResult)
 
+  // useEffect(() => {
+  //   let payload = {};
+  //   if (filterMode === "range" && dateRange.from && dateRange.to) {
+  //     payload = {
+  //       fromDate: dateRange.from,
+  //       toDate: dateRange.to,
+  //     };
+  //   } else if (filterMode === "single" && singleDate) {
+  //     payload = {
+  //       date: singleDate,
+  //     };
+  //   }
+
+  //   dispatch(fetchDashboardResult(payload));
+  // }, [dispatch, toggler]);
+
   useEffect(() => {
     dispatch(fetchDashboardResult());
   }, [dispatch]);
-
-  const handleFilter = (filter) => {
-    dispatch(fetchDashboardResult(filter));
-  };
 
   if (loading || !dashboardResult) {
     return <p className="p-4 sm:p-6">Loading...</p>;
@@ -140,7 +160,136 @@ const Dashboard = () => {
           </Link>
         </div>
 
-        {/* <DashboardFilter onApply={handleFilter} /> */}
+        {/* Date Filter */}
+        {/* <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800">
+                Date Filter
+              </h2>
+
+              <p className="text-sm text-gray-500">
+                Filter dashboard statistics by date
+              </p>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setFilterMode("range");
+                  setDateRange({
+                    from: "",
+                    to: "",
+                  });
+                  setSingleDate("");
+
+                  setToggler((prev) => !prev);
+                }}
+                className="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition cursor-pointer"
+              >
+                Reset
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setToggler((prev) => !prev)}
+                className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition cursor-pointer"
+              >
+                Apply Filter
+              </button>
+            </div>
+
+          </div>
+
+          <div className="flex flex-wrap gap-6 mt-6">
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                checked={filterMode === "range"}
+                onChange={() => setFilterMode("range")}
+              />
+
+              <span className="font-medium">
+                Date Range
+              </span>
+            </label>
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                checked={filterMode === "single"}
+                onChange={() => setFilterMode("single")}
+              />
+
+              <span className="font-medium">
+                Single Date
+              </span>
+            </label>
+
+          </div>
+
+          {filterMode === "range" && (
+            <div className="grid md:grid-cols-2 gap-4 mt-5">
+
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  From Date
+                </label>
+
+                <input
+                  type="date"
+                  value={dateRange.from}
+                  onChange={(e) =>
+                    setDateRange({
+                      ...dateRange,
+                      from: e.target.value,
+                    })
+                  }
+                  className="w-full rounded-xl border border-gray-300 p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  To Date
+                </label>
+
+                <input
+                  type="date"
+                  value={dateRange.to}
+                  onChange={(e) =>
+                    setDateRange({
+                      ...dateRange,
+                      to: e.target.value,
+                    })
+                  }
+                  className="w-full rounded-xl border border-gray-300 p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
+              </div>
+
+            </div>
+          )}
+
+          {filterMode === "single" && (
+            <div className="mt-5 max-w-sm">
+
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Select Date
+              </label>
+
+              <input
+                type="date"
+                value={singleDate}
+                onChange={(e) => setSingleDate(e.target.value)}
+                className="w-full rounded-xl border border-gray-300 p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              />
+
+            </div>
+          )}
+        </div> */}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 items-stretch">
           {/* PURCHASE */}
