@@ -63,6 +63,7 @@ const EditProductPage = () => {
 
   useEffect(() => {
     if (!user) navigate("/login");
+    if (user && user.role !== "admin") navigate("/");
     dispatch(fetchProductById(id));
     dispatch(fetchAllCategoriesNames());
   }, [user, id, navigate, dispatch]);
@@ -78,6 +79,8 @@ const EditProductPage = () => {
       });
     }
   }, [productSearchedById]);
+
+  if (!user || user.role !== "admin") return null;
 
   return (
     <>

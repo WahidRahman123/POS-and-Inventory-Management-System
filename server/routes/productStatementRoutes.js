@@ -7,7 +7,7 @@ const router = express.Router();
 //* @route GET /api/product-statement
 // @desc All Sales fetch
 // @access Private
-router.get('/', protect, admin, productStatement.index);
+router.get('/', protect, productStatement.index);
 
 //* @route POST /api/product-statement
 // @desc Create product-statement

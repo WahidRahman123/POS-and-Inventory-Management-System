@@ -80,7 +80,7 @@ const LowQuantityProductsPage = () => {
               <th className="p-2 text-center">Qty</th>
               <th className="p-2 text-right">Cost</th>
               <th className="p-2 text-right">Sale</th>
-              <th className="p-2 text-center">Actions</th>
+              {user.role === "admin" && <th className="p-2 text-center">Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -93,15 +93,14 @@ const LowQuantityProductsPage = () => {
                     {product.category?.name || "-"}
                   </td>
                   <td
-                    className={`p-2 text-center ${
-                      product.quantity < 10 ? "font-bold text-red-500" : ""
-                    }`}
+                    className={`p-2 text-center ${product.quantity < 10 ? "font-bold text-red-500" : ""
+                      }`}
                   >
                     {product.quantity}
                   </td>
                   <td className="p-2 text-right">৳{product.costPrice}</td>
                   <td className="p-2 text-right">৳{product.sellPrice}</td>
-                  <td className="p-2">
+                  {user.role === "admin" && (<td className="p-2">
                     <div className="flex flex-wrap gap-1 justify-center">
                       <Link
                         to={`/product/${product._id}/add-stock`}
@@ -118,11 +117,10 @@ const LowQuantityProductsPage = () => {
                       <button
                         onClick={() => handleDelete(product._id)}
                         disabled={loading && did === product._id}
-                        className={`text-xs text-white px-2 py-1 rounded ${
-                          loading && did === product._id
+                        className={`text-xs text-white px-2 py-1 rounded ${loading && did === product._id
                             ? "bg-red-400 cursor-not-allowed"
                             : "bg-red-500 hover:bg-red-600"
-                        }`}
+                          }`}
                       >
                         {loading && did === product._id ? (
                           <BeatLoader color="#FFFFFF" size={3} />
@@ -131,7 +129,7 @@ const LowQuantityProductsPage = () => {
                         )}
                       </button>
                     </div>
-                  </td>
+                  </td>)}
                 </tr>
               ))
             ) : (
@@ -154,11 +152,10 @@ const LowQuantityProductsPage = () => {
           <button
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
             disabled={lqpage === 1}
-            className={`${
-              lqpage === 1
+            className={`${lqpage === 1
                 ? ""
                 : "cursor-pointer hover:bg-black hover:text-white"
-            } px-2 py-1 border rounded  disabled:opacity-50`}
+              } px-2 py-1 border rounded  disabled:opacity-50`}
           >
             Prev
           </button>
@@ -168,11 +165,10 @@ const LowQuantityProductsPage = () => {
           <button
             onClick={() => setCurrentPage((p) => Math.min(p + 1, lqpages))}
             disabled={lqpage === lqpages}
-            className={`${
-              lqpage === lqpages
+            className={`${lqpage === lqpages
                 ? ""
                 : "cursor-pointer hover:bg-black hover:text-white"
-            }  px-2 py-1 border rounded  disabled:opacity-50`}
+              }  px-2 py-1 border rounded  disabled:opacity-50`}
           >
             Next
           </button>

@@ -40,13 +40,13 @@ const SalesReport = () => {
     if (!user) {
       navigate("/login");
     }
-    if (user && user.role !== "admin") {
-      navigate("/");
-    }
+    // if (user && user.role !== "admin") {
+    //   navigate("/");
+    // }
   }, [user, navigate]);
 
   useEffect(() => {
-    if (user && user.role === "admin") {
+    if (user) {
       if (selectedRange) {
         dispatch(
           fetchSalesByDate({
@@ -79,7 +79,7 @@ const SalesReport = () => {
     }
   }, [dispatch, user, filterToggle, selectedRange, sortOrder]);
 
-  if (user && user.role !== "admin") return null;
+  if (!user) return null;
 
   return (
     <>
@@ -140,7 +140,7 @@ const SalesReport = () => {
         </div>
 
         {/* Summary */}
-        {sales.length > 0 && (
+        {sales.length > 0 && user.role === "admin" && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 shadow-sm">
               <p className="text-sm text-gray-500">Total Sales</p>

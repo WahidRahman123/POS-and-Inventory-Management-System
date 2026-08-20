@@ -49,7 +49,7 @@ router.get('/low-quantity-product-list', protect, products.lowQuantityProductLis
 //* @route GET /api/products/addstock/:id
 // @desc search products
 // @access private
-router.post('/addstock/:id', protect, products.addStock);
+router.post('/addstock/:id', protect, admin, products.addStock);
 
 //* @route GET /api/products/quantity/:id
 // @desc fetch only product's quantity
@@ -64,12 +64,12 @@ router.get('/:id', protect, products.showProduct);
 //* @route PUT /api/products/:id
 // @desc Update specific product
 // @access private
-router.put('/:id', protect, products.updateProduct);
+router.put('/:id', protect, admin, products.updateProduct);
 
 //* @route DELETE /api/products/:id
 // @desc Delete specific product
 // @access private
-router.delete('/:id', protect, products.deleteProduct);
+router.delete('/:id', protect, admin, products.deleteProduct);
 
 
 

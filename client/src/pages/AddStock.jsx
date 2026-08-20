@@ -32,8 +32,11 @@ const AddStock = () => {
 
   useEffect(() => {
     if (!user) navigate("/login");
+    if (user && user.role !== "admin") navigate("/");
     dispatch(fetchProductById(id));
   }, [user, id, navigate, dispatch]);
+
+  if (!user || user.role !== "admin") return null;
 
   return (
     <>

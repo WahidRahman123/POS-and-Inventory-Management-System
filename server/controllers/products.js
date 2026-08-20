@@ -5,7 +5,7 @@ const ProductStatement = require("../models/ProductStatement");
 
 module.exports.index = async (req, res) => {
   try {
-    const { page = 1, search = "", order = 1 } = req.query;
+    const { page = 1, search = "" } = req.query;
 
     const limit = 15;
 
@@ -18,7 +18,7 @@ module.exports.index = async (req, res) => {
     const skip = (parseInt(page) - 1) * limit;
 
     const products = await Product.find(searchQuery)
-      .sort({ createdAt: parseInt(order) })
+      .sort({ updatedAt: parseInt(-1) })
       .skip(skip)
       .limit(limit)
       .populate("category");

@@ -152,8 +152,7 @@ const SideBar = ({ closeSidebar }) => {
             <span className="mr-3">📅</span> Sales Return Statement
           </NavLink> */}
 
-        {user?.role === "admin" && (
-          <NavLink
+        <NavLink
             to="/sales-report"
             end
             onClick={closeSidebar}
@@ -163,8 +162,6 @@ const SideBar = ({ closeSidebar }) => {
           >
             <span className="mr-3">📅</span> Sales Report
           </NavLink>
-          
-        )}
 
         <NavLink
           to="/category"

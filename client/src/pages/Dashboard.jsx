@@ -61,6 +61,7 @@ const DashboardCard = ({
 );
 
 const Dashboard = () => {
+  const { user } = useSelector((state) => state.auth);
   const [filterMode, setFilterMode] = useState("range");
   const [dateRange, setDateRange] = useState({
     from: "",
@@ -565,28 +566,31 @@ const Dashboard = () => {
             suffix=" ৳"
             textColor="text-black"
           /> */}
-            <Row
+            {user.role === "admin" && (<Row
               label="Profit"
               value={dashboardResult.salesProfitToday}
               suffix=" ৳"
               textColor="text-black"
-            />
+            />)}
+
             <Row
               label="Expense"
               value={dashboardResult.salesExpenseToday}
               suffix=" ৳"
               textColor="text-black"
             />
-            <Row
+
+            {user.role === "admin" && (<Row
               label="Net Profit"
               value={netProfitToday}
               suffix=" ৳"
               textColor="text-black"
-            />
+            />)}
+
           </DashboardCard>
 
           {/* TOTAL SALES */}
-          <DashboardCard
+          {user.role === "admin" && (<DashboardCard
             title="আমার দোকানে সর্বমোট বিক্রি"
             value={dashboardResult.salesTotal}
             suffix=" ৳"
@@ -606,9 +610,9 @@ const Dashboard = () => {
             />
             <Row label="Due" value={dashboardResult.salesDue} suffix=" ৳" />
             <Row label="Profit" value={dashboardResult.salesProfit} suffix=" ৳" />
-          </DashboardCard>
+          </DashboardCard>)}
 
-          <GrandTotalCard dashboardResult={dashboardResult} />
+          {user.role === "admin" && (<GrandTotalCard dashboardResult={dashboardResult} />)}
 
         </div>
       </div>

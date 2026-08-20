@@ -104,14 +104,14 @@ const Product = () => {
 
         {/* Controls */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2 text-sm">
-          <select
+          {/* <select
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value)}
             className="border text-gray-700 border-gray-300 rounded-md px-3 py-2 text-sm"
           >
             <option value="1">Oldest First</option>
             <option value="-1">Newest First</option>
-          </select>
+          </select> */}
 
           <input
             type="search"
@@ -133,7 +133,7 @@ const Product = () => {
                 <th className="p-2 text-center">Qty</th>
                 <th className="p-2 text-right">Cost</th>
                 <th className="p-2 text-right">Sale</th>
-                <th className="p-2 text-center print:hidden">Actions</th>
+                {user.role === "admin" && <th className="p-2 text-center print:hidden">Actions</th>}
                 {/* print:hidden ক্লাসের কারণে প্রিন্ট কপিতে অ্যাকশন কলাম (Stock, Edit, Delete) শো করবে না */}
               </tr>
             </thead>
@@ -159,7 +159,7 @@ const Product = () => {
                     </td>
                     <td className="p-2 text-right">৳{product.costPrice}</td>
                     <td className="p-2 text-right">৳{product.sellPrice}</td>
-                    <td className="p-2 print:hidden">
+                    {user.role === "admin" && (<td className="p-2 print:hidden">
                       <div className="flex flex-wrap gap-1 justify-center">
                         <Link
                           to={`/product/${product._id}/add-stock`}
@@ -188,7 +188,7 @@ const Product = () => {
                           )}
                         </button>
                       </div>
-                    </td>
+                    </td>)}
                   </tr>
                 ))
               ) : (

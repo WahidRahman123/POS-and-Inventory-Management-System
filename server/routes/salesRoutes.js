@@ -23,12 +23,12 @@ router.get('/getTotalSaleCount', protect, sales.getTotalSaleCount);
 //* @route GET /api/sales/search
 // @desc search sales between dates
 // @access Private
-router.get('/search', protect, admin, sales.searchByDates);
+router.get('/search', protect, sales.searchByDates);
 
 //* @route GET /api/sales/searchIndividual
 // @desc search sales between dates
 // @access Private
-router.get('/searchIndividual', protect, admin, sales.searchByIndividualDate);
+router.get('/searchIndividual', protect, sales.searchByIndividualDate);
 
 //* @route get /api/sales/by-name
 // @desc specific supplier purchase return details
