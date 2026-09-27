@@ -121,8 +121,6 @@ From the `server/` directory:
 node index.js
 ```
 
-If your backend entry file is configured differently, run the corresponding server entry point.
-
 ### 5. Install frontend dependencies
 
 Open a new terminal:
@@ -200,7 +198,7 @@ GitHub: [WahidRahman123](https://github.com/WahidRahman123)
 
 ## License
 
-Copyright (c) 2026 Wahid Rahman and Project Team.
+Copyright (c) 2026 Md Wahid Rahman
 
 ---
 
