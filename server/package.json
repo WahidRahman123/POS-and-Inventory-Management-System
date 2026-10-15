@@ -10,8 +10,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "archiver": "^7.0.1",
     "axios": "^1.17.0",
     "bcryptjs": "^3.0.2",
+    "bson": "^6.10.4",
     "cors": "^2.8.5",
     "dayjs": "^1.11.21",
     "decimal.js": "^10.2.1",
@@ -19,8 +21,12 @@
     "express": "^5.1.0",
     "express-mongo-sanitize": "^2.2.0",
     "express-xss-sanitizer": "^2.0.0",
+    "googleapis": "^183.0.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.17.1"
+    "mongoose": "^8.17.1",
+    "multer": "^2.4.0",
+    "unzipper": "^0.12.5",
+    "uuid": "^14.0.3"
   }
 }

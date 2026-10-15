@@ -25,15 +25,17 @@ const expenseRoutes = require("./routes/expenseRoutes");
 const scrapProductRoutes = require("./routes/scrapProductRoutes");
 const scrapProductSellRoutes = require("./routes/scrapProductSellRoutes");
 const productStatementRoutes = require("./routes/productStatementRoutes");
+const developerRoutes = require("./routes/developerRoutes");
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+const allowedOrigins = ["https://ellitebattery.com", process.env.URI];
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://ellitebattery.com"],
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Authorization", "Content-Type"],
+    allowedHeaders: ["Authorization", "Content-Type", "x-developer-key"],
   })
 );
 // app.use(
@@ -74,6 +76,7 @@ app.use("/api/company-sales-return", CompanySalesReturnRoutes);
 app.use("/api/expense", expenseRoutes);
 app.use("/api/scrap-product", scrapProductRoutes);
 app.use("/api/scrap-product-sell", scrapProductSellRoutes);
+app.use("/api/developer", developerRoutes);
 
 app.listen(port, () => {
   console.log(`LISTENING TO THE PORT ${port}`);
