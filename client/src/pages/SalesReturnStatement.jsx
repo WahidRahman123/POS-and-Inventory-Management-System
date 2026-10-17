@@ -64,7 +64,7 @@ const SalesReturnStatement = () => {
           className="max-w-6xl mx-auto space-y-4 sm:space-y-6 print:p-10"
         >
           <button
-            onClick={() => navigate("/sales-return")}
+            onClick={() => navigate(-1)}
             className="flex items-center gap-2 cursor-pointer text-blue-600 hover:text-blue-800 font-bold text-sm transition-all group print:hidden"
           >
             <FaArrowLeft className="group-hover:-translate-x-1" />
@@ -75,6 +75,15 @@ const SalesReturnStatement = () => {
             <h1 className="text-lg sm:text-2xl font-bold text-gray-800 uppercase tracking-tight">
               Sales Return Statement
             </h1>
+
+            <button
+              onClick={() =>
+                navigate("/sales-return-statement-pay", { state })
+              }
+              className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-700 transition cursor-pointer print:hidden"
+            >
+              Pay
+            </button>
 
             <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto print:hidden">
               <input

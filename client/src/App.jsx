@@ -52,6 +52,7 @@ import InvoiceForCustomer from "./pages/InvoiceForCustomer";
 import InvoiceForSalesReturn from "./pages/InvoiceForSalesReturn";
 import ProductStatement from "./pages/ProductStatement";
 import SalesReturnList from "./pages/SalesReturnList";
+import SalesReturnStatementWithPay from "./pages/SalesReturnStatementWithPay";
 
 
 function App() {
@@ -119,6 +120,7 @@ function App() {
 
           <Route path="/sales-return" element={<SalesReturn />} />
           <Route path="/sales-return-statement" element={<SalesReturnStatement />} />
+          <Route path="/sales-return-statement-pay" element={<SalesReturnStatementWithPay />} />
           <Route path="/sales-return/:id/exchange-due" element={<EditSRExchangeDue />}/>
           <Route path="/sales-return/:id/edit-due" element={<EditSRCashDue />}/>
           <Route path="/sales-return-list" element={<SalesReturnList />}/>

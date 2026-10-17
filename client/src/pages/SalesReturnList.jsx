@@ -102,7 +102,7 @@ const SalesReturnList = () => {
         {/* Printable Content */}
 
 
-        <div ref={printRef}>
+        <div ref={printRef} className="print:m-5">
           <div className="overflow-x-auto">
             <table className="min-w-full border-collapse text-sm">
               <thead className="bg-gray-800 text-white">
@@ -112,7 +112,7 @@ const SalesReturnList = () => {
                   <th className="px-6 py-4 text-left">Total Return</th>
                   <th className="px-6 py-4 text-right">Total Given</th>
                   <th className="px-6 py-4 text-center">Pending</th>
-                  <th className="px-6 py-4 text-center">Action</th>
+                  <th className="px-6 py-4 text-center print:hidden">Action</th>
                 </tr>
               </thead>
 
@@ -213,12 +213,16 @@ const SalesReturnList = () => {
                       </td>
 
                       {/* Action */}
-                      <td className="px-6 py-4 text-center">
+                      <td className="px-6 py-4 text-center print:hidden">
                         <div className="flex flex-wrap gap-1 justify-center">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigate("/sales/due-payment");
+                              navigate("/sales-return-statement-pay", { state: {
+                                customerName: salesReturn.customerName,
+                                customerPhone: salesReturn.customerPhone,
+                                customerEmail: salesReturn.customerEmail,
+                              } });
                             }}
                             className="bg-red-600 cursor-pointer hover:bg-red-700 text-white px-3 py-1.5 rounded font-semibold transition-colors"
                           >
