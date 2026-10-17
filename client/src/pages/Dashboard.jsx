@@ -423,7 +423,7 @@ const Dashboard = () => {
             value={dashboardResult.cardFiveAmount || 0}
             suffix=" ৳"
             color="bg-indigo-600"
-            to="/sales-return"
+            to="/sales-return-list"
           >
             <Row
               label="Total Qty"

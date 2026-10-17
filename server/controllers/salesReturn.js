@@ -10,6 +10,7 @@ const { combineDateWithCurrentTime } = require("../utils/combineDateWithCurrentT
 const dayjs = require("../utils/date.js");
 const { getNextSequenceForOther } = require("../utils/getNextSequenceForOther.js");
 const ProductStatement = require("../models/ProductStatement.js");
+const Customer = require("../models/Customer.js");
 
 module.exports.index = async (req, res) => {
   try {
@@ -570,41 +571,6 @@ module.exports.salesReturnStatement = async (req, res) => {
       },
     ]);
 
-    // const test =
-    //   await SalesReturnTransaction.aggregate([
-    //     {
-    //       $match: nameSearchQuery,
-    //     },
-    //     // {
-    //     //   $unwind: "$exchangeProducts",
-    //     // },
-    //     {
-    //       $group: {
-    //         _id: "$salesReturnId",
-    //         count: {$sum: 1}
-    //       },
-    //     },
-    //   ]);
-
-    //   console.log(test)
-
-    // const quantityExchangeProductDetails =
-    //   await SalesReturn.aggregate([
-    //     {
-    //       $match: { $and: [nameSearchQuery, { due: { $eq: 0 } }] },
-    //     },
-    //     {
-    //       $unwind: "$products",
-    //     },
-    //     {
-    //       $group: {
-    //         _id: null,
-    //         totalExchangeQuantity: {
-    //           $sum: "$products.returnQuantity",
-    //         },
-    //       },
-    //     },
-    //   ]);
 
     //* Generated - starts
     const groups = await SalesReturnTransaction.aggregate([
@@ -800,6 +766,231 @@ module.exports.salesReturnById = async (req, res) => {
     if (!salesReturn) return res.status(409).json({ message: "Invalid ID!" });
 
     res.status(201).json(salesReturn);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};
+
+
+module.exports.salesReturnList = async (req, res) => {
+  try {
+    const { page = 1, customerName = "", order = -1 } = req.query;
+    // const limit = 15;
+
+    // Search Filter
+    const searchQuery = {
+      customerName: { $regex: customerName, $options: "i" },
+      // due: { $gt: 0 },
+    };
+
+    // Pagination
+    // const skip = (parseInt(page) - 1) * limit;
+
+    // const customers = await Customer.find(searchQuery)
+    //   .sort({ updatedAt: -1 })
+    //   .skip(skip)
+    //   .limit(limit);
+
+    const result = await SalesReturn.aggregate([
+      {
+        $match: searchQuery,
+      },
+      {
+        $facet: {
+          amountDetails: [
+            {
+              $group: {
+                _id: "$customerId",
+                totalAmount: {
+                  $sum: { $multiply: ["$totalReturnValue", 10000] },
+                },
+                totalPaid: {
+                  $sum: { $multiply: ["$paid", 10000] },
+                },
+                totalDue: {
+                  $sum: { $multiply: ["$due", 10000] },
+                },
+                customerName: { $first: "$customerName" },
+                customerPhone: { $first: "$customerPhone" },
+                customerEmail: { $first: "$customerEmail" },
+              },
+            },
+          ],
+
+          quantityProductDetails: [
+            { $unwind: "$products" },
+            {
+              $group: {
+                _id: "$customerId",
+                totalReturnQuantity: {
+                  $sum: "$products.returnQuantity",
+                },
+                totalReturnQuantityInKg: {
+                  $sum: "$products.returnQtyInKg",
+                },
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+    const amountDetails = result[0]?.amountDetails || [];
+    const quantityDetails = result[0]?.quantityProductDetails || [];
+
+    // Customer ID অনুযায়ী quantity map
+    const quantityMap = new Map(
+      quantityDetails.map((item) => [
+        item._id.toString(),
+        item,
+      ]),
+    );
+
+    // Search result-এ থাকা SalesReturn document-গুলো
+    const returns = await SalesReturn.find(searchQuery)
+      .select("_id customerId")
+      .lean();
+
+    const returnCustomerMap = new Map();
+    const returnIds = [];
+
+    returns.forEach((item) => {
+      const returnId = item._id.toString();
+      const customerId = item.customerId.toString();
+
+      returnIds.push(item._id);
+      returnCustomerMap.set(returnId, customerId);
+    });
+
+    // সংশ্লিষ্ট SalesReturnTransaction হিসাব
+    const groups = await SalesReturnTransaction.aggregate([
+      {
+        $match: {
+          salesReturnId: { $in: returnIds },
+        },
+      },
+      {
+        $group: {
+          _id: "$salesReturnId",
+
+          hasZeroDue: {
+            $max: {
+              $cond: [
+                { $eq: ["$currentDue", 0] },
+                1,
+                0,
+              ],
+            },
+          },
+
+          exchangeQty: {
+            $sum: {
+              $sum: {
+                $map: {
+                  input: { $ifNull: ["$exchangeProducts", []] },
+                  as: "item",
+                  in: { $ifNull: ["$$item.quantity", 0] },
+                },
+              },
+            },
+          },
+        },
+      },
+    ]);
+
+    // যেসব return-এর currentDue = 0,
+    // সেগুলোর returned product quantity বের করা
+    const zeroDueIds = groups
+      .filter((item) => item.hasZeroDue)
+      .map((item) => item._id);
+
+    const salesReturns = zeroDueIds.length
+      ? await SalesReturn.aggregate([
+        {
+          $match: {
+            _id: { $in: zeroDueIds },
+          },
+        },
+        { $unwind: "$products" },
+        {
+          $group: {
+            _id: "$_id",
+            qty: {
+              $sum: "$products.returnQuantity",
+            },
+          },
+        },
+      ])
+      : [];
+
+    const returnQtyMap = new Map(
+      salesReturns.map((item) => [
+        item._id.toString(),
+        item.qty,
+      ]),
+    );
+
+    // Customer অনুযায়ী exchange quantity যোগ করা
+    const exchangeMap = new Map();
+
+    groups.forEach((group) => {
+      const returnId = group._id.toString();
+      const customerId = returnCustomerMap.get(returnId);
+
+      if (!customerId) return;
+
+      const qty = group.hasZeroDue
+        ? returnQtyMap.get(returnId) || 0
+        : group.exchangeQty || 0;
+
+      exchangeMap.set(
+        customerId,
+        (exchangeMap.get(customerId) || 0) + qty,
+      );
+    });
+
+    // Final result
+    const finalResult = amountDetails.map((customer) => {
+      const customerId = customer._id.toString();
+
+      const quantity = quantityMap.get(customerId);
+      const totalReturnQuantity = quantity?.totalReturnQuantity || 0;
+      const totalReturnQuantityInKg =
+        quantity?.totalReturnQuantityInKg || 0;
+
+      const totalExchangeQuantity =
+        exchangeMap.get(customerId) || 0;
+
+      return {
+        customerId: customer._id,
+        customerName: customer.customerName,
+        customerPhone: customer.customerPhone,
+        customerEmail: customer.customerEmail,
+
+        totalAmount: customer.totalAmount / 10000,
+        totalPaid: customer.totalPaid / 10000,
+        totalDue: customer.totalDue / 10000,
+
+        totalReturnQuantity,
+        totalReturnQuantityInKg,
+        totalExchangeQuantity,
+
+        remainingQuantity:
+          totalReturnQuantity - totalExchangeQuantity,
+      };
+    });
+
+    // Count total documents
+    // const total = await Customer.countDocuments(searchQuery);
+
+    res.status(201).json(finalResult);
+    // res.status(201).json({
+    //   total,
+    //   page: parseInt(page),
+    //   pages: Math.ceil(total / limit),
+    //   customers,
+    // });
   } catch (error) {
     console.error(error);
     res.status(500).send("Server Error");

@@ -7,6 +7,7 @@ const initialState = {
   saleSearchedByInvoice: null,
   salesReturnSearchedById: null,
   invoiceLoading: false,
+  salesReturnList: [],
 
   transactions: [],
   totalAmount: null,
@@ -19,8 +20,11 @@ const initialState = {
 
   page: 1,
   pages: null,
+  listPage: 1,
+  listPages: null,
   toggle: false,
   loading: false,
+  listLoading: false,
   error: null,
 };
 
@@ -119,8 +123,7 @@ export const addPaymentByExchange = createAsyncThunk(
   async (value, ThunkAPI) => {
     try {
       const { data } = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URI}/api/sales-return/${
-          value.id
+        `${import.meta.env.VITE_BACKEND_URI}/api/sales-return/${value.id
         }/exchange-payment`,
         value.info,
         {
@@ -143,8 +146,7 @@ export const addPaymentByCash = createAsyncThunk(
   async (value, ThunkAPI) => {
     try {
       const { data } = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URI}/api/sales-return/${
-          value.id
+        `${import.meta.env.VITE_BACKEND_URI}/api/sales-return/${value.id
         }/cash-payment`,
         value.info,
         {
@@ -157,6 +159,31 @@ export const addPaymentByCash = createAsyncThunk(
       return { message: "Payment updated Successful!" };
     } catch (error) {
       const message = "Payment updated Failed!";
+      return ThunkAPI.rejectWithValue(message);
+    }
+  },
+);
+
+export const fetchSalesReturnList = createAsyncThunk(
+  "salesReturn/fetchSalesReturnList",
+  async (query, ThunkAPI) => {
+    try {
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URI}/api/sales-return/list`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+          params: query,
+        },
+      );
+      // console.log(import.meta.env.VITE_BACKEND_URI)
+
+
+      return data;
+    } catch (error) {
+      const message = "Sales Return Fetching Failed!";
+      console.log(error.message);
       return ThunkAPI.rejectWithValue(message);
     }
   },
@@ -390,7 +417,29 @@ const salesReturnSlice = createSlice({
           progress: undefined,
           theme: "colored",
         });
-      });
+      })
+      .addCase(fetchSalesReturnList.pending, (state, action) => {
+        state.listLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchSalesReturnList.fulfilled, (state, action) => {
+        state.listLoading = false;
+        state.salesReturnList = action.payload;
+      })
+      .addCase(fetchSalesReturnList.rejected, (state, action) => {
+        state.listLoading = false;
+        state.error = action.error;
+        toast.error(action.payload, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
   },
 });
 
