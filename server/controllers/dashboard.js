@@ -18,6 +18,7 @@ const dayjs = require('../utils/date.js');
 const CompanyProductReturn = require("../models/CompanyProductReturn.js");
 const ScrapProductSell = require("../models/ScrapProductSell.js");
 const PurchaseTransaction = require("../models/PurchaseTransaction.js");
+const ProductStatement = require("../models/ProductStatement.js");
 
 module.exports.index = async (req, res) => {
   try {
@@ -358,6 +359,24 @@ module.exports.index = async (req, res) => {
         },
       ]),
     ]);
+
+    //* Sales Return Quantity Fetching from Product Statment
+    const productStatmentDataForToday = await ProductStatement.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: start, $lte: end },
+          transactionType: "Exchange Product in Sales Return"
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalReturnQuantityToday: { $sum: "$quantityAmount" },
+        }
+      }
+    ]);
+
+    // console.log(productStatmentDataForToday);
 
     //* For Sales Return Data - starts
     const salesReturnForNewData = await SalesReturn.aggregate([
@@ -793,6 +812,11 @@ module.exports.index = async (req, res) => {
         sales[0].todaysSaleQuantityDetails &&
           sales[0].todaysSaleQuantityDetails.length > 0
           ? sales[0].todaysSaleQuantityDetails[0].totalQtyToday
+          : 0,
+
+      totalReturnQuantityToday:
+        productStatmentDataForToday && productStatmentDataForToday.length > 0
+          ? productStatmentDataForToday[0].totalReturnQuantityToday
           : 0,
 
       salesCashToday:

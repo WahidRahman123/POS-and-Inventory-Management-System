@@ -525,6 +525,12 @@ const Dashboard = () => {
               textColor="text-black"
             />
             <Row
+              label="Total Return Qty"
+              value={dashboardResult.totalReturnQuantityToday || 0}
+              suffix=" Pcs"
+              textColor="text-black"
+            />
+            <Row
               label="Cash"
               value={dashboardResult.salesCashToday}
               suffix=" ৳"
