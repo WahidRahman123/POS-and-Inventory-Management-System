@@ -23,6 +23,7 @@ const SalesReturn = () => {
     invoiceLoading,
     page,
     pages,
+    createLoading
   } = useSelector((state) => state.salesReturn);
 
   const [returnType, setReturnType] = useState("product");
@@ -805,9 +806,10 @@ const SalesReturn = () => {
                 <div className="flex flex-wrap gap-3">
                   <button
                     type="submit"
-                    className="px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700"
+                    className="px-6 py-2 cursor-pointer bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed"
+                    disabled={createLoading}
                   >
-                    Add Return
+                    {createLoading? "Adding Return.." : "Add Return"}
                   </button>
                   <button
                     type="button"
@@ -821,7 +823,7 @@ const SalesReturn = () => {
                       setSelectedProducts([]);
                       dispatch(setSaleSearchedByInvoiceToEmpty());
                     }}
-                    className="px-6 py-2 bg-gray-500 text-white font-medium rounded-md hover:bg-gray-600"
+                    className="px-6 py-2 bg-gray-500 text-white font-medium rounded-md hover:bg-gray-600 cursor-pointer"
                   >
                     Reset
                   </button>

@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSelector, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -24,6 +24,7 @@ const initialState = {
   listPages: null,
   toggle: false,
   loading: false,
+  createLoading: false,
   listLoading: false,
   error: null,
 };
@@ -249,11 +250,11 @@ const salesReturnSlice = createSlice({
         });
       })
       .addCase(addSalesReturn.pending, (state, action) => {
-        state.loading = true;
+        state.createLoading = true;
         state.error = null;
       })
       .addCase(addSalesReturn.fulfilled, (state, action) => {
-        state.loading = false;
+        state.createLoading = false;
         state.toggle = !state.toggle;
         toast.success(action.payload.message, {
           position: "bottom-right",
@@ -267,7 +268,7 @@ const salesReturnSlice = createSlice({
         });
       })
       .addCase(addSalesReturn.rejected, (state, action) => {
-        state.loading = false;
+        state.createLoading = false;
         state.error = action.error;
         toast.error(action.payload, {
           position: "bottom-right",
