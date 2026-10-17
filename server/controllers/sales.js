@@ -614,25 +614,53 @@ module.exports.salesByCustomerName = async (req, res) => {
 // 9. Sales Due List (Customer wise total due)
 module.exports.salesDueList = async (req, res) => {
   try {
-    const { page = 1, customerName = "", order = -1 } = req.query;
-    const limit = 15;
+    const { page = 1, customerName = "", order = -1, dateSearch = "" } = req.query;
 
-    // Search Filter
-    const searchQuery = {
-      name: { $regex: customerName, $options: "i" },
-      // due: { $gt: 0 },
-    };
+    let searchQuery = [];
+    let dateSearchQuery;
+    let nameSearchQuery;
+
+    // For date search:
+    if (dateSearch) {
+      const startOfDay = dayjs(dateSearch)
+        .tz("Asia/Dhaka")
+        .startOf("day")
+        .utc()
+        .toDate();
+
+      const endOfDay = dayjs(dateSearch)
+        .tz("Asia/Dhaka")
+        .endOf("day")
+        .utc()
+        .toDate();
+
+      dateSearchQuery = {
+        updatedAt: { $gte: startOfDay, $lte: endOfDay },
+      };
+      searchQuery.push(dateSearchQuery);
+    }
+
+    // For name search:
+    if (customerName) {
+      nameSearchQuery = {
+        name: { $regex: customerName, $options: "i" }
+      };
+      searchQuery.push(nameSearchQuery);
+    }
+
+    const mainSearch = searchQuery.length !== 0 ? { $and: searchQuery } : {};
+    const limit = 15;
 
     // Pagination
     const skip = (parseInt(page) - 1) * limit;
 
-    const customers = await Customer.find(searchQuery)
+    const customers = await Customer.find(mainSearch)
       .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limit);
 
     // Count total documents
-    const total = await Customer.countDocuments(searchQuery);
+    const total = await Customer.countDocuments(mainSearch);
 
     res.status(201).json({
       total,

@@ -4,6 +4,8 @@ import { fetchSalesDueList } from "../features/sales/salesSlice";
 import { useNavigate } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
 import { FaPrint, FaArrowLeft } from "react-icons/fa";
+import dayjs from "../utils/date.js";
+
 
 const SalesDueList = () => {
   const { user } = useSelector((state) => state.auth);
@@ -20,6 +22,7 @@ const SalesDueList = () => {
   const [customerName, setCustomerName] = useState("");
   const [sortOrder, setSortOrder] = useState(-1);
   const [currentPage, setCurrentPage] = useState(page);
+  const [dateSearch, setDateSearch] = useState("");
 
   // Print Reference
   const printRef = useRef(null);
@@ -41,10 +44,11 @@ const SalesDueList = () => {
           customerName,
           order: sortOrder,
           page: currentPage,
+          dateSearch,
         }),
       );
     }
-  }, [dispatch, user, sortOrder, customerName, currentPage]);
+  }, [dispatch, user, sortOrder, customerName, currentPage, dateSearch]);
 
   // console.log(salesOfDues);
 
@@ -92,6 +96,8 @@ const SalesDueList = () => {
               className="border border-gray-300 rounded px-4 py-2.5 w-full sm:w-80 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
 
+
+
             {/* <select
             value={sortOrder}
             onChange={(e) => setSortOrder(Number(e.target.value))}
@@ -100,6 +106,41 @@ const SalesDueList = () => {
             <option value="-1">Highest Due First</option>
             <option value="1">Lowest Due First</option>
           </select> */}
+          </div>
+
+          <div className="flex gap-1.5 items-center">
+            <label
+              htmlFor="due-date-search"
+              className="font-semibold text-slate-600"
+            >
+              Date:
+            </label>
+
+            <div className="flex items-center gap-2">
+              <input
+                id="due-date-search"
+                type="date"
+                value={dateSearch}
+                onChange={(e) => {
+                  setDateSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
+              />
+
+              {dateSearch && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDateSearch("");
+                    setCurrentPage(1);
+                  }}
+                  className="shrink-0 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-100"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
           </div>
 
           {/* সর্ট অর্ডার ফিল্ডের পাশে অল-রেকর্ডস গ্র্যান্ড টোটাল */}
@@ -120,6 +161,7 @@ const SalesDueList = () => {
               <thead className="bg-gray-800 text-white">
                 <tr>
                   <th className="px-6 py-4 text-left">#</th>
+                  <th className="px-6 py-4 text-left">Date</th>
                   <th className="px-6 py-4 text-left">Customer Name</th>
                   <th className="px-6 py-4 text-left">Mobile Number</th>
                   <th className="px-6 py-4 text-right">Current Balance</th>
@@ -142,6 +184,11 @@ const SalesDueList = () => {
                       }
                     >
                       <td className="p-2">{(page - 1) * 15 + index + 1}</td>
+                      <td className="p-2">{
+                        dayjs(customer.updatedAt)
+                          .tz("Asia/Dhaka")
+                          .format("DD-MM-YYYY")
+                      }</td>
                       <td className="px-6 py-4 font-medium">{customer.name}</td>
                       <td className="px-6 py-4">{customer.phone || "N/A"}</td>
                       <td
