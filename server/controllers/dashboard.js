@@ -333,11 +333,45 @@ module.exports.index = async (req, res) => {
                       ],
                     },
                   },
+
+                  totalcashforDueToday: {
+                    $sum: {
+                      $cond: [
+                        {
+                          $eq: ["$saleType", "due-payment"],
+                        },
+                        { $multiply: ["$cash", 10000] },
+                        0,
+                      ],
+                    },
+                  },
+
+                  totalbankPaymentAmountforDueToday: {
+                    $sum: {
+                      $cond: [
+                        {
+                          $eq: ["$saleType", "due-payment"],
+                        },
+                        { $multiply: ["$bankPaymentAmount", 10000] },
+                        0,
+                      ],
+                    },
+                  },
+
+                  totalExchangeforDueToday: {
+                    $sum: {
+                      $cond: [
+                        {
+                          $eq: ["$saleType", "due-payment"],
+                        },
+                        { $multiply: ["$exchange", 10000] },
+                        0,
+                      ],
+                    },
+                  }
                 },
               },
             ],
-
-
           },
         },
       ]),
@@ -794,6 +828,15 @@ module.exports.index = async (req, res) => {
 
       dueCollectionToday:
         salesTransaction[0].todaysReport[0] ? salesTransaction[0].todaysReport[0].totalDuePaidToday / 10000 : 0,
+
+      totalcashforDueToday:
+        salesTransaction[0].todaysReport[0] ? salesTransaction[0].todaysReport[0].totalcashforDueToday / 10000 : 0,
+
+      totalbankPaymentAmountforDueToday:
+        salesTransaction[0].todaysReport[0] ? salesTransaction[0].todaysReport[0].totalbankPaymentAmountforDueToday / 10000 : 0,
+
+      totalExchangeforDueToday:
+        salesTransaction[0].todaysReport[0] ? salesTransaction[0].todaysReport[0].totalExchangeforDueToday / 10000 : 0,
 
       salesAdvanceToday:
         customerToday[0]

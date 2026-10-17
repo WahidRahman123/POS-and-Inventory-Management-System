@@ -560,6 +560,30 @@ const Dashboard = () => {
               suffix=" ৳"
               textColor="text-black"
             />
+
+            {/* Due Collection Sub Options */}
+            <div className="ml-4 mt-2 border-l-2 border-black/20 pl-3 text-xs">
+              <Row
+                label="Cash"
+                value={dashboardResult.totalcashforDueToday || 0}
+                suffix=" ৳"
+                textColor="text-black"
+              />
+
+              <Row
+                label="Bank"
+                value={dashboardResult.totalbankPaymentAmountforDueToday || 0}
+                suffix=" ৳"
+                textColor="text-black"
+              />
+
+              <Row
+                label="Exchange"
+                value={dashboardResult.totalExchangeforDueToday || 0}
+                suffix=" ৳"
+                textColor="text-black"
+              />
+            </div>
             {/* <Row
             label="Today's Advance"
             value={dashboardResult.salesAdvanceToday}
