@@ -45,6 +45,7 @@ const EditCompanySalesReturnDue = () => {
 
       const initialProducts = companySalesReturnSearchedById.products.map((p, index) => ({
         ...p,
+        maxQuantity: p.availableQty || "",
         quantity: p.availableQty || p.dueQty || 0,
         unitPrice: p.unitPrice || p.costPrice || 0,
         pid: p.productId,
@@ -109,6 +110,7 @@ const EditCompanySalesReturnDue = () => {
       productName: "",
       unitPrice: 0,
       quantity: 0,
+      maxQuantity: "",
       productId: `new-${Date.now()}`,
     };
     setReceivableProducts([...receivableProducts, newRow]);
@@ -285,6 +287,7 @@ const EditCompanySalesReturnDue = () => {
                     value={product.quantity || ""}
                     onChange={(e) => handleQuantityChange(index, e.target.value)}
                     min={1}
+                    max={product.maxQuantity || ""}
                     placeholder="Qty"
                     className="w-full border border-gray-300 rounded-md px-4 py-2"
                     required
