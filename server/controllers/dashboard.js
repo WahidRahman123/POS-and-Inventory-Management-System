@@ -317,8 +317,27 @@ module.exports.index = async (req, res) => {
 
                   // SA included/ref starts with SA হলে due sum
 
+                  // totalSalesDueToday: {
+                  //   $first: "$currentDue"
+                  // },
+
+                  // totalSalesDueToday: {
+                  //   $sum: "$currentDue"
+                  // },
+
                   totalSalesDueToday: {
-                    $first: "$currentDue"
+                    $sum: {
+                      $cond: [
+                        {
+                          $regexMatch: {
+                            input: { $ifNull: ["$refMemo", ""] },
+                            regex: "^S",
+                          },
+                        },
+                        { $multiply: ["$unchangedDue", 10000] },
+                        0,
+                      ],
+                    },
                   },
 
                   // DUE-PAY included হলে paidAmount sum
@@ -824,7 +843,7 @@ module.exports.index = async (req, res) => {
       //     ? customerToday[0].customerTodayDueTotal / 10000
       //     : 0,
       salesDueToday:
-        salesTransaction[0].todaysReport[0] ? salesTransaction[0].todaysReport[0].totalSalesDueToday : 0,
+        salesTransaction[0].todaysReport[0] ? salesTransaction[0].todaysReport[0].totalSalesDueToday / 10000 : 0,
 
       dueCollectionToday:
         salesTransaction[0].todaysReport[0] ? salesTransaction[0].todaysReport[0].totalDuePaidToday / 10000 : 0,
@@ -930,6 +949,7 @@ module.exports.index = async (req, res) => {
       totalReceivedValueForCSR: companyTotalPaidValue,
     };
 
+    // console.log(salesTransaction[0].todaysReport)
     // console.log(purchaseTransaction[0].advancePaymentTotal)
     // console.log(result.purchaseTotalToday)
 
