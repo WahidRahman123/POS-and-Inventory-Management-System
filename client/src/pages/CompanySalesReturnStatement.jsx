@@ -64,6 +64,14 @@ const CompanySalesReturnStatement = () => {
             </button>
 
             <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+              <button
+              onClick={() =>
+                navigate("/company-sales-return-statement-pay", { state })
+              }
+              className="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-green-700 transition cursor-pointer print:hidden"
+            >
+              Receive
+            </button>
               <input
                 type="date"
                 value={date}

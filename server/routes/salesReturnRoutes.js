@@ -19,7 +19,7 @@ router.get('/sales-by-invoice', protect, salesReturn.saleByInvoice);
 //* @route get /api/sales-return/list
 // @desc the sales return details
 // @access Private
-router.get('/list', salesReturn.salesReturnList);
+router.get('/list', protect, salesReturn.salesReturnList);
 
 //* @route POST /api/sales-return
 // @desc create sales return

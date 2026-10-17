@@ -464,3 +464,41 @@ module.exports.salesReturnStockSearchedByProductName = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+module.exports.companySalesReturnList = async (req, res) => {
+  try {
+    const { supplierName = "" } = req.query;
+
+    const searchQuery = {
+      supplierName: { $regex: supplierName, $options: "i" },
+      // due: { $gt: 0 },
+    };
+
+    const result = await CompanySalesReturn.aggregate([
+      { $match: searchQuery },
+      {
+        $group: {
+          _id: "$supplierId",
+          totalAmount: { $sum: "$totalAmountQty" },
+          totalPaid: { $sum: "$paidQty" },
+          totalDue: { $sum: "$dueQty" },
+          supplierName: { $first: "$supplierName" },
+          address: { $first: "$address" },
+          supplierPhone: { $first: "$supplierPhone" },
+          supplierId: { $first: "$supplierId" },
+        },
+      },
+    ]);
+
+    res.status(201).json(result);
+    // res.status(201).json({
+    //   transactions,
+    //   totalAmount: result.length > 0 ? result[0].totalAmount : 0,
+    //   totalPaid: result.length > 0 ? result[0].totalPaid : 0,
+    //   totalDue: result.length > 0 ? result[0].totalDue : 0,
+    // });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+};

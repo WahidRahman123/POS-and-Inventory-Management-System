@@ -53,6 +53,8 @@ import InvoiceForSalesReturn from "./pages/InvoiceForSalesReturn";
 import ProductStatement from "./pages/ProductStatement";
 import SalesReturnList from "./pages/SalesReturnList";
 import SalesReturnStatementWithPay from "./pages/SalesReturnStatementWithPay";
+import CompanySalesReturnList from "./pages/CompanySalesReturnList";
+import CompanySalesReturnStatementWithPay from "./pages/CompanySalesReturnStatementWithPay";
 
 
 function App() {
@@ -110,7 +112,9 @@ function App() {
 
           <Route path="/company-sales-return" element={<CompanySalesReturn />} />
           <Route path="/company-sales-return-statement" element={<CompanySalesReturnStatement />} />
+          <Route path="/company-sales-return-statement-pay" element={<CompanySalesReturnStatementWithPay />} />
           <Route path="/company-sales-return/:id/edit-due" element={<EditCompanySalesReturnDue />} />
+          <Route path="/company-sales-return-list" element={<CompanySalesReturnList />}/>
 
 
           <Route path="/purchase-return" element={<PurchaseReturn />} />

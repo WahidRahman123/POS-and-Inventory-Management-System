@@ -7,17 +7,19 @@ const initialState = {
   salesReturnReportData: null,
   companySalesReturnSearchedById: null,
   companySalesReturnSearchedByProductName: [],
+  companySalesReturnList: [],
 
   transactions: [],
   totalAmount: null,
   totalPaid: null,
   totalDue: null,
-  
+
   page: 1,
   pages: null,
   toggle: false,
-  loading: false, 
-  sloading: false, 
+  loading: false,
+  listLoading: false,
+  sloading: false,
   addLoading: false,
   paymentLoading: false,
   salesReturnDataLoading: false,
@@ -138,8 +140,7 @@ export const addPayment = createAsyncThunk(
   async (value, ThunkAPI) => {
     try {
       const { data } = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URI}/api/company-sales-return/${
-          value.id
+        `${import.meta.env.VITE_BACKEND_URI}/api/company-sales-return/${value.id
         }/payment`,
         value.info,
         {
@@ -155,6 +156,31 @@ export const addPayment = createAsyncThunk(
       return ThunkAPI.rejectWithValue(message);
     }
   }
+);
+
+export const fetchCompanySalesReturnList = createAsyncThunk(
+  "companySalesReturn/fetchCompanySalesReturnList",
+  async (query, ThunkAPI) => {
+    try {
+      const { data } = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URI}/api/company-sales-return/list`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+          params: query,
+        },
+      );
+      // console.log(import.meta.env.VITE_BACKEND_URI)
+
+
+      return data;
+    } catch (error) {
+      const message = "Fetching Failed!";
+      console.log(error.message);
+      return ThunkAPI.rejectWithValue(message);
+    }
+  },
 );
 
 //* This is only for the Company Sales Return Statement
@@ -185,10 +211,10 @@ const companySalesReturnSlice = createSlice({
   name: "companySalesReturn",
   initialState,
   reducers: {
-      setSalesReturnSearchByProductNameToEmpty: (state) => {
-        state.companySalesReturnSearchedByProductName = [];
-      },
+    setSalesReturnSearchByProductNameToEmpty: (state) => {
+      state.companySalesReturnSearchedByProductName = [];
     },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchCompanySalesReturns.pending, (state, action) => {
@@ -376,7 +402,29 @@ const companySalesReturnSlice = createSlice({
           progress: undefined,
           theme: "colored",
         });
-      });
+      })
+      .addCase(fetchCompanySalesReturnList.pending, (state, action) => {
+        state.listLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchCompanySalesReturnList.fulfilled, (state, action) => {
+        state.listLoading = false;
+        state.companySalesReturnList = action.payload;
+      })
+      .addCase(fetchCompanySalesReturnList.rejected, (state, action) => {
+        state.listLoading = false;
+        state.error = action.error;
+        toast.error(action.payload, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      })
   },
 });
 

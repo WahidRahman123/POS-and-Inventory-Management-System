@@ -423,7 +423,7 @@ const Dashboard = () => {
             value={dashboardResult.cardFiveAmount || 0}
             suffix=" ৳"
             color="bg-indigo-600"
-            to="/sales-return-list"
+            to="/sales-return"
           >
             <Row
               label="Total Qty"
@@ -441,7 +441,7 @@ const Dashboard = () => {
             value={dashboardResult.totalDueForSalesReturn || 0}
             suffix=" ৳"
             color="bg-indigo-600"
-            to="/sales-return"
+            to="/sales-return-list"
           >
             <Row
               label="Total Customer Return"
@@ -467,7 +467,7 @@ const Dashboard = () => {
             value={dashboardResult.totalPaidForCSR || 0}
             suffix=" ৳"
             color="bg-red-600"
-            to="/company-sales-return"
+            to="/company-sales-return-list"
           >
             <Row
               label="Total Qty"

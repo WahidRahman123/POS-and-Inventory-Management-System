@@ -14,6 +14,11 @@ router.get('/', protect, companySalesReturn.index);
 // @access private
 router.post('/', protect, companySalesReturn.createCompanySalesReturn);
 
+//* @route get /api/company-sales-return/list
+// @desc the company sales return details
+// @access Private
+router.get('/list', companySalesReturn.companySalesReturnList);
+
 //* @route get /api/company-sales-return/statement-by-name
 // @desc specific company sales return statement details
 // @access Private

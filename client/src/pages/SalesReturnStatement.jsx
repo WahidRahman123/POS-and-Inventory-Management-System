@@ -80,9 +80,9 @@ const SalesReturnStatement = () => {
               onClick={() =>
                 navigate("/sales-return-statement-pay", { state })
               }
-              className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-700 transition cursor-pointer print:hidden"
+              className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-red-700 transition cursor-pointer print:hidden"
             >
-              Pay
+              Return Pay
             </button>
 
             <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto print:hidden">
