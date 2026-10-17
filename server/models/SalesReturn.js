@@ -116,14 +116,17 @@ const salesReturnSchema = new mongoose.Schema({
 
   //* Exchange and cash refund related fields
   totalExchangeValue: {
+    //* paidAmount for exchange products
     type: Number,
     default: 0,
   },
   adjustmentAmount: {
+    //* due for exchange products
     type: Number,
     default: 0,
   },
   cashRefundAmount: {
+    //* paidAmount for cash refund
     type: Number,
     default: 0,
   },
@@ -142,6 +145,7 @@ const salesReturnSchema = new mongoose.Schema({
 
   // Financial Summary
   totalReturnValue: {
+    //* this is totalAmount in sales return
     type: Number,
     default: 0,
     required: true,

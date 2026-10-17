@@ -30,7 +30,7 @@ const developerRoutes = require("./routes/developerRoutes");
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-const allowedOrigins = ["https://ellitebattery.com", process.env.URI, "http://localhost:5173"];
+const allowedOrigins = ["https://ellitebattery.com", process.env.URI];
 app.use(
   cors({
     origin: allowedOrigins,
