@@ -55,6 +55,7 @@ import SalesReturnList from "./pages/SalesReturnList";
 import SalesReturnStatementWithPay from "./pages/SalesReturnStatementWithPay";
 import CompanySalesReturnList from "./pages/CompanySalesReturnList";
 import CompanySalesReturnStatementWithPay from "./pages/CompanySalesReturnStatementWithPay";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 
 function App() {
@@ -66,6 +67,7 @@ function App() {
         {/* Login page without layout */}
         <Route path="/login" element={<Login />} />
         <Route path="/invoice" element={<InvoicePage />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/invoice-for-customer" element={<InvoiceForCustomer />} />
         <Route path="/invoice-exchange" element={<InvoiceForExchange />} />
         <Route path="/invoice-purchase" element={<InvoiceForPurchase />} />
