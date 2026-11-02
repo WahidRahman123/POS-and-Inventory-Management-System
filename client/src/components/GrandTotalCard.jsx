@@ -362,7 +362,7 @@ const GrandTotalCard = ({ dashboardResult }) => {
 
         <Item
           title="কোম্পানির রিপ্লেস ব্যালেন্স"
-          value={dashboardResult.totalPaidForCSR}
+          value={dashboardResult.totalDueForCSR}
           color="text-emerald-400"
           prefix="+ "
         />

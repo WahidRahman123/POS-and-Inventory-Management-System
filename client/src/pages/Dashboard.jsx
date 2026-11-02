@@ -464,7 +464,7 @@ const Dashboard = () => {
           {/* COMPANY SALES RETURN */}
           <DashboardCard
             title="রিপ্লেস নেওয়া মাল কোম্পানিতে পাঠানোর পর আমি পাব"
-            value={dashboardResult.totalPaidForCSR || 0}
+            value={dashboardResult.totalDueForCSR || 0}
             suffix=" ৳"
             color="bg-red-600"
             to="/company-sales-return-list"
@@ -490,8 +490,8 @@ const Dashboard = () => {
               suffix=" ৳"
             />
             <Row
-              label="Total Due"
-              value={dashboardResult.totalDueForCSR}
+              label="Total Claim Amount"
+              value={dashboardResult.totalPaidForCSR}
               suffix=" ৳"
             />
           </DashboardCard>
