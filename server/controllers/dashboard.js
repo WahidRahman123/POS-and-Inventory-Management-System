@@ -963,7 +963,8 @@ module.exports.index = async (req, res) => {
       .plus(new Decimal(result.totalStockValue))
       .plus(new Decimal(result.cardFiveAmount))
       .minus(new Decimal(result.totalDueForSalesReturn))
-      .plus(new Decimal(result.totalPaidForCSR)).toFixed(2));
+      // .plus(new Decimal(result.totalPaidForCSR))
+      .plus(new Decimal(result.totalDueForCSR)).toFixed(2));
 
     res.status(201).json({ ...result, totalLedgerValue });
   } catch (error) {
